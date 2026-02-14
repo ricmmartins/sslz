@@ -1,0 +1,244 @@
+// ============================================================================
+// Networking — VNet, Subnets, NSGs
+// Self-contained networking per subscription. No hub, no peering.
+// ============================================================================
+
+@description('Azure region')
+param location string
+
+@description('VNet name')
+param vnetName string
+
+@description('VNet address prefix (e.g., 10.0.0.0/16 for prod, 10.1.0.0/16 for nonprod)')
+param vnetAddressPrefix string
+
+@description('Log Analytics workspace ID for NSG flow logs')
+param logAnalyticsWorkspaceId string
+
+@description('Resource tags')
+param tags object
+
+// ============================================================================
+// Variables — Subnet address ranges
+// ============================================================================
+
+var baseOctet = split(split(vnetAddressPrefix, '.')[0], '/')[0]
+var secondOctet = split(vnetAddressPrefix, '.')[1]
+
+var subnets = {
+  aks: {
+    name: 'snet-aks'
+    addressPrefix: '${baseOctet}.${secondOctet}.0.0/18'
+  }
+  app: {
+    name: 'snet-app'
+    addressPrefix: '${baseOctet}.${secondOctet}.4.0/22'
+  }
+  data: {
+    name: 'snet-data'
+    addressPrefix: '${baseOctet}.${secondOctet}.8.0/22'
+  }
+  shared: {
+    name: 'snet-shared'
+    addressPrefix: '${baseOctet}.${secondOctet}.12.0/24'
+  }
+}
+
+// ============================================================================
+// NSGs — One per subnet, deny-all-inbound by default
+// ============================================================================
+
+resource nsgAks 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: 'nsg-${subnets.aks.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAzureLoadBalancerInbound'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+resource nsgApp 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: 'nsg-${subnets.app.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+resource nsgData 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: 'nsg-${subnets.data.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowFromAksSubnet'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: subnets.aks.addressPrefix
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: ['1433', '5432', '6380', '443']
+        }
+      }
+      {
+        name: 'AllowFromAppSubnet'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: subnets.app.addressPrefix
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: ['1433', '5432', '6380', '443']
+        }
+      }
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+resource nsgShared 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: 'nsg-${subnets.shared.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+// ============================================================================
+// VNet with Subnets
+// ============================================================================
+
+resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
+  name: vnetName
+  location: location
+  tags: tags
+  properties: {
+    addressSpace: {
+      addressPrefixes: [vnetAddressPrefix]
+    }
+    subnets: [
+      {
+        name: subnets.aks.name
+        properties: {
+          addressPrefix: subnets.aks.addressPrefix
+          networkSecurityGroup: { id: nsgAks.id }
+        }
+      }
+      {
+        name: subnets.app.name
+        properties: {
+          addressPrefix: subnets.app.addressPrefix
+          networkSecurityGroup: { id: nsgApp.id }
+          delegations: [
+            {
+              name: 'delegation-web'
+              properties: {
+                serviceName: 'Microsoft.Web/serverFarms'
+              }
+            }
+          ]
+        }
+      }
+      {
+        name: subnets.data.name
+        properties: {
+          addressPrefix: subnets.data.addressPrefix
+          networkSecurityGroup: { id: nsgData.id }
+        }
+      }
+      {
+        name: subnets.shared.name
+        properties: {
+          addressPrefix: subnets.shared.addressPrefix
+          networkSecurityGroup: { id: nsgShared.id }
+        }
+      }
+    ]
+  }
+}
+
+// ============================================================================
+// Outputs
+// ============================================================================
+
+output vnetId string = vnet.id
+output vnetName string = vnet.name
+output aksSubnetId string = vnet.properties.subnets[0].id
+output appSubnetId string = vnet.properties.subnets[1].id
+output dataSubnetId string = vnet.properties.subnets[2].id
+output sharedSubnetId string = vnet.properties.subnets[3].id

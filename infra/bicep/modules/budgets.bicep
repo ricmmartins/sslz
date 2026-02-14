@@ -1,0 +1,60 @@
+// ============================================================================
+// Budget Alerts
+// Alerts at 50%, 80%, and 100% of monthly budget
+// ============================================================================
+
+targetScope = 'subscription'
+
+@description('Budget name')
+param budgetName string
+
+@description('Monthly budget amount in USD')
+param amount int
+
+@description('Email addresses for budget notifications')
+param contactEmails array
+
+@description('Budget start date (first day of current month, YYYY-MM-DD)')
+param startDate string = '${utcNow('yyyy-MM')}-01'
+
+resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
+  name: budgetName
+  properties: {
+    category: 'Cost'
+    amount: amount
+    timeGrain: 'Monthly'
+    timePeriod: {
+      startDate: startDate
+    }
+    notifications: {
+      fiftyPercent: {
+        enabled: true
+        threshold: 50
+        operator: 'GreaterThan'
+        contactEmails: contactEmails
+        thresholdType: 'Actual'
+      }
+      eightyPercent: {
+        enabled: true
+        threshold: 80
+        operator: 'GreaterThan'
+        contactEmails: contactEmails
+        thresholdType: 'Actual'
+      }
+      hundredPercent: {
+        enabled: true
+        threshold: 100
+        operator: 'GreaterThan'
+        contactEmails: contactEmails
+        thresholdType: 'Actual'
+      }
+      forecastedHundredPercent: {
+        enabled: true
+        threshold: 100
+        operator: 'GreaterThan'
+        contactEmails: contactEmails
+        thresholdType: 'Forecasted'
+      }
+    }
+  }
+}

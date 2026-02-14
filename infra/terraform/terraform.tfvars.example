@@ -1,0 +1,25 @@
+# ==============================================================================
+# Copy this file to terraform.tfvars and fill in your values
+# ==============================================================================
+
+subscription_id = "00000000-0000-0000-0000-000000000000"
+company_name    = "mycompany"
+environment     = "prod"
+location        = "eastus2"
+
+monthly_budget_amount = 5000
+budget_alert_emails = [
+  "platform-team@mycompany.com",
+  "cto@mycompany.com"
+]
+
+deploy_networking              = true
+enable_defender_for_servers    = true  # recommended for prod
+enable_defender_for_containers = false # set true if running AKS
+enable_defender_for_databases  = true  # recommended for prod
+
+allowed_locations = ["eastus2", "centralus"]
+
+tags = {
+  team = "platform"
+}

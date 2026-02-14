@@ -1,0 +1,148 @@
+targetScope = 'subscription'
+
+// ============================================================================
+// Azure Landing Zone for Startups — Main Orchestrator
+// Deploys: Resource Groups, Log Analytics, Networking, Budgets, Defender, Policies
+// ============================================================================
+
+@description('Primary Azure region for all resources')
+param location string
+
+@description('Company name used for naming resources')
+param companyName string
+
+@description('Environment: prod or nonprod')
+@allowed(['prod', 'nonprod'])
+param environment string
+
+@description('Monthly budget amount in USD')
+param monthlyBudgetAmount int
+
+@description('Email addresses for budget alerts')
+param budgetAlertEmails array
+
+@description('Deploy VNet and networking resources')
+param deployNetworking bool = true
+
+@description('Enable Defender for Servers P2 (recommended for prod)')
+param enableDefenderForServers bool = environment == 'prod'
+
+@description('Enable Defender for Containers (recommended if running AKS)')
+param enableDefenderForContainers bool = false
+
+@description('Enable Defender for Databases (recommended for prod)')
+param enableDefenderForDatabases bool = environment == 'prod'
+
+@description('Allowed Azure regions for resource deployment')
+param allowedLocations array = [location]
+
+@description('Tags applied to all resources')
+param tags object = {
+  environment: environment
+  managedBy: 'bicep'
+  project: 'landing-zone'
+}
+
+// ============================================================================
+// Variables
+// ============================================================================
+
+var prefix = '${companyName}-${environment}'
+var rgMonitoring = 'rg-${prefix}-monitoring'
+var rgNetworking = 'rg-${prefix}-networking'
+
+// ============================================================================
+// Resource Groups
+// ============================================================================
+
+resource rgMonitoringRes 'Microsoft.Resources/resourceGroups@2024-03-01' = {
+  name: rgMonitoring
+  location: location
+  tags: tags
+}
+
+resource rgNetworkingRes 'Microsoft.Resources/resourceGroups@2024-03-01' = if (deployNetworking) {
+  name: rgNetworking
+  location: location
+  tags: tags
+}
+
+// ============================================================================
+// Monitoring — Log Analytics Workspace
+// ============================================================================
+
+module logAnalytics 'modules/log-analytics.bicep' = {
+  name: 'deploy-log-analytics'
+  scope: rgMonitoringRes
+  params: {
+    location: location
+    workspaceName: 'law-${prefix}'
+    retentionInDays: 90
+    tags: tags
+  }
+}
+
+// ============================================================================
+// Networking — VNet, Subnets, NSGs
+// ============================================================================
+
+module networking 'modules/networking.bicep' = if (deployNetworking) {
+  name: 'deploy-networking'
+  scope: rgNetworkingRes
+  params: {
+    location: location
+    vnetName: 'vnet-${prefix}'
+    vnetAddressPrefix: environment == 'prod' ? '10.0.0.0/16' : '10.1.0.0/16'
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+    tags: tags
+  }
+}
+
+// ============================================================================
+// Security — Microsoft Defender for Cloud
+// ============================================================================
+
+module defender 'modules/defender.bicep' = {
+  name: 'deploy-defender'
+  params: {
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+    enableDefenderForServers: enableDefenderForServers
+    enableDefenderForContainers: enableDefenderForContainers
+    enableDefenderForDatabases: enableDefenderForDatabases
+  }
+}
+
+// ============================================================================
+// Cost Management — Budget Alerts
+// ============================================================================
+
+module budgets 'modules/budgets.bicep' = {
+  name: 'deploy-budgets'
+  params: {
+    budgetName: 'budget-${prefix}-monthly'
+    amount: monthlyBudgetAmount
+    contactEmails: budgetAlertEmails
+  }
+}
+
+// ============================================================================
+// Governance — Azure Policies
+// ============================================================================
+
+module policies 'modules/policy-assignments.bicep' = {
+  name: 'deploy-policies'
+  params: {
+    location: location
+    allowedLocations: allowedLocations
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+  }
+}
+
+// ============================================================================
+// Outputs
+// ============================================================================
+
+output logAnalyticsWorkspaceId string = logAnalytics.outputs.workspaceId
+output logAnalyticsWorkspaceName string = logAnalytics.outputs.workspaceName
+output vnetId string = deployNetworking ? networking.outputs.vnetId : ''
+output vnetName string = deployNetworking ? networking.outputs.vnetName : ''

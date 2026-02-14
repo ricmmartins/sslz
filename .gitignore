@@ -1,0 +1,26 @@
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+*.auto.tfvars
+crash.log
+
+# Bicep
+*.local.bicepparam
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets
+.env
+*.pem
+*.key
