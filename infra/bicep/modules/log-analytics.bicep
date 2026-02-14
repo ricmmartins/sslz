@@ -35,31 +35,9 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-// Activity Log — capture all control plane operations
-resource activityLogDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'activity-log-to-law'
-  properties: {
-    workspaceId: workspace.id
-    logs: [
-      {
-        category: 'Administrative'
-        enabled: true
-      }
-      {
-        category: 'Security'
-        enabled: true
-      }
-      {
-        category: 'Alert'
-        enabled: true
-      }
-      {
-        category: 'Policy'
-        enabled: true
-      }
-    ]
-  }
-}
+// NOTE: Activity Log diagnostic settings require subscription scope.
+// This is handled by the policy assignment in policy-assignments.bicep
+// (DeployIfNotExists policy: "Deploy Activity Log diagnostics to Log Analytics").
 
 output workspaceId string = workspace.id
 output workspaceName string = workspace.name

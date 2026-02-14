@@ -46,6 +46,11 @@ variable "budget_alert_emails" {
   type        = list(string)
 }
 
+variable "budget_start_date" {
+  description = "Budget start date in ISO 8601 format (e.g., 2026-03-01T00:00:00Z). Must be the first of a month."
+  type        = string
+}
+
 variable "enable_defender_for_servers" {
   description = "Enable Defender for Servers P2"
   type        = bool

@@ -8,6 +8,7 @@ environment     = "prod"
 location        = "eastus2"
 
 monthly_budget_amount = 5000
+budget_start_date    = "2026-03-01T00:00:00Z" # must be first of a month
 budget_alert_emails = [
   "platform-team@mycompany.com",
   "cto@mycompany.com"

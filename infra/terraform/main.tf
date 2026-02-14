@@ -31,16 +31,16 @@ provider "azurerm" {
 # ==============================================================================
 
 resource "azurerm_resource_group" "monitoring" {
-  name     = "rg-${var.prefix}-monitoring"
+  name     = "rg-${local.prefix}-monitoring"
   location = var.location
-  tags     = var.tags
+  tags     = local.tags
 }
 
 resource "azurerm_resource_group" "networking" {
   count    = var.deploy_networking ? 1 : 0
-  name     = "rg-${var.prefix}-networking"
+  name     = "rg-${local.prefix}-networking"
   location = var.location
-  tags     = var.tags
+  tags     = local.tags
 }
 
 # ==============================================================================
@@ -51,10 +51,10 @@ module "log_analytics" {
   source              = "./modules/monitoring"
   location            = var.location
   resource_group_name = azurerm_resource_group.monitoring.name
-  workspace_name      = "law-${var.prefix}"
+  workspace_name      = "law-${local.prefix}"
   retention_in_days   = 90
   daily_quota_gb      = 5
-  tags                = var.tags
+  tags                = local.tags
 }
 
 module "networking" {
@@ -62,9 +62,9 @@ module "networking" {
   source              = "./modules/networking"
   location            = var.location
   resource_group_name = azurerm_resource_group.networking[0].name
-  vnet_name           = "vnet-${var.prefix}"
+  vnet_name           = "vnet-${local.prefix}"
   vnet_address_prefix = var.environment == "prod" ? "10.0.0.0/16" : "10.1.0.0/16"
-  tags                = var.tags
+  tags                = local.tags
 }
 
 module "security" {
@@ -88,13 +88,13 @@ module "policy" {
 # ==============================================================================
 
 resource "azurerm_consumption_budget_subscription" "monthly" {
-  name            = "budget-${var.prefix}-monthly"
+  name            = "budget-${local.prefix}-monthly"
   subscription_id = "/subscriptions/${var.subscription_id}"
   amount          = var.monthly_budget_amount
   time_grain      = "Monthly"
 
   time_period {
-    start_date = "${formatdate("YYYY-MM", timestamp())}-01T00:00:00Z"
+    start_date = var.budget_start_date
   }
 
   notification {
@@ -129,9 +129,6 @@ resource "azurerm_consumption_budget_subscription" "monthly" {
     contact_emails = var.budget_alert_emails
   }
 
-  lifecycle {
-    ignore_changes = [time_period]
-  }
 }
 
 # ==============================================================================
