@@ -150,5 +150,7 @@ This is why we don't start with full ESLZ. At $1,500-3,000/month just for platfo
 
 - [Azure Landing Zones documentation](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/)
 - [ALZ Bicep modules](https://github.com/Azure/ALZ-Bicep)
-- [ALZ Terraform module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale)
+- [ALZ Terraform module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) (extended support, archived Aug 2026)
+- [Azure Verified Modules for Landing Zones (Terraform)](https://aka.ms/alz/tf) — Microsoft's recommended replacement
+- [Azure Landing Zone Vending Module](https://registry.terraform.io/modules/Azure/lz-vending/azurerm/latest)
 - [Azure Architecture Center](https://learn.microsoft.com/azure/architecture/)
