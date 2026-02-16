@@ -146,6 +146,7 @@ We assign a minimal set of policies at the management group level:
 |---|---|---|
 | Microsoft Cloud Security Benchmark | Audit | Security recommendations without blocking deployments |
 | Require tag: `environment` on resource groups | Deny | Cost tracking and resource lifecycle management |
+| Require tag: `team` on resource groups | Deny | Ownership tracking and cost allocation |
 | Inherit tag: `environment` from resource group | Modify | Auto-propagate tags to child resources |
 | Allowed locations | Deny | Prevent accidental deployments to wrong regions |
 | Deploy diagnostic settings for Activity Log | DeployIfNotExists | Ensure all control plane actions are logged |

@@ -12,7 +12,7 @@ Azure Front Door (WAF)
 AKS Cluster
     ├── System node pool     (Standard_D4s_v5, 2-5 nodes)
     ├── GPU node pool         (Standard_NC6s_v3, 1-3 nodes, Spot)
-    └── CPU inference pool    (Standard_D8s_v5, 2-10 nodes)
+    └── CPU inference pool    (Standard_D4s_v5, 0-10 nodes, Spot)
     │
     ├── Azure OpenAI Service
     ├── Azure Blob Storage    (models, datasets, outputs)

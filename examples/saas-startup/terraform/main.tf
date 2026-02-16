@@ -15,7 +15,15 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = true
+    }
+    key_vault {
+      purge_soft_delete_on_destroy    = false
+      recover_soft_deleted_key_vaults = true
+    }
+  }
   subscription_id = var.subscription_id
 }
 
@@ -64,6 +72,12 @@ variable "web_image" {
   description = "Container image for the web frontend"
   type        = string
   default     = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+}
+
+variable "sql_admin_login" {
+  description = "SQL administrator login name"
+  type        = string
+  default     = "sqladmin"
 }
 
 variable "sql_admin_password" {
@@ -207,7 +221,7 @@ resource "azurerm_mssql_server" "this" {
   location                      = var.location
   resource_group_name           = data.azurerm_resource_group.this.name
   version                       = "12.0"
-  administrator_login           = "sqladmin"
+  administrator_login           = var.sql_admin_login
   administrator_login_password  = var.sql_admin_password
   minimum_tls_version           = "1.2"
   public_network_access_enabled = false
@@ -270,7 +284,7 @@ resource "azurerm_key_vault" "this" {
   sku_name                   = "standard"
   rbac_authorization_enabled = true
   soft_delete_retention_days = 30
-  purge_protection_enabled   = false
+  purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 
   network_acls {

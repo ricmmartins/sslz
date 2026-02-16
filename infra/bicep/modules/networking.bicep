@@ -12,7 +12,8 @@ param vnetName string
 @description('VNet address prefix (e.g., 10.0.0.0/16 for prod, 10.1.0.0/16 for nonprod)')
 param vnetAddressPrefix string
 
-@description('Log Analytics workspace ID for NSG flow logs')
+@description('Log Analytics workspace ID (reserved for NSG flow logs — not yet wired)')
+#disable-next-line no-unused-params
 param logAnalyticsWorkspaceId string
 
 @description('Resource tags')

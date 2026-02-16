@@ -41,11 +41,11 @@ graph TB
         budgets["Budget Alerts<br/>50% / 80% / 100%"]
     end
 
-    policies --> mg-yourcompany
-    budgets --> sub-prod
-    budgets --> sub-nonprod
-    law --> sub-prod
-    law --> sub-nonprod
+    policies --> rg_mon_p
+    policies --> rg_mon_n
+    budgets --> rg_app_p
+    budgets --> rg_net_n
+    law --> defender
 ```
 
 ## Graduation Path (Mermaid)
@@ -70,13 +70,13 @@ graph TB
         subgraph "snet-aks 10.0.0.0/18 (16,382 IPs)"
             aks_nodes["AKS Nodes + Pods<br/>(Azure CNI assigns pod IPs here)"]
         end
-        subgraph "snet-app 10.0.64.0/22 (1,022 IPs)"
+        subgraph "snet-app 10.0.4.0/22 (1,022 IPs)"
             app_svc["App Services<br/>Container Apps<br/>VNet-integrated"]
         end
-        subgraph "snet-data 10.0.68.0/22 (1,022 IPs)"
+        subgraph "snet-data 10.0.8.0/22 (1,022 IPs)"
             pe["Private Endpoints<br/>SQL, Cosmos, Redis,<br/>Storage, Key Vault"]
         end
-        subgraph "snet-shared 10.0.72.0/24 (254 IPs)"
+        subgraph "snet-shared 10.0.12.0/24 (254 IPs)"
             bastion["Azure Bastion"]
             vpn["VPN Gateway<br/>(if needed)"]
         end

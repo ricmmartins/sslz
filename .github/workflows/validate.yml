@@ -61,13 +61,32 @@ jobs:
           terraform_version: "~> 1.9"
 
       - name: Terraform Format Check
-        working-directory: infra/terraform
         run: terraform fmt -check -recursive -diff
 
-      - name: Terraform Init
+      - name: Terraform Init — Landing Zone
         working-directory: infra/terraform
         run: terraform init -backend=false
 
-      - name: Terraform Validate
+      - name: Terraform Validate — Landing Zone
         working-directory: infra/terraform
         run: terraform validate
+
+      - name: Terraform Init & Validate — Examples
+        run: |
+          failed=0
+          for dir in examples/*/terraform; do
+            if [ -d "$dir" ]; then
+              echo "=== Validating $dir ==="
+              terraform -chdir="$dir" init -backend=false
+              if terraform -chdir="$dir" validate; then
+                echo "  ✓ OK"
+              else
+                echo "  ✗ FAILED"
+                failed=1
+              fi
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo "::error::One or more example Terraform configs failed validation"
+            exit 1
+          fi

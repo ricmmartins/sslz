@@ -1,7 +1,7 @@
 variable "log_analytics_workspace_id" { type = string }
 variable "security_contact_email" {
-  type    = string
-  default = "security@contoso.com"
+  description = "Email address for Defender for Cloud security alerts"
+  type        = string
 }
 variable "enable_defender_for_servers" {
   type    = bool
@@ -14,6 +14,11 @@ variable "enable_defender_for_containers" {
 variable "enable_defender_for_databases" {
   type    = bool
   default = false
+}
+variable "enable_defender_for_key_vault" {
+  description = "Enable Defender for Key Vault (recommended for prod, low cost)"
+  type        = bool
+  default     = true
 }
 
 # CSPM Free — always enabled
@@ -49,7 +54,7 @@ resource "azurerm_security_center_subscription_pricing" "oss_db" {
 
 # Defender for Key Vault
 resource "azurerm_security_center_subscription_pricing" "keyvault" {
-  tier          = var.enable_defender_for_servers ? "Standard" : "Free"
+  tier          = var.enable_defender_for_key_vault ? "Standard" : "Free"
   resource_type = "KeyVaults"
 }
 
@@ -61,7 +66,7 @@ resource "azurerm_security_center_subscription_pricing" "arm" {
 
 # Security contact
 resource "azurerm_security_center_contact" "default" {
-  name                = "default1"
+  name                = "default"
   email               = var.security_contact_email
   alert_notifications = true
   alerts_to_admins    = true

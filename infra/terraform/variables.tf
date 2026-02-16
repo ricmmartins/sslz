@@ -1,6 +1,10 @@
 variable "subscription_id" {
   description = "Azure subscription ID to deploy into"
   type        = string
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.subscription_id))
+    error_message = "subscription_id must be a valid UUID."
+  }
 }
 
 variable "location" {
@@ -49,6 +53,15 @@ variable "budget_alert_emails" {
 variable "budget_start_date" {
   description = "Budget start date in ISO 8601 format (e.g., 2026-03-01T00:00:00Z). Must be the first of a month."
   type        = string
+  validation {
+    condition     = can(regex("^\\d{4}-\\d{2}-01T00:00:00Z$", var.budget_start_date))
+    error_message = "budget_start_date must be the first of a month in ISO 8601 format (e.g., 2026-03-01T00:00:00Z)."
+  }
+}
+
+variable "security_contact_email" {
+  description = "Email address for Defender for Cloud security alerts"
+  type        = string
 }
 
 variable "enable_defender_for_servers" {
@@ -67,6 +80,12 @@ variable "enable_defender_for_databases" {
   description = "Enable Defender for Databases"
   type        = bool
   default     = false
+}
+
+variable "enable_defender_for_key_vault" {
+  description = "Enable Defender for Key Vault (recommended, low cost)"
+  type        = bool
+  default     = true
 }
 
 variable "allowed_locations" {

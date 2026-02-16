@@ -93,6 +93,10 @@ resource app 'Microsoft.Web/sites@2023-12-01' = {
           name: 'COSMOS_ENDPOINT'
           value: cosmos.properties.documentEndpoint
         }
+        {
+          name: 'REDIS_HOSTNAME'
+          value: redis.properties.hostName
+        }
       ]
     }
   }
@@ -158,7 +162,7 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     capabilities: environment == 'nonprod' ? [
       { name: 'EnableServerless' }
     ] : []
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
     minimalTlsVersion: 'Tls12'
   }
 }
@@ -235,6 +239,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     tenantId: subscription().tenantId
     enableRbacAuthorization: true
     enableSoftDelete: true
+    enablePurgeProtection: environment == 'prod' ? true : null
     softDeleteRetentionInDays: 30
   }
 }

@@ -1,13 +1,11 @@
 # Example: SaaS Startup
 
-A multi-tenant SaaS application running on Azure Container Apps with Azure SQL and Azure Front Door.
+A multi-tenant SaaS application running on Azure Container Apps with Azure SQL.
 
 ## Architecture
 
 ```
 Internet
-    │
-Azure Front Door (WAF + CDN)
     │
 Azure Container Apps Environment
     ├── container-app-api      (backend API)
@@ -16,9 +14,10 @@ Azure Container Apps Environment
     │
     ├── Azure SQL (Elastic Pool)
     ├── Azure Cache for Redis
-    ├── Azure Storage (blob)
     └── Azure Key Vault
 ```
+
+> **Tip:** When you need global load balancing, WAF, or CDN, add Azure Front Door in front of the Container Apps ingress.
 
 ## Why This Stack
 
@@ -26,7 +25,6 @@ Azure Container Apps Environment
 |---|---|
 | Container Apps over AKS | No cluster management. Scale to zero. Pay per use. Good enough until you need custom Kubernetes operators. |
 | Azure SQL Elastic Pool | Multi-tenant database with shared resources. DTU pooling saves 50-70% vs individual databases. |
-| Front Door over App Gateway | Global anycast, built-in CDN, WAF included. Cheaper for single-region too. |
 | Redis | Session cache, rate limiting, pub/sub for real-time features. |
 
 ## Estimated Monthly Cost
@@ -35,11 +33,9 @@ Azure Container Apps Environment
 |---|---|---|
 | Container Apps | Consumption (2 vCPU, 4GB per app) | $50-150 |
 | Azure SQL Elastic Pool | Standard 100 eDTU | $225 |
-| Azure Front Door | Standard | $35 + traffic |
 | Redis | Basic C0 | $16 |
-| Storage | LRS Hot | $5-20 |
 | Key Vault | Standard | $1-5 |
-| **Total** | | **~$350-450/month** |
+| **Total** | | **~$300-400/month** |
 
 ## Deploy
 

@@ -1,5 +1,7 @@
 # Networking Deep Dive
 
+> See also: [Networking Architecture diagram](../diagrams/architecture.md#networking-architecture) for a visual overview.
+
 ## Do You Even Need a VNet?
 
 Seriously. If your entire stack is:
@@ -70,7 +72,7 @@ Every subnet gets an NSG with these custom rules:
 
 ```
 Priority  Direction  Action  Source              Destination        Port
-100       Inbound    Deny    *                   *                  *
+4096      Inbound    Deny    *                   *                  *
 ```
 
 Yes, deny everything inbound by default. Then add explicit allow rules for what you need.
@@ -107,19 +109,26 @@ Enable NSG Flow Logs version 2 on all NSGs and send them to your Log Analytics w
 - Traffic analytics (optional, costs extra)
 
 ```bicep
+// Illustrative — requires a Storage Account and Log Analytics Workspace
+// to be deployed separately for flow log storage and analytics.
+param nsgName string
+param nsgId string
+param storageAccountId string
+param logAnalyticsWorkspaceId string
+
 resource flowLog 'Microsoft.Network/networkWatchers/flowLogs@2023-11-01' = {
   name: 'nw-${location}/fl-${nsgName}'
   location: location
   properties: {
-    targetResourceId: nsg.id
-    storageId: storageAccount.id
+    targetResourceId: nsgId
+    storageId: storageAccountId
     enabled: true
     format: { type: 'JSON', version: 2 }
     retentionPolicy: { days: 30, enabled: true }
     flowAnalyticsConfiguration: {
       networkWatcherFlowAnalyticsConfiguration: {
         enabled: false  // enable later if you want Traffic Analytics
-        workspaceResourceId: logAnalyticsWorkspace.id
+        workspaceResourceId: logAnalyticsWorkspaceId
         trafficAnalyticsInterval: 60
       }
     }

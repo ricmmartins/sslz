@@ -1,11 +1,16 @@
 # Terraform
 **/.terraform/
+.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfplan
 terraform.tfvars
 *.auto.tfvars
 crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
 # Bicep
 *.local.bicepparam

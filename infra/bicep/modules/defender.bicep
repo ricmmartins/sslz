@@ -17,6 +17,12 @@ param enableDefenderForContainers bool
 @description('Enable Defender for Databases (SQL + OSS)')
 param enableDefenderForDatabases bool
 
+@description('Enable Defender for Key Vault (recommended, low cost)')
+param enableDefenderForKeyVault bool = true
+
+@description('Email address for Defender for Cloud security alerts')
+param securityContactEmail string
+
 // ============================================================================
 // Defender Plans
 // ============================================================================
@@ -66,7 +72,7 @@ resource defenderOssDatabases 'Microsoft.Security/pricings@2024-01-01' = {
 resource defenderKeyVault 'Microsoft.Security/pricings@2024-01-01' = {
   name: 'KeyVaults'
   properties: {
-    pricingTier: enableDefenderForServers ? 'Standard' : 'Free' // piggyback on the servers flag for prod
+    pricingTier: enableDefenderForKeyVault ? 'Standard' : 'Free'
   }
 }
 
@@ -79,20 +85,13 @@ resource defenderArm 'Microsoft.Security/pricings@2024-01-01' = {
 }
 
 // ============================================================================
-// Auto-provisioning — send Defender data to Log Analytics
+// Security Contact
 // ============================================================================
-
-resource autoProvisioningLaw 'Microsoft.Security/autoProvisioningSettings@2017-08-01-preview' = {
-  name: 'default'
-  properties: {
-    autoProvision: 'On'
-  }
-}
 
 resource securityContact 'Microsoft.Security/securityContacts@2020-01-01-preview' = {
   name: 'default'
   properties: {
-    emails: ''
+    emails: securityContactEmail
     notificationsByRole: {
       state: 'On'
       roles: ['Owner', 'Contributor']

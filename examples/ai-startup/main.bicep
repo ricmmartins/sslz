@@ -22,6 +22,12 @@ param gpuNodeVmSize string = 'Standard_NC6s_v3'
 @description('Use Spot VMs for GPU node pool')
 param gpuUseSpot bool = true
 
+@description('CPU burst node pool VM size')
+param cpuNodeVmSize string = 'Standard_D4s_v5'
+
+@description('Kubernetes version')
+param kubernetesVersion string = '1.30'
+
 @description('SSH public key for AKS nodes')
 param sshPublicKey string
 
@@ -56,7 +62,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-06-02-preview' = {
   identity: { type: 'SystemAssigned' }
   properties: {
     dnsPrefix: '${appName}-${environment}'
-    kubernetesVersion: '1.30'
+    kubernetesVersion: kubernetesVersion
     networkProfile: {
       networkPlugin: 'azure'
       networkPolicy: 'calico'
@@ -124,6 +130,28 @@ resource gpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024
   }
 }
 
+// CPU burst node pool for data preprocessing
+resource cpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024-06-02-preview' = {
+  parent: aks
+  name: 'cpu'
+  properties: {
+    mode: 'User'
+    count: 0
+    minCount: 0
+    maxCount: 10
+    enableAutoScaling: true
+    vmSize: cpuNodeVmSize
+    osType: 'Linux'
+    osSKU: 'AzureLinux'
+    scaleSetPriority: 'Spot'
+    scaleSetEvictionPolicy: 'Delete'
+    spotMaxPrice: json('-1')
+    nodeLabels: {
+      'workload-type': 'cpu-batch'
+    }
+  }
+}
+
 // ============================================================================
 // Azure Container Registry
 // ============================================================================
@@ -160,7 +188,7 @@ resource openai 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = {
   kind: 'OpenAI'
   sku: { name: 'S0' }
   properties: {
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
     customSubDomainName: 'oai-${appName}-${environment}'
   }
 }
@@ -244,6 +272,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     tenantId: subscription().tenantId
     enableRbacAuthorization: true
     enableSoftDelete: true
+    enablePurgeProtection: environment == 'prod' ? true : null
     softDeleteRetentionInDays: 30
   }
 }

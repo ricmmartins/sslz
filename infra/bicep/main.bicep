@@ -33,6 +33,12 @@ param enableDefenderForContainers bool = false
 @description('Enable Defender for Databases (recommended for prod)')
 param enableDefenderForDatabases bool = environment == 'prod'
 
+@description('Enable Defender for Key Vault (recommended, low cost)')
+param enableDefenderForKeyVault bool = true
+
+@description('Email address for Defender for Cloud security alerts')
+param securityContactEmail string
+
 @description('Allowed Azure regions for resource deployment')
 param allowedLocations array = [location]
 
@@ -109,6 +115,8 @@ module defender 'modules/defender.bicep' = {
     enableDefenderForServers: enableDefenderForServers
     enableDefenderForContainers: enableDefenderForContainers
     enableDefenderForDatabases: enableDefenderForDatabases
+    enableDefenderForKeyVault: enableDefenderForKeyVault
+    securityContactEmail: securityContactEmail
   }
 }
 

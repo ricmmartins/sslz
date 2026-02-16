@@ -12,6 +12,7 @@ param deployNetworking = true
 param enableDefenderForServers = true
 param enableDefenderForContainers = false // set to true if running AKS
 param enableDefenderForDatabases = true
+param securityContactEmail = 'security@mycompany.com'
 param allowedLocations = [
   'eastus2'
   'centralus' // DR region

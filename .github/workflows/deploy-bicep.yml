@@ -33,12 +33,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure Login
+      - name: Azure Login (prod)
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
 
       - name: Validate Bicep (prod)
         run: |
@@ -46,6 +46,13 @@ jobs:
             --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/prod.bicepparam
+
+      - name: Azure Login (nonprod)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
 
       - name: Validate Bicep (nonprod)
         run: |
@@ -67,7 +74,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
 
       - name: What-If
         run: |

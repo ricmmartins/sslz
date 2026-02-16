@@ -11,6 +11,7 @@ param deployNetworking = true
 param enableDefenderForServers = false
 param enableDefenderForContainers = false
 param enableDefenderForDatabases = false
+param securityContactEmail = 'security@mycompany.com'
 param allowedLocations = [
   'eastus2'
   'centralus'

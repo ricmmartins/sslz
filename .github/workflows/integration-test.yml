@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - nonprod
+          - prod
   schedule:
     # Run weekly on Monday at 06:00 UTC
     - cron: '0 6 * * 1'
@@ -27,8 +28,9 @@ env:
   TF_VAR_company_name: "lztest"
   TF_VAR_environment: "nonprod"
   TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
-  TF_VAR_budget_start_date: "2026-03-01T00:00:00Z"
+  # Dynamically set in the terraform-plan job to the 1st of the current month
   TF_VAR_deploy_networking: "true"
+  TF_VAR_security_contact_email: "landing-zone-test@contoso.com"
 
 jobs:
   # ============================================================================
@@ -79,6 +81,9 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
 
       - name: Terraform Init
         working-directory: infra/terraform

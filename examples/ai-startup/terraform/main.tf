@@ -15,7 +15,15 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = true
+    }
+    key_vault {
+      purge_soft_delete_on_destroy    = false
+      recover_soft_deleted_key_vaults = true
+    }
+  }
   subscription_id = var.subscription_id
 }
 
@@ -66,10 +74,22 @@ variable "gpu_node_vm_size" {
   default     = "Standard_NC6s_v3"
 }
 
+variable "cpu_node_vm_size" {
+  description = "CPU burst node pool VM size"
+  type        = string
+  default     = "Standard_D4s_v5"
+}
+
 variable "gpu_use_spot" {
   description = "Use Spot VMs for GPU node pool"
   type        = bool
   default     = true
+}
+
+variable "kubernetes_version" {
+  description = "AKS Kubernetes version"
+  type        = string
+  default     = "1.30"
 }
 
 variable "ssh_public_key" {
@@ -123,7 +143,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   location            = var.location
   resource_group_name = data.azurerm_resource_group.this.name
   dns_prefix          = "${var.app_name}-${var.environment}"
-  kubernetes_version  = "1.30"
+  kubernetes_version  = var.kubernetes_version
   tags                = local.tags
 
   identity {
@@ -184,7 +204,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
 resource "azurerm_kubernetes_cluster_node_pool" "cpu" {
   name                  = "cpu"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
-  vm_size               = "Standard_D4s_v5"
+  vm_size               = var.cpu_node_vm_size
   min_count             = 0
   max_count             = 10
   auto_scaling_enabled  = true
@@ -225,13 +245,14 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 # ==============================================================================
 
 resource "azurerm_cognitive_account" "openai" {
-  name                  = "oai-${var.app_name}-${var.environment}"
-  location              = var.location
-  resource_group_name   = data.azurerm_resource_group.this.name
-  kind                  = "OpenAI"
-  sku_name              = "S0"
-  custom_subdomain_name = "oai-${var.app_name}-${var.environment}"
-  tags                  = local.tags
+  name                          = "oai-${var.app_name}-${var.environment}"
+  location                      = var.location
+  resource_group_name           = data.azurerm_resource_group.this.name
+  kind                          = "OpenAI"
+  sku_name                      = "S0"
+  custom_subdomain_name         = "oai-${var.app_name}-${var.environment}"
+  public_network_access_enabled = false
+  tags                          = local.tags
 }
 
 resource "azurerm_cognitive_deployment" "gpt4o" {
@@ -305,7 +326,7 @@ resource "azurerm_key_vault" "this" {
   sku_name                   = "standard"
   rbac_authorization_enabled = true
   soft_delete_retention_days = 30
-  purge_protection_enabled   = false
+  purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 
   network_acls {

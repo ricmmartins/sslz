@@ -15,7 +15,15 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = true
+    }
+    key_vault {
+      purge_soft_delete_on_destroy    = false
+      recover_soft_deleted_key_vaults = true
+    }
+  }
   subscription_id = var.subscription_id
 }
 
@@ -151,6 +159,7 @@ resource "azurerm_linux_web_app" "this" {
   app_settings = {
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.this.connection_string
     "COSMOS_ENDPOINT"                       = azurerm_cosmosdb_account.this.endpoint
+    "REDIS_HOSTNAME"                        = azurerm_redis_cache.this.hostname
   }
 }
 
@@ -196,13 +205,14 @@ resource "azurerm_api_management" "this" {
 # ==============================================================================
 
 resource "azurerm_cosmosdb_account" "this" {
-  name                = "cosmos-${var.app_name}-${var.environment}"
-  location            = var.location
-  resource_group_name = data.azurerm_resource_group.this.name
-  offer_type          = "Standard"
-  kind                = "GlobalDocumentDB"
-  minimal_tls_version = "Tls12"
-  tags                = local.tags
+  name                          = "cosmos-${var.app_name}-${var.environment}"
+  location                      = var.location
+  resource_group_name           = data.azurerm_resource_group.this.name
+  offer_type                    = "Standard"
+  kind                          = "GlobalDocumentDB"
+  minimal_tls_version           = "Tls12"
+  public_network_access_enabled = false
+  tags                          = local.tags
 
   consistency_policy {
     consistency_level = "Session"
@@ -279,7 +289,7 @@ resource "azurerm_key_vault" "this" {
   sku_name                   = "standard"
   rbac_authorization_enabled = true
   soft_delete_retention_days = 30
-  purge_protection_enabled   = false
+  purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 
   network_acls {

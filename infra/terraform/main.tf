@@ -10,15 +10,16 @@
 #
 # Deploy it separately BEFORE running this main deployment:
 #
-#   cd infra/terraform
+#   cd infra/terraform/modules/management-groups
 #   terraform init
-#   terraform apply -target=module.management_groups \
+#   terraform apply \
 #     -var='company_name=yourcompany' \
 #     -var='prod_subscription_id=<PROD_SUB_ID>' \
 #     -var='nonprod_subscription_id=<NONPROD_SUB_ID>'
 #
-# After the management group exists, run the rest of this config normally:
+# After the management group exists, come back here and run normally:
 #
+#   cd infra/terraform
 #   terraform apply
 #
 # See: ./modules/management-groups/main.tf
@@ -44,7 +45,15 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = true
+    }
+    key_vault {
+      purge_soft_delete_on_destroy    = false
+      recover_soft_deleted_key_vaults = true
+    }
+  }
   subscription_id = var.subscription_id
 }
 
@@ -92,9 +101,11 @@ module "networking" {
 module "security" {
   source                         = "./modules/security"
   log_analytics_workspace_id     = module.log_analytics.workspace_id
+  security_contact_email         = var.security_contact_email
   enable_defender_for_servers    = var.enable_defender_for_servers
   enable_defender_for_containers = var.enable_defender_for_containers
   enable_defender_for_databases  = var.enable_defender_for_databases
+  enable_defender_for_key_vault  = var.enable_defender_for_key_vault
 }
 
 module "policy" {
@@ -151,24 +162,4 @@ resource "azurerm_consumption_budget_subscription" "monthly" {
     contact_emails = var.budget_alert_emails
   }
 
-}
-
-# ==============================================================================
-# Outputs
-# ==============================================================================
-
-output "log_analytics_workspace_id" {
-  value = module.log_analytics.workspace_id
-}
-
-output "log_analytics_workspace_name" {
-  value = module.log_analytics.workspace_name
-}
-
-output "vnet_id" {
-  value = var.deploy_networking ? module.networking[0].vnet_id : null
-}
-
-output "vnet_name" {
-  value = var.deploy_networking ? module.networking[0].vnet_name : null
 }

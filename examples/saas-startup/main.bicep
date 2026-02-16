@@ -1,6 +1,6 @@
 // ============================================================================
 // SaaS Startup Example
-// Container Apps + Azure SQL Elastic Pool + Redis + Front Door
+// Container Apps + Azure SQL Elastic Pool + Redis + Key Vault
 // ============================================================================
 
 @description('Azure region')
@@ -14,6 +14,9 @@ param apiImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:la
 
 @description('Container image for the web frontend')
 param webImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
+@description('SQL administrator login name')
+param sqlAdminLogin string = 'sqladmin'
 
 @description('SQL admin password')
 @secure()
@@ -79,7 +82,7 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
         targetPort: 80
         transport: 'http'
         corsPolicy: {
-          allowedOrigins: ['*']
+          allowedOrigins: ['https://${appName}-web.${cae.properties.defaultDomain}']
         }
       }
       secrets: []
@@ -158,7 +161,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   location: location
   tags: tags
   properties: {
-    administratorLogin: 'sqladmin'
+    administratorLogin: sqlAdminLogin
     administratorLoginPassword: sqlAdminPassword
     minimalTlsVersion: '1.2'
     publicNetworkAccess: 'Disabled'
@@ -229,6 +232,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     tenantId: subscription().tenantId
     enableRbacAuthorization: true
     enableSoftDelete: true
+    enablePurgeProtection: environment == 'prod' ? true : null
     softDeleteRetentionInDays: 30
     networkAcls: {
       defaultAction: 'Deny'
