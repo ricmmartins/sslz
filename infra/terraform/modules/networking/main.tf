@@ -2,7 +2,10 @@ variable "location" { type = string }
 variable "resource_group_name" { type = string }
 variable "vnet_name" { type = string }
 variable "vnet_address_prefix" { type = string }
-variable "tags" { type = map(string); default = {} }
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
 
 locals {
   # Extract base octets from the address prefix (e.g., "10.0" from "10.0.0.0/16")

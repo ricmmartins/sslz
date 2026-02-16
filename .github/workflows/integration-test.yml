@@ -1,0 +1,120 @@
+name: Integration Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'nonprod'
+        type: choice
+        options:
+          - nonprod
+  schedule:
+    # Run weekly on Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_USE_OIDC: true
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_company_name: "lztest"
+  TF_VAR_environment: "nonprod"
+  TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
+  TF_VAR_budget_start_date: "2026-03-01T00:00:00Z"
+  TF_VAR_deploy_networking: "true"
+
+jobs:
+  # ============================================================================
+  # Bicep: What-If (dry-run)
+  # ============================================================================
+  bicep-whatif:
+    name: Bicep What-If
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure test resource group
+        run: |
+          az group create \
+            --name rg-lztest-nonprod-integration \
+            --location eastus2 \
+            --tags environment=test managedBy=ci
+
+      - name: Bicep What-If
+        run: |
+          az deployment group what-if \
+            --resource-group rg-lztest-nonprod-integration \
+            --template-file infra/bicep/main.bicep \
+            --parameters \
+              companyName=lztest \
+              environment=nonprod \
+              budgetAlertEmails='["landing-zone-test@contoso.com"]' \
+              budgetStartDate=2026-03-01T00:00:00Z
+
+  # ============================================================================
+  # Terraform: Plan
+  # ============================================================================
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: terraform plan -out=tfplan -input=false
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: infra/terraform/tfplan
+          retention-days: 1
+
+  # ============================================================================
+  # Summary
+  # ============================================================================
+  summary:
+    name: Test Summary
+    needs: [bicep-whatif, terraform-plan]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "## Integration Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Bicep What-If | ${{ needs.bicep-whatif.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Terraform Plan | ${{ needs.terraform-plan.result }} |" >> "$GITHUB_STEP_SUMMARY"

@@ -68,8 +68,8 @@ module "networking" {
 }
 
 module "security" {
-  source                        = "./modules/security"
-  log_analytics_workspace_id    = module.log_analytics.workspace_id
+  source                         = "./modules/security"
+  log_analytics_workspace_id     = module.log_analytics.workspace_id
   enable_defender_for_servers    = var.enable_defender_for_servers
   enable_defender_for_containers = var.enable_defender_for_containers
   enable_defender_for_databases  = var.enable_defender_for_databases

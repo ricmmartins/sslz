@@ -8,7 +8,7 @@ locals {
 
   # Built-in policy definition IDs
   policy_ids = {
-    mcsb                = "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8"
+    mcsb                 = "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8"
     allowed_locations    = "/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c"
     allowed_locations_rg = "/providers/Microsoft.Authorization/policyDefinitions/e765b5de-1225-4ba3-bd56-1ac6695af988"
     require_tag_rg       = "/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025"
@@ -27,7 +27,7 @@ resource "azurerm_subscription_policy_assignment" "mcsb" {
   description          = "Audit resources against Microsoft Cloud Security Benchmark."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.mcsb
-  enforcement_mode     = true
+  enforce              = true
 }
 
 # ==============================================================================
@@ -40,7 +40,7 @@ resource "azurerm_subscription_policy_assignment" "allowed_locations" {
   description          = "Restrict resource deployment to approved regions only."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.allowed_locations
-  enforcement_mode     = true
+  enforce              = true
 
   parameters = jsonencode({
     listOfAllowedLocations = { value = var.allowed_locations }
@@ -53,7 +53,7 @@ resource "azurerm_subscription_policy_assignment" "allowed_locations_rg" {
   description          = "Restrict resource group creation to approved regions only."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.allowed_locations_rg
-  enforcement_mode     = true
+  enforce              = true
 
   parameters = jsonencode({
     listOfAllowedLocations = { value = var.allowed_locations }
@@ -70,7 +70,7 @@ resource "azurerm_subscription_policy_assignment" "require_env_tag" {
   description          = "All resource groups must have an environment tag."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.require_tag_rg
-  enforcement_mode     = true
+  enforce              = true
 
   parameters = jsonencode({
     tagName = { value = "environment" }
@@ -83,7 +83,7 @@ resource "azurerm_subscription_policy_assignment" "require_team_tag" {
   description          = "All resource groups must have a team tag."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.require_tag_rg
-  enforcement_mode     = true
+  enforce              = true
 
   parameters = jsonencode({
     tagName = { value = "team" }
@@ -101,7 +101,7 @@ resource "azurerm_subscription_policy_assignment" "inherit_env_tag" {
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.inherit_tag
   location             = var.location
-  enforcement_mode     = true
+  enforce              = true
 
   identity {
     type = "SystemAssigned"
@@ -119,7 +119,7 @@ resource "azurerm_subscription_policy_assignment" "inherit_team_tag" {
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.inherit_tag
   location             = var.location
-  enforcement_mode     = true
+  enforce              = true
 
   identity {
     type = "SystemAssigned"
@@ -141,7 +141,7 @@ resource "azurerm_subscription_policy_assignment" "activity_log_diag" {
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.activity_log_diag
   location             = var.location
-  enforcement_mode     = true
+  enforce              = true
 
   identity {
     type = "SystemAssigned"

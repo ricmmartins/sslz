@@ -20,6 +20,13 @@ Thumbs.db
 *.swp
 *.swo
 
+# Generated diagrams
+diagrams/output/*.png
+diagrams/output/*.svg
+
+# Azure Developer CLI
+.azure/
+
 # Secrets
 .env
 *.pem

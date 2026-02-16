@@ -1,0 +1,10 @@
+# Azure Developer CLI (azd) configuration
+# Deploy: azd up
+# Docs: https://learn.microsoft.com/azure/developer/azure-developer-cli/
+name: azure-landing-zone-startups
+metadata:
+  template: azure-landing-zone-startups
+
+infra:
+  provider: bicep
+  path: infra/bicep

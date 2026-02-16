@@ -5,7 +5,10 @@
 # ==============================================================================
 
 variable "company_name" { type = string }
-variable "display_name" { type = string; default = "" }
+variable "display_name" {
+  type    = string
+  default = ""
+}
 variable "prod_subscription_id" { type = string }
 variable "nonprod_subscription_id" { type = string }
 

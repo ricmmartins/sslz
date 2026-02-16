@@ -1,7 +1,20 @@
 variable "log_analytics_workspace_id" { type = string }
-variable "enable_defender_for_servers" { type = bool; default = false }
-variable "enable_defender_for_containers" { type = bool; default = false }
-variable "enable_defender_for_databases" { type = bool; default = false }
+variable "security_contact_email" {
+  type    = string
+  default = "security@contoso.com"
+}
+variable "enable_defender_for_servers" {
+  type    = bool
+  default = false
+}
+variable "enable_defender_for_containers" {
+  type    = bool
+  default = false
+}
+variable "enable_defender_for_databases" {
+  type    = bool
+  default = false
+}
 
 # CSPM Free — always enabled
 resource "azurerm_security_center_subscription_pricing" "cspm" {
@@ -46,14 +59,10 @@ resource "azurerm_security_center_subscription_pricing" "arm" {
   resource_type = "Arm"
 }
 
-# Auto-provisioning
-resource "azurerm_security_center_auto_provisioning" "default" {
-  auto_provision = "On"
-}
-
 # Security contact
 resource "azurerm_security_center_contact" "default" {
-  email               = ""
+  name                = "default1"
+  email               = var.security_contact_email
   alert_notifications = true
   alerts_to_admins    = true
 }

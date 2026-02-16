@@ -43,14 +43,27 @@ Azure Container Apps Environment
 
 ## Deploy
 
+### Bicep
+
 ```bash
-# After deploying the base landing zone, deploy this example:
 cd examples/saas-startup
 
 az deployment group create \
   --resource-group rg-mycompany-prod-app \
   --template-file main.bicep \
   --parameters main.bicepparam
+```
+
+### Terraform
+
+```bash
+cd examples/saas-startup/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+terraform init
+terraform plan
+terraform apply
 ```
 
 ## Key Decisions
