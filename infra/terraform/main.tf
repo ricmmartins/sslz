@@ -1,6 +1,28 @@
 # ==============================================================================
 # Azure Landing Zone for Startups — Terraform Main
 # ==============================================================================
+#
+# NOTE: Management Groups
+# -----------------------
+# The management-groups module (./modules/management-groups) is NOT called from
+# this root config because it requires *tenant-level* permissions that most
+# service principals do not have.
+#
+# Deploy it separately BEFORE running this main deployment:
+#
+#   cd infra/terraform
+#   terraform init
+#   terraform apply -target=module.management_groups \
+#     -var='company_name=yourcompany' \
+#     -var='prod_subscription_id=<PROD_SUB_ID>' \
+#     -var='nonprod_subscription_id=<NONPROD_SUB_ID>'
+#
+# After the management group exists, run the rest of this config normally:
+#
+#   terraform apply
+#
+# See: ./modules/management-groups/main.tf
+# ==============================================================================
 
 terraform {
   required_version = ">= 1.5.0"

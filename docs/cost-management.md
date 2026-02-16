@@ -110,6 +110,8 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
 - Batch processing: Spot VMs or Spot node pools in AKS.
 - Dev/test environments: Spot VMs with `Deallocate` eviction policy.
 
+Setting `maxPrice: -1` (or `spot_max_price = -1` in Terraform) means "pay up to the current on-demand price." Azure will **only** evict the VM when it needs the capacity back for on-demand customers — never because of price fluctuations. This is the recommended default for most Spot workloads because it maximizes uptime while still getting the Spot discount (typically 60-90% off).
+
 ```bicep
 resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
   properties: {
@@ -123,6 +125,8 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
   }
 }
 ```
+
+If you want to cap the price (e.g., only run when the Spot price is below $0.05/hr), set `maxPrice` to that value instead. The VM will be evicted if the Spot price exceeds your cap **or** if Azure needs the capacity.
 
 ### 6. Not Using Azure Dev/Test Pricing
 

@@ -1,0 +1,9 @@
+subscription_id     = "00000000-0000-0000-0000-000000000000"
+resource_group_name = "rg-myaiapp-prod-app"
+location            = "eastus2"
+app_name            = "myaiapp"
+environment         = "prod"
+system_node_vm_size = "Standard_D4s_v5"
+gpu_node_vm_size    = "Standard_NC6s_v3"
+gpu_use_spot        = true
+ssh_public_key      = "ssh-rsa AAAA... user@host"
