@@ -1,0 +1,15 @@
+title: Azure Landing Zones
+description: A stripped-down, opinionated, deployable Azure Landing Zone for digital-native companies and startups
+url: "https://azurelanding.zone"
+baseurl: ""
+
+remote_theme: just-the-docs/just-the-docs
+
+# Use the Kramdown parser in GFM mode to enable task lists
+markdown: kramdown
+kramdown:
+  input: GFM
+  task_lists: true
+
+plugins:
+  - jekyll-remote-theme
