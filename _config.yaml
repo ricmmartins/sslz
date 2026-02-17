@@ -1,7 +1,7 @@
 title: Azure Landing Zones
 description: A stripped-down, opinionated, deployable Azure Landing Zone for digital-native companies and startups
-url: "https://azurelanding.zone"
-baseurl: ""
+url: "https://ricardomartins.com.br"
+baseurl: "/azure-landing-zone-startup"
 
 remote_theme: just-the-docs/just-the-docs
 
