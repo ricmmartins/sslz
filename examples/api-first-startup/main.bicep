@@ -125,7 +125,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2023-12-01' = if (environment ==
 // API Management — Consumption tier
 // ============================================================================
 
-resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
+resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
   name: 'apim-${appName}-${environment}'
   location: location
   tags: tags
@@ -196,19 +196,22 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
-// Grant App Service access to Cosmos DB
-resource cosmosRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(cosmos.id, app.id, '00000000-0000-0000-0000-000000000002')
-  scope: cosmos
+// Grant App Service access to Cosmos DB (SQL built-in Data Contributor role)
+resource cosmosRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = {
+  parent: cosmos
+  name: guid(cosmos.id, app.id, 'cosmos-data-contributor')
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00000000-0000-0000-0000-000000000002') // Cosmos DB Built-in Data Contributor
+    roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
     principalId: app.identity.principalId
-    principalType: 'ServicePrincipal'
+    scope: cosmos.id
   }
 }
 
 // ============================================================================
 // Redis — response caching
+// Basic C0 for both environments: sufficient for API response caching,
+// no SLA needed since the app works without cache (just slower).
+// Upgrade to Standard for prod if you need replication or SLA guarantees.
 // ============================================================================
 
 resource redis 'Microsoft.Cache/redis@2024-03-01' = {
@@ -241,6 +244,10 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableSoftDelete: true
     enablePurgeProtection: environment == 'prod' ? true : null
     softDeleteRetentionInDays: 30
+    networkAcls: {
+      defaultAction: 'Deny'
+      bypass: 'AzureServices'
+    }
   }
 }
 

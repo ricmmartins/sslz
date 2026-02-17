@@ -184,6 +184,12 @@ resource "azurerm_linux_web_app_slot" "staging" {
       node_version = "20-lts"
     }
   }
+
+  app_settings = {
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.this.connection_string
+    "COSMOS_ENDPOINT"                       = azurerm_cosmosdb_account.this.endpoint
+    "REDIS_HOSTNAME"                        = azurerm_redis_cache.this.hostname
+  }
 }
 
 # ==============================================================================
@@ -263,6 +269,9 @@ resource "azurerm_cosmosdb_sql_role_assignment" "app_cosmos" {
 
 # ==============================================================================
 # Redis — response caching
+# Basic C0 for both environments: sufficient for API response caching,
+# no SLA needed since the app works without cache (just slower).
+# Upgrade to Standard for prod if you need replication or SLA guarantees.
 # ==============================================================================
 
 resource "azurerm_redis_cache" "this" {
@@ -328,4 +337,8 @@ output "app_insights_connection_string" {
 
 output "redis_hostname" {
   value = azurerm_redis_cache.this.hostname
+}
+
+output "key_vault_uri" {
+  value = azurerm_key_vault.this.vault_uri
 }

@@ -1,17 +1,29 @@
-variable "location" { type = string }
-variable "resource_group_name" { type = string }
-variable "workspace_name" { type = string }
+variable "location" {
+  description = "Azure region"
+  type        = string
+}
+variable "resource_group_name" {
+  description = "Resource group name"
+  type        = string
+}
+variable "workspace_name" {
+  description = "Log Analytics workspace name"
+  type        = string
+}
 variable "retention_in_days" {
-  type    = number
-  default = 90
+  description = "Data retention in days"
+  type        = number
+  default     = 90
 }
 variable "daily_quota_gb" {
-  type    = number
-  default = 5
+  description = "Daily ingestion quota in GB"
+  type        = number
+  default     = 5
 }
 variable "tags" {
-  type    = map(string)
-  default = {}
+  description = "Resource tags"
+  type        = map(string)
+  default     = {}
 }
 
 resource "azurerm_log_analytics_workspace" "this" {

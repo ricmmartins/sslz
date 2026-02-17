@@ -9,8 +9,7 @@ Internet
     │
 Azure Container Apps Environment
     ├── container-app-api      (backend API)
-    ├── container-app-web      (frontend SPA / SSR)
-    └── container-app-worker   (background jobs)
+    └── container-app-web      (frontend SPA / SSR)
     │
     ├── Azure SQL (Elastic Pool)
     ├── Azure Cache for Redis

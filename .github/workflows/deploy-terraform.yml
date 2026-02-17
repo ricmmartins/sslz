@@ -1,3 +1,6 @@
+# PREREQUISITE: Configure a remote backend in infra/terraform/main.tf before
+# using this workflow. Without a remote backend, Terraform state is lost between
+# runs and apply will attempt to recreate all resources.
 name: Deploy Landing Zone (Terraform)
 
 on:
@@ -49,6 +52,9 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
         run: terraform init
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_DIR }}

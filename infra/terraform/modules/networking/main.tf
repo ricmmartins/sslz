@@ -1,10 +1,23 @@
-variable "location" { type = string }
-variable "resource_group_name" { type = string }
-variable "vnet_name" { type = string }
-variable "vnet_address_prefix" { type = string }
+variable "location" {
+  description = "Azure region"
+  type        = string
+}
+variable "resource_group_name" {
+  description = "Resource group name"
+  type        = string
+}
+variable "vnet_name" {
+  description = "Virtual network name"
+  type        = string
+}
+variable "vnet_address_prefix" {
+  description = "VNet address prefix (e.g., 10.0.0.0/16)"
+  type        = string
+}
 variable "tags" {
-  type    = map(string)
-  default = {}
+  description = "Resource tags"
+  type        = map(string)
+  default     = {}
 }
 
 locals {

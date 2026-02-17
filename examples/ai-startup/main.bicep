@@ -55,7 +55,7 @@ resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 // AKS Cluster
 // ============================================================================
 
-resource aks 'Microsoft.ContainerService/managedClusters@2024-06-02-preview' = {
+resource aks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
   name: 'aks-${appName}-${environment}'
   location: location
   tags: tags
@@ -105,7 +105,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-06-02-preview' = {
 }
 
 // GPU node pool — separate resource for independent scaling
-resource gpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024-06-02-preview' = {
+resource gpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024-09-01' = {
   parent: aks
   name: 'gpu'
   properties: {
@@ -131,7 +131,7 @@ resource gpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024
 }
 
 // CPU burst node pool for data preprocessing
-resource cpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024-06-02-preview' = {
+resource cpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024-09-01' = {
   parent: aks
   name: 'cpu'
   properties: {
@@ -156,7 +156,7 @@ resource cpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024
 // Azure Container Registry
 // ============================================================================
 
-resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' = {
+resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01' = {
   name: replace('acr${appName}${environment}', '-', '')
   location: location
   tags: tags
@@ -274,6 +274,10 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableSoftDelete: true
     enablePurgeProtection: environment == 'prod' ? true : null
     softDeleteRetentionInDays: 30
+    networkAcls: {
+      defaultAction: 'Deny'
+      bypass: 'AzureServices'
+    }
   }
 }
 

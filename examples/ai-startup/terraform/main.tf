@@ -362,3 +362,7 @@ output "storage_account_name" {
 output "redis_hostname" {
   value = azurerm_redis_cache.this.hostname
 }
+
+output "key_vault_uri" {
+  value = azurerm_key_vault.this.vault_uri
+}

@@ -1,7 +1,19 @@
-variable "location" { type = string }
-variable "allowed_locations" { type = list(string) }
-variable "log_analytics_workspace_id" { type = string }
-variable "subscription_id" { type = string }
+variable "location" {
+  description = "Primary Azure region"
+  type        = string
+}
+variable "allowed_locations" {
+  description = "Allowed Azure regions for resource deployment"
+  type        = list(string)
+}
+variable "log_analytics_workspace_id" {
+  description = "Log Analytics workspace resource ID"
+  type        = string
+}
+variable "subscription_id" {
+  description = "Azure subscription ID"
+  type        = string
+}
 
 locals {
   subscription_scope = "/subscriptions/${var.subscription_id}"

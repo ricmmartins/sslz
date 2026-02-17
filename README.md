@@ -134,7 +134,7 @@ Pre-built configurations for common startup archetypes:
 
 | Example | Description |
 |---|---|
-| [SaaS Startup](examples/saas-startup/) | Container Apps + Azure SQL + Front Door |
+| [SaaS Startup](examples/saas-startup/) | Container Apps + Azure SQL Elastic Pool + Redis + Key Vault |
 | [AI Startup](examples/ai-startup/) | AKS with GPU node pools + Azure OpenAI + Blob Storage |
 | [API-First Startup](examples/api-first-startup/) | App Service + API Management + Cosmos DB |
 

@@ -5,7 +5,8 @@
 
 targetScope = 'subscription'
 
-@description('Log Analytics workspace ID for Defender data')
+@description('Log Analytics workspace ID (reserved for Defender workspace integration — not yet wired)')
+#disable-next-line no-unused-params
 param logAnalyticsWorkspaceId string
 
 @description('Enable Defender for Servers P2')
