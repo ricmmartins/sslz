@@ -224,6 +224,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "cpu" {
 # Azure Container Registry
 # ==============================================================================
 
+# NOTE: Standard tier is cost-effective for startups. Upgrade to Premium if you
+# need Private Endpoints (to match OpenAI/Cosmos private access) or geo-replication.
 resource "azurerm_container_registry" "this" {
   name                = replace("acr${var.app_name}${var.environment}", "-", "")
   location            = var.location

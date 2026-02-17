@@ -16,6 +16,9 @@ param vnetAddressPrefix string
 #disable-next-line no-unused-params
 param logAnalyticsWorkspaceId string
 
+@description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
+param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
+
 @description('Resource tags')
 param tags object
 
@@ -209,7 +212,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
             {
               name: 'delegation-web'
               properties: {
-                serviceName: 'Microsoft.Web/serverFarms'
+                serviceName: appSubnetDelegation
               }
             }
           ]

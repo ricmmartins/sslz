@@ -157,6 +157,11 @@ resource "azurerm_container_app" "api" {
       latest_revision = true
       percentage      = 100
     }
+
+    # Allow requests from the web frontend (matches Bicep corsPolicy)
+    cors {
+      allowed_origins = ["https://${var.app_name}-web.${azurerm_container_app_environment.this.default_domain}"]
+    }
   }
 
   template {

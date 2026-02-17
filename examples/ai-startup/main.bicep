@@ -156,6 +156,8 @@ resource cpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024
 // Azure Container Registry
 // ============================================================================
 
+// NOTE: Standard tier is cost-effective for startups. Upgrade to Premium if you
+// need Private Endpoints (to match OpenAI/Cosmos private access) or geo-replication.
 resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01' = {
   name: replace('acr${appName}${environment}', '-', '')
   location: location

@@ -14,6 +14,8 @@ budget_alert_emails = [
   "cto@mycompany.com"
 ]
 
+security_contact_email = "security@mycompany.com"
+
 deploy_networking              = true
 enable_defender_for_servers    = true  # recommended for prod
 enable_defender_for_containers = false # set true if running AKS

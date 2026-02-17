@@ -269,5 +269,7 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 output appUrl string = 'https://${app.properties.defaultHostName}'
 output apimGatewayUrl string = apim.properties.gatewayUrl
 output cosmosEndpoint string = cosmos.properties.documentEndpoint
-output appInsightsConnectionString string = appInsights.properties.ConnectionString
+// Note: App Insights connection string is intentionally omitted from outputs
+// because Bicep does not support secure outputs. Retrieve it from the Azure
+// portal or via: az monitor app-insights component show --app <name> --query connectionString
 output redisHostname string = redis.properties.hostName

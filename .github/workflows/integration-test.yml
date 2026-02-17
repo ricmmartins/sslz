@@ -59,7 +59,8 @@ jobs:
               companyName=lztest \
               environment=nonprod \
               monthlyBudgetAmount=500 \
-              budgetAlertEmails='["landing-zone-test@contoso.com"]'
+              budgetAlertEmails='["landing-zone-test@contoso.com"]' \
+              securityContactEmail='landing-zone-test@contoso.com'
 
   # ============================================================================
   # Terraform: Plan

@@ -36,12 +36,20 @@ resource defenderCspm 'Microsoft.Security/pricings@2024-01-01' = {
   }
 }
 
-// Defender for Servers P2
-resource defenderServers 'Microsoft.Security/pricings@2024-01-01' = {
+// Defender for Servers P2 (Standard) or Free — separate resources to avoid
+// sending subPlan when tier is Free, which the API rejects.
+resource defenderServersStandard 'Microsoft.Security/pricings@2024-01-01' = if (enableDefenderForServers) {
   name: 'VirtualMachines'
   properties: {
-    pricingTier: enableDefenderForServers ? 'Standard' : 'Free'
-    subPlan: enableDefenderForServers ? 'P2' : null
+    pricingTier: 'Standard'
+    subPlan: 'P2'
+  }
+}
+
+resource defenderServersFree 'Microsoft.Security/pricings@2024-01-01' = if (!enableDefenderForServers) {
+  name: 'VirtualMachines'
+  properties: {
+    pricingTier: 'Free'
   }
 }
 

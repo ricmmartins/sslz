@@ -120,6 +120,10 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
         run: terraform apply tfplan-nonprod
 
+  # NOTE: The prod plan was generated in parallel with nonprod. If nonprod apply
+  # changes shared subscription-level state (e.g., Defender, Policy), the prod
+  # plan could be stale and Terraform may reject it. Re-run the workflow if this
+  # happens, or split plan/apply into separate workflows for full isolation.
   apply-prod:
     name: Apply Prod
     runs-on: ubuntu-latest

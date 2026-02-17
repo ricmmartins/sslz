@@ -114,7 +114,7 @@ graph TB
     end
 
     subgraph "Defender for Cloud"
-        defender_servers["Servers: Free tier"]
+        defender_servers["Servers: P2 (prod) / Free"]
         defender_containers["Containers: On (if AKS)"]
         defender_db["Databases: On (prod)"]
         defender_kv["Key Vault: On"]

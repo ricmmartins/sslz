@@ -4,6 +4,17 @@
 # Requires tenant-level permissions
 # ==============================================================================
 
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+  }
+}
+
 variable "company_name" {
   description = "Company name used in management group naming"
   type        = string

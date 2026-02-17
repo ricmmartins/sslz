@@ -140,7 +140,7 @@ Don't buy P2 to check a box. Buy it when you have an actual operational need for
 
 ## Policy Baseline
 
-We assign a minimal set of policies at the management group level:
+We assign a minimal set of policies at the subscription level:
 
 | Policy | Mode | Purpose |
 |---|---|---|
