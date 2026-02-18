@@ -9,10 +9,22 @@ infra/
     parameters/    # Environment-specific .bicepparam files
   terraform/       # Terraform IaC (equivalent to Bicep)
     modules/       # Reusable TF modules (each has main.tf, variables.tf, outputs.tf)
-examples/          # Reference architectures (SaaS startup, etc.)
-docs/              # Architecture decisions, networking deep dive, troubleshooting
-scripts/           # Bootstrap and validation helpers
-.github/workflows/ # CI/CD pipelines
+examples/
+  saas-startup/    # Container Apps + Azure SQL + Redis + Key Vault + optional Private Endpoints
+  ai-startup/      # AKS with GPU pools + Azure OpenAI + Blob Storage
+  api-first-startup/ # App Service + API Management + Cosmos DB
+docs/
+  architecture.md  # Architecture decisions, rollback guidance
+  networking.md    # VNet design, NSGs, Private Endpoints
+  security.md      # Defender, RBAC, logging
+  cost-management.md # Budgets, RI guidance
+  ci-cd-setup.md   # Workload Identity Federation setup for GitHub Actions
+  troubleshooting.md # Common deployment errors and fixes
+  graduation-guide.md # Migration path to full ESLZ
+scripts/
+  bootstrap-backend.sh     # Create Azure Storage for TF remote state
+  validate-prerequisites.sh # Pre-flight checks (CLI tools, auth, providers)
+.github/workflows/         # CI/CD pipelines (validate, deploy, integration test)
 ```
 
 ## Conventions

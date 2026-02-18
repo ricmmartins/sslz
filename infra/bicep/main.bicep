@@ -84,6 +84,7 @@ module logAnalytics 'modules/log-analytics.bicep' = {
     location: location
     workspaceName: 'law-${prefix}'
     retentionInDays: 90
+    dailyQuotaGb: 5
     tags: tags
   }
 }

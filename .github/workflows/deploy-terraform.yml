@@ -81,7 +81,25 @@ jobs:
             const fs = require('fs');
             const plan = fs.readFileSync('${{ env.TF_DIR }}/plan-output.txt', 'utf8');
             const truncated = plan.length > 60000 ? plan.substring(0, 60000) + '\n... (truncated)' : plan;
-            const body = `### Terraform Plan — \`${{ matrix.environment }}\`\n\n<details>\n<summary>Show Plan Output</summary>\n\n\`\`\`\n${truncated}\n\`\`\`\n\n</details>`;
+
+            // Extract resource summary from plan output
+            const summaryMatch = plan.match(/Plan: (\d+ to add, \d+ to change, \d+ to destroy)/);
+            const noChanges = plan.includes('No changes.');
+            const badge = noChanges ? '`No changes`' : (summaryMatch ? `\`${summaryMatch[1]}\`` : '`See details`');
+
+            const body = [
+              `### Terraform Plan — \`${{ matrix.environment }}\` ${badge}`,
+              '',
+              '<details>',
+              '<summary>Show Plan Output</summary>',
+              '',
+              '```',
+              truncated,
+              '```',
+              '',
+              '</details>'
+            ].join('\n');
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

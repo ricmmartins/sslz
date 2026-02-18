@@ -82,3 +82,27 @@ Container Apps scales based on HTTP traffic or KEDA scalers. Set:
 ### Secrets
 
 All secrets in Key Vault, referenced by Container Apps via managed identity. Never put connection strings in environment variables directly.
+
+### Private Endpoints (Optional)
+
+By default, Azure SQL has `publicNetworkAccess: Disabled` and Redis uses service-level firewall rules. If you need network-level isolation through Private Endpoints:
+
+**Bicep:**
+```bash
+az deployment group create \
+  --resource-group rg-mycompany-prod-app \
+  --template-file main.bicep \
+  --parameters main.bicepparam \
+  --parameters deployPrivateEndpoints=true \
+               privateEndpointSubnetId='/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-data' \
+               vnetId='/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>'
+```
+
+**Terraform:**
+```hcl
+deploy_private_endpoints   = true
+private_endpoint_subnet_id = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-data"
+vnet_id                    = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>"
+```
+
+This creates Private Endpoints and Private DNS Zones for both SQL Server (`privatelink.database.windows.net`) and Redis (`privatelink.redis.cache.windows.net`), linked to your VNet.

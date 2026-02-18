@@ -84,7 +84,7 @@ jobs:
             --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/prod.bicepparam \
-            --no-pretty-print 2>&1 | tee whatif-output.txt
+            2>&1 | tee whatif-output.txt
 
       - name: Post What-If to PR
         uses: actions/github-script@v7

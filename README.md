@@ -45,22 +45,55 @@ No hub. No Azure Firewall. No VNet peering. Each subscription is self-contained.
 
 ## Quick Start
 
-### Prerequisites
+### Step 1: Check Prerequisites (5 min)
 
-- Azure CLI (`az`) installed and authenticated
-- Permissions: Owner on the Tenant Root Group (for management groups) or on the target subscriptions
-- Two subscriptions created (Prod + Non-Prod)
+You need:
+- **Azure CLI** — [Install guide](https://learn.microsoft.com/cli/azure/install-azure-cli)
+- **Terraform** >= 1.5.0 — [Install guide](https://developer.hashicorp.com/terraform/install) (only for Terraform option)
+- **Two Azure subscriptions** — One for prod, one for non-prod. [Create a subscription](https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription)
+- **Permissions** — Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups)
 
-### Option 1: Bicep
+Run the pre-flight check to verify everything:
 
 ```bash
-# Clone
 git clone https://github.com/<your-org>/azure-landing-zone-startups.git
-cd azure-landing-zone-startups/infra/bicep
+cd azure-landing-zone-startups
 
-# Edit parameters
+# Login to Azure
+az login
+az account set --subscription <YOUR_PROD_SUBSCRIPTION_ID>
+
+# Check all prerequisites
+./scripts/validate-prerequisites.sh
+```
+
+If the script reports errors, fix them before proceeding. See [Troubleshooting](docs/troubleshooting.md) for common issues.
+
+### Step 2: Deploy the Landing Zone (20 min)
+
+Choose **one** option: Bicep or Terraform.
+
+#### Option A: Bicep
+
+```bash
+cd infra/bicep
+
+# Copy and edit the parameter file for your environment
 cp parameters/prod.bicepparam parameters/prod.local.bicepparam
-# Edit prod.local.bicepparam with your values
+```
+
+Open `parameters/prod.local.bicepparam` and change these values:
+- `companyName` — Your company name (e.g., `'acme'`). Used in all resource names.
+- `securityContactEmail` — Email for Defender for Cloud alerts.
+- `budgetAlertEmails` — List of emails for budget notifications.
+- `monthlyBudgetAmount` — Your monthly budget in USD.
+
+```bash
+# Preview what will be created (no changes made)
+az deployment sub what-if \
+  --location eastus2 \
+  --template-file main.bicep \
+  --parameters parameters/prod.local.bicepparam
 
 # Deploy
 az deployment sub create \
@@ -69,18 +102,58 @@ az deployment sub create \
   --parameters parameters/prod.local.bicepparam
 ```
 
-### Option 2: Terraform
+Repeat for non-prod by creating a `nonprod.local.bicepparam` file with `environment = 'nonprod'` and switching subscriptions:
+```bash
+az account set --subscription <YOUR_NONPROD_SUBSCRIPTION_ID>
+```
+
+#### Option B: Terraform
 
 ```bash
 cd infra/terraform
 
+# Copy and edit the variables file
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
+```
 
+Open `terraform.tfvars` and fill in the **REQUIRED** values (marked in the file):
+- `subscription_id` — Your Azure subscription UUID
+- `company_name` — Your company name (e.g., `"acme"`)
+- `environment` — `"prod"` or `"nonprod"`
+- `budget_alert_emails` — List of email addresses
+- `security_contact_email` — Email for security alerts
+
+```bash
+# Initialize Terraform
 terraform init
+
+# Preview what will be created (no changes made)
 terraform plan -out=tfplan
+
+# Deploy (review the plan output carefully before confirming)
 terraform apply tfplan
 ```
+
+> **Tip:** For production use, set up a remote backend for Terraform state so it persists across machines and CI/CD runs. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend, then uncomment the `backend "azurerm"` block in `main.tf`.
+
+### Step 3: Verify the Deployment (5 min)
+
+After deployment completes, verify in the Azure Portal or CLI:
+
+```bash
+# Check resource groups were created
+az group list --query "[?contains(name, 'yourcompany')].name" -o tsv
+
+# Check Log Analytics workspace
+az monitor log-analytics workspace list --query "[].name" -o tsv
+
+# Check policy assignments
+az policy assignment list --query "[?contains(name, 'mcsb')].displayName" -o tsv
+```
+
+### Step 4: Post-Deployment Setup (30 min)
+
+See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-setup.md) if you're configuring GitHub Actions.
 
 ## Day-1 Checklist
 
@@ -144,6 +217,8 @@ Pre-built configurations for common startup archetypes:
 - [Networking Deep Dive](docs/networking.md) — VNet design, NSGs, when you need a hub
 - [Security Baseline](docs/security.md) — Defender, RBAC, logging, network security
 - [Cost Management](docs/cost-management.md) — Budgets, RI guidance, common mistakes
+- [CI/CD Setup](docs/ci-cd-setup.md) — Workload Identity Federation, GitHub Actions, secrets
+- [Troubleshooting](docs/troubleshooting.md) — Common deployment errors and fixes
 - [Graduation Guide](docs/graduation-guide.md) — When and how to migrate to full ESLZ
 
 ## Contributing

@@ -78,14 +78,14 @@ jobs:
 
       - name: TFLint — Landing Zone
         working-directory: infra/terraform
-        run: tflint --config=../../.tflint.hcl
+        run: tflint --config="${{ github.workspace }}/.tflint.hcl"
 
       - name: TFLint — Examples
         run: |
           for dir in examples/*/terraform; do
             if [ -d "$dir" ]; then
               echo "=== Linting $dir ==="
-              tflint --config=.tflint.hcl --chdir="$dir"
+              tflint --config="${{ github.workspace }}/.tflint.hcl" --chdir="$dir"
             fi
           done
 

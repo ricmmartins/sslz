@@ -2,27 +2,55 @@
 # Copy this file to terraform.tfvars and fill in your values
 # ==============================================================================
 
+# REQUIRED — Your Azure subscription ID (UUID format)
 subscription_id = "00000000-0000-0000-0000-000000000000"
-company_name    = "mycompany"
-environment     = "prod"
-location        = "eastus2"
 
-monthly_budget_amount = 5000
-budget_start_date    = "2026-03-01T00:00:00Z" # must be first of a month
+# REQUIRED — Your company name (used in resource naming, e.g., rg-mycompany-prod-monitoring)
+company_name = "mycompany"
+
+# REQUIRED — Environment: "prod" or "nonprod"
+environment = "prod"
+
+# Azure region to deploy into (default: eastus2)
+location = "eastus2"
+
+# REQUIRED — Email addresses that receive budget alerts
 budget_alert_emails = [
   "platform-team@mycompany.com",
   "cto@mycompany.com"
 ]
 
+# REQUIRED — Email for Defender for Cloud security alerts
 security_contact_email = "security@mycompany.com"
 
-deploy_networking              = true
-enable_defender_for_servers    = true  # recommended for prod
-enable_defender_for_containers = false # set true if running AKS
-enable_defender_for_databases  = true  # recommended for prod
+# Monthly budget in USD (default: 5000)
+monthly_budget_amount = 5000
 
+# Budget start date — leave empty to auto-set to the 1st of the current month.
+# If you set this manually, it must be the first of a month (e.g., "2026-03-01T00:00:00Z").
+# budget_start_date = "2026-03-01T00:00:00Z"
+
+# Deploy VNet and networking resources (default: true)
+deploy_networking = true
+
+# VNet address space — leave empty to use defaults (prod: 10.0.0.0/16, nonprod: 10.1.0.0/16)
+# vnet_address_prefix = "10.0.0.0/16"
+
+# Service delegation for the app subnet.
+# Use "Microsoft.Web/serverFarms" for App Service or "Microsoft.App/environments" for Container Apps.
+# Default: "Microsoft.Web/serverFarms"
+# app_subnet_delegation = "Microsoft.App/environments"
+
+# Defender for Cloud plans — enable what you need (all default to false except Key Vault)
+enable_defender_for_servers    = true  # recommended for prod (~$15/server/month)
+enable_defender_for_containers = false # set true if running AKS (~$7/vCPU/month)
+enable_defender_for_databases  = true  # recommended for prod (~$15/server/month)
+# enable_defender_for_key_vault = true  # default: true, low cost (~$0.02/10K transactions)
+
+# Restrict deployments to these Azure regions
 allowed_locations = ["eastus2", "centralus"]
 
+# Additional tags merged with defaults (environment, managedBy, project)
 tags = {
   team = "platform"
 }
