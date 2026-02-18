@@ -12,10 +12,6 @@ param vnetName string
 @description('VNet address prefix (e.g., 10.0.0.0/16 for prod, 10.1.0.0/16 for nonprod)')
 param vnetAddressPrefix string
 
-@description('Log Analytics workspace ID (reserved for NSG flow logs — not yet wired)')
-#disable-next-line no-unused-params
-param logAnalyticsWorkspaceId string
-
 @description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
 param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
 

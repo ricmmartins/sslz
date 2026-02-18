@@ -11,11 +11,19 @@ variable "location" {
   description = "Primary Azure region"
   type        = string
   default     = "eastus2"
+  validation {
+    condition     = can(regex("^[a-z]+[a-z0-9]*$", var.location))
+    error_message = "location must be a valid Azure region name (e.g., eastus2, westeurope)."
+  }
 }
 
 variable "company_name" {
-  description = "Company name used in resource naming"
+  description = "Company name used in resource naming (2-10 lowercase alphanumeric characters)"
   type        = string
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9]{1,9}$", var.company_name))
+    error_message = "company_name must be 2-10 lowercase alphanumeric characters, starting with a letter."
+  }
 }
 
 variable "environment" {
@@ -43,6 +51,10 @@ variable "vnet_address_prefix" {
   description = "VNet address prefix (overrides default per-environment prefix)"
   type        = string
   default     = ""
+  validation {
+    condition     = var.vnet_address_prefix == "" || can(cidrhost(var.vnet_address_prefix, 0))
+    error_message = "vnet_address_prefix must be a valid CIDR block (e.g., 10.0.0.0/16) or empty for the default."
+  }
 }
 
 variable "app_subnet_delegation" {
@@ -60,6 +72,10 @@ variable "monthly_budget_amount" {
 variable "budget_alert_emails" {
   description = "Email addresses for budget alerts"
   type        = list(string)
+  validation {
+    condition     = length(var.budget_alert_emails) > 0
+    error_message = "budget_alert_emails must contain at least one email address."
+  }
 }
 
 variable "budget_start_date" {
@@ -75,6 +91,10 @@ variable "budget_start_date" {
 variable "security_contact_email" {
   description = "Email address for Defender for Cloud security alerts"
   type        = string
+  validation {
+    condition     = can(regex("^[^@]+@[^@]+\\.[^@]+$", var.security_contact_email))
+    error_message = "security_contact_email must be a valid email address."
+  }
 }
 
 variable "enable_defender_for_servers" {

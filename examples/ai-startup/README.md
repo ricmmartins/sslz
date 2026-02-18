@@ -65,3 +65,49 @@ Options ranked by complexity:
 - **Inference caching with Redis:** Cache frequent prompts/responses. 30-50% cost reduction on LLM calls.
 - **Azure OpenAI PTU:** If your Azure OpenAI spend exceeds $5k/month, investigate Provisioned Throughput Units for predictable pricing.
 - **Blob lifecycle policies:** Automatically move training data older than 30 days to Cool tier (50% cheaper).
+
+## Deploy
+
+### Prerequisites
+
+- An existing resource group (created by the landing zone)
+- An SSH public key for AKS node access
+
+### Terraform
+
+```bash
+cd examples/ai-startup/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+terraform init
+terraform plan
+terraform apply
+```
+
+### Post-Deploy
+
+1. Get AKS credentials:
+   ```bash
+   az aks get-credentials --resource-group <RG_NAME> --name aks-<APP_NAME>-<ENV>
+   ```
+2. Install the NVIDIA device plugin for GPU workloads:
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.1/nvidia-device-plugin.yml
+   ```
+3. Push your inference container to ACR:
+   ```bash
+   az acr login --name <ACR_NAME>
+   docker push <ACR_LOGIN_SERVER>/inference:latest
+   ```
+
+## Teardown
+
+To destroy all resources created by this example:
+
+```bash
+cd examples/ai-startup/terraform
+terraform destroy
+```
+
+> **Note:** AKS clusters can take 10-15 minutes to fully delete. Storage accounts with blob containers will fail to delete if they contain data — empty the containers first or use `terraform destroy -target` to remove other resources first.

@@ -21,7 +21,7 @@ on:
     - cron: '0 6 * * 1'
 
 concurrency:
-  group: integration-test-${{ github.event.inputs.environment || 'nonprod' }}
+  group: integration-test-${{ github.event.inputs.environment || 'nonprod' }}-${{ github.event_name }}
   cancel-in-progress: false
 
 permissions:

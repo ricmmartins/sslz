@@ -5,10 +5,6 @@
 
 targetScope = 'subscription'
 
-@description('Log Analytics workspace ID (reserved for Defender workspace integration — not yet wired)')
-#disable-next-line no-unused-params
-param logAnalyticsWorkspaceId string
-
 @description('Enable Defender for Servers P2')
 param enableDefenderForServers bool
 
@@ -97,7 +93,7 @@ resource defenderArm 'Microsoft.Security/pricings@2024-01-01' = {
 // Security Contact
 // ============================================================================
 
-resource securityContact 'Microsoft.Security/securityContacts@2020-01-01-preview' = {
+resource securityContact 'Microsoft.Security/securityContacts@2023-12-01-preview' = {
   name: 'default'
   properties: {
     emails: securityContactEmail

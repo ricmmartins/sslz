@@ -1,6 +1,6 @@
 # Networking Deep Dive
 
-> See also: [Networking Architecture diagram](../diagrams/architecture.md#networking-architecture) for a visual overview.
+> See also: [Architecture Decisions](architecture.md#networking) for details on why this layout was chosen.
 
 ## Do You Even Need a VNet?
 
@@ -214,6 +214,8 @@ After (when you graduate):
 | Good for startups? | **Yes** | **Not until compliance or hybrid demands it** |
 
 Start with NSGs. They're free, they cover 95% of use cases, and they're per-subnet so failures are isolated. Add Azure Firewall when you have a specific compliance or operational requirement.
+
+> **See also:** The [SaaS Startup example](../examples/saas-startup/) demonstrates opt-in Private Endpoints for SQL and Redis with DNS zone configuration.
 
 ## Front Door vs Application Gateway
 

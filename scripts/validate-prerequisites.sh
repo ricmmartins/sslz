@@ -42,7 +42,7 @@ fi
 # Bicep
 if command -v az &>/dev/null; then
   if az bicep version --only-show-errors &>/dev/null; then
-    BICEP_VERSION=$(az bicep version --only-show-errors 2>&1 | grep -oP '[\d.]+' | head -1)
+    BICEP_VERSION=$(az bicep version --only-show-errors 2>&1 | grep -oE '[0-9]+\.[0-9.]+' | head -1)
     pass "Bicep CLI $BICEP_VERSION"
   else
     warn "Bicep CLI not installed — run: az bicep install"
@@ -51,7 +51,7 @@ fi
 
 # tflint (optional)
 if command -v tflint &>/dev/null; then
-  pass "tflint $(tflint --version 2>&1 | grep -oP '[\d.]+' | head -1)"
+  pass "tflint $(tflint --version 2>&1 | grep -oE '[0-9]+\.[0-9.]+' | head -1)"
 else
   warn "tflint not found (optional) — install from https://github.com/terraform-linters/tflint"
 fi

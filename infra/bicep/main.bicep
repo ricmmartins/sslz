@@ -8,7 +8,9 @@ targetScope = 'subscription'
 @description('Primary Azure region for all resources')
 param location string
 
-@description('Company name used for naming resources')
+@description('Company name used for naming resources (2-10 lowercase alphanumeric characters)')
+@minLength(2)
+@maxLength(10)
 param companyName string
 
 @description('Environment: prod or nonprod')
@@ -100,7 +102,6 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
     location: location
     vnetName: 'vnet-${prefix}'
     vnetAddressPrefix: environment == 'prod' ? '10.0.0.0/16' : '10.1.0.0/16'
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
     tags: tags
   }
 }
@@ -112,7 +113,6 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
 module defender 'modules/defender.bicep' = {
   name: 'deploy-defender'
   params: {
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
     enableDefenderForServers: enableDefenderForServers
     enableDefenderForContainers: enableDefenderForContainers
     enableDefenderForDatabases: enableDefenderForDatabases
@@ -138,7 +138,7 @@ module budgets 'modules/budgets.bicep' = {
 // Activity Log — Diagnostic Setting (immediate, not waiting for DINE policy)
 // ============================================================================
 
-resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2024-10-01-preview' = {
   name: 'diag-activity-log-to-law'
   properties: {
     workspaceId: logAnalytics.outputs.workspaceId

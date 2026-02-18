@@ -185,3 +185,9 @@ resources
 | Best for startups | Stable, predictable workloads | Variable workloads, frequent changes |
 
 **Recommendation:** Start with Savings Plans for flexibility. Switch to RIs for workloads that are very stable (same VM size for 6+ months).
+
+## See Also
+
+- [Architecture Decisions](architecture.md) — Why two subscriptions, budget design
+- [Troubleshooting](troubleshooting.md) — Budget start date format errors
+- [Graduation Guide](graduation-guide.md) — When to add cost management tooling

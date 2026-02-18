@@ -26,13 +26,13 @@ param sqlAdminPassword string
 @allowed(['prod', 'nonprod'])
 param environment string = 'prod'
 
-@description('Deploy Private Endpoints for SQL and Redis (requires VNet with data subnet)')
+@description('Deploy Private Endpoints for SQL and Redis. When true, you MUST also provide privateEndpointSubnetId and vnetId.')
 param deployPrivateEndpoints bool = false
 
-@description('Subnet resource ID for Private Endpoints (required when deployPrivateEndpoints is true)')
+@description('Subnet resource ID for Private Endpoints. Required when deployPrivateEndpoints is true. Example: /subscriptions/.../subnets/snet-data')
 param privateEndpointSubnetId string = ''
 
-@description('VNet resource ID for Private DNS Zone links (required when deployPrivateEndpoints is true)')
+@description('VNet resource ID for Private DNS Zone links. Required when deployPrivateEndpoints is true. Example: /subscriptions/.../virtualNetworks/vnet-prod')
 param vnetId string = ''
 
 param tags object = {
@@ -173,7 +173,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
     administratorLogin: sqlAdminLogin
     administratorLoginPassword: sqlAdminPassword
     minimalTlsVersion: '1.2'
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: deployPrivateEndpoints ? 'Disabled' : 'Enabled'
   }
 }
 
@@ -225,6 +225,7 @@ resource redis 'Microsoft.Cache/redis@2024-03-01' = {
     }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
+    publicNetworkAccess: deployPrivateEndpoints ? 'Disabled' : 'Enabled'
   }
 }
 

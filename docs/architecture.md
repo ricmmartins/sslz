@@ -208,3 +208,51 @@ If a Deny policy is blocking a critical deployment:
    ```
 2. **Switch to Audit:** Change the policy assignment's `enforce` mode from `true` to `false` — this converts Deny to Audit temporarily
 3. **Never delete the policy assignment** — you'll lose compliance history and audit trail
+
+## Multi-Region and Disaster Recovery
+
+This landing zone deploys to a single region. That's intentional — multi-region adds significant complexity that most startups don't need on day one.
+
+### When to Go Multi-Region
+
+- **SLA requirements:** You need 99.99%+ uptime (single-region gives you ~99.95% for most services)
+- **Latency:** Your users are distributed across continents and need <100ms response times
+- **Compliance:** Data residency requirements mandate replicas in specific regions
+- **Business continuity:** You can't tolerate a full region outage (rare but possible)
+
+### How to Prepare Without Over-Engineering
+
+Even in a single region, you can prepare for a future multi-region expansion:
+
+1. **Use paired regions:** Deploy to a region with a good pair (e.g., East US 2 + Central US). Azure prioritizes recovery for paired regions.
+2. **Avoid region-locked resources:** Don't hardcode region names. This landing zone uses a `location` parameter for a reason.
+3. **Use geo-redundant storage (GRS):** For critical data, switch from LRS to GRS. Your data is asynchronously replicated to the paired region at no extra compute cost (storage cost ~2x).
+4. **Database backups:** Azure SQL and Cosmos DB support geo-restore by default. Verify your backup retention meets your RPO.
+
+### Multi-Region Architecture (When You're Ready)
+
+```
+Azure Front Door (global load balancer + WAF)
+├── Region 1 (primary)
+│   ├── Container Apps / AKS
+│   ├── Azure SQL (primary replica)
+│   └── Redis
+└── Region 2 (secondary)
+    ├── Container Apps / AKS
+    ├── Azure SQL (geo-replica, read-only)
+    └── Redis
+```
+
+Key additions when you graduate to multi-region:
+- **Azure Front Door** for global load balancing and automatic failover
+- **Azure SQL geo-replication** or Cosmos DB multi-region writes
+- **Azure Traffic Manager** or Front Door health probes for failover detection
+- Separate Terraform workspaces or Bicep parameter files per region
+
+### See Also
+
+- [Graduation Guide](graduation-guide.md) — Full migration path to enterprise-scale
+- [Networking Deep Dive](networking.md) — When to add a hub VNet
+- [Security Baseline](security.md) — Defender, RBAC, logging
+- [Cost Management](cost-management.md) — Budgets and cost optimization
+- [Troubleshooting](troubleshooting.md) — Common deployment errors

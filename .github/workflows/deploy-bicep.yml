@@ -29,44 +29,11 @@ env:
 
 jobs:
   validate:
-    name: Validate Bicep
+    name: Validate Bicep (${{ matrix.environment }})
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login (prod)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-
-      - name: Validate Bicep (prod)
-        run: |
-          az deployment sub validate \
-            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
-            --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/prod.bicepparam
-
-      - name: Azure Login (nonprod)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-
-      - name: Validate Bicep (nonprod)
-        run: |
-          az deployment sub validate \
-            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
-            --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/nonprod.bicepparam
-
-  what-if:
-    name: What-If (Preview Changes)
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        environment: [prod, nonprod]
     steps:
       - uses: actions/checkout@v4
 
@@ -75,7 +42,32 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+          subscription-id: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+
+      - name: Validate Bicep
+        run: |
+          az deployment sub validate \
+            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
+            --template-file ${{ env.BICEP_DIR }}/main.bicep \
+            --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam
+
+  what-if:
+    name: What-If (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        environment: [prod, nonprod]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
 
       - name: What-If
         id: whatif
@@ -83,7 +75,7 @@ jobs:
           az deployment sub what-if \
             --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/prod.bicepparam \
+            --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam \
             2>&1 | tee whatif-output.txt
 
       - name: Post What-If to PR
@@ -93,7 +85,36 @@ jobs:
             const fs = require('fs');
             const whatif = fs.readFileSync('whatif-output.txt', 'utf8');
             const truncated = whatif.length > 60000 ? whatif.substring(0, 60000) + '\n... (truncated)' : whatif;
-            const body = `### Bicep What-If — \`prod\`\n\n<details>\n<summary>Show What-If Output</summary>\n\n\`\`\`\n${truncated}\n\`\`\`\n\n</details>`;
+
+            // Count resource changes from what-if output
+            const createMatch = whatif.match(/Create:\s*(\d+)/);
+            const modifyMatch = whatif.match(/Modify:\s*(\d+)/);
+            const deleteMatch = whatif.match(/Delete:\s*(\d+)/);
+            const noChanges = whatif.includes('no change');
+            let badge;
+            if (noChanges && !createMatch && !modifyMatch && !deleteMatch) {
+              badge = '`No changes`';
+            } else {
+              const parts = [];
+              if (createMatch) parts.push(`${createMatch[1]} to create`);
+              if (modifyMatch) parts.push(`${modifyMatch[1]} to modify`);
+              if (deleteMatch) parts.push(`${deleteMatch[1]} to delete`);
+              badge = parts.length > 0 ? `\`${parts.join(', ')}\`` : '`See details`';
+            }
+
+            const body = [
+              `### Bicep What-If — \`${{ matrix.environment }}\` ${badge}`,
+              '',
+              '<details>',
+              '<summary>Show What-If Output</summary>',
+              '',
+              '```',
+              truncated,
+              '```',
+              '',
+              '</details>'
+            ].join('\n');
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

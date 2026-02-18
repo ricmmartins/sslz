@@ -6,3 +6,12 @@ output "policy_assignment_ids" {
     activity_log_diag = azurerm_subscription_policy_assignment.activity_log_diag.id
   }
 }
+
+output "policy_assignment_names" {
+  description = "Map of policy assignment names"
+  value = {
+    mcsb              = azurerm_subscription_policy_assignment.mcsb.name
+    allowed_locations = azurerm_subscription_policy_assignment.allowed_locations.name
+    activity_log_diag = azurerm_subscription_policy_assignment.activity_log_diag.name
+  }
+}

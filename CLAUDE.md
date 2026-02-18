@@ -24,6 +24,7 @@ docs/
 scripts/
   bootstrap-backend.sh     # Create Azure Storage for TF remote state
   validate-prerequisites.sh # Pre-flight checks (CLI tools, auth, providers)
+  teardown.sh              # Safely destroy landing zone resources
 .github/workflows/         # CI/CD pipelines (validate, deploy, integration test)
 ```
 

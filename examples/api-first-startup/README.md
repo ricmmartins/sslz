@@ -84,3 +84,49 @@ Application Insights gives you:
 - **Failures:** Automatic exception grouping and impact analysis
 - **Performance:** P50/P95/P99 response times per endpoint
 - **Availability tests:** Synthetic pings from global locations
+
+## Deploy
+
+### Prerequisites
+
+- An existing resource group (created by the landing zone)
+- APIM publisher email and name for API Management configuration
+
+### Terraform
+
+```bash
+cd examples/api-first-startup/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+terraform init
+terraform plan
+terraform apply
+```
+
+### Post-Deploy
+
+1. Access your API:
+   ```bash
+   curl https://app-<APP_NAME>-api-<ENV>.azurewebsites.net/health
+   ```
+2. Configure APIM policies (rate limiting, API keys) in the Azure Portal under API Management > APIs
+3. Deploy your application code:
+   ```bash
+   az webapp deploy --resource-group <RG> --name app-<APP_NAME>-api-<ENV> --src-path <YOUR_ZIP>
+   ```
+4. Test the staging slot (prod only):
+   ```bash
+   curl https://app-<APP_NAME>-api-<ENV>-staging.azurewebsites.net/health
+   ```
+
+## Teardown
+
+To destroy all resources created by this example:
+
+```bash
+cd examples/api-first-startup/terraform
+terraform destroy
+```
+
+> **Note:** Cosmos DB accounts with `enablePurgeProtection` may remain in a soft-deleted state. API Management in Consumption tier may take a few minutes to fully deprovision.

@@ -104,6 +104,13 @@ variable "vnet_id" {
   default     = ""
 }
 
+check "private_endpoint_config" {
+  assert {
+    condition     = !var.deploy_private_endpoints || (var.private_endpoint_subnet_id != "" && var.vnet_id != "")
+    error_message = "private_endpoint_subnet_id and vnet_id are required when deploy_private_endpoints is true."
+  }
+}
+
 variable "tags" {
   description = "Tags applied to all resources"
   type        = map(string)
@@ -247,7 +254,7 @@ resource "azurerm_mssql_server" "this" {
   administrator_login           = var.sql_admin_login
   administrator_login_password  = var.sql_admin_password
   minimum_tls_version           = "1.2"
-  public_network_access_enabled = false
+  public_network_access_enabled = !var.deploy_private_endpoints
   tags                          = local.tags
 }
 
@@ -282,15 +289,16 @@ resource "azurerm_mssql_database" "app" {
 # ==============================================================================
 
 resource "azurerm_redis_cache" "this" {
-  name                 = "redis-${var.app_name}-${var.environment}"
-  location             = var.location
-  resource_group_name  = data.azurerm_resource_group.this.name
-  capacity             = 0
-  family               = "C"
-  sku_name             = var.environment == "prod" ? "Standard" : "Basic"
-  non_ssl_port_enabled = false
-  minimum_tls_version  = "1.2"
-  tags                 = local.tags
+  name                          = "redis-${var.app_name}-${var.environment}"
+  location                      = var.location
+  resource_group_name           = data.azurerm_resource_group.this.name
+  capacity                      = 0
+  family                        = "C"
+  sku_name                      = var.environment == "prod" ? "Standard" : "Basic"
+  non_ssl_port_enabled          = false
+  minimum_tls_version           = "1.2"
+  public_network_access_enabled = !var.deploy_private_endpoints
+  tags                          = local.tags
 }
 
 # ==============================================================================

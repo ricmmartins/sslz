@@ -25,7 +25,7 @@ env:
 
 jobs:
   plan:
-    name: Terraform Plan
+    name: Terraform Plan (${{ matrix.environment }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -156,10 +156,9 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
         run: terraform apply tfplan-nonprod
 
-  # NOTE: The prod plan was generated in parallel with nonprod. If nonprod apply
-  # changes shared subscription-level state (e.g., Defender, Policy), the prod
-  # plan could be stale and Terraform may reject it. Re-run the workflow if this
-  # happens, or split plan/apply into separate workflows for full isolation.
+  # Prod re-plans before applying to avoid stale plan artifacts. The nonprod
+  # apply may change subscription-level state (Defender, Policy) that the
+  # parallel plan job could not have predicted.
   apply-prod:
     name: Apply Prod
     runs-on: ubuntu-latest
@@ -173,12 +172,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~> 1.9"
-
-      - name: Download Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-prod
-          path: ${{ env.TF_DIR }}
 
       - name: Azure Login
         uses: azure/login@v2
@@ -194,6 +187,24 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
         run: terraform init
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+
+      - name: Terraform Plan (fresh)
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+          TF_VAR_budget_alert_emails: ${{ vars.BUDGET_ALERT_EMAILS || '["platform@example.com"]' }}
+          TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
+        run: |
+          terraform plan \
+            -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
+            -var="environment=prod" \
+            -var="company_name=${{ vars.COMPANY_NAME || 'mycompany' }}" \
+            -out=tfplan-prod
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_DIR }}
