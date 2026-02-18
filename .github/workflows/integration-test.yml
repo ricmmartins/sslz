@@ -11,9 +11,18 @@ on:
         options:
           - nonprod
           - prod
+      deploy:
+        description: 'Actually deploy resources (not just plan/what-if)'
+        required: false
+        default: false
+        type: boolean
   schedule:
     # Run weekly on Monday at 06:00 UTC
     - cron: '0 6 * * 1'
+
+concurrency:
+  group: integration-test-${{ github.event.inputs.environment || 'nonprod' }}
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -28,7 +37,6 @@ env:
   TF_VAR_company_name: "lztest"
   TF_VAR_environment: "nonprod"
   TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
-  # Dynamically set in the terraform-plan job to the 1st of the current month
   TF_VAR_deploy_networking: "true"
   TF_VAR_security_contact_email: "landing-zone-test@contoso.com"
 
@@ -102,11 +110,122 @@ jobs:
           retention-days: 1
 
   # ============================================================================
+  # Deploy (opt-in via workflow_dispatch)
+  # ============================================================================
+  deploy:
+    name: Deploy Resources
+    runs-on: ubuntu-latest
+    needs: [bicep-whatif, terraform-plan]
+    if: github.event.inputs.deploy == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Apply
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve -input=false
+
+  # ============================================================================
+  # Validate deployed resources
+  # ============================================================================
+  validate-deployment:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event.inputs.deploy == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate resource groups exist
+        run: |
+          echo "=== Checking resource groups ==="
+          az group show --name "rg-lztest-nonprod-monitoring" --query "name" -o tsv
+          echo "  ✓ Monitoring RG exists"
+          az group show --name "rg-lztest-nonprod-networking" --query "name" -o tsv
+          echo "  ✓ Networking RG exists"
+
+      - name: Validate Log Analytics workspace
+        run: |
+          echo "=== Checking Log Analytics ==="
+          az monitor log-analytics workspace show \
+            --resource-group "rg-lztest-nonprod-monitoring" \
+            --workspace-name "law-lztest-nonprod" \
+            --query "provisioningState" -o tsv
+          echo "  ✓ Log Analytics workspace exists"
+
+      - name: Validate policy assignments
+        run: |
+          echo "=== Checking policy assignments ==="
+          az policy assignment show --name "mcsb-audit" --query "name" -o tsv
+          echo "  ✓ MCSB policy assigned"
+          az policy assignment show --name "allowed-locations" --query "name" -o tsv
+          echo "  ✓ Allowed locations policy assigned"
+
+  # ============================================================================
+  # Teardown
+  # ============================================================================
+  teardown:
+    name: Teardown Resources
+    runs-on: ubuntu-latest
+    needs: validate-deployment
+    if: always() && github.event.inputs.deploy == 'true' && needs.deploy.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Destroy
+        working-directory: infra/terraform
+        run: terraform destroy -auto-approve -input=false
+
+  # ============================================================================
   # Summary
   # ============================================================================
   summary:
     name: Test Summary
-    needs: [bicep-whatif, terraform-plan]
+    needs: [bicep-whatif, terraform-plan, deploy, validate-deployment, teardown]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -118,3 +237,6 @@ jobs:
           echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
           echo "| Bicep What-If | ${{ needs.bicep-whatif.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Terraform Plan | ${{ needs.terraform-plan.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Deploy | ${{ needs.deploy.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Validate | ${{ needs.validate-deployment.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Teardown | ${{ needs.teardown.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"

@@ -1,6 +1,16 @@
 # Azure Developer CLI (azd) configuration
 # Deploy: azd up
 # Docs: https://learn.microsoft.com/azure/developer/azure-developer-cli/
+#
+# This project uses Bicep by default. For Terraform, see infra/terraform/ and
+# the deploy-terraform.yml workflow. To switch azd to Terraform:
+#   azd config set infra.provider terraform
+#   azd config set infra.path infra/terraform
+#
+# Environment setup:
+#   azd env new <name>
+#   azd env set AZURE_LOCATION eastus2
+#   azd env set AZURE_SUBSCRIPTION_ID <your-subscription-id>
 name: azure-landing-zone-startups
 metadata:
   template: azure-landing-zone-startups

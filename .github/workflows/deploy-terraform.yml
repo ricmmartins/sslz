@@ -57,6 +57,7 @@ jobs:
         run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
 
       - name: Terraform Plan
+        id: plan
         working-directory: ${{ env.TF_DIR }}
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -69,7 +70,24 @@ jobs:
             -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
             -var="environment=${{ matrix.environment }}" \
             -var="company_name=${{ vars.COMPANY_NAME || 'mycompany' }}" \
-            -out=tfplan-${{ matrix.environment }}
+            -no-color \
+            -out=tfplan-${{ matrix.environment }} 2>&1 | tee plan-output.txt
+
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('${{ env.TF_DIR }}/plan-output.txt', 'utf8');
+            const truncated = plan.length > 60000 ? plan.substring(0, 60000) + '\n... (truncated)' : plan;
+            const body = `### Terraform Plan — \`${{ matrix.environment }}\`\n\n<details>\n<summary>Show Plan Output</summary>\n\n\`\`\`\n${truncated}\n\`\`\`\n\n</details>`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4

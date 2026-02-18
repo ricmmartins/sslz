@@ -14,6 +14,9 @@ param workspaceName string
 @maxValue(730)
 param retentionInDays int = 90
 
+@description('Daily ingestion quota in GB (-1 for unlimited)')
+param dailyQuotaGb int = 5
+
 @description('Resource tags')
 param tags object
 
@@ -30,7 +33,7 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
       enableLogAccessUsingOnlyResourcePermissions: true
     }
     workspaceCapping: {
-      dailyQuotaGb: 5 // Prevent runaway costs — adjust based on your ingestion
+      dailyQuotaGb: dailyQuotaGb
     }
   }
 }

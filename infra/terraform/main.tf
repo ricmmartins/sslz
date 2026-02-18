@@ -89,18 +89,18 @@ module "log_analytics" {
 }
 
 module "networking" {
-  count               = var.deploy_networking ? 1 : 0
-  source              = "./modules/networking"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.networking[0].name
-  vnet_name           = "vnet-${local.prefix}"
-  vnet_address_prefix = var.environment == "prod" ? "10.0.0.0/16" : "10.1.0.0/16"
-  tags                = local.tags
+  count                 = var.deploy_networking ? 1 : 0
+  source                = "./modules/networking"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.networking[0].name
+  vnet_name             = "vnet-${local.prefix}"
+  vnet_address_prefix   = local.vnet_address_prefix
+  app_subnet_delegation = var.app_subnet_delegation
+  tags                  = local.tags
 }
 
 module "security" {
   source                         = "./modules/security"
-  log_analytics_workspace_id     = module.log_analytics.workspace_id
   security_contact_email         = var.security_contact_email
   enable_defender_for_servers    = var.enable_defender_for_servers
   enable_defender_for_containers = var.enable_defender_for_containers
@@ -117,6 +117,29 @@ module "policy" {
 }
 
 # ==============================================================================
+# Activity Log — Diagnostic Setting (immediate, not waiting for DINE policy)
+# ==============================================================================
+
+resource "azurerm_monitor_diagnostic_setting" "activity_log" {
+  name                       = "diag-activity-log-to-law"
+  target_resource_id         = "/subscriptions/${var.subscription_id}"
+  log_analytics_workspace_id = module.log_analytics.workspace_id
+
+  enabled_log {
+    category = "Administrative"
+  }
+  enabled_log {
+    category = "Security"
+  }
+  enabled_log {
+    category = "Alert"
+  }
+  enabled_log {
+    category = "Policy"
+  }
+}
+
+# ==============================================================================
 # Budget
 # ==============================================================================
 
@@ -127,7 +150,7 @@ resource "azurerm_consumption_budget_subscription" "monthly" {
   time_grain      = "Monthly"
 
   time_period {
-    start_date = var.budget_start_date
+    start_date = local.budget_start_date
   }
 
   notification {

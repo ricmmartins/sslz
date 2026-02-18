@@ -160,3 +160,51 @@ Because Deny mode on security policies will block legitimate deployments and cre
 - CIS Benchmark — Overlaps heavily with MCSB, adds noise
 - NIST / ISO / PCI initiatives — Add when compliance requires it
 - Custom policies — Write them when built-in ones don't cover a specific need
+
+## Rollback and Recovery
+
+### Terraform State Rollback
+
+If a `terraform apply` goes wrong:
+
+1. **Immediate:** If still running, Ctrl+C will stop and leave state consistent with what was applied so far
+2. **Revert code, re-apply:** The safest approach — revert your `.tf` files to the previous commit and run `terraform apply` again. Terraform will converge to the desired state.
+3. **State surgery (last resort):** Use `terraform state rm` to remove a problematic resource from state, then re-import or recreate it. Never edit the state file directly.
+
+```bash
+# Revert to previous commit and re-apply
+git checkout HEAD~1 -- infra/terraform/
+terraform -chdir=infra/terraform plan    # Review what will change
+terraform -chdir=infra/terraform apply   # Apply the rollback
+```
+
+### Bicep Deployment Reversal
+
+Bicep deployments are incremental by default — they add/update but don't delete. To roll back:
+
+1. **Revert code, re-deploy:** Check out the previous version and deploy again
+2. **Manual cleanup:** If new resources were created, delete them via CLI or portal
+
+```bash
+# Revert to previous deployment
+git checkout HEAD~1 -- infra/bicep/
+az deployment sub create \
+  --location eastus2 \
+  --template-file infra/bicep/main.bicep \
+  --parameters infra/bicep/parameters/prod.bicepparam
+```
+
+### Emergency Policy Override
+
+If a Deny policy is blocking a critical deployment:
+
+1. **Temporary exemption:** Create a policy exemption (preferred — auditable and time-limited)
+   ```bash
+   az policy exemption create \
+     --name "emergency-deploy-$(date +%Y%m%d)" \
+     --policy-assignment "/subscriptions/$SUB_ID/providers/Microsoft.Authorization/policyAssignments/allowed-locations" \
+     --exemption-category Waiver \
+     --description "Emergency deployment — expires in 24h"
+   ```
+2. **Switch to Audit:** Change the policy assignment's `enforce` mode from `true` to `false` — this converts Deny to Audit temporarily
+3. **Never delete the policy assignment** — you'll lose compliance history and audit trail

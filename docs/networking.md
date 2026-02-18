@@ -136,6 +136,12 @@ resource flowLog 'Microsoft.Network/networkWatchers/flowLogs@2023-11-01' = {
 }
 ```
 
+## Private Endpoint Warning
+
+> **Important:** Setting `publicNetworkAccess: 'Disabled'` on services like Azure SQL or Redis **requires** Private Endpoints or VNet integration to be configured. Without them, all connectivity (including from your application) will be blocked.
+>
+> If you're not deploying Private Endpoints yet, keep `publicNetworkAccess: 'Enabled'` and use service-level firewall rules to restrict access to known IPs. See `deploy_private_endpoints` in the SaaS example for an opt-in Private Endpoint setup.
+
 ## DNS
 
 ### Default (No Custom DNS)

@@ -41,13 +41,20 @@ jobs:
             exit 1
           fi
 
-      - name: Lint Bicep files
+      - name: Lint Bicep files (strict)
         run: |
           echo "=== Linting Bicep modules ==="
+          failed=0
           for file in $(find infra/bicep examples -name '*.bicep' -not -name '*.bicepparam'); do
             echo "Linting: $file"
-            az bicep lint --file "$file" 2>&1 || true
+            if ! az bicep lint --file "$file" 2>&1; then
+              failed=1
+            fi
           done
+          if [ $failed -eq 1 ]; then
+            echo "::error::One or more Bicep files have lint warnings or errors"
+            exit 1
+          fi
 
   validate-terraform:
     name: Validate Terraform
@@ -60,8 +67,27 @@ jobs:
         with:
           terraform_version: "~> 1.9"
 
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Init TFLint
+        run: tflint --init --config=.tflint.hcl
+
       - name: Terraform Format Check
         run: terraform fmt -check -recursive -diff
+
+      - name: TFLint — Landing Zone
+        working-directory: infra/terraform
+        run: tflint --config=../../.tflint.hcl
+
+      - name: TFLint — Examples
+        run: |
+          for dir in examples/*/terraform; do
+            if [ -d "$dir" ]; then
+              echo "=== Linting $dir ==="
+              tflint --config=.tflint.hcl --chdir="$dir"
+            fi
+          done
 
       - name: Terraform Init — Landing Zone
         working-directory: infra/terraform

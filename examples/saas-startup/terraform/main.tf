@@ -86,6 +86,24 @@ variable "sql_admin_password" {
   sensitive   = true
 }
 
+variable "deploy_private_endpoints" {
+  description = "Deploy Private Endpoints for SQL and Redis (requires VNet with data subnet)"
+  type        = bool
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  description = "Subnet resource ID for Private Endpoints (required when deploy_private_endpoints is true)"
+  type        = string
+  default     = ""
+}
+
+variable "vnet_id" {
+  description = "VNet resource ID for Private DNS Zone links (required when deploy_private_endpoints is true)"
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Tags applied to all resources"
   type        = map(string)
@@ -151,7 +169,7 @@ resource "azurerm_container_app" "api" {
   ingress {
     external_enabled = true
     target_port      = 80
-    transport        = "http"
+    transport        = "auto"
 
     traffic_weight {
       latest_revision = true
@@ -196,7 +214,7 @@ resource "azurerm_container_app" "web" {
   ingress {
     external_enabled = true
     target_port      = 80
-    transport        = "http"
+    transport        = "auto"
 
     traffic_weight {
       latest_revision = true
@@ -303,6 +321,82 @@ resource "azurerm_role_assignment" "api_kv_secrets" {
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_container_app.api.identity[0].principal_id
+}
+
+# ==============================================================================
+# Private Endpoints (opt-in)
+# ==============================================================================
+
+resource "azurerm_private_dns_zone" "sql" {
+  count               = var.deploy_private_endpoints ? 1 : 0
+  name                = "privatelink.database.windows.net"
+  resource_group_name = data.azurerm_resource_group.this.name
+  tags                = local.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "sql" {
+  count                 = var.deploy_private_endpoints ? 1 : 0
+  name                  = "link-sql"
+  resource_group_name   = data.azurerm_resource_group.this.name
+  private_dns_zone_name = azurerm_private_dns_zone.sql[0].name
+  virtual_network_id    = var.vnet_id
+}
+
+resource "azurerm_private_endpoint" "sql" {
+  count               = var.deploy_private_endpoints ? 1 : 0
+  name                = "pe-${azurerm_mssql_server.this.name}"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  subnet_id           = var.private_endpoint_subnet_id
+  tags                = local.tags
+
+  private_service_connection {
+    name                           = "plsc-sql"
+    private_connection_resource_id = azurerm_mssql_server.this.id
+    subresource_names              = ["sqlServer"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.sql[0].id]
+  }
+}
+
+resource "azurerm_private_dns_zone" "redis" {
+  count               = var.deploy_private_endpoints ? 1 : 0
+  name                = "privatelink.redis.cache.windows.net"
+  resource_group_name = data.azurerm_resource_group.this.name
+  tags                = local.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "redis" {
+  count                 = var.deploy_private_endpoints ? 1 : 0
+  name                  = "link-redis"
+  resource_group_name   = data.azurerm_resource_group.this.name
+  private_dns_zone_name = azurerm_private_dns_zone.redis[0].name
+  virtual_network_id    = var.vnet_id
+}
+
+resource "azurerm_private_endpoint" "redis" {
+  count               = var.deploy_private_endpoints ? 1 : 0
+  name                = "pe-${azurerm_redis_cache.this.name}"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  subnet_id           = var.private_endpoint_subnet_id
+  tags                = local.tags
+
+  private_service_connection {
+    name                           = "plsc-redis"
+    private_connection_resource_id = azurerm_redis_cache.this.id
+    subresource_names              = ["redisCache"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.redis[0].id]
+  }
 }
 
 # ==============================================================================

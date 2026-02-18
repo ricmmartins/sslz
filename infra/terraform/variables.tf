@@ -39,6 +39,18 @@ variable "deploy_networking" {
   default     = true
 }
 
+variable "vnet_address_prefix" {
+  description = "VNet address prefix (overrides default per-environment prefix)"
+  type        = string
+  default     = ""
+}
+
+variable "app_subnet_delegation" {
+  description = "Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)"
+  type        = string
+  default     = "Microsoft.Web/serverFarms"
+}
+
 variable "monthly_budget_amount" {
   description = "Monthly budget amount in USD"
   type        = number
@@ -51,10 +63,11 @@ variable "budget_alert_emails" {
 }
 
 variable "budget_start_date" {
-  description = "Budget start date in ISO 8601 format (e.g., 2026-03-01T00:00:00Z). Must be the first of a month."
+  description = "Budget start date in ISO 8601 format (e.g., 2026-03-01T00:00:00Z). Must be the first of a month. Defaults to the 1st of the current month."
   type        = string
+  default     = ""
   validation {
-    condition     = can(regex("^\\d{4}-\\d{2}-01T00:00:00Z$", var.budget_start_date))
+    condition     = var.budget_start_date == "" || can(regex("^\\d{4}-\\d{2}-01T00:00:00Z$", var.budget_start_date))
     error_message = "budget_start_date must be the first of a month in ISO 8601 format (e.g., 2026-03-01T00:00:00Z)."
   }
 }
@@ -102,6 +115,10 @@ variable "tags" {
 
 locals {
   prefix = var.prefix != "" ? var.prefix : "${var.company_name}-${var.environment}"
+
+  budget_start_date = var.budget_start_date != "" ? var.budget_start_date : formatdate("YYYY-MM-01'T'00:00:00Z", plantimestamp())
+
+  vnet_address_prefix = var.vnet_address_prefix != "" ? var.vnet_address_prefix : (var.environment == "prod" ? "10.0.0.0/16" : "10.1.0.0/16")
 
   default_tags = {
     environment = var.environment

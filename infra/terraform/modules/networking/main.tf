@@ -1,30 +1,3 @@
-variable "location" {
-  description = "Azure region"
-  type        = string
-}
-variable "resource_group_name" {
-  description = "Resource group name"
-  type        = string
-}
-variable "vnet_name" {
-  description = "Virtual network name"
-  type        = string
-}
-variable "vnet_address_prefix" {
-  description = "VNet address prefix (e.g., 10.0.0.0/16)"
-  type        = string
-}
-variable "app_subnet_delegation" {
-  description = "Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)"
-  type        = string
-  default     = "Microsoft.Web/serverFarms"
-}
-variable "tags" {
-  description = "Resource tags"
-  type        = map(string)
-  default     = {}
-}
-
 locals {
   # Extract base octets from the address prefix (e.g., "10.0" from "10.0.0.0/16")
   octets      = split(".", var.vnet_address_prefix)
@@ -235,14 +208,3 @@ resource "azurerm_subnet_network_security_group_association" "shared" {
   subnet_id                 = azurerm_subnet.shared.id
   network_security_group_id = azurerm_network_security_group.shared.id
 }
-
-# ==============================================================================
-# Outputs
-# ==============================================================================
-
-output "vnet_id" { value = azurerm_virtual_network.this.id }
-output "vnet_name" { value = azurerm_virtual_network.this.name }
-output "aks_subnet_id" { value = azurerm_subnet.aks.id }
-output "app_subnet_id" { value = azurerm_subnet.app.id }
-output "data_subnet_id" { value = azurerm_subnet.data.id }
-output "shared_subnet_id" { value = azurerm_subnet.shared.id }

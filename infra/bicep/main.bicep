@@ -134,6 +134,23 @@ module budgets 'modules/budgets.bicep' = {
 }
 
 // ============================================================================
+// Activity Log — Diagnostic Setting (immediate, not waiting for DINE policy)
+// ============================================================================
+
+resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-activity-log-to-law'
+  properties: {
+    workspaceId: logAnalytics.outputs.workspaceId
+    logs: [
+      { category: 'Administrative', enabled: true }
+      { category: 'Security', enabled: true }
+      { category: 'Alert', enabled: true }
+      { category: 'Policy', enabled: true }
+    ]
+  }
+}
+
+// ============================================================================
 // Governance — Azure Policies
 // ============================================================================
 

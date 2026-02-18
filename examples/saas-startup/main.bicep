@@ -26,6 +26,15 @@ param sqlAdminPassword string
 @allowed(['prod', 'nonprod'])
 param environment string = 'prod'
 
+@description('Deploy Private Endpoints for SQL and Redis (requires VNet with data subnet)')
+param deployPrivateEndpoints bool = false
+
+@description('Subnet resource ID for Private Endpoints (required when deployPrivateEndpoints is true)')
+param privateEndpointSubnetId string = ''
+
+@description('VNet resource ID for Private DNS Zone links (required when deployPrivateEndpoints is true)')
+param vnetId string = ''
+
 param tags object = {
   environment: environment
   team: 'engineering'
@@ -80,7 +89,7 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: {
         external: true
         targetPort: 80
-        transport: 'http'
+        transport: 'auto'
         corsPolicy: {
           allowedOrigins: ['https://${appName}-web.${cae.properties.defaultDomain}']
         }
@@ -130,7 +139,7 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: {
         external: true
         targetPort: 80
-        transport: 'http'
+        transport: 'auto'
       }
     }
     template: {
@@ -249,6 +258,108 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
     principalId: apiApp.identity.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+// ============================================================================
+// Private Endpoints (opt-in)
+// ============================================================================
+
+resource sqlPrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = if (deployPrivateEndpoints) {
+  name: 'privatelink.database.windows.net'
+  location: 'global'
+  tags: tags
+}
+
+resource sqlPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = if (deployPrivateEndpoints) {
+  parent: sqlPrivateDnsZone
+  name: 'link-sql'
+  location: 'global'
+  properties: {
+    virtualNetwork: { id: vnetId }
+    registrationEnabled: false
+  }
+}
+
+resource sqlPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = if (deployPrivateEndpoints) {
+  name: 'pe-${sqlServer.name}'
+  location: location
+  tags: tags
+  properties: {
+    subnet: { id: privateEndpointSubnetId }
+    privateLinkServiceConnections: [
+      {
+        name: 'plsc-sql'
+        properties: {
+          privateLinkServiceId: sqlServer.id
+          groupIds: ['sqlServer']
+        }
+      }
+    ]
+  }
+}
+
+resource sqlPeDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2024-05-01' = if (deployPrivateEndpoints) {
+  parent: sqlPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config-sql'
+        properties: {
+          privateDnsZoneId: sqlPrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource redisPrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = if (deployPrivateEndpoints) {
+  name: 'privatelink.redis.cache.windows.net'
+  location: 'global'
+  tags: tags
+}
+
+resource redisPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = if (deployPrivateEndpoints) {
+  parent: redisPrivateDnsZone
+  name: 'link-redis'
+  location: 'global'
+  properties: {
+    virtualNetwork: { id: vnetId }
+    registrationEnabled: false
+  }
+}
+
+resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = if (deployPrivateEndpoints) {
+  name: 'pe-${redis.name}'
+  location: location
+  tags: tags
+  properties: {
+    subnet: { id: privateEndpointSubnetId }
+    privateLinkServiceConnections: [
+      {
+        name: 'plsc-redis'
+        properties: {
+          privateLinkServiceId: redis.id
+          groupIds: ['redisCache']
+        }
+      }
+    ]
+  }
+}
+
+resource redisPeDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2024-05-01' = if (deployPrivateEndpoints) {
+  parent: redisPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config-redis'
+        properties: {
+          privateDnsZoneId: redisPrivateDnsZone.id
+        }
+      }
+    ]
   }
 }
 
