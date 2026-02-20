@@ -72,7 +72,7 @@ az account set --subscription <YOUR_PROD_SUBSCRIPTION_ID>
 ./scripts/validate-prerequisites.sh
 ```
 
-If the script reports errors, fix them before proceeding. See [Troubleshooting](docs/troubleshooting.md) for common issues.
+If the script reports errors, fix them before proceeding. See [Troubleshooting](/troubleshooting.md) for common issues.
 
 ### Step 2: Deploy the Landing Zone (20 min)
 
@@ -170,7 +170,7 @@ To destroy all landing zone resources:
 
 ### Step 4: Post-Deployment Setup (30 min)
 
-See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-setup.md) if you're configuring GitHub Actions.
+See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](/ci-cd-setup.md) if you're configuring GitHub Actions.
 
 ## Day-1 Checklist
 
@@ -187,7 +187,7 @@ See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-
 ### Post-Deployment (30 min)
 - [ ] Assign `sg-azure-admins` as Owner on the management group
 - [ ] Create Entra ID groups: `sg-azure-developers`, `sg-azure-readers`
-- [ ] Assign RBAC roles (see [Security docs](docs/security.md))
+- [ ] Assign RBAC roles (see [Security docs](/security.md))
 - [ ] Set up CI/CD with Workload Identity Federation
 - [ ] Test a sample deployment end-to-end
 
@@ -216,7 +216,7 @@ These are enterprise components you should add later when needed:
 | Advanced Conditional Access | 30+ Azure users or regulated customer data |
 | PIM (Privileged Identity Management) | You need just-in-time admin access (Series B+) |
 
-See [Graduation Guide](docs/graduation-guide.md) for detailed migration paths to full ESLZ.
+See [Graduation Guide](/graduation-guide.md) for detailed migration paths to full ESLZ.
 
 ## Examples
 
@@ -230,13 +230,13 @@ Pre-built configurations for common startup archetypes:
 
 ## Documentation
 
-- [Architecture Decisions](docs/architecture.md) — Why this layout, what we skipped, and when to revisit
-- [Networking Deep Dive](docs/networking.md) — VNet design, NSGs, when you need a hub
-- [Security Baseline](docs/security.md) — Defender, RBAC, logging, network security
-- [Cost Management](docs/cost-management.md) — Budgets, RI guidance, common mistakes
-- [CI/CD Setup](docs/ci-cd-setup.md) — Workload Identity Federation, GitHub Actions, secrets
-- [Troubleshooting](docs/troubleshooting.md) — Common deployment errors and fixes
-- [Graduation Guide](docs/graduation-guide.md) — When and how to migrate to full ESLZ
+- [Architecture Decisions](/architecture.md) — Why this layout, what we skipped, and when to revisit
+- [Networking Deep Dive](/networking.md) — VNet design, NSGs, when you need a hub
+- [Security Baseline](/security.md) — Defender, RBAC, logging, network security
+- [Cost Management](/cost-management.md) — Budgets, RI guidance, common mistakes
+- [CI/CD Setup](/ci-cd-setup.md) — Workload Identity Federation, GitHub Actions, secrets
+- [Troubleshooting](dos/troubleshooting.md) — Common deployment errors and fixes
+- [Graduation Guide](/graduation-guide.md) — When and how to migrate to full ESLZ
 
 ## Contributing
 
