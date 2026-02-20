@@ -1,0 +1,19 @@
+title: Azure Landing Zone for Startups
+description: Opinionated, deployable Azure Landing Zone for digital-native companies and startups.
+remote_theme: just-the-docs/just-the-docs
+
+# IMPORTANT for project pages:
+url: "https://ricmmartins.github.io"
+baseurl: "/azure-landing-zone-startups"
+
+# Nice defaults
+search_enabled: true
+color_scheme: dark
+
+# Optional. Shows an "Edit this page" link
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/ricmmartins/azure-landing-zone-startups"
+gh_edit_branch: "main"
+gh_edit_source: docs
+gh_edit_view_mode: "tree"
