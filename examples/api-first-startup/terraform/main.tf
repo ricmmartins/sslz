@@ -215,12 +215,15 @@ resource "azurerm_api_management" "this" {
 # ==============================================================================
 
 resource "azurerm_cosmosdb_account" "this" {
-  name                          = "cosmos-${var.app_name}-${var.environment}"
-  location                      = var.location
-  resource_group_name           = data.azurerm_resource_group.this.name
-  offer_type                    = "Standard"
-  kind                          = "GlobalDocumentDB"
-  minimal_tls_version           = "Tls12"
+  name                = "cosmos-${var.app_name}-${var.environment}"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  offer_type          = "Standard"
+  kind                = "GlobalDocumentDB"
+  minimal_tls_version = "Tls12"
+  # Public access is disabled for security. In production, deploy a Private
+  # Endpoint so App Service can reach Cosmos DB over the VNet. Without a PE,
+  # Cosmos DB is unreachable — add one or change to true with IP rules.
   public_network_access_enabled = false
   tags                          = local.tags
 
@@ -315,6 +318,34 @@ resource "azurerm_role_assignment" "app_kv_secrets" {
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_linux_web_app.this.identity[0].principal_id
+}
+
+# ==============================================================================
+# Diagnostic Settings — send audit logs to Log Analytics
+# ==============================================================================
+
+resource "azurerm_monitor_diagnostic_setting" "cosmos" {
+  name                       = "diag-cosmos"
+  target_resource_id         = azurerm_cosmosdb_account.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "DataPlaneRequests"
+  }
+
+  enabled_log {
+    category = "QueryRuntimeStatistics"
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "apim" {
+  name                       = "diag-apim"
+  target_resource_id         = azurerm_api_management.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "GatewayLogs"
+  }
 }
 
 # ==============================================================================

@@ -125,7 +125,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2023-12-01' = if (environment ==
 // API Management — Consumption tier
 // ============================================================================
 
-resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
+resource apim 'Microsoft.ApiManagement/service@2024-03-01' = {
   name: 'apim-${appName}-${environment}'
   location: location
   tags: tags
@@ -162,6 +162,9 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     capabilities: environment == 'nonprod' ? [
       { name: 'EnableServerless' }
     ] : []
+    // Public access is disabled for security. In production, deploy a Private
+    // Endpoint so App Service can reach Cosmos DB over the VNet. Without a PE,
+    // Cosmos DB is unreachable — add one or change to 'Enabled' with IP rules.
     publicNetworkAccess: 'Disabled'
     minimalTlsVersion: 'Tls12'
   }
@@ -258,6 +261,42 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6') // Key Vault Secrets User
     principalId: app.identity.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+// ============================================================================
+// Diagnostic Settings — send audit logs to Log Analytics
+// ============================================================================
+
+resource cosmosDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-cosmos'
+  scope: cosmos
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'DataPlaneRequests'
+        enabled: true
+      }
+      {
+        category: 'QueryRuntimeStatistics'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource apimDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-apim'
+  scope: apim
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'GatewayLogs'
+        enabled: true
+      }
+    ]
   }
 }
 

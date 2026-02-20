@@ -142,6 +142,8 @@ data "azurerm_resource_group" "this" {
 
 # ==============================================================================
 # Log Analytics
+# 30-day retention keeps costs low for startup workloads. Increase to 90 days
+# for compliance or if you need longer investigative windows.
 # ==============================================================================
 
 resource "azurerm_log_analytics_workspace" "this" {
@@ -336,6 +338,20 @@ resource "azurerm_role_assignment" "api_kv_secrets" {
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_container_app.api.identity[0].principal_id
+}
+
+# ==============================================================================
+# Diagnostic Settings — send audit logs to Log Analytics
+# ==============================================================================
+
+resource "azurerm_monitor_diagnostic_setting" "sql" {
+  name                       = "diag-sql"
+  target_resource_id         = azurerm_mssql_database.app.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "SQLSecurityAuditEvents"
+  }
 }
 
 # ==============================================================================

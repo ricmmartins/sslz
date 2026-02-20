@@ -44,6 +44,8 @@ param tags object = {
 
 // ============================================================================
 // Log Analytics (for Container Apps)
+// 30-day retention keeps costs low for startup workloads. Increase to 90 days
+// for compliance or if you need longer investigative windows.
 // ============================================================================
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -260,6 +262,24 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
     principalId: apiApp.identity.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+// ============================================================================
+// Diagnostic Settings — send audit logs to Log Analytics
+// ============================================================================
+
+resource sqlDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-sql'
+  scope: appDb
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'SQLSecurityAuditEvents'
+        enabled: true
+      }
+    ]
   }
 }
 

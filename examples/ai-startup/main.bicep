@@ -39,6 +39,8 @@ param tags object = {
 
 // ============================================================================
 // Log Analytics
+// 30-day retention keeps costs low for startup workloads. Increase to 90 days
+// for compliance or if you need longer investigative windows.
 // ============================================================================
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -190,6 +192,9 @@ resource openai 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = {
   kind: 'OpenAI'
   sku: { name: 'S0' }
   properties: {
+    // Public access is disabled for security. In production, deploy a Private
+    // Endpoint so AKS pods can reach OpenAI over the VNet. Without a PE,
+    // the service is unreachable — add one or change to 'Enabled' with IP rules.
     publicNetworkAccess: 'Disabled'
     customSubDomainName: 'oai-${appName}-${environment}'
   }
@@ -258,6 +263,37 @@ resource redis 'Microsoft.Cache/redis@2024-03-01' = {
     }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
+  }
+}
+
+// ============================================================================
+// Diagnostic Settings — send audit logs to Log Analytics
+// ============================================================================
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' existing = {
+  parent: storage
+  name: 'default'
+}
+
+resource storageBlobDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-blob'
+  scope: blobService
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'StorageRead'
+        enabled: true
+      }
+      {
+        category: 'StorageWrite'
+        enabled: true
+      }
+      {
+        category: 'StorageDelete'
+        enabled: true
+      }
+    ]
   }
 }
 

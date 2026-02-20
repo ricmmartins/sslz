@@ -139,15 +139,25 @@ elif [[ "$TOOL" == "bicep" ]]; then
   echo "Removing resource groups created by the landing zone..."
   echo ""
 
-  # List matching resource groups
-  RGS=$(az group list --query "[?contains(name, '-${ENV}-')].name" -o tsv)
+  # List resource groups matching the landing zone naming convention (rg-*-<env>-*)
+  # Uses startsWith('rg-') to avoid accidentally matching unrelated resource groups.
+  RGS=$(az group list --query "[?starts_with(name, 'rg-') && contains(name, '-${ENV}')].name" -o tsv)
 
   if [[ -z "$RGS" ]]; then
     echo "No matching resource groups found for environment: $ENV"
+    echo "Expected pattern: rg-*-${ENV}[-*]"
   else
     echo "Resource groups to delete:"
     echo "$RGS" | while read -r rg; do echo "  - $rg"; done
     echo ""
+
+    if [[ "$AUTO_APPROVE" != "true" ]]; then
+      read -r -p "Proceed with deletion? (y/N): " CONFIRM_RG
+      if [[ "$CONFIRM_RG" != "y" && "$CONFIRM_RG" != "Y" ]]; then
+        echo "Aborted."
+        exit 1
+      fi
+    fi
 
     echo "$RGS" | while read -r rg; do
       echo "Deleting $rg..."
@@ -156,7 +166,7 @@ elif [[ "$TOOL" == "bicep" ]]; then
 
     echo ""
     echo "Resource group deletions initiated (running in background)."
-    echo "Monitor progress: az group list --query \"[?contains(name, '-${ENV}-')].{name:name, state:properties.provisioningState}\" -o table"
+    echo "Monitor progress: az group list --query \"[?starts_with(name, 'rg-') && contains(name, '-${ENV}')].{name:name, state:properties.provisioningState}\" -o table"
   fi
 
   echo ""

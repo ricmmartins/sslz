@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "Installing jq..."
+sudo apt-get update -qq && sudo apt-get install -y -qq jq > /dev/null
+
 echo "Installing Bicep CLI..."
 az bicep install
 
@@ -9,9 +12,9 @@ curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/instal
 
 echo "Verifying tool versions..."
 echo "  Terraform: $(terraform version -json | jq -r '.terraform_version')"
-echo "  Bicep:     $(az bicep version --only-show-errors 2>&1 | grep -oP '[\d.]+')"
+echo "  Bicep:     $(az bicep version --only-show-errors 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
 echo "  Azure CLI: $(az version --query '"azure-cli"' -o tsv)"
 echo "  GitHub CLI: $(gh --version | head -1)"
-echo "  tflint:    $(tflint --version 2>&1 | grep -oP '[\d.]+' | head -1)"
+echo "  tflint:    $(tflint --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
 
 echo "Dev container ready!"

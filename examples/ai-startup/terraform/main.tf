@@ -127,6 +127,8 @@ data "azurerm_client_config" "current" {}
 
 # ==============================================================================
 # Log Analytics
+# 30-day retention keeps costs low for startup workloads. Increase to 90 days
+# for compliance or if you need longer investigative windows.
 # ==============================================================================
 
 resource "azurerm_log_analytics_workspace" "this" {
@@ -251,12 +253,15 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 # ==============================================================================
 
 resource "azurerm_cognitive_account" "openai" {
-  name                          = "oai-${var.app_name}-${var.environment}"
-  location                      = var.location
-  resource_group_name           = data.azurerm_resource_group.this.name
-  kind                          = "OpenAI"
-  sku_name                      = "S0"
-  custom_subdomain_name         = "oai-${var.app_name}-${var.environment}"
+  name                  = "oai-${var.app_name}-${var.environment}"
+  location              = var.location
+  resource_group_name   = data.azurerm_resource_group.this.name
+  kind                  = "OpenAI"
+  sku_name              = "S0"
+  custom_subdomain_name = "oai-${var.app_name}-${var.environment}"
+  # Public access is disabled for security. In production, deploy a Private
+  # Endpoint so AKS pods can reach OpenAI over the VNet. Without a PE,
+  # the service is unreachable — add one or change to true with IP rules.
   public_network_access_enabled = false
   tags                          = local.tags
 }
@@ -318,6 +323,28 @@ resource "azurerm_redis_cache" "this" {
   non_ssl_port_enabled = false
   minimum_tls_version  = "1.2"
   tags                 = local.tags
+}
+
+# ==============================================================================
+# Diagnostic Settings — send audit logs to Log Analytics
+# ==============================================================================
+
+resource "azurerm_monitor_diagnostic_setting" "storage_blob" {
+  name                       = "diag-blob"
+  target_resource_id         = "${azurerm_storage_account.this.id}/blobServices/default"
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "StorageRead"
+  }
+
+  enabled_log {
+    category = "StorageWrite"
+  }
+
+  enabled_log {
+    category = "StorageDelete"
+  }
 }
 
 # ==============================================================================
