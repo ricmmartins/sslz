@@ -1,19 +1,26 @@
 title: Azure Landing Zone for Startups
-description: Opinionated, deployable Azure Landing Zone for digital-native companies and startups.
+description: Opinionated, deployable Azure Landing Zone for digital-native companies and startups. Bicep + Terraform.
+theme: null
 remote_theme: just-the-docs/just-the-docs
 
-# IMPORTANT for project pages:
-url: "https://ricmmartins.github.io"
-baseurl: "/azure-landing-zone-startups"
+plugins:
+  - jekyll-remote-theme
 
-# Nice defaults
+color_scheme: light
 search_enabled: true
-color_scheme: dark
 
-# Optional. Shows an "Edit this page" link
-gh_edit_link: true
-gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/ricmmartins/azure-landing-zone-startups"
-gh_edit_branch: "main"
-gh_edit_source: docs
-gh_edit_view_mode: "tree"
+# Optional, but nice for project pages
+aux_links:
+  "GitHub Repo":
+    - "https://github.com/ricmmartins/azure-landing-zone-startups"
+
+# Make relative links behave well in project pages
+# If you later map a custom domain, you can remove baseurl.
+baseurl: "/azure-landing-zone-startups"
+url: "https://ricmmartins.github.io"
+
+# Just the Docs settings
+heading_anchors: true
+
+# If you want nicer nav behavior
+nav_sort: case_sensitive
