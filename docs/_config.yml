@@ -16,8 +16,8 @@ aux_links:
 
 # Make relative links behave well in project pages
 # If you later map a custom domain, you can remove baseurl.
-baseurl: "/azure-landing-zone-startups"
-url: "https://ricmmartins.github.io"
+baseurl: ""
+url: "https://azurelanding.zone"
 
 # Just the Docs settings
 heading_anchors: true
