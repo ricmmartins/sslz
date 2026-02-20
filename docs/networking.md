@@ -1,3 +1,8 @@
+---
+title: Networking Deep Dive
+nav_order: 3
+---
+
 # Networking Deep Dive
 
 > See also: [Architecture Decisions](architecture.md#networking) for details on why this layout was chosen.
