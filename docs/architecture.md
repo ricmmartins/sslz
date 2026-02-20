@@ -1,3 +1,8 @@
+---
+title: Architecture Decisions
+nav_order: 2
+---
+
 # Architecture Decisions
 
 ## Why This Layout
