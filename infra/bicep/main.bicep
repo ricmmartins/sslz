@@ -138,7 +138,7 @@ module budgets 'modules/budgets.bicep' = {
 // Activity Log — Diagnostic Setting (immediate, not waiting for DINE policy)
 // ============================================================================
 
-resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2024-10-01-preview' = {
+resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'diag-activity-log-to-law'
   properties: {
     workspaceId: logAnalytics.outputs.workspaceId

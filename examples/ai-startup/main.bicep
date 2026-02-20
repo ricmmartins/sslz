@@ -6,7 +6,9 @@
 @description('Azure region')
 param location string = resourceGroup().location
 
-@description('Application name prefix')
+@description('Application name prefix (lowercase alphanumeric, max 12 chars to fit resource naming limits)')
+@minLength(2)
+@maxLength(12)
 param appName string
 
 @description('Environment: prod or nonprod')

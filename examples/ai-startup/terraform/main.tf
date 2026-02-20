@@ -52,8 +52,12 @@ variable "location" {
 }
 
 variable "app_name" {
-  description = "Application name prefix"
+  description = "Application name prefix (lowercase alphanumeric, max 12 chars to fit resource naming limits)"
   type        = string
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9]{1,11}$", var.app_name))
+    error_message = "app_name must be 2-12 lowercase alphanumeric characters, starting with a letter."
+  }
 }
 
 variable "environment" {
