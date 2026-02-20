@@ -306,10 +306,21 @@ resource apimDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
 // Outputs
 // ============================================================================
 
+@description('HTTPS URL of the App Service API')
 output appUrl string = 'https://${app.properties.defaultHostName}'
+
+@description('API Management gateway URL for external consumers')
 output apimGatewayUrl string = apim.properties.gatewayUrl
+
+@description('Cosmos DB account endpoint URL')
 output cosmosEndpoint string = cosmos.properties.documentEndpoint
+
 // Note: App Insights connection string is intentionally omitted from outputs
 // because Bicep does not support secure outputs. Retrieve it from the Azure
 // portal or via: az monitor app-insights component show --app <name> --query connectionString
+
+@description('Redis cache hostname for response caching')
 output redisHostname string = redis.properties.hostName
+
+@description('Key Vault URI for secret access')
+output keyVaultUri string = kv.properties.vaultUri

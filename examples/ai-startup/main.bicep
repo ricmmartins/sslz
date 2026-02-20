@@ -325,9 +325,23 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
 // Outputs
 // ============================================================================
 
+@description('AKS cluster name (use with az aks get-credentials)')
 output aksClusterName string = aks.name
+
+@description('AKS cluster FQDN for API server access')
 output aksClusterFqdn string = aks.properties.fqdn
+
+@description('Container registry login server (use with docker push)')
 output acrLoginServer string = acr.properties.loginServer
+
+@description('Azure OpenAI service endpoint URL')
 output openaiEndpoint string = openai.properties.endpoint
+
+@description('Storage account name for model artifacts and datasets')
 output storageAccountName string = storage.name
+
+@description('Redis cache hostname for inference caching')
 output redisHostname string = redis.properties.hostName
+
+@description('Key Vault URI for secret access')
+output keyVaultUri string = kv.properties.vaultUri

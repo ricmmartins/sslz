@@ -17,7 +17,7 @@ param apiImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:la
 @description('Container image for the web frontend')
 param webImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
-@description('SQL administrator login name (avoid common names like admin or sa)')
+@description('SQL administrator login name. Must NOT be a commonly guessed name (admin, administrator, sa, root). Azure will reject these at deployment time.')
 @minLength(2)
 param sqlAdminLogin string
 
@@ -391,7 +391,17 @@ resource redisPeDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroup
 // Outputs
 // ============================================================================
 
+@description('HTTPS URL of the API container app')
 output apiUrl string = 'https://${apiApp.properties.configuration.ingress.fqdn}'
+
+@description('HTTPS URL of the web frontend container app')
 output webUrl string = 'https://${webApp.properties.configuration.ingress.fqdn}'
+
+@description('Fully qualified domain name of the SQL Server')
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
+
+@description('Redis cache hostname')
 output redisHostname string = redis.properties.hostName
+
+@description('Key Vault URI for secret access')
+output keyVaultUri string = kv.properties.vaultUri
