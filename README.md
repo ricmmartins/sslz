@@ -53,10 +53,10 @@ You need:
 - **Two Azure subscriptions** — One for prod, one for non-prod. [Create a subscription](https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription)
 - **Permissions** — Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups)
 
-Run the pre-flight check to verify everything:
+Fork this repo then run the pre-flight check to verify everything:
 
 ```bash
-git clone https://github.com/<your-org>/azure-landing-zone-startups.git
+git clone https://github.com/<your-username>/azure-landing-zone-startups.git
 cd azure-landing-zone-startups
 
 # Login to Azure
