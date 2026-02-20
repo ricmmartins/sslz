@@ -1,4 +1,4 @@
-# Azure Landing Zone for Startups
+# Startup-Scale Landing Zone
 
 A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's Enterprise Scale Landing Zone (ESLZ), minus the enterprise complexity.
 
