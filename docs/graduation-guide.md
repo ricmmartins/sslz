@@ -1,8 +1,3 @@
----
-title: Graduation Guide
-nav_order: 7
----
-
 # Graduation Guide: When and How to Migrate to Full ESLZ
 
 ## Signals It's Time
