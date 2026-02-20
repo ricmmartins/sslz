@@ -1,6 +1,6 @@
 ---
-title: Graduation Guide: When and How to Migrate to Full ESLZ
-nav_order: 7
+title: Architecture Decisions
+nav_order: 2
 ---
 
 # Graduation Guide: When and How to Migrate to Full ESLZ
