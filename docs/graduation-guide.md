@@ -146,6 +146,13 @@ Be aware of the additional monthly costs:
 
 This is why we don't start with full ESLZ. At $1,500-3,000/month just for platform overhead, it needs to be justified by team size, compliance requirements, or operational needs.
 
+## See Also
+
+- [Architecture Decisions — Multi-Region and DR](architecture.md#multi-region-and-disaster-recovery) — When and how to expand to multiple regions
+- [Networking Deep Dive](networking.md) — VNet design, hub-spoke, Private Endpoints
+- [Security Baseline](security.md) — Defender, RBAC, identity hardening
+- [Cost Management](cost-management.md) — RI guidance, Savings Plans, cost mistakes
+
 ## Resources
 
 - [Azure Landing Zones documentation](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/)

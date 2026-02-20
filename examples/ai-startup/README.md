@@ -73,6 +73,21 @@ Options ranked by complexity:
 - An existing resource group (created by the landing zone)
 - An SSH public key for AKS node access
 
+### Bicep
+
+```bash
+cd examples/ai-startup
+
+# Edit the parameter file with your values
+cp main.bicepparam main.local.bicepparam
+# Update appName, sshPublicKey, etc.
+
+az deployment group create \
+  --resource-group rg-mycompany-prod-app \
+  --template-file main.bicep \
+  --parameters main.local.bicepparam
+```
+
 ### Terraform
 
 ```bash

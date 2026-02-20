@@ -1,6 +1,9 @@
 # PREREQUISITE: Configure a remote backend in infra/terraform/main.tf before
 # using this workflow. Without a remote backend, Terraform state is lost between
 # runs and apply will attempt to recreate all resources.
+#
+# OIDC tokens from azure/login@v2 are valid for ~1 hour. Each job performs its
+# own fresh login, so token expiry is not a concern for typical deployments.
 name: Deploy Landing Zone (Terraform)
 
 on:

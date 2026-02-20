@@ -3,4 +3,5 @@ resource_group_name = "rg-myapp-prod-app"
 location            = "eastus2"
 app_name            = "myapp"
 environment         = "prod"
+sql_admin_login     = "appadmin"  # Avoid common names like admin, sa, root
 sql_admin_password  = "CHANGE-ME-use-keyvault-in-production"

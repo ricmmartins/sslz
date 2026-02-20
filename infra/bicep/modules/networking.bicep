@@ -123,7 +123,7 @@ resource nsgData 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
           sourceAddressPrefix: subnets.aks.addressPrefix
           sourcePortRange: '*'
           destinationAddressPrefix: '*'
-          destinationPortRanges: ['1433', '5432', '6380', '443']
+          destinationPortRanges: ['1433', '5432', '6380', '443'] // SQL Server, PostgreSQL, Redis SSL, HTTPS
         }
       }
       {
@@ -136,7 +136,7 @@ resource nsgData 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
           sourceAddressPrefix: subnets.app.addressPrefix
           sourcePortRange: '*'
           destinationAddressPrefix: '*'
-          destinationPortRanges: ['1433', '5432', '6380', '443']
+          destinationPortRanges: ['1433', '5432', '6380', '443'] // SQL Server, PostgreSQL, Redis SSL, HTTPS
         }
       }
       {

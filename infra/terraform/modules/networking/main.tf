@@ -92,7 +92,7 @@ resource "azurerm_network_security_group" "data" {
     source_address_prefix      = local.subnets.aks.address_prefix
     source_port_range          = "*"
     destination_address_prefix = "*"
-    destination_port_ranges    = ["1433", "5432", "6380", "443"]
+    destination_port_ranges    = ["1433", "5432", "6380", "443"] # SQL Server, PostgreSQL, Redis SSL, HTTPS
   }
 
   security_rule {
@@ -104,7 +104,7 @@ resource "azurerm_network_security_group" "data" {
     source_address_prefix      = local.subnets.app.address_prefix
     source_port_range          = "*"
     destination_address_prefix = "*"
-    destination_port_ranges    = ["1433", "5432", "6380", "443"]
+    destination_port_ranges    = ["1433", "5432", "6380", "443"] # SQL Server, PostgreSQL, Redis SSL, HTTPS
   }
 
   security_rule {

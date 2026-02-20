@@ -34,6 +34,10 @@ provider "azurerm" {
 variable "subscription_id" {
   description = "Azure subscription ID"
   type        = string
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.subscription_id))
+    error_message = "subscription_id must be a valid UUID."
+  }
 }
 
 variable "resource_group_name" {
@@ -75,9 +79,12 @@ variable "web_image" {
 }
 
 variable "sql_admin_login" {
-  description = "SQL administrator login name"
+  description = "SQL administrator login name (avoid common names like 'admin' or 'sa')"
   type        = string
-  default     = "sqladmin"
+  validation {
+    condition     = !contains(["admin", "administrator", "sa", "root"], lower(var.sql_admin_login))
+    error_message = "sql_admin_login must not be a commonly guessed name (admin, administrator, sa, root)."
+  }
 }
 
 variable "sql_admin_password" {
@@ -292,7 +299,7 @@ resource "azurerm_redis_cache" "this" {
   name                          = "redis-${var.app_name}-${var.environment}"
   location                      = var.location
   resource_group_name           = data.azurerm_resource_group.this.name
-  capacity                      = 0
+  capacity                      = var.environment == "prod" ? 1 : 0
   family                        = "C"
   sku_name                      = var.environment == "prod" ? "Standard" : "Basic"
   non_ssl_port_enabled          = false
@@ -412,21 +419,26 @@ resource "azurerm_private_endpoint" "redis" {
 # ==============================================================================
 
 output "api_url" {
-  value = "https://${azurerm_container_app.api.ingress[0].fqdn}"
+  description = "HTTPS URL of the API container app"
+  value       = "https://${azurerm_container_app.api.ingress[0].fqdn}"
 }
 
 output "web_url" {
-  value = "https://${azurerm_container_app.web.ingress[0].fqdn}"
+  description = "HTTPS URL of the web frontend container app"
+  value       = "https://${azurerm_container_app.web.ingress[0].fqdn}"
 }
 
 output "sql_server_fqdn" {
-  value = azurerm_mssql_server.this.fully_qualified_domain_name
+  description = "Fully qualified domain name of the SQL Server"
+  value       = azurerm_mssql_server.this.fully_qualified_domain_name
 }
 
 output "redis_hostname" {
-  value = azurerm_redis_cache.this.hostname
+  description = "Redis cache hostname"
+  value       = azurerm_redis_cache.this.hostname
 }
 
 output "key_vault_uri" {
-  value = azurerm_key_vault.this.vault_uri
+  description = "Key Vault URI for secret access"
+  value       = azurerm_key_vault.this.vault_uri
 }

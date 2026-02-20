@@ -1,3 +1,7 @@
+# OIDC tokens from azure/login@v2 are valid for ~1 hour. Each job performs its
+# own fresh login, so token expiry is not a concern for typical deployments.
+# If a single deployment exceeds 1 hour, split it into smaller deployments or
+# add a second azure/login step before the long-running command.
 name: Deploy Landing Zone (Bicep)
 
 on:

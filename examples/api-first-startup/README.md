@@ -92,6 +92,21 @@ Application Insights gives you:
 - An existing resource group (created by the landing zone)
 - APIM publisher email and name for API Management configuration
 
+### Bicep
+
+```bash
+cd examples/api-first-startup
+
+# Edit the parameter file with your values
+cp main.bicepparam main.local.bicepparam
+# Update appName, apimPublisherEmail, apimPublisherName, etc.
+
+az deployment group create \
+  --resource-group rg-mycompany-prod-app \
+  --template-file main.bicep \
+  --parameters main.local.bicepparam
+```
+
 ### Terraform
 
 ```bash

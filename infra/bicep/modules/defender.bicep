@@ -97,13 +97,16 @@ resource securityContact 'Microsoft.Security/securityContacts@2023-12-01-preview
   name: 'default'
   properties: {
     emails: securityContactEmail
+    isEnabled: true
     notificationsByRole: {
       state: 'On'
       roles: ['Owner', 'Contributor']
     }
-    alertNotifications: {
-      state: 'On'
-      minimalSeverity: 'Medium'
-    }
+    notificationsSources: [
+      {
+        sourceType: 'Alert'
+        minimalSeverity: 'Medium'
+      }
+    ]
   }
 }

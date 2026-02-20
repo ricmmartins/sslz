@@ -34,6 +34,10 @@ provider "azurerm" {
 variable "subscription_id" {
   description = "Azure subscription ID"
   type        = string
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.subscription_id))
+    error_message = "subscription_id must be a valid UUID."
+  }
 }
 
 variable "resource_group_name" {
@@ -269,18 +273,17 @@ resource "azurerm_cosmosdb_sql_role_assignment" "app_cosmos" {
 
 # ==============================================================================
 # Redis — response caching
-# Basic C0 for both environments: sufficient for API response caching,
-# no SLA needed since the app works without cache (just slower).
-# Upgrade to Standard for prod if you need replication or SLA guarantees.
+# Standard C1 for prod (SLA, replication), Basic C0 for nonprod.
+# The app works without cache (just slower), so this is optional.
 # ==============================================================================
 
 resource "azurerm_redis_cache" "this" {
   name                 = "redis-${var.app_name}-${var.environment}"
   location             = var.location
   resource_group_name  = data.azurerm_resource_group.this.name
-  capacity             = 0
+  capacity             = var.environment == "prod" ? 1 : 0
   family               = "C"
-  sku_name             = "Basic"
+  sku_name             = var.environment == "prod" ? "Standard" : "Basic"
   non_ssl_port_enabled = false
   minimum_tls_version  = "1.2"
   tags                 = local.tags
@@ -319,26 +322,32 @@ resource "azurerm_role_assignment" "app_kv_secrets" {
 # ==============================================================================
 
 output "app_url" {
-  value = "https://${azurerm_linux_web_app.this.default_hostname}"
+  description = "HTTPS URL of the App Service API"
+  value       = "https://${azurerm_linux_web_app.this.default_hostname}"
 }
 
 output "apim_gateway_url" {
-  value = azurerm_api_management.this.gateway_url
+  description = "API Management gateway URL for external consumers"
+  value       = azurerm_api_management.this.gateway_url
 }
 
 output "cosmos_endpoint" {
-  value = azurerm_cosmosdb_account.this.endpoint
+  description = "Cosmos DB account endpoint URL"
+  value       = azurerm_cosmosdb_account.this.endpoint
 }
 
 output "app_insights_connection_string" {
-  value     = azurerm_application_insights.this.connection_string
-  sensitive = true
+  description = "Application Insights connection string (sensitive)"
+  value       = azurerm_application_insights.this.connection_string
+  sensitive   = true
 }
 
 output "redis_hostname" {
-  value = azurerm_redis_cache.this.hostname
+  description = "Redis cache hostname for response caching"
+  value       = azurerm_redis_cache.this.hostname
 }
 
 output "key_vault_uri" {
-  value = azurerm_key_vault.this.vault_uri
+  description = "Key Vault URI for secret access"
+  value       = azurerm_key_vault.this.vault_uri
 }

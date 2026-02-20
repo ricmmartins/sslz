@@ -15,8 +15,9 @@ param apiImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:la
 @description('Container image for the web frontend')
 param webImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
-@description('SQL administrator login name')
-param sqlAdminLogin string = 'sqladmin'
+@description('SQL administrator login name (avoid common names like admin or sa)')
+@minLength(2)
+param sqlAdminLogin string
 
 @description('SQL admin password')
 @secure()
@@ -221,7 +222,7 @@ resource redis 'Microsoft.Cache/redis@2024-03-01' = {
     sku: {
       name: environment == 'prod' ? 'Standard' : 'Basic'
       family: 'C'
-      capacity: 0
+      capacity: environment == 'prod' ? 1 : 0
     }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'

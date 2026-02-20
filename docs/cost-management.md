@@ -137,6 +137,51 @@ If you want to cap the price (e.g., only run when the Spot price is below $0.05/
 - Benefits: No Windows OS license charges on VMs, discounted rates on several services
 - Requires Visual Studio subscribers (most startups with MSDN/MPN have these)
 
+## Automated Cost Reporting
+
+Budget alerts catch spikes, but you also need regular visibility into where money goes. Azure Cost Management provides built-in scheduled exports — no extra tooling required.
+
+### Set Up Cost Exports
+
+In the Azure Portal: **Cost Management** → **Exports** → **Add**
+
+| Setting | Recommended Value |
+|---|---|
+| Export type | Actual cost (amortized) |
+| Frequency | Weekly (every Monday) |
+| Storage account | A dedicated `stcostexports<company>` in the prod subscription |
+| Container | `cost-exports` |
+| Format | CSV |
+
+Or via CLI:
+
+```bash
+# Create a weekly cost export for the subscription
+az costmanagement export create \
+  --name "weekly-cost-export" \
+  --scope "subscriptions/<SUBSCRIPTION_ID>" \
+  --type "ActualCost" \
+  --timeframe "MonthToDate" \
+  --storage-account-id "/subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.Storage/storageAccounts/<SA>" \
+  --storage-container "cost-exports" \
+  --schedule-recurrence "Weekly" \
+  --schedule-status "Active" \
+  --recurrence-period-from "$(date -u +%Y-%m-%dT00:00:00Z)" \
+  --recurrence-period-to "2030-01-01T00:00:00Z"
+```
+
+### What to Do With the Data
+
+- **Small team (< 10 engineers):** Weekly portal review is enough. Set up exports as a backup audit trail.
+- **Growing team (10-50):** Import exports into Power BI with the [Cost Management connector](https://learn.microsoft.com/en-us/power-bi/connect-data/desktop-connect-azure-cost-management) for team-level dashboards.
+- **Enterprise path:** Feed exports into a FinOps tool (e.g., Azure FinOps toolkit, or third-party like Infracost).
+
+### Cost Anomaly Alerts
+
+Azure Cost Management also supports **anomaly detection** (preview). Enable it to get automatic alerts when daily spend deviates significantly from the baseline — catches issues that fixed-threshold budget alerts miss.
+
+**Cost Management** → **Cost alerts** → **Anomaly alerts** → Enable for each subscription.
+
 ## Cost Monitoring Routine
 
 ### Weekly (5 minutes)

@@ -209,9 +209,8 @@ resource cosmosRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssi
 
 // ============================================================================
 // Redis — response caching
-// Basic C0 for both environments: sufficient for API response caching,
-// no SLA needed since the app works without cache (just slower).
-// Upgrade to Standard for prod if you need replication or SLA guarantees.
+// Standard C1 for prod (SLA, replication), Basic C0 for nonprod.
+// The app works without cache (just slower), so this is optional.
 // ============================================================================
 
 resource redis 'Microsoft.Cache/redis@2024-03-01' = {
@@ -220,9 +219,9 @@ resource redis 'Microsoft.Cache/redis@2024-03-01' = {
   tags: tags
   properties: {
     sku: {
-      name: 'Basic'
+      name: environment == 'prod' ? 'Standard' : 'Basic'
       family: 'C'
-      capacity: 0
+      capacity: environment == 'prod' ? 1 : 0
     }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
