@@ -33,6 +33,10 @@ param kubernetesVersion string = '1.30'
 @description('SSH public key for AKS nodes')
 param sshPublicKey string
 
+@description('Linux admin username for AKS nodes')
+param aksAdminUsername string = 'azureuser'
+
+@description('Resource tags applied to all deployed resources')
 param tags object = {
   environment: environment
   team: 'ml-engineering'
@@ -96,7 +100,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
       }
     }
     linuxProfile: {
-      adminUsername: 'azureuser'
+      adminUsername: aksAdminUsername
       ssh: {
         publicKeys: [
           {

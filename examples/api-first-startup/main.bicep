@@ -24,6 +24,7 @@ param apimPublisherEmail string
 @description('APIM publisher name')
 param apimPublisherName string
 
+@description('Resource tags applied to all deployed resources')
 param tags object = {
   environment: environment
   team: 'engineering'

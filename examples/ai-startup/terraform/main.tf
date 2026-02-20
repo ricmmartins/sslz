@@ -105,6 +105,12 @@ variable "ssh_public_key" {
   type        = string
 }
 
+variable "aks_admin_username" {
+  description = "Linux admin username for AKS nodes"
+  type        = string
+  default     = "azureuser"
+}
+
 variable "tags" {
   description = "Tags applied to all resources"
   type        = map(string)
@@ -181,7 +187,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   linux_profile {
-    admin_username = "azureuser"
+    admin_username = var.aks_admin_username
     ssh_key {
       key_data = var.ssh_public_key
     }

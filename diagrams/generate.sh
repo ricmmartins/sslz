@@ -4,7 +4,7 @@
 # Outputs PNG and SVG files for use in docs and presentations
 # Requires: npx (Node.js) OR docker
 # ==============================================================================
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTPUT_DIR="${SCRIPT_DIR}/output"

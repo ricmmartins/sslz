@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "Installing jq and shellcheck..."
 sudo apt-get update -qq && sudo apt-get install -y -qq jq shellcheck > /dev/null

@@ -231,6 +231,10 @@ resource "azurerm_container_app" "web" {
   revision_mode                = "Single"
   tags                         = local.tags
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   ingress {
     external_enabled = true
     target_port      = 80

@@ -38,6 +38,7 @@ param privateEndpointSubnetId string = ''
 @description('VNet resource ID for Private DNS Zone links. Required when deployPrivateEndpoints is true. Example: /subscriptions/.../virtualNetworks/vnet-prod')
 param vnetId string = ''
 
+@description('Resource tags applied to all deployed resources')
 param tags object = {
   environment: environment
   team: 'engineering'
@@ -138,6 +139,7 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'ca-${appName}-web'
   location: location
   tags: tags
+  identity: { type: 'SystemAssigned' }
   properties: {
     managedEnvironmentId: cae.id
     configuration: {
