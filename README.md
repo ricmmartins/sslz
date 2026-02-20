@@ -56,8 +56,8 @@ You need:
 Fork this repo then run the pre-flight check to verify everything:
 
 ```bash
-git clone https://github.com/<your-username>/azure-landing-zone-startups.git
-cd azure-landing-zone-startups
+git clone https://github.com/<your-username>/sslz.git
+cd sslz
 
 # Login to Azure
 az login

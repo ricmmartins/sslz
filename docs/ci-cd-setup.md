@@ -15,7 +15,7 @@ This creates the identity that GitHub Actions will use to authenticate to Azure.
 ```bash
 # Set your variables
 GITHUB_ORG="your-github-org"       # e.g., "acme-corp"
-GITHUB_REPO="azure-landing-zone-startups"
+GITHUB_REPO="sslz"
 APP_NAME="github-actions-landing-zone"
 
 # Create the app registration

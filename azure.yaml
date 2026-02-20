@@ -11,9 +11,9 @@
 #   azd env new <name>
 #   azd env set AZURE_LOCATION eastus2
 #   azd env set AZURE_SUBSCRIPTION_ID <your-subscription-id>
-name: azure-landing-zone-startups
+name: sslz
 metadata:
-  template: azure-landing-zone-startups
+  template: sslz
 
 infra:
   provider: bicep

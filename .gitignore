@@ -31,6 +31,13 @@ diagrams/output/*.svg
 # Azure Developer CLI
 .azure/
 
+# Compiled Bicep output
+*.main.json
+**/main.json
+
+# Terraform lock files (generated per-platform)
+.terraform.lock.hcl
+
 # Secrets
 .env
 *.pem
