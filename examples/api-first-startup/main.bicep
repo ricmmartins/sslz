@@ -47,7 +47,7 @@ resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-11-20' = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: 'ai-${appName}-${environment}'
   location: location
   tags: tags
@@ -55,7 +55,7 @@ resource appInsights 'Microsoft.Insights/components@2020-11-20' = {
   properties: {
     Application_Type: 'web'
     WorkspaceResourceId: law.id
-    RetentionInDays: 90
+    RetentionInDays: 30
   }
 }
 

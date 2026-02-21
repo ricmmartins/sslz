@@ -10,8 +10,16 @@ variable "display_name" {
 variable "prod_subscription_id" {
   description = "Production subscription ID to place under this management group"
   type        = string
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.prod_subscription_id))
+    error_message = "prod_subscription_id must be a valid UUID."
+  }
 }
 variable "nonprod_subscription_id" {
   description = "Non-production subscription ID to place under this management group"
   type        = string
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.nonprod_subscription_id))
+    error_message = "nonprod_subscription_id must be a valid UUID."
+  }
 }

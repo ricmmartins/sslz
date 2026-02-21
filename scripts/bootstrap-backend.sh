@@ -55,6 +55,12 @@ if ! [[ "$STORAGE_ACCOUNT" =~ ^[a-z0-9]{3,24}$ ]]; then
   exit 1
 fi
 
+# Verify Azure CLI authentication
+if ! az account show &>/dev/null; then
+  echo "Error: Not logged in to Azure. Run: az login"
+  exit 1
+fi
+
 echo "=== Bootstrapping Terraform Backend ==="
 echo "  Location:        $LOCATION"
 echo "  Resource Group:  $RESOURCE_GROUP"

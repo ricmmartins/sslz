@@ -18,9 +18,11 @@ param companyName string
 param environment string
 
 @description('Monthly budget amount in USD')
+@minValue(1)
 param monthlyBudgetAmount int
 
 @description('Email addresses for budget alerts')
+@minLength(1)
 param budgetAlertEmails array
 
 @description('Deploy VNet and networking resources')
