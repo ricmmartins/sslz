@@ -41,11 +41,13 @@ resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   tags: tags
   properties: {
     sku: { name: 'PerGB2018' }
-    retentionInDays: 90
+    // 30-day retention keeps costs low for startup workloads. Increase to 90 days
+    // for compliance or if you need longer investigative windows.
+    retentionInDays: 30
   }
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+resource appInsights 'Microsoft.Insights/components@2020-11-20' = {
   name: 'ai-${appName}-${environment}'
   location: location
   tags: tags
@@ -120,6 +122,20 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2023-12-01' = if (environment ==
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
       alwaysOn: false
+      appSettings: [
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsights.properties.ConnectionString
+        }
+        {
+          name: 'COSMOS_ENDPOINT'
+          value: cosmos.properties.documentEndpoint
+        }
+        {
+          name: 'REDIS_HOSTNAME'
+          value: redis.properties.hostName
+        }
+      ]
     }
   }
 }
@@ -231,6 +247,7 @@ resource redis 'Microsoft.Cache/redis@2024-03-01' = {
     }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
+    publicNetworkAccess: 'Disabled'
   }
 }
 

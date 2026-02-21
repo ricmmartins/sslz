@@ -324,15 +324,16 @@ resource "azurerm_storage_container" "datasets" {
 # ==============================================================================
 
 resource "azurerm_redis_cache" "this" {
-  name                 = "redis-${var.app_name}-${var.environment}"
-  location             = var.location
-  resource_group_name  = data.azurerm_resource_group.this.name
-  capacity             = var.environment == "prod" ? 1 : 0
-  family               = "C"
-  sku_name             = var.environment == "prod" ? "Standard" : "Basic"
-  non_ssl_port_enabled = false
-  minimum_tls_version  = "1.2"
-  tags                 = local.tags
+  name                          = "redis-${var.app_name}-${var.environment}"
+  location                      = var.location
+  resource_group_name           = data.azurerm_resource_group.this.name
+  capacity                      = var.environment == "prod" ? 1 : 0
+  family                        = "C"
+  sku_name                      = var.environment == "prod" ? "Standard" : "Basic"
+  non_ssl_port_enabled          = false
+  minimum_tls_version           = "1.2"
+  public_network_access_enabled = false
+  tags                          = local.tags
 }
 
 # ==============================================================================

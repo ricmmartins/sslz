@@ -269,6 +269,7 @@ resource redis 'Microsoft.Cache/redis@2024-03-01' = {
     }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
+    publicNetworkAccess: 'Disabled'
   }
 }
 

@@ -115,8 +115,10 @@ resource "azurerm_log_analytics_workspace" "this" {
   location            = var.location
   resource_group_name = data.azurerm_resource_group.this.name
   sku                 = "PerGB2018"
-  retention_in_days   = 90
-  tags                = local.tags
+  # 30-day retention keeps costs low for startup workloads. Increase to 90 days
+  # for compliance or if you need longer investigative windows.
+  retention_in_days = 30
+  tags              = local.tags
 }
 
 resource "azurerm_application_insights" "this" {
@@ -125,7 +127,7 @@ resource "azurerm_application_insights" "this" {
   resource_group_name = data.azurerm_resource_group.this.name
   workspace_id        = azurerm_log_analytics_workspace.this.id
   application_type    = "web"
-  retention_in_days   = 90
+  retention_in_days   = 30
   tags                = local.tags
 }
 
@@ -285,15 +287,16 @@ resource "azurerm_cosmosdb_sql_role_assignment" "app_cosmos" {
 # ==============================================================================
 
 resource "azurerm_redis_cache" "this" {
-  name                 = "redis-${var.app_name}-${var.environment}"
-  location             = var.location
-  resource_group_name  = data.azurerm_resource_group.this.name
-  capacity             = var.environment == "prod" ? 1 : 0
-  family               = "C"
-  sku_name             = var.environment == "prod" ? "Standard" : "Basic"
-  non_ssl_port_enabled = false
-  minimum_tls_version  = "1.2"
-  tags                 = local.tags
+  name                          = "redis-${var.app_name}-${var.environment}"
+  location                      = var.location
+  resource_group_name           = data.azurerm_resource_group.this.name
+  capacity                      = var.environment == "prod" ? 1 : 0
+  family                        = "C"
+  sku_name                      = var.environment == "prod" ? "Standard" : "Basic"
+  non_ssl_port_enabled          = false
+  minimum_tls_version           = "1.2"
+  public_network_access_enabled = false
+  tags                          = local.tags
 }
 
 # ==============================================================================

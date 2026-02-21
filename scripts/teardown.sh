@@ -104,6 +104,16 @@ if [[ "$TOOL" == "terraform" ]]; then
   TF_VAR_budget_start_date="$(date -u +%Y-%m-01T00:00:00Z)"
 
   cd "$TF_DIR"
+
+  # terraform.tfvars must exist — it provides required variables
+  # (subscription_id, company_name, budget_alert_emails, security_contact_email).
+  if [[ ! -f "terraform.tfvars" ]]; then
+    echo "Error: terraform.tfvars not found in $TF_DIR."
+    echo "This file is required for destroy — it provides subscription_id, company_name, and other required variables."
+    echo "Create it from the example: cp terraform.tfvars.example terraform.tfvars"
+    exit 1
+  fi
+
   terraform init
   terraform destroy \
     -var="environment=$ENV" \
