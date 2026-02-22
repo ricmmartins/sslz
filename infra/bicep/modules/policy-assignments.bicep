@@ -9,7 +9,7 @@ targetScope = 'subscription'
 param location string
 
 @description('Allowed Azure regions for resource deployment')
-param allowedLocations array
+param allowedLocations string[]
 
 @description('Log Analytics workspace ID for diagnostic settings policy')
 param logAnalyticsWorkspaceId string

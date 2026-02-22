@@ -1,6 +1,9 @@
 // ============================================================================
 // Budget Alerts
-// Alerts at 50%, 80%, and 100% of monthly budget
+// Alerts at 50%, 80%, and 100% of monthly budget.
+// For cost anomaly detection, enable it in the Azure Portal:
+// Cost Management → Cost alerts → Anomaly alerts (no ARM resource available).
+// See docs/cost-management.md for details.
 // ============================================================================
 
 targetScope = 'subscription'
@@ -12,7 +15,7 @@ param budgetName string
 param amount int
 
 @description('Email addresses for budget notifications')
-param contactEmails array
+param contactEmails string[]
 
 @description('Budget start date (first day of current month, YYYY-MM-DD)')
 param startDate string = '${utcNow('yyyy-MM')}-01'

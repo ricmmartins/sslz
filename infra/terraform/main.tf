@@ -141,6 +141,9 @@ resource "azurerm_monitor_diagnostic_setting" "activity_log" {
 
 # ==============================================================================
 # Budget
+# For cost anomaly detection, enable it in the Azure Portal:
+# Cost Management → Cost alerts → Anomaly alerts (no Terraform resource available).
+# See docs/cost-management.md for details.
 # ==============================================================================
 
 resource "azurerm_consumption_budget_subscription" "monthly" {

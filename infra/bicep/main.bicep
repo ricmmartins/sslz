@@ -23,7 +23,7 @@ param monthlyBudgetAmount int
 
 @description('Email addresses for budget alerts')
 @minLength(1)
-param budgetAlertEmails array
+param budgetAlertEmails string[]
 
 @description('Deploy VNet and networking resources')
 param deployNetworking bool = true
@@ -47,7 +47,7 @@ param enableDefenderForKeyVault bool = true
 param securityContactEmail string
 
 @description('Allowed Azure regions for resource deployment')
-param allowedLocations array = [location]
+param allowedLocations string[] = [location]
 
 @description('Tags applied to all resources')
 param tags object = {

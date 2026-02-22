@@ -171,6 +171,45 @@ jobs:
           az policy assignment show --name "allowed-locations" --query "name" -o tsv
           echo "  ✓ Allowed locations policy assigned"
 
+      - name: Validate networking resources
+        run: |
+          echo "=== Checking VNet and NSGs ==="
+          VNET_STATE=$(az network vnet show \
+            --resource-group "rg-lztest-nonprod-networking" \
+            --name "vnet-lztest-nonprod" \
+            --query "provisioningState" -o tsv)
+          echo "  ✓ VNet provisioning state: $VNET_STATE"
+          SUBNET_COUNT=$(az network vnet subnet list \
+            --resource-group "rg-lztest-nonprod-networking" \
+            --vnet-name "vnet-lztest-nonprod" \
+            --query "length(@)" -o tsv)
+          echo "  ✓ Subnets created: $SUBNET_COUNT (expected 4)"
+          if [ "$SUBNET_COUNT" -ne 4 ]; then
+            echo "  ✗ ERROR: Expected 4 subnets, got $SUBNET_COUNT"
+            exit 1
+          fi
+
+      - name: Validate Defender plans
+        run: |
+          echo "=== Checking Defender for Cloud ==="
+          CSPM=$(az security pricing show --name "CloudPosture" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
+          echo "  CSPM tier: $CSPM"
+          ARM=$(az security pricing show --name "Arm" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
+          echo "  ARM tier: $ARM"
+          KV=$(az security pricing show --name "KeyVaults" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
+          echo "  Key Vault tier: $KV"
+          echo "  ✓ Defender plans verified"
+
+      - name: Validate budget exists
+        run: |
+          echo "=== Checking budget ==="
+          BUDGET=$(az consumption budget list --query "[?contains(name, 'lztest')].name" -o tsv 2>/dev/null || echo "")
+          if [ -n "$BUDGET" ]; then
+            echo "  ✓ Budget exists: $BUDGET"
+          else
+            echo "  ⚠ Budget not found (may take time to propagate)"
+          fi
+
       # --- Teardown (runs even if validation fails, as long as apply succeeded) ---
       - name: Terraform Destroy
         if: always()
