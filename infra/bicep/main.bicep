@@ -28,6 +28,9 @@ param budgetAlertEmails array
 @description('Deploy VNet and networking resources')
 param deployNetworking bool = true
 
+@description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
+param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
+
 @description('Enable Defender for Servers P2 (recommended for prod)')
 param enableDefenderForServers bool = environment == 'prod'
 
@@ -104,6 +107,7 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
     location: location
     vnetName: 'vnet-${prefix}'
     vnetAddressPrefix: environment == 'prod' ? '10.0.0.0/16' : '10.1.0.0/16'
+    appSubnetDelegation: appSubnetDelegation
     tags: tags
   }
 }

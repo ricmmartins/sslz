@@ -98,21 +98,21 @@ variable "security_contact_email" {
 }
 
 variable "enable_defender_for_servers" {
-  description = "Enable Defender for Servers P2"
+  description = "Enable Defender for Servers P2 (recommended for prod)"
   type        = bool
-  default     = false
+  default     = null
 }
 
 variable "enable_defender_for_containers" {
-  description = "Enable Defender for Containers"
+  description = "Enable Defender for Containers (recommended if running AKS)"
   type        = bool
   default     = false
 }
 
 variable "enable_defender_for_databases" {
-  description = "Enable Defender for Databases"
+  description = "Enable Defender for Databases (recommended for prod)"
   type        = bool
-  default     = false
+  default     = null
 }
 
 variable "enable_defender_for_key_vault" {
@@ -135,6 +135,10 @@ variable "tags" {
 
 locals {
   prefix = var.prefix != "" ? var.prefix : "${var.company_name}-${var.environment}"
+
+  # Defender defaults: enable Servers and Databases for prod (matches Bicep behavior)
+  enable_defender_for_servers   = var.enable_defender_for_servers != null ? var.enable_defender_for_servers : var.environment == "prod"
+  enable_defender_for_databases = var.enable_defender_for_databases != null ? var.enable_defender_for_databases : var.environment == "prod"
 
   budget_start_date = var.budget_start_date != "" ? var.budget_start_date : formatdate("YYYY-MM-01'T'00:00:00Z", plantimestamp())
 

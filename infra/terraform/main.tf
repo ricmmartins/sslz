@@ -102,9 +102,9 @@ module "networking" {
 module "security" {
   source                         = "./modules/security"
   security_contact_email         = var.security_contact_email
-  enable_defender_for_servers    = var.enable_defender_for_servers
+  enable_defender_for_servers    = local.enable_defender_for_servers
   enable_defender_for_containers = var.enable_defender_for_containers
-  enable_defender_for_databases  = var.enable_defender_for_databases
+  enable_defender_for_databases  = local.enable_defender_for_databases
   enable_defender_for_key_vault  = var.enable_defender_for_key_vault
 }
 
