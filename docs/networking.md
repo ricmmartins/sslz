@@ -92,8 +92,8 @@ No inbound rules needed — VNet integration is outbound only.
 
 **For data subnet:**
 ```
-110  Inbound  Allow  snet-aks    snet-data  1433,6380,443  (SQL, Redis, Storage)
-120  Inbound  Allow  snet-app    snet-data  1433,6380,443
+110  Inbound  Allow  snet-aks    snet-data  1433,5432,6380,443  (SQL, PostgreSQL, Redis, Storage)
+120  Inbound  Allow  snet-app    snet-data  1433,5432,6380,443
 ```
 
 **For shared subnet:**

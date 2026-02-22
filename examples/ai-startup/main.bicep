@@ -118,7 +118,7 @@ resource gpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024
   name: 'gpu'
   properties: {
     mode: 'User'
-    count: 1
+    count: 0
     minCount: 0
     maxCount: 3
     enableAutoScaling: true

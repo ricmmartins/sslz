@@ -174,7 +174,15 @@ module policies 'modules/policy-assignments.bicep' = {
 // Outputs
 // ============================================================================
 
+@description('Monitoring resource group name')
+output resourceGroupMonitoring string = rgMonitoring
+@description('Networking resource group name')
+output resourceGroupNetworking string = deployNetworking ? rgNetworking : ''
+@description('Log Analytics workspace resource ID')
 output logAnalyticsWorkspaceId string = logAnalytics.outputs.workspaceId
+@description('Log Analytics workspace name')
 output logAnalyticsWorkspaceName string = logAnalytics.outputs.workspaceName
+@description('Virtual network resource ID')
 output vnetId string = deployNetworking ? networking.outputs.vnetId : ''
+@description('Virtual network name')
 output vnetName string = deployNetworking ? networking.outputs.vnetName : ''

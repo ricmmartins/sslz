@@ -12,7 +12,7 @@ Security that protects you without slowing you down. Every recommendation here i
 | Defender for Servers P2 | Prod only | ~$15/server/month | EDR via Defender for Endpoint, vulnerability assessment, JIT VM access, adaptive application controls. |
 | Defender for Containers | If running AKS | ~$7/vCPU/month | Runtime threat detection, image vulnerability scanning, Kubernetes audit log monitoring. |
 | Defender for Databases | Prod only | Varies | SQL/Postgres threat detection — alerts on SQL injection, anomalous access, brute force. |
-| Defender for Key Vault | Prod only | ~$0.02/10k transactions | Alerts on unusual access patterns to secrets. Cheap insurance. |
+| Defender for Key Vault | Both subs | ~$0.02/10k transactions | Alerts on unusual access patterns to secrets. Cheap insurance. Always enabled by default. |
 | Defender for ARM | Both subs | ~$4/sub/month | Detects suspicious control-plane operations (mass deletions, privilege escalation). Always enabled by this landing zone. |
 | Defender for Storage | No | ~$10/month per account | Malware scanning. Skip unless you accept user file uploads. |
 | Defender for App Service | No | ~$15/month per instance | Limited value compared to other plans. Revisit later. |
