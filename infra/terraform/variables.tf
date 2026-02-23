@@ -122,9 +122,9 @@ variable "enable_defender_for_key_vault" {
 }
 
 variable "allowed_locations" {
-  description = "Allowed Azure regions for resource deployment"
+  description = "Allowed Azure regions for resource deployment (defaults to the primary location)"
   type        = list(string)
-  default     = ["eastus2", "centralus"]
+  default     = []
 }
 
 variable "tags" {
@@ -141,6 +141,9 @@ locals {
   enable_defender_for_databases = var.enable_defender_for_databases != null ? var.enable_defender_for_databases : var.environment == "prod"
 
   budget_start_date = var.budget_start_date != "" ? var.budget_start_date : formatdate("YYYY-MM-01'T'00:00:00Z", plantimestamp())
+
+  # Allowed locations: defaults to [var.location] to match Bicep's [location] behavior
+  allowed_locations = length(var.allowed_locations) > 0 ? var.allowed_locations : [var.location]
 
   vnet_address_prefix = var.vnet_address_prefix != "" ? var.vnet_address_prefix : (var.environment == "prod" ? "10.0.0.0/16" : "10.1.0.0/16")
 

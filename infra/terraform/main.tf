@@ -111,7 +111,7 @@ module "security" {
 module "policy" {
   source                     = "./modules/policy"
   location                   = var.location
-  allowed_locations          = var.allowed_locations
+  allowed_locations          = local.allowed_locations
   log_analytics_workspace_id = module.log_analytics.workspace_id
   subscription_id            = var.subscription_id
 }
