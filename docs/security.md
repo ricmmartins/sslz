@@ -91,7 +91,7 @@ For CI/CD pipelines, use Workload Identity Federation instead of client secrets:
   with:
     client-id: ${{ secrets.AZURE_CLIENT_ID }}
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}  # or _PROD
 ```
 
 **Why?**
