@@ -47,8 +47,8 @@ enable_defender_for_containers = false # set true if running AKS (~$7/vCPU/month
 enable_defender_for_databases  = true  # recommended for prod (~$15/server/month)
 # enable_defender_for_key_vault = true  # default: true, low cost (~$0.02/10K transactions)
 
-# Restrict deployments to these Azure regions
-allowed_locations = ["eastus2", "centralus"]
+# Restrict deployments to these Azure regions (defaults to [location] if omitted)
+# allowed_locations = ["eastus2", "centralus"]
 
 # Additional tags merged with defaults (environment, managedBy, project)
 tags = {

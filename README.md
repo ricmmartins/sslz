@@ -176,7 +176,7 @@ See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-
 - [ ] Create security group `sg-azure-admins`, add 2-3 founders/leads
 
 ### Deploy Landing Zone (30 min)
-- [ ] Run Bicep or Terraform deployment (creates management groups, policies, networking, monitoring, budgets)
+- [ ] Run Bicep or Terraform deployment (creates policies, networking, monitoring, security, budgets)
 - [ ] Verify resources in Azure Portal
 
 ### Post-Deployment (30 min)
