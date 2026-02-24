@@ -18,7 +18,7 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 |---|---|
 | [ALZ (Enterprise Scale)](https://aka.ms/alz) | 100+ modules, months to understand, built for 10k-seat enterprises |
 | [ALZ-Bicep](https://github.com/Azure/ALZ-Bicep) | Still enterprise-scoped, overwhelming for a 10-person startup |
-| [CAF Terraform Module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) | Enterprise-scoped, entering extended support (archived Aug 2026). Microsoft now recommends [Azure Verified Modules](https://aka.ms/avm). |
+| [CAF Terraform Module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) | Enterprise-scoped, in extended support (archived Aug 2026). Microsoft recommends migrating to [Azure Verified Modules](https://aka.ms/avm). |
 | **This project** | **Deploys in 1 hour. Grows with you. Written for engineers, not consultants.** |
 
 ## Architecture

@@ -85,7 +85,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
     </div>
     <div class="compare-card">
       <h3><a href="https://github.com/Azure/terraform-azurerm-caf-enterprise-scale">CAF Terraform Module</a></h3>
-      <p>Enterprise-scoped, entering extended support (archived Aug 2026). Microsoft now recommends <a href="https://aka.ms/avm">Azure Verified Modules</a>.</p>
+      <p>Enterprise-scoped, in extended support (archived Aug 2026). Microsoft recommends migrating to <a href="https://aka.ms/avm">Azure Verified Modules</a>.</p>
     </div>
     <div class="compare-card accent">
       <h3>This Project</h3>
