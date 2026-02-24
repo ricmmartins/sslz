@@ -7,53 +7,9 @@ description: "Mermaid diagrams of the landing zone architecture"
 
 # Architecture Diagrams
 
-## Landing Zone Overview (Mermaid)
+## Landing Zone Overview
 
-```mermaid
-graph TB
-    subgraph "Entra ID Tenant"
-        subgraph "mg-yourcompany"
-            subgraph "sub-prod"
-                rg_mon_p["rg-prod-monitoring"]
-                rg_net_p["rg-prod-networking"]
-                rg_app_p["rg-prod-app"]
-
-                subgraph "Monitoring"
-                    law["Log Analytics Workspace"]
-                    defender["Defender for Cloud"]
-                end
-
-                subgraph "Networking (prod-vnet 10.0.0.0/16)"
-                    snet_aks["snet-aks /18"]
-                    snet_app["snet-app /22"]
-                    snet_data["snet-data /22"]
-                    snet_shared["snet-shared /24"]
-                end
-            end
-
-            subgraph "sub-nonprod"
-                rg_mon_n["rg-nonprod-monitoring"]
-                rg_net_n["rg-nonprod-networking"]
-
-                subgraph "Networking (nonprod-vnet 10.1.0.0/16)"
-                    snet_aks_n["snet-aks /18"]
-                    snet_app_n["snet-app /22"]
-                    snet_data_n["snet-data /22"]
-                    snet_shared_n["snet-shared /24"]
-                end
-            end
-        end
-
-        policies["Azure Policies<br/>MCSB (audit) + Tags + Locations"]
-        budgets["Budget Alerts<br/>50% / 80% / 100%"]
-    end
-
-    policies --> rg_mon_p
-    policies --> rg_mon_n
-    budgets --> rg_app_p
-    budgets --> rg_net_n
-    law --> defender
-```
+![Landing Zone Overview]({{ '/assets/images/landing-zone-overview.png' | relative_url }})
 
 ## Graduation Path (Mermaid)
 
