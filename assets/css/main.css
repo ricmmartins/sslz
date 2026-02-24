@@ -675,28 +675,124 @@ img {
   min-width: 700px;
 }
 
-/* --- What's Included table --- */
-.whats-included table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
+/* --- Comparison grid --- */
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
 }
 
-.whats-included thead th {
-  background: var(--bg-tertiary);
+.compare-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.compare-card h3 {
+  font-size: 1rem;
   font-weight: 600;
-  text-align: left;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+
+.compare-card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.compare-card.accent {
+  border-left: 4px solid var(--azure-blue);
+  background: var(--sidebar-active);
+}
+
+.compare-card.accent h3 {
+  color: var(--azure-blue);
+}
+
+[data-theme="dark"] .compare-card.accent h3 {
+  color: var(--link-color);
+}
+
+/* --- Included grid --- */
+.included-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.included-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: var(--card-shadow);
+}
+
+.included-card .check-icon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  color: #16a34a;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .included-card .check-icon {
+  color: #4ade80;
+}
+
+.included-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: var(--text-primary);
+}
+
+.included-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* --- Not-included list --- */
+.not-included-list {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.not-included-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
   padding: 0.75rem 1rem;
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
+  border-radius: 8px;
 }
 
-.whats-included tbody td {
-  padding: 0.625rem 1rem;
-  border: 1px solid var(--border-color);
+.not-included-item .dash-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-weight: 700;
 }
 
-.whats-included tbody tr:nth-child(even) {
-  background: var(--bg-secondary);
+.not-included-item strong {
+  color: var(--text-primary);
+}
+
+.not-included-item .trigger {
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 /* --- Examples grid --- */
@@ -908,6 +1004,14 @@ img {
   }
 
   .quick-start-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .included-grid {
     grid-template-columns: 1fr;
   }
 

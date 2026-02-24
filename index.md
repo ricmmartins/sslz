@@ -41,17 +41,26 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   </div>
 </section>
 
-<section class="landing-section alt-bg" markdown="1">
-
-## How It Compares
-
-| What Exists Today | The Problem |
-|---|---|
-| [ALZ (Enterprise Scale)](https://aka.ms/alz) | 100+ modules, months to understand, built for 10k-seat enterprises |
-| [ALZ-Bicep](https://github.com/Azure/ALZ-Bicep) | Still enterprise-scoped, overwhelming for a 10-person startup |
-| [CAF Terraform Module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) | Enterprise-scoped, entering extended support (archived Aug 2026). Microsoft now recommends [Azure Verified Modules](https://aka.ms/avm). |
-| **This project** | **Deploys in 1 hour. Grows with you. Written for engineers, not consultants.** |
-
+<section class="landing-section alt-bg">
+  <h2>How It Compares</h2>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3><a href="https://aka.ms/alz">ALZ (Enterprise Scale)</a></h3>
+      <p>100+ modules, months to understand, built for 10k-seat enterprises</p>
+    </div>
+    <div class="compare-card">
+      <h3><a href="https://github.com/Azure/ALZ-Bicep">ALZ-Bicep</a></h3>
+      <p>Still enterprise-scoped, overwhelming for a 10-person startup</p>
+    </div>
+    <div class="compare-card">
+      <h3><a href="https://github.com/Azure/terraform-azurerm-caf-enterprise-scale">CAF Terraform Module</a></h3>
+      <p>Enterprise-scoped, entering extended support (archived Aug 2026). Microsoft now recommends <a href="https://aka.ms/avm">Azure Verified Modules</a>.</p>
+    </div>
+    <div class="compare-card accent">
+      <h3>This Project</h3>
+      <p>Deploys in 1 hour. Grows with you. Written for engineers, not consultants.</p>
+    </div>
+  </div>
 </section>
 
 <section class="architecture-preview landing-section">
@@ -94,39 +103,93 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   </p>
 </section>
 
-<section class="whats-included landing-section" markdown="1">
-
-## What's Included
-
-| Component | What You Get |
-|---|---|
-| **Management Groups** | Single MG with two subscriptions underneath |
-| **Azure Policy** | Microsoft Cloud Security Benchmark (audit), required tags, allowed locations |
-| **Networking** | VNet + subnets per subscription, NSGs with deny-all-inbound default |
-| **Monitoring** | Log Analytics workspace, Activity Log forwarding, diagnostic settings policy |
-| **Security** | Defender for Cloud CSPM, Defender for Servers P2 (prod), MFA via Security Defaults |
-| **Cost Management** | Budget alerts at 50/80/100%, tagging enforcement |
-| **CI/CD** | GitHub Actions workflows for Bicep and Terraform |
-
+<section class="landing-section">
+  <h2>What's Included</h2>
+  <div class="included-grid">
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>Management Groups</h3>
+        <p>Single MG with two subscriptions underneath</p>
+      </div>
+    </div>
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>Azure Policy</h3>
+        <p>Microsoft Cloud Security Benchmark (audit), required tags, allowed locations</p>
+      </div>
+    </div>
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>Networking</h3>
+        <p>VNet + subnets per subscription, NSGs with deny-all-inbound default</p>
+      </div>
+    </div>
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>Monitoring</h3>
+        <p>Log Analytics workspace, Activity Log forwarding, diagnostic settings policy</p>
+      </div>
+    </div>
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>Security</h3>
+        <p>Defender for Cloud CSPM, Defender for Servers P2 (prod), MFA via Security Defaults</p>
+      </div>
+    </div>
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>Cost Management</h3>
+        <p>Budget alerts at 50/80/100%, tagging enforcement</p>
+      </div>
+    </div>
+    <div class="included-card">
+      <span class="check-icon">&#10003;</span>
+      <div>
+        <h3>CI/CD</h3>
+        <p>GitHub Actions workflows for Bicep and Terraform</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="landing-section alt-bg" markdown="1">
-
-## What's NOT Included (By Design)
-
-These are enterprise components you should add later when needed:
-
-| Component | Add When... |
-|---|---|
-| Hub VNet + Azure Firewall | Hybrid connectivity or centralized egress control required |
-| ExpressRoute / VPN Gateway | On-prem connectivity needed |
-| Multiple MG layers | 5+ subscriptions with different policy needs |
-| Private DNS Zones at scale | 3+ PaaS services using Private Endpoints across VNets |
-| Advanced Conditional Access | 30+ Azure users or regulated customer data |
-| PIM (Privileged Identity Management) | You need just-in-time admin access (Series B+) |
-
-See [Graduation Guide]({{ '/docs/graduation-guide' | relative_url }}) for detailed migration paths to full ESLZ.
-
+<section class="landing-section alt-bg">
+  <h2>What's NOT Included (By Design)</h2>
+  <p class="section-subtitle">Enterprise components you should add later when needed.</p>
+  <div class="not-included-list">
+    <div class="not-included-item">
+      <span class="dash-icon">&ndash;</span>
+      <div><strong>Hub VNet + Azure Firewall</strong> <span class="trigger">Add when hybrid connectivity or centralized egress control required</span></div>
+    </div>
+    <div class="not-included-item">
+      <span class="dash-icon">&ndash;</span>
+      <div><strong>ExpressRoute / VPN Gateway</strong> <span class="trigger">Add when on-prem connectivity needed</span></div>
+    </div>
+    <div class="not-included-item">
+      <span class="dash-icon">&ndash;</span>
+      <div><strong>Multiple MG layers</strong> <span class="trigger">Add when 5+ subscriptions with different policy needs</span></div>
+    </div>
+    <div class="not-included-item">
+      <span class="dash-icon">&ndash;</span>
+      <div><strong>Private DNS Zones at scale</strong> <span class="trigger">Add when 3+ PaaS services using Private Endpoints across VNets</span></div>
+    </div>
+    <div class="not-included-item">
+      <span class="dash-icon">&ndash;</span>
+      <div><strong>Advanced Conditional Access</strong> <span class="trigger">Add when 30+ Azure users or regulated customer data</span></div>
+    </div>
+    <div class="not-included-item">
+      <span class="dash-icon">&ndash;</span>
+      <div><strong>PIM (Privileged Identity Management)</strong> <span class="trigger">Add when you need just-in-time admin access (Series B+)</span></div>
+    </div>
+  </div>
+  <p style="text-align: center; margin-top: 2rem;">
+    <a href="{{ '/docs/graduation-guide' | relative_url }}" class="btn btn-primary">Graduation Guide</a>
+  </p>
 </section>
 
 <section class="landing-section">
