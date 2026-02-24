@@ -95,6 +95,30 @@
     initLightbox();
   }
 
+  /* --- Back to Top --- */
+  function initBackToTop() {
+    var btn = document.querySelector('.back-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 600) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBackToTop);
+  } else {
+    initBackToTop();
+  }
+
   /* --- Mermaid: convert markdown code blocks to mermaid divs --- */
   function convertMermaidBlocks() {
     document.querySelectorAll('pre code.language-mermaid').forEach(function (block) {
