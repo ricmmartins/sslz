@@ -14,6 +14,19 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   </div>
 </section>
 
+<section class="landing-section">
+  <div class="tldr-callout">
+    <h2>TL;DR</h2>
+    <ul>
+      <li><strong>One management group, two subscriptions</strong> (Prod + Non-Prod) is all you need to start. Don't over-engineer your hierarchy.</li>
+      <li><strong>Skip the hub network, Azure Firewall, and dedicated Connectivity subscription</strong> until you actually have hybrid/on-prem requirements or 10+ workloads.</li>
+      <li><strong>Enable Defender for Cloud CSPM (free) + Defender for Servers P2 on prod only.</strong> Turn on diagnostic settings to a single Log Analytics workspace. That's your security baseline.</li>
+      <li><strong>Set budget alerts at 50%, 80%, and 100% of your monthly burn.</strong> Tag everything with <code>environment</code> and <code>team</code>. No exceptions.</li>
+      <li><strong>Deploy this in under 1 hour with Bicep or Terraform.</strong> Graduate to full ESLZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.</li>
+    </ul>
+  </div>
+</section>
+
 <section class="key-points landing-section">
   <h2>Why This Landing Zone</h2>
   <p class="section-subtitle">Enterprise-grade foundations without enterprise complexity.</p>
@@ -97,29 +110,121 @@ nonprod-vnet (10.1.0.0/16)
       <h3>Prerequisites</h3>
       <span class="step-time">5 min</span>
       <p>Azure CLI, Terraform (optional), two subscriptions, and Owner permissions.</p>
+      <details>
+        <summary>Show commands</summary>
+<pre><code>git clone https://github.com/&lt;your-username&gt;/sslz.git
+cd sslz
+
+az login
+az account set --subscription &lt;YOUR_PROD_SUBSCRIPTION_ID&gt;
+
+# Check all prerequisites
+./scripts/validate-prerequisites.sh</code></pre>
+      </details>
     </div>
     <div class="step-card">
       <div class="step-number">2</div>
       <h3>Deploy</h3>
       <span class="step-time">20 min</span>
       <p>Run Bicep or Terraform to create policies, networking, monitoring, security, and budgets.</p>
+      <details>
+        <summary>Bicep commands</summary>
+<pre><code>cd infra/bicep
+
+cp parameters/prod.bicepparam parameters/prod.local.bicepparam
+# Edit prod.local.bicepparam with your values
+
+az deployment sub what-if \
+  --location eastus2 \
+  --template-file main.bicep \
+  --parameters parameters/prod.local.bicepparam
+
+az deployment sub create \
+  --location eastus2 \
+  --template-file main.bicep \
+  --parameters parameters/prod.local.bicepparam</code></pre>
+      </details>
+      <details>
+        <summary>Terraform commands</summary>
+<pre><code>cd infra/terraform
+
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+terraform init
+terraform plan -out=tfplan
+terraform apply tfplan</code></pre>
+      </details>
     </div>
     <div class="step-card">
       <div class="step-number">3</div>
       <h3>Verify</h3>
       <span class="step-time">5 min</span>
       <p>Check resource groups, Log Analytics, and policy assignments in the Portal or CLI.</p>
+      <details>
+        <summary>Show commands</summary>
+<pre><code># Check resource groups
+az group list \
+  --query "[?contains(name, 'yourcompany')].name" -o tsv
+
+# Check Log Analytics workspace
+az monitor log-analytics workspace list \
+  --query "[].name" -o tsv
+
+# Check policy assignments
+az policy assignment list \
+  --query "[?contains(name, 'mcsb')].displayName" -o tsv</code></pre>
+      </details>
     </div>
     <div class="step-card">
       <div class="step-number">4</div>
       <h3>Post-Deploy</h3>
       <span class="step-time">30 min</span>
       <p>RBAC assignments, CI/CD setup with Workload Identity Federation, and first test deployment.</p>
+      <details>
+        <summary>Show commands</summary>
+<pre><code># Teardown (if needed)
+./scripts/teardown.sh --tool terraform --env nonprod
+./scripts/teardown.sh --tool bicep --env nonprod</code></pre>
+      </details>
     </div>
   </div>
   <p style="text-align: center; margin-top: 2rem;">
     <a href="{{ '/docs/ci-cd-setup' | relative_url }}" class="btn btn-primary">Full Deployment Guide</a>
   </p>
+</section>
+
+<section class="landing-section" id="day-1-checklist">
+  <h2>Day-1 Checklist</h2>
+  <p class="section-subtitle">Everything you need to do on launch day, broken into three phases.</p>
+  <div class="checklist-grid">
+    <div class="checklist-phase">
+      <h3>Pre-Deployment <span class="phase-time">30 min</span></h3>
+      <ul>
+        <li>Verify Entra ID tenant is set up, custom domain added</li>
+        <li>Enable Security Defaults (Entra ID &gt; Properties &gt; Security Defaults)</li>
+        <li>Create break-glass account with hardware MFA key</li>
+        <li>Create security group <code>sg-azure-admins</code>, add 2-3 founders/leads</li>
+      </ul>
+    </div>
+    <div class="checklist-phase">
+      <h3>Deploy <span class="phase-time">30 min</span></h3>
+      <ul>
+        <li>Run Bicep or Terraform deployment (creates policies, networking, monitoring, security, budgets)</li>
+        <li>Verify resources in Azure Portal</li>
+      </ul>
+    </div>
+    <div class="checklist-phase">
+      <h3>Post-Deployment <span class="phase-time">30 min</span></h3>
+      <ul>
+        <li>Assign <code>sg-azure-admins</code> as Owner on the management group</li>
+        <li>Create Entra ID groups: <code>sg-azure-developers</code>, <code>sg-azure-readers</code></li>
+        <li>Assign RBAC roles (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
+        <li>Set up CI/CD with Workload Identity Federation</li>
+        <li>Test a sample deployment end-to-end</li>
+      </ul>
+    </div>
+  </div>
 </section>
 
 <section class="landing-section">

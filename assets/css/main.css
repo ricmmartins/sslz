@@ -978,6 +978,188 @@ img {
   height: auto;
 }
 
+/* --- TL;DR Callout --- */
+.tldr-callout {
+  border-left: 4px solid var(--azure-blue);
+  background: var(--bg-secondary);
+  border-radius: 0 10px 10px 0;
+  padding: 1.5rem 2rem;
+  box-shadow: var(--card-shadow);
+}
+
+.tldr-callout h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--azure-blue);
+}
+
+[data-theme="dark"] .tldr-callout h2 {
+  color: var(--link-color);
+}
+
+.tldr-callout ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tldr-callout li {
+  font-size: 0.925rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.tldr-callout li::before {
+  content: "\2022";
+  color: var(--azure-blue);
+  font-weight: 700;
+  position: absolute;
+  left: 0;
+}
+
+.tldr-callout li strong {
+  color: var(--text-primary);
+}
+
+.tldr-callout code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85em;
+  background: var(--bg-code);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+}
+
+/* --- Step Card Details (expand/collapse) --- */
+.step-card details {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--border-light);
+  padding-top: 0.5rem;
+}
+
+.step-card summary {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--link-color);
+  cursor: pointer;
+  padding: 0.35rem 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.step-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.step-card summary::before {
+  content: "\25B6";
+  font-size: 0.6rem;
+  transition: transform 0.15s;
+}
+
+.step-card details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.step-card summary:hover {
+  color: var(--link-hover);
+}
+
+.step-card details pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0 0;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.step-card details code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.78rem;
+  background: none;
+  padding: 0;
+  border: none;
+  color: var(--text-primary);
+}
+
+/* --- Day-1 Checklist --- */
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.checklist-phase {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.checklist-phase h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.checklist-phase .phase-time {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.checklist-phase ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checklist-phase li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.checklist-phase li::before {
+  content: "\2610";
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.checklist-phase code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82em;
+  background: var(--bg-code);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+}
+
 /* ========================================
    Responsive
    ======================================== */
@@ -988,6 +1170,10 @@ img {
 
   .quick-start-steps {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .checklist-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .page-content {
@@ -1069,6 +1255,10 @@ img {
   }
 
   .included-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist-grid {
     grid-template-columns: 1fr;
   }
 
