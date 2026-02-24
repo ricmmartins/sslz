@@ -175,7 +175,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
       <p>Azure CLI, Terraform (optional), two subscriptions, and Owner permissions.</p>
       <details>
         <summary>Show commands</summary>
-<pre><code>git clone https://github.com/&lt;your-username&gt;/sslz.git
+<pre><code>git clone https://github.com/ricmmartins/sslz.git
 cd sslz
 
 az login
