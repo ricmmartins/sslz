@@ -20,7 +20,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   <div class="cards-grid">
     <div class="card">
       <div class="card-icon">&#9889;</div>
-      <h3>1 Hour Deploy</h3>: From zero to production-ready Azure with Bicep or Terraform. No consultants required.
+      <h3>1 Hour Deploy</h3>:       <p>From zero to production-ready Azure with Bicep or Terraform. No consultants required.</p>
     </div>
     <div class="card">
       <div class="card-icon">&#9878;</div>
