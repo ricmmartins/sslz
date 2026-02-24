@@ -43,7 +43,11 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-  <pre><code class="language-mermaid">graph TB
+  <pre><code class="language-mermaid">---
+config:
+  theme: mc
+---
+graph TB
     subgraph "Entra ID Tenant"
         subgraph "mg-yourcompany"
             subgraph "sub-prod"
@@ -75,11 +79,29 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
         policies["Azure Policies — MCSB (audit) + Tags + Locations"]
         budgets["Budget Alerts — 50% / 80% / 100%"]
     end
-    policies --> rg_mon_p
-    policies --> rg_mon_n
-    budgets --> rg_app_p
-    budgets --> rg_net_n
-    law --> defender
+    policies --&gt; rg_mon_p
+    policies --&gt; rg_mon_n
+    budgets --&gt; rg_app_p
+    budgets --&gt; rg_net_n
+    law --&gt; defender
+
+    style rg_mon_p fill:#0078D4,color:#fff,stroke:#005A9E
+    style rg_net_p fill:#0078D4,color:#fff,stroke:#005A9E
+    style rg_app_p fill:#0078D4,color:#fff,stroke:#005A9E
+    style rg_mon_n fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF
+    style rg_net_n fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF
+    style law fill:#005A9E,color:#fff,stroke:#003D6B
+    style defender fill:#005A9E,color:#fff,stroke:#003D6B
+    style snet_aks fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
+    style snet_app fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
+    style snet_data fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
+    style snet_shared fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
+    style snet_aks_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
+    style snet_app_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
+    style snet_data_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
+    style snet_shared_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
+    style policies fill:#0078D4,color:#fff,stroke:#005A9E
+    style budgets fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF
   </code></pre>
 </section>
 
