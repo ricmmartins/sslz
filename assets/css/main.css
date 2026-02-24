@@ -599,7 +599,7 @@ img {
   color: #fff;
 }
 
-/* --- ASCII tree --- */
+/* --- ASCII tree (docs pages) --- */
 .architecture-tree {
   background: var(--bg-code);
   border: 1px solid var(--border-color);
@@ -663,46 +663,248 @@ img {
   border-bottom: 1px solid var(--border-color);
 }
 
-.architecture-preview .mermaid {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 2rem;
-  overflow: auto;
-}
-
-.architecture-preview .mermaid svg {
-  min-width: 700px;
-}
-
-.arch-trees {
+/* --- Visual Architecture Diagrams --- */
+.arch-visual {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
-.arch-trees .architecture-tree {
-  margin-bottom: 0;
+.arch-panel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
 }
 
-.arch-trees .architecture-tree h3 {
+.arch-panel h3 {
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
-.arch-trees .architecture-tree pre {
-  margin: 0;
+/* Management Group Diagram */
+.mg-diagram {
   font-size: 0.85rem;
-  line-height: 1.6;
+}
+
+.mg-tenant {
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  padding: 0.85rem;
+}
+
+.mg-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mg-group {
+  background: rgba(0, 120, 212, 0.04);
+  border: 1px solid rgba(0, 120, 212, 0.2);
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+[data-theme="dark"] .mg-group {
+  background: rgba(88, 166, 255, 0.05);
+  border-color: rgba(88, 166, 255, 0.15);
+}
+
+.mg-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--text-primary);
+}
+
+.mg-icon {
+  font-size: 1.1rem;
+}
+
+.mg-tag {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--azure-blue);
+  background: rgba(0, 120, 212, 0.08);
+  border: 1px solid rgba(0, 120, 212, 0.2);
+  border-radius: 20px;
+  padding: 0.15rem 0.5rem;
+  margin-left: auto;
+}
+
+[data-theme="dark"] .mg-tag {
+  color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  border-color: rgba(88, 166, 255, 0.2);
+}
+
+.mg-subs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mg-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.mg-sub-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mg-sub-prod .mg-sub-dot {
+  background: #10B981;
+}
+
+.mg-sub-nonprod .mg-sub-dot {
+  background: #F59E0B;
+}
+
+.mg-sub div {
+  display: flex;
+  flex-direction: column;
+}
+
+.mg-sub strong {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mg-sub span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Network Diagram */
+.net-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.net-vnet {
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+}
+
+.net-vnet-prod {
+  background: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.net-vnet-nonprod {
+  background: rgba(245, 158, 11, 0.04);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+[data-theme="dark"] .net-vnet-prod {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme="dark"] .net-vnet-nonprod {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.15);
+}
+
+.net-vnet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.net-vnet-header span {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.net-vnet-header code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.72rem;
+  background: var(--bg-code);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+}
+
+.net-subnets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+}
+
+.net-subnet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.6rem;
+  border-radius: 5px;
+  border-left: 3px solid var(--subnet-color);
+  background: var(--bg-primary);
+}
+
+.net-subnet span {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.net-subnet code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
   background: none;
-  border: none;
   padding: 0;
+  border: none;
+}
+
+.net-no-peering {
+  text-align: center;
+  padding: 0.5rem;
+  border: 1px dashed var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+}
+
+.net-no-peering span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .diagram-frame {
@@ -1366,7 +1568,7 @@ img {
     grid-template-columns: 1fr;
   }
 
-  .arch-trees {
+  .arch-visual {
     grid-template-columns: 1fr;
   }
 

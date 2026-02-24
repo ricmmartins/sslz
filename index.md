@@ -97,24 +97,71 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-  <div class="arch-trees">
-    <div class="architecture-tree">
-      <h3>Management Hierarchy</h3>
-<pre>Tenant Root Group
-└── mg-&lt;yourcompany&gt;              ← Policies here
-    ├── sub-&lt;yourcompany&gt;-prod    ← Production
-    └── sub-&lt;yourcompany&gt;-nonprod ← Dev / Staging</pre>
-    </div>
-    <div class="architecture-tree">
-      <h3>Network Layout</h3>
-<pre>prod-vnet (10.0.0.0/16)
-├── snet-aks         10.0.0.0/18
-├── snet-app         10.0.4.0/22
-├── snet-data        10.0.8.0/22
-└── snet-shared      10.0.12.0/24
 
-nonprod-vnet (10.1.0.0/16)
-└── (same layout)</pre>
+  <div class="arch-visual">
+    <div class="arch-panel">
+      <h3>Management Hierarchy</h3>
+      <div class="mg-diagram">
+        <div class="mg-tenant">
+          <span class="mg-label">Tenant Root Group</span>
+          <div class="mg-group">
+            <div class="mg-group-header">
+              <span class="mg-icon">&#9878;</span>
+              <span>mg-&lt;yourcompany&gt;</span>
+              <span class="mg-tag">Policies</span>
+            </div>
+            <div class="mg-subs">
+              <div class="mg-sub mg-sub-prod">
+                <span class="mg-sub-dot"></span>
+                <div>
+                  <strong>sub-&lt;yourcompany&gt;-prod</strong>
+                  <span>Production workloads</span>
+                </div>
+              </div>
+              <div class="mg-sub mg-sub-nonprod">
+                <span class="mg-sub-dot"></span>
+                <div>
+                  <strong>sub-&lt;yourcompany&gt;-nonprod</strong>
+                  <span>Dev / Staging / QA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-panel">
+      <h3>Network Layout</h3>
+      <div class="net-diagram">
+        <div class="net-vnet net-vnet-prod">
+          <div class="net-vnet-header">
+            <span>prod-vnet</span>
+            <code>10.0.0.0/16</code>
+          </div>
+          <div class="net-subnets">
+            <div class="net-subnet" style="--subnet-color: #3B82F6"><span>snet-aks</span><code>/18</code></div>
+            <div class="net-subnet" style="--subnet-color: #10B981"><span>snet-app</span><code>/22</code></div>
+            <div class="net-subnet" style="--subnet-color: #F59E0B"><span>snet-data</span><code>/22</code></div>
+            <div class="net-subnet" style="--subnet-color: #8B5CF6"><span>snet-shared</span><code>/24</code></div>
+          </div>
+        </div>
+        <div class="net-vnet net-vnet-nonprod">
+          <div class="net-vnet-header">
+            <span>nonprod-vnet</span>
+            <code>10.1.0.0/16</code>
+          </div>
+          <div class="net-subnets">
+            <div class="net-subnet" style="--subnet-color: #3B82F6"><span>snet-aks</span><code>/18</code></div>
+            <div class="net-subnet" style="--subnet-color: #10B981"><span>snet-app</span><code>/22</code></div>
+            <div class="net-subnet" style="--subnet-color: #F59E0B"><span>snet-data</span><code>/22</code></div>
+            <div class="net-subnet" style="--subnet-color: #8B5CF6"><span>snet-shared</span><code>/24</code></div>
+          </div>
+        </div>
+        <div class="net-no-peering">
+          <span>No VNet peering &mdash; each subscription is self-contained</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
