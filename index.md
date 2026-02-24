@@ -45,30 +45,39 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
   <pre><code class="language-mermaid">---
 config:
-  theme: mc
+  theme: base
+  themeVariables:
+    primaryColor: "#e8f4fd"
+    primaryTextColor: "#1a1a2e"
+    primaryBorderColor: "#0078D4"
+    lineColor: "#0078D4"
+    secondaryColor: "#e0fafe"
+    tertiaryColor: "#f0f2f5"
+    fontFamily: "Inter, Segoe UI, sans-serif"
+    fontSize: "14px"
 ---
 graph TB
-    subgraph "Entra ID Tenant"
-        subgraph "mg-yourcompany"
-            subgraph "sub-prod"
+    subgraph tenant["Entra ID Tenant"]
+        subgraph mg["mg-yourcompany"]
+            subgraph prod["sub-prod"]
                 rg_mon_p["rg-prod-monitoring"]
                 rg_net_p["rg-prod-networking"]
                 rg_app_p["rg-prod-app"]
-                subgraph "Monitoring"
+                subgraph monitoring["Monitoring"]
                     law["Log Analytics Workspace"]
                     defender["Defender for Cloud"]
                 end
-                subgraph "Networking (prod-vnet 10.0.0.0/16)"
+                subgraph net_prod["Networking (prod-vnet 10.0.0.0/16)"]
                     snet_aks["snet-aks /18"]
                     snet_app["snet-app /22"]
                     snet_data["snet-data /22"]
                     snet_shared["snet-shared /24"]
                 end
             end
-            subgraph "sub-nonprod"
+            subgraph nonprod["sub-nonprod"]
                 rg_mon_n["rg-nonprod-monitoring"]
                 rg_net_n["rg-nonprod-networking"]
-                subgraph "Networking (nonprod-vnet 10.1.0.0/16)"
+                subgraph net_nonprod["Networking (nonprod-vnet 10.1.0.0/16)"]
                     snet_aks_n["snet-aks /18"]
                     snet_app_n["snet-app /22"]
                     snet_data_n["snet-data /22"]
@@ -85,6 +94,14 @@ graph TB
     budgets --&gt; rg_net_n
     law --&gt; defender
 
+    style tenant fill:#f0f2f5,stroke:#718096,color:#1a1a2e
+    style mg fill:#f8f9fa,stroke:#0078D4,color:#1a1a2e,stroke-width:2px
+    style prod fill:#e8f4fd,stroke:#0078D4,color:#1a1a2e,stroke-width:2px
+    style nonprod fill:#e0fafe,stroke:#50E6FF,color:#1a1a2e,stroke-width:2px
+    style monitoring fill:#dbeafe,stroke:#005A9E,color:#1a1a2e
+    style net_prod fill:#dbeafe,stroke:#005A9E,color:#1a1a2e
+    style net_nonprod fill:#d5f5f6,stroke:#30C6DF,color:#1a1a2e
+
     style rg_mon_p fill:#0078D4,color:#fff,stroke:#005A9E
     style rg_net_p fill:#0078D4,color:#fff,stroke:#005A9E
     style rg_app_p fill:#0078D4,color:#fff,stroke:#005A9E
@@ -92,16 +109,16 @@ graph TB
     style rg_net_n fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF
     style law fill:#005A9E,color:#fff,stroke:#003D6B
     style defender fill:#005A9E,color:#fff,stroke:#003D6B
-    style snet_aks fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
-    style snet_app fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
-    style snet_data fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
-    style snet_shared fill:#e8f4fd,color:#1a1a2e,stroke:#0078D4
-    style snet_aks_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
-    style snet_app_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
-    style snet_data_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
-    style snet_shared_n fill:#e0fafe,color:#1a1a2e,stroke:#50E6FF
-    style policies fill:#0078D4,color:#fff,stroke:#005A9E
-    style budgets fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF
+    style snet_aks fill:#fff,color:#1a1a2e,stroke:#0078D4
+    style snet_app fill:#fff,color:#1a1a2e,stroke:#0078D4
+    style snet_data fill:#fff,color:#1a1a2e,stroke:#0078D4
+    style snet_shared fill:#fff,color:#1a1a2e,stroke:#0078D4
+    style snet_aks_n fill:#fff,color:#1a1a2e,stroke:#50E6FF
+    style snet_app_n fill:#fff,color:#1a1a2e,stroke:#50E6FF
+    style snet_data_n fill:#fff,color:#1a1a2e,stroke:#50E6FF
+    style snet_shared_n fill:#fff,color:#1a1a2e,stroke:#50E6FF
+    style policies fill:#0078D4,color:#fff,stroke:#005A9E,stroke-width:2px
+    style budgets fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF,stroke-width:2px
   </code></pre>
 </section>
 
