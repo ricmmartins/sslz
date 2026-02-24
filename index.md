@@ -1,0 +1,164 @@
+---
+layout: home
+title: "Startup-Scale Landing Zone"
+description: "A stripped-down, opinionated, deployable Azure Landing Zone for startups. Deploy in under 1 hour."
+---
+
+<section class="hero">
+  <h1>Azure Landing Zone<br>for Startups</h1>
+  <p class="tagline">A stripped-down, opinionated, deployable Azure Landing Zone. Built for teams of 5–50 engineers who need to get Azure right from day one.</p>
+  <div class="hero-ctas">
+    <a href="#quick-start" class="btn btn-primary">Quick Start</a>
+    <a href="{{ site.github_repo }}" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+  </div>
+</section>
+
+<section class="key-points landing-section">
+  <h2>Why This Landing Zone</h2>
+  <p class="section-subtitle">Enterprise-grade foundations without enterprise complexity.</p>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">&#9889;</div>
+      <h3>1 Hour Deploy</h3>
+      <p>From zero to production-ready Azure with Bicep or Terraform. No consultants required.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9878;</div>
+      <h3>2 Subscriptions</h3>
+      <p>One management group, prod + non-prod. Simple hierarchy that grows with you.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128737;</div>
+      <h3>Security Built-in</h3>
+      <p>Defender for Cloud, RBAC, NSG deny-all defaults, policy enforcement from day one.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128176;</div>
+      <h3>Cost Aware</h3>
+      <p>Budget alerts at 50/80/100%, tag enforcement, and reservation guidance built in.</p>
+    </div>
+  </div>
+</section>
+
+<section class="architecture-preview landing-section">
+  <h2>Architecture Overview</h2>
+  <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
+
+```mermaid
+graph TB
+    subgraph "Entra ID Tenant"
+        subgraph "mg-yourcompany"
+            subgraph "sub-prod"
+                rg_mon_p["rg-prod-monitoring"]
+                rg_net_p["rg-prod-networking"]
+                rg_app_p["rg-prod-app"]
+                subgraph "Monitoring"
+                    law["Log Analytics Workspace"]
+                    defender["Defender for Cloud"]
+                end
+                subgraph "Networking (prod-vnet 10.0.0.0/16)"
+                    snet_aks["snet-aks /18"]
+                    snet_app["snet-app /22"]
+                    snet_data["snet-data /22"]
+                    snet_shared["snet-shared /24"]
+                end
+            end
+            subgraph "sub-nonprod"
+                rg_mon_n["rg-nonprod-monitoring"]
+                rg_net_n["rg-nonprod-networking"]
+                subgraph "Networking (nonprod-vnet 10.1.0.0/16)"
+                    snet_aks_n["snet-aks /18"]
+                    snet_app_n["snet-app /22"]
+                    snet_data_n["snet-data /22"]
+                    snet_shared_n["snet-shared /24"]
+                end
+            end
+        end
+        policies["Azure Policies — MCSB (audit) + Tags + Locations"]
+        budgets["Budget Alerts — 50% / 80% / 100%"]
+    end
+    policies --> rg_mon_p
+    policies --> rg_mon_n
+    budgets --> rg_app_p
+    budgets --> rg_net_n
+    law --> defender
+```
+
+</section>
+
+<section class="whats-included landing-section" id="quick-start">
+  <h2>What's Included</h2>
+  <p class="section-subtitle">Everything you need to start, nothing you don't.</p>
+
+| Component | What You Get |
+|---|---|
+| **Management Groups** | Single MG with two subscriptions underneath |
+| **Azure Policy** | Microsoft Cloud Security Benchmark (audit), required tags, allowed locations |
+| **Networking** | VNet + subnets per subscription, NSGs with deny-all-inbound default |
+| **Monitoring** | Log Analytics workspace, Activity Log forwarding, diagnostic settings policy |
+| **Security** | Defender for Cloud CSPM, Defender for Servers P2 (prod), MFA via Security Defaults |
+| **Cost Management** | Budget alerts at 50/80/100%, tagging enforcement |
+| **CI/CD** | GitHub Actions workflows for Bicep and Terraform |
+
+</section>
+
+<section class="landing-section">
+  <h2>Starter Examples</h2>
+  <p class="section-subtitle">Pre-built configurations for common startup archetypes.</p>
+  <div class="examples-grid">
+    <a href="{{ site.github_repo }}/tree/main/examples/saas-startup" class="example-card" target="_blank" rel="noopener">
+      <h3>SaaS Startup</h3>
+      <p>Container Apps + Azure SQL Elastic Pool + Redis + Key Vault</p>
+      <span class="card-link">View on GitHub &rarr;</span>
+    </a>
+    <a href="{{ site.github_repo }}/tree/main/examples/ai-startup" class="example-card" target="_blank" rel="noopener">
+      <h3>AI Startup</h3>
+      <p>AKS with GPU node pools + Azure OpenAI + Blob Storage</p>
+      <span class="card-link">View on GitHub &rarr;</span>
+    </a>
+    <a href="{{ site.github_repo }}/tree/main/examples/api-first-startup" class="example-card" target="_blank" rel="noopener">
+      <h3>API-First Startup</h3>
+      <p>App Service + API Management + Cosmos DB</p>
+      <span class="card-link">View on GitHub &rarr;</span>
+    </a>
+  </div>
+</section>
+
+<section class="landing-section">
+  <h2>Documentation</h2>
+  <p class="section-subtitle">Practical guides written for engineers, not consultants.</p>
+  <div class="docs-grid">
+    <a href="{{ '/docs/architecture' | relative_url }}" class="doc-card">
+      <h3>Architecture Decisions</h3>
+      <p>Why this layout, what we skipped, and when to revisit</p>
+    </a>
+    <a href="{{ '/docs/networking' | relative_url }}" class="doc-card">
+      <h3>Networking Deep Dive</h3>
+      <p>VNet design, NSGs, and when you actually need a hub</p>
+    </a>
+    <a href="{{ '/docs/security' | relative_url }}" class="doc-card">
+      <h3>Security Baseline</h3>
+      <p>Defender, RBAC, logging, and network security</p>
+    </a>
+    <a href="{{ '/docs/cost-management' | relative_url }}" class="doc-card">
+      <h3>Cost Management</h3>
+      <p>Budgets, reservations, and common cost mistakes</p>
+    </a>
+    <a href="{{ '/docs/ci-cd-setup' | relative_url }}" class="doc-card">
+      <h3>CI/CD Setup</h3>
+      <p>Workload Identity Federation and GitHub Actions</p>
+    </a>
+    <a href="{{ '/docs/troubleshooting' | relative_url }}" class="doc-card">
+      <h3>Troubleshooting</h3>
+      <p>Common deployment errors and fixes</p>
+    </a>
+    <a href="{{ '/docs/graduation-guide' | relative_url }}" class="doc-card">
+      <h3>Graduation Guide</h3>
+      <p>When and how to migrate to full ESLZ</p>
+    </a>
+    <a href="{{ '/diagrams/architecture' | relative_url }}" class="doc-card">
+      <h3>Architecture Diagrams</h3>
+      <p>Mermaid diagrams of the full landing zone</p>
+    </a>
+  </div>
+</section>

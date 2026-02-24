@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Troubleshooting"
+nav_order: 6
+description: "Common deployment errors and fixes"
+---
+
 # Troubleshooting
 
 ## Common Deployment Errors

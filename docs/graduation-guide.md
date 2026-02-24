@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Graduation Guide"
+nav_order: 7
+description: "When and how to migrate to full ESLZ"
+---
+
 # Graduation Guide: When and How to Migrate to Full ESLZ
 
 ## Signals It's Time

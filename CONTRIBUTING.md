@@ -1,3 +1,11 @@
+---
+layout: page
+title: "Contributing"
+nav_order: 9
+description: "How to contribute to the Startup-Scale Landing Zone"
+permalink: /contributing
+---
+
 # Contributing
 
 We welcome contributions from startup CTOs, platform engineers, and anyone who's deployed Azure infrastructure at scale and learned from it.

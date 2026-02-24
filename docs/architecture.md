@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Architecture Decisions"
+nav_order: 1
+description: "Why this layout, what we skipped, and when to revisit"
+---
+
 # Architecture Decisions
 
 ## Why This Layout

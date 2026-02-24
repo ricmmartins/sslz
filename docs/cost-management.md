@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Cost Management"
+nav_order: 4
+description: "Budgets, reservations, and common cost mistakes"
+---
+
 # Cost Management
 
 ## Budget Alerts

@@ -1,0 +1,42 @@
+title: "Startup-Scale Landing Zone"
+description: "A stripped-down, opinionated, deployable Azure Landing Zone for startups"
+url: "https://azurelanding.zone"
+baseurl: ""
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+permalink: pretty
+
+exclude:
+  - infra/
+  - scripts/
+  - examples/
+  - azure.yaml
+  - bicepconfig.json
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - node_modules/
+  - "*.tfvars"
+  - "*.tfstate"
+  - .terraform/
+
+defaults:
+  - scope:
+      path: "docs"
+      type: "pages"
+    values:
+      layout: "page"
+  - scope:
+      path: "diagrams"
+      type: "pages"
+    values:
+      layout: "page"
+
+collections_dir: .
+
+github_repo: "https://github.com/rmmartins/azure-landing-zone-startups"

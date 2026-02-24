@@ -1,3 +1,10 @@
+---
+layout: page
+title: "CI/CD Setup"
+nav_order: 5
+description: "Workload Identity Federation, GitHub Actions, and secrets management"
+---
+
 # CI/CD Setup with GitHub Actions
 
 This guide walks you through setting up GitHub Actions to deploy the landing zone automatically using Workload Identity Federation (WIF). WIF eliminates the need for client secrets — instead, GitHub Actions gets short-lived tokens via OIDC.

@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Security Baseline"
+nav_order: 3
+description: "Defender, RBAC, logging, and network security"
+---
+
 # Security Baseline
 
 Security that protects you without slowing you down. Every recommendation here is either free or costs less than a compromised production database.

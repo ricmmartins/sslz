@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Architecture Diagrams"
+nav_order: 8
+description: "Mermaid diagrams of the landing zone architecture"
+---
+
 # Architecture Diagrams
 
 ## Landing Zone Overview (Mermaid)
