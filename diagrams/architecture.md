@@ -11,19 +11,9 @@ description: "Mermaid diagrams of the landing zone architecture"
 
 ![Landing Zone Overview]({{ '/assets/images/landing-zone-overview.png' | relative_url }})
 
-## Graduation Path (Mermaid)
+## Graduation Path
 
-```mermaid
-graph LR
-    A["Starter<br/>1 MG, 2 Subs<br/>No Hub"] -->|"50+ engineers<br/>or compliance"| B["Phase 1<br/>MG Hierarchy"]
-    B --> C["Phase 2<br/>Hub + Firewall"]
-    C --> D["Phase 3<br/>Management Sub"]
-    D --> E["Phase 4<br/>Policy Hardening"]
-    E --> F["Full ESLZ"]
-
-    style A fill:#22c55e,color:#fff
-    style F fill:#3b82f6,color:#fff
-```
+![Graduation Path]({{ '/assets/images/graduation-path.png' | relative_url }})
 
 ## Networking Architecture
 
