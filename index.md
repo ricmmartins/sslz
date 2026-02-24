@@ -6,7 +6,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 
 <section class="hero">
   <h1>Azure Landing Zone<br>for Startups</h1>
-  <p class="tagline">A stripped-down, opinionated, deployable Azure Landing Zone. Built for teams of 5–50 engineers who need to get Azure right from day one.</p>
+  <p class="tagline">A stripped-down, opinionated, production-ready Azure Landing Zone designed for startups and digital-native teams. Built for companies with 5–50 engineers that need to get Azure right from day one without enterprise complexity.</p>
   <div class="hero-ctas">
     <a href="#quick-start" class="btn btn-primary">Quick Start</a>
     <a href="{{ site.github_repo }}" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
