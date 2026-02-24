@@ -15,15 +15,33 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 </section>
 
 <section class="landing-section">
-  <div class="tldr-callout">
-    <h2>TL;DR</h2>
-    <ul>
-      <li><strong>One management group, two subscriptions</strong> (Prod + Non-Prod) is all you need to start. Don't over-engineer your hierarchy.</li>
-      <li><strong>Skip the hub network, Azure Firewall, and dedicated Connectivity subscription</strong> until you actually have hybrid/on-prem requirements or 10+ workloads.</li>
-      <li><strong>Enable Defender for Cloud CSPM (free) + Defender for Servers P2 on prod only.</strong> Turn on diagnostic settings to a single Log Analytics workspace. That's your security baseline.</li>
-      <li><strong>Set budget alerts at 50%, 80%, and 100% of your monthly burn.</strong> Tag everything with <code>environment</code> and <code>team</code>. No exceptions.</li>
-      <li><strong>Deploy this in under 1 hour with Bicep or Terraform.</strong> Graduate to full ESLZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.</li>
-    </ul>
+  <div class="tldr-terminal">
+    <div class="tldr-titlebar">
+      <span class="tldr-dots"><span></span><span></span><span></span></span>
+      <span class="tldr-title">$ cat tldr.md</span>
+    </div>
+    <div class="tldr-body">
+      <div class="tldr-line">
+        <span class="tldr-prompt">1</span>
+        <div><strong>One management group, two subscriptions</strong> (Prod + Non-Prod) is all you need to start. Don't over-engineer your hierarchy.</div>
+      </div>
+      <div class="tldr-line">
+        <span class="tldr-prompt">2</span>
+        <div><strong>Skip the hub network, Azure Firewall, and dedicated Connectivity subscription</strong> until you actually have hybrid/on-prem requirements or 10+ workloads.</div>
+      </div>
+      <div class="tldr-line">
+        <span class="tldr-prompt">3</span>
+        <div><strong>Enable Defender for Cloud CSPM (free) + Defender for Servers P2 on prod only.</strong> Turn on diagnostic settings to a single Log Analytics workspace. That's your security baseline.</div>
+      </div>
+      <div class="tldr-line">
+        <span class="tldr-prompt">4</span>
+        <div><strong>Set budget alerts at 50%, 80%, and 100% of your monthly burn.</strong> Tag everything with <code>environment</code> and <code>team</code>. No exceptions.</div>
+      </div>
+      <div class="tldr-line">
+        <span class="tldr-prompt">5</span>
+        <div><strong>Deploy this in under 1 hour with Bicep or Terraform.</strong> Graduate to full ESLZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -196,33 +214,59 @@ az policy assignment list \
 
 <section class="landing-section" id="day-1-checklist">
   <h2>Day-1 Checklist</h2>
-  <p class="section-subtitle">Everything you need to do on launch day, broken into three phases.</p>
-  <div class="checklist-grid">
-    <div class="checklist-phase">
-      <h3>Pre-Deployment <span class="phase-time">30 min</span></h3>
-      <ul>
-        <li>Verify Entra ID tenant is set up, custom domain added</li>
-        <li>Enable Security Defaults (Entra ID &gt; Properties &gt; Security Defaults)</li>
-        <li>Create break-glass account with hardware MFA key</li>
-        <li>Create security group <code>sg-azure-admins</code>, add 2-3 founders/leads</li>
-      </ul>
+  <p class="section-subtitle">90 minutes from zero to production-ready. Three phases, one afternoon.</p>
+  <div class="timeline">
+    <div class="timeline-phase">
+      <div class="timeline-marker">
+        <span class="timeline-icon">&#9881;</span>
+        <span class="timeline-line"></span>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <h3>Pre-Deployment</h3>
+          <span class="timeline-badge">30 min</span>
+        </div>
+        <ul>
+          <li>Verify Entra ID tenant is set up, custom domain added</li>
+          <li>Enable Security Defaults (Entra ID &gt; Properties &gt; Security Defaults)</li>
+          <li>Create break-glass account with hardware MFA key</li>
+          <li>Create security group <code>sg-azure-admins</code>, add 2-3 founders/leads</li>
+        </ul>
+      </div>
     </div>
-    <div class="checklist-phase">
-      <h3>Deploy <span class="phase-time">30 min</span></h3>
-      <ul>
-        <li>Run Bicep or Terraform deployment (creates policies, networking, monitoring, security, budgets)</li>
-        <li>Verify resources in Azure Portal</li>
-      </ul>
+    <div class="timeline-phase">
+      <div class="timeline-marker">
+        <span class="timeline-icon">&#9889;</span>
+        <span class="timeline-line"></span>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <h3>Deploy</h3>
+          <span class="timeline-badge">30 min</span>
+        </div>
+        <ul>
+          <li>Run Bicep or Terraform deployment (creates policies, networking, monitoring, security, budgets)</li>
+          <li>Verify resources in Azure Portal</li>
+        </ul>
+      </div>
     </div>
-    <div class="checklist-phase">
-      <h3>Post-Deployment <span class="phase-time">30 min</span></h3>
-      <ul>
-        <li>Assign <code>sg-azure-admins</code> as Owner on the management group</li>
-        <li>Create Entra ID groups: <code>sg-azure-developers</code>, <code>sg-azure-readers</code></li>
-        <li>Assign RBAC roles (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
-        <li>Set up CI/CD with Workload Identity Federation</li>
-        <li>Test a sample deployment end-to-end</li>
-      </ul>
+    <div class="timeline-phase">
+      <div class="timeline-marker">
+        <span class="timeline-icon">&#10003;</span>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <h3>Post-Deployment</h3>
+          <span class="timeline-badge">30 min</span>
+        </div>
+        <ul>
+          <li>Assign <code>sg-azure-admins</code> as Owner on the management group</li>
+          <li>Create Entra ID groups: <code>sg-azure-developers</code>, <code>sg-azure-readers</code></li>
+          <li>Assign RBAC roles (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
+          <li>Set up CI/CD with Workload Identity Federation</li>
+          <li>Test a sample deployment end-to-end</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
