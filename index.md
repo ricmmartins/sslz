@@ -43,9 +43,9 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="landing-section alt-bg">
   <h2>How It Compares</h2>
   <div class="compare-grid">
-    <div class="compare-card">
+    
       <h3><a href="https://aka.ms/alz">ALZ (Enterprise Scale):</a></h3> 100+ modules, months to understand, built for 10k-seat enterprises
-    </div>
+    
     <div class="compare-card">
       <h3><a href="https://github.com/Azure/ALZ-Bicep">ALZ-Bicep</a></h3>
       <p>Still enterprise-scoped, overwhelming for a 10-person startup</p>
