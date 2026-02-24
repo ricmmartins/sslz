@@ -43,7 +43,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-  <div class="mermaid">
+  <pre class="mermaid">
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e8f4fd", "primaryTextColor": "#1a1a2e", "primaryBorderColor": "#0078D4", "lineColor": "#0078D4", "secondaryColor": "#e0fafe", "tertiaryColor": "#f0f2f5", "fontFamily": "Inter, Segoe UI, sans-serif", "fontSize": "13px"}, "flowchart": {"useMaxWidth": false, "diagramPadding": 30, "nodeSpacing": 40, "rankSpacing": 40}}}%%
 graph TB
     subgraph tenant[" Entra ID Tenant "]
@@ -108,7 +108,7 @@ graph TB
     style snet_shared_n fill:#fff,color:#1a1a2e,stroke:#50E6FF
     style policies fill:#0078D4,color:#fff,stroke:#005A9E,stroke-width:2px
     style budgets fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF,stroke-width:2px
-  </div>
+  </pre>
 </section>
 
 <section class="whats-included landing-section" id="quick-start">
