@@ -43,9 +43,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-
-```mermaid
-graph TB
+  <pre><code class="language-mermaid">graph TB
     subgraph "Entra ID Tenant"
         subgraph "mg-yourcompany"
             subgraph "sub-prod"
@@ -82,24 +80,26 @@ graph TB
     budgets --> rg_app_p
     budgets --> rg_net_n
     law --> defender
-```
-
+  </code></pre>
 </section>
 
 <section class="whats-included landing-section" id="quick-start">
   <h2>What's Included</h2>
   <p class="section-subtitle">Everything you need to start, nothing you don't.</p>
-
-| Component | What You Get |
-|---|---|
-| **Management Groups** | Single MG with two subscriptions underneath |
-| **Azure Policy** | Microsoft Cloud Security Benchmark (audit), required tags, allowed locations |
-| **Networking** | VNet + subnets per subscription, NSGs with deny-all-inbound default |
-| **Monitoring** | Log Analytics workspace, Activity Log forwarding, diagnostic settings policy |
-| **Security** | Defender for Cloud CSPM, Defender for Servers P2 (prod), MFA via Security Defaults |
-| **Cost Management** | Budget alerts at 50/80/100%, tagging enforcement |
-| **CI/CD** | GitHub Actions workflows for Bicep and Terraform |
-
+  <table>
+    <thead>
+      <tr><th>Component</th><th>What You Get</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Management Groups</strong></td><td>Single MG with two subscriptions underneath</td></tr>
+      <tr><td><strong>Azure Policy</strong></td><td>Microsoft Cloud Security Benchmark (audit), required tags, allowed locations</td></tr>
+      <tr><td><strong>Networking</strong></td><td>VNet + subnets per subscription, NSGs with deny-all-inbound default</td></tr>
+      <tr><td><strong>Monitoring</strong></td><td>Log Analytics workspace, Activity Log forwarding, diagnostic settings policy</td></tr>
+      <tr><td><strong>Security</strong></td><td>Defender for Cloud CSPM, Defender for Servers P2 (prod), MFA via Security Defaults</td></tr>
+      <tr><td><strong>Cost Management</strong></td><td>Budget alerts at 50/80/100%, tagging enforcement</td></tr>
+      <tr><td><strong>CI/CD</strong></td><td>GitHub Actions workflows for Bicep and Terraform</td></tr>
+    </tbody>
+  </table>
 </section>
 
 <section class="landing-section">

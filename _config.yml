@@ -39,4 +39,4 @@ defaults:
 
 collections_dir: .
 
-github_repo: "https://github.com/rmmartins/azure-landing-zone-startups"
+github_repo: "https://github.com/ricmmartins/sslz"
