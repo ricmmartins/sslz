@@ -44,38 +44,42 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
   <pre class="mermaid">
-%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e8f4fd", "primaryTextColor": "#1a1a2e", "primaryBorderColor": "#0078D4", "lineColor": "#0078D4", "secondaryColor": "#e0fafe", "tertiaryColor": "#f0f2f5", "fontFamily": "Inter, Segoe UI, sans-serif", "fontSize": "13px"}, "flowchart": {"useMaxWidth": false, "diagramPadding": 30, "nodeSpacing": 40, "rankSpacing": 40}}}%%
-graph TB
-    subgraph tenant[" Entra ID Tenant "]
-        subgraph mg[" mg-yourcompany "]
-            subgraph prod[" sub-prod "]
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e8f4fd", "primaryTextColor": "#1a1a2e", "primaryBorderColor": "#0078D4", "lineColor": "#0078D4", "secondaryColor": "#e0fafe", "tertiaryColor": "#f0f2f5", "fontFamily": "Inter, Segoe UI, sans-serif", "fontSize": "14px"}, "flowchart": {"useMaxWidth": true, "htmlLabels": true, "diagramPadding": 20, "nodeSpacing": 30, "rankSpacing": 30, "padding": 15}}}%%
+graph LR
+    subgraph tenant["Entra ID Tenant"]
+        direction TB
+        policies["Azure Policies<br/>MCSB + Tags + Locations"]
+        budgets["Budget Alerts<br/>50% / 80% / 100%"]
+        subgraph mg["mg-yourcompany"]
+            direction LR
+            subgraph prod["sub-prod"]
+                direction TB
                 rg_mon_p["rg-prod-monitoring"]
                 rg_net_p["rg-prod-networking"]
                 rg_app_p["rg-prod-app"]
-                subgraph monitoring[" Monitoring "]
-                    law["Log Analytics"]
-                    defender["Defender"]
+                subgraph monitoring["Monitoring"]
+                    law["Log Analytics<br/>Workspace"]
+                    defender["Defender for<br/>Cloud"]
                 end
-                subgraph net_prod[" prod-vnet 10.0.0.0/16 "]
-                    snet_aks["snet-aks /18"]
-                    snet_app["snet-app /22"]
-                    snet_data["snet-data /22"]
-                    snet_shared["snet-shared /24"]
+                subgraph net_prod["prod-vnet 10.0.0.0/16"]
+                    snet_aks["snet-aks<br/>/18"]
+                    snet_app["snet-app<br/>/22"]
+                    snet_data["snet-data<br/>/22"]
+                    snet_shared["snet-shared<br/>/24"]
                 end
             end
-            subgraph nonprod[" sub-nonprod "]
+            subgraph nonprod["sub-nonprod"]
+                direction TB
                 rg_mon_n["rg-nonprod-monitoring"]
                 rg_net_n["rg-nonprod-networking"]
-                subgraph net_nonprod[" nonprod-vnet 10.1.0.0/16 "]
-                    snet_aks_n["snet-aks /18"]
-                    snet_app_n["snet-app /22"]
-                    snet_data_n["snet-data /22"]
-                    snet_shared_n["snet-shared /24"]
+                subgraph net_nonprod["nonprod-vnet 10.1.0.0/16"]
+                    snet_aks_n["snet-aks<br/>/18"]
+                    snet_app_n["snet-app<br/>/22"]
+                    snet_data_n["snet-data<br/>/22"]
+                    snet_shared_n["snet-shared<br/>/24"]
                 end
             end
         end
-        policies["Azure Policies\nMCSB + Tags + Locations"]
-        budgets["Budget Alerts\n50% / 80% / 100%"]
     end
     policies --> rg_mon_p
     policies --> rg_mon_n
