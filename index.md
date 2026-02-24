@@ -45,16 +45,11 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   <h2>How It Compares</h2>
   <div class="compare-grid">
     <div class="compare-card">
-      <h3><a href="https://aka.ms/alz">ALZ (Enterprise Scale)</a></h3>
-      <p>100+ modules, months to understand, built for 10k-seat enterprises</p>
-    </div>
-    <div class="compare-card">
-      <h3><a href="https://github.com/Azure/ALZ-Bicep">ALZ-Bicep</a></h3>
-      <p>Still enterprise-scoped, overwhelming for a 10-person startup</p>
-    </div>
-    <div class="compare-card">
-      <h3><a href="https://github.com/Azure/terraform-azurerm-caf-enterprise-scale">CAF Terraform Module</a></h3>
-      <p>Enterprise-scoped, entering extended support (archived Aug 2026). Microsoft now recommends <a href="https://aka.ms/avm">Azure Verified Modules</a>.</p>
+    [ALZ (Enterprise Scale):](https://aka.ms/alz) 100+ modules, months to understand, built for 10k-seat enterprises
+    [ALZ-Bicep:](https://github.com/Azure/ALZ-Bicep) Still enterprise-scoped, overwhelming for a 10-person startup
+    [CAF Terraform Module:](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) Enterprise-scoped, entering extended support (archived Aug 2026). Microsoft now recommends Azure Verified Modules.
+
+This Project: Deploys in 1 hour. Grows with you. Written for engineers, not consultants.
     </div>
     <div class="compare-card accent">
       <h3>This Project</h3>
