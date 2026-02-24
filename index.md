@@ -86,10 +86,6 @@ nonprod-vnet (10.1.0.0/16)
 └── (same layout)</pre>
     </div>
   </div>
-  <figure class="diagram-frame">
-    <img src="{{ '/assets/images/architecture-overview.png' | relative_url }}" alt="Architecture overview showing Entra ID Tenant with management group, prod and nonprod subscriptions, networking, monitoring, policies, and budget alerts" data-zoomable>
-    <figcaption>Full architecture diagram — click to enlarge.</figcaption>
-  </figure>
 </section>
 
 <section class="landing-section alt-bg" id="quick-start">
