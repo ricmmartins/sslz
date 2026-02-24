@@ -54,30 +54,36 @@ config:
     secondaryColor: "#e0fafe"
     tertiaryColor: "#f0f2f5"
     fontFamily: "Inter, Segoe UI, sans-serif"
-    fontSize: "14px"
+    fontSize: "13px"
+  flowchart:
+    useMaxWidth: false
+    padding: 30
+    diagramPadding: 30
+    nodeSpacing: 40
+    rankSpacing: 40
 ---
 graph TB
-    subgraph tenant["Entra ID Tenant"]
-        subgraph mg["mg-yourcompany"]
-            subgraph prod["sub-prod"]
+    subgraph tenant[" Entra ID Tenant "]
+        subgraph mg[" mg-yourcompany "]
+            subgraph prod[" sub-prod "]
                 rg_mon_p["rg-prod-monitoring"]
                 rg_net_p["rg-prod-networking"]
                 rg_app_p["rg-prod-app"]
-                subgraph monitoring["Monitoring"]
-                    law["Log Analytics Workspace"]
-                    defender["Defender for Cloud"]
+                subgraph monitoring[" Monitoring "]
+                    law["Log Analytics"]
+                    defender["Defender"]
                 end
-                subgraph net_prod["Networking (prod-vnet 10.0.0.0/16)"]
+                subgraph net_prod[" prod-vnet 10.0.0.0/16 "]
                     snet_aks["snet-aks /18"]
                     snet_app["snet-app /22"]
                     snet_data["snet-data /22"]
                     snet_shared["snet-shared /24"]
                 end
             end
-            subgraph nonprod["sub-nonprod"]
+            subgraph nonprod[" sub-nonprod "]
                 rg_mon_n["rg-nonprod-monitoring"]
                 rg_net_n["rg-nonprod-networking"]
-                subgraph net_nonprod["Networking (nonprod-vnet 10.1.0.0/16)"]
+                subgraph net_nonprod[" nonprod-vnet 10.1.0.0/16 "]
                     snet_aks_n["snet-aks /18"]
                     snet_app_n["snet-app /22"]
                     snet_data_n["snet-data /22"]
@@ -85,8 +91,8 @@ graph TB
                 end
             end
         end
-        policies["Azure Policies — MCSB (audit) + Tags + Locations"]
-        budgets["Budget Alerts — 50% / 80% / 100%"]
+        policies["Azure Policies\nMCSB + Tags + Locations"]
+        budgets["Budget Alerts\n50% / 80% / 100%"]
     end
     policies --&gt; rg_mon_p
     policies --&gt; rg_mon_n

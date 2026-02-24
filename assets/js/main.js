@@ -82,9 +82,8 @@
       var theme = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
       mermaid.initialize({
         startOnLoad: true,
-        theme: theme,
         securityLevel: 'loose',
-        flowchart: { useMaxWidth: false, htmlLabels: true }
+        flowchart: { useMaxWidth: false, htmlLabels: true, diagramPadding: 30 }
       });
     };
     document.head.appendChild(script);
