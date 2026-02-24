@@ -97,7 +97,6 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-
   <div class="arch-visual">
     <div class="arch-panel">
       <h3>Management Hierarchy</h3>
@@ -130,7 +129,6 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
         </div>
       </div>
     </div>
-
     <div class="arch-panel">
       <h3>Network Layout</h3>
       <div class="net-diagram">
@@ -140,10 +138,10 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
             <code>10.0.0.0/16</code>
           </div>
           <div class="net-subnets">
-            <div class="net-subnet" style="--subnet-color: #3B82F6"><span>snet-aks</span><code>/18</code></div>
-            <div class="net-subnet" style="--subnet-color: #10B981"><span>snet-app</span><code>/22</code></div>
-            <div class="net-subnet" style="--subnet-color: #F59E0B"><span>snet-data</span><code>/22</code></div>
-            <div class="net-subnet" style="--subnet-color: #8B5CF6"><span>snet-shared</span><code>/24</code></div>
+            <div class="net-subnet subnet-aks"><span>snet-aks</span><code>/18</code></div>
+            <div class="net-subnet subnet-app"><span>snet-app</span><code>/22</code></div>
+            <div class="net-subnet subnet-data"><span>snet-data</span><code>/22</code></div>
+            <div class="net-subnet subnet-shared"><span>snet-shared</span><code>/24</code></div>
           </div>
         </div>
         <div class="net-vnet net-vnet-nonprod">
@@ -152,10 +150,10 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
             <code>10.1.0.0/16</code>
           </div>
           <div class="net-subnets">
-            <div class="net-subnet" style="--subnet-color: #3B82F6"><span>snet-aks</span><code>/18</code></div>
-            <div class="net-subnet" style="--subnet-color: #10B981"><span>snet-app</span><code>/22</code></div>
-            <div class="net-subnet" style="--subnet-color: #F59E0B"><span>snet-data</span><code>/22</code></div>
-            <div class="net-subnet" style="--subnet-color: #8B5CF6"><span>snet-shared</span><code>/24</code></div>
+            <div class="net-subnet subnet-aks"><span>snet-aks</span><code>/18</code></div>
+            <div class="net-subnet subnet-app"><span>snet-app</span><code>/22</code></div>
+            <div class="net-subnet subnet-data"><span>snet-data</span><code>/22</code></div>
+            <div class="net-subnet subnet-shared"><span>snet-shared</span><code>/24</code></div>
           </div>
         </div>
         <div class="net-no-peering">

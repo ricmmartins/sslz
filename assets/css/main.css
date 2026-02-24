@@ -873,9 +873,14 @@ img {
   justify-content: space-between;
   padding: 0.4rem 0.6rem;
   border-radius: 5px;
-  border-left: 3px solid var(--subnet-color);
+  border-left: 3px solid var(--border-color);
   background: var(--bg-primary);
 }
+
+.net-subnet.subnet-aks { border-left-color: #3B82F6; }
+.net-subnet.subnet-app { border-left-color: #10B981; }
+.net-subnet.subnet-data { border-left-color: #F59E0B; }
+.net-subnet.subnet-shared { border-left-color: #8B5CF6; }
 
 .net-subnet span {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
