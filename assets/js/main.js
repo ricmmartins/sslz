@@ -80,7 +80,12 @@
     script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
     script.onload = function () {
       var theme = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-      mermaid.initialize({ startOnLoad: true, theme: theme, securityLevel: 'loose' });
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: theme,
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: false, htmlLabels: true }
+      });
     };
     document.head.appendChild(script);
   }
