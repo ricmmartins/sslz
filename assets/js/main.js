@@ -63,11 +63,9 @@
 
   /* --- Mermaid Initialization --- */
   function initMermaid() {
+    // Convert markdown-rendered code blocks to mermaid divs
     var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid');
-    if (mermaidBlocks.length === 0) return;
-
-    // Convert code blocks to mermaid divs
-    mermaidBlocks.forEach(function (block, i) {
+    mermaidBlocks.forEach(function (block) {
       var pre = block.parentElement;
       var div = document.createElement('div');
       div.className = 'mermaid';
@@ -75,16 +73,20 @@
       pre.parentNode.replaceChild(div, pre);
     });
 
+    // Check if any mermaid divs exist (either from conversion above or hardcoded in HTML)
+    var mermaidDivs = document.querySelectorAll('.mermaid');
+    if (mermaidDivs.length === 0) return;
+
     // Load mermaid from CDN
     var script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
     script.onload = function () {
-      var theme = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
       mermaid.initialize({
         startOnLoad: true,
         securityLevel: 'loose',
         flowchart: { useMaxWidth: false, htmlLabels: true, diagramPadding: 30 }
       });
+      mermaid.run({ nodes: mermaidDivs });
     };
     document.head.appendChild(script);
   }

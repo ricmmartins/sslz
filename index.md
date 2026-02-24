@@ -43,25 +43,8 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-  <pre><code class="language-mermaid">---
-config:
-  theme: base
-  themeVariables:
-    primaryColor: "#e8f4fd"
-    primaryTextColor: "#1a1a2e"
-    primaryBorderColor: "#0078D4"
-    lineColor: "#0078D4"
-    secondaryColor: "#e0fafe"
-    tertiaryColor: "#f0f2f5"
-    fontFamily: "Inter, Segoe UI, sans-serif"
-    fontSize: "13px"
-  flowchart:
-    useMaxWidth: false
-    padding: 30
-    diagramPadding: 30
-    nodeSpacing: 40
-    rankSpacing: 40
----
+  <div class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e8f4fd", "primaryTextColor": "#1a1a2e", "primaryBorderColor": "#0078D4", "lineColor": "#0078D4", "secondaryColor": "#e0fafe", "tertiaryColor": "#f0f2f5", "fontFamily": "Inter, Segoe UI, sans-serif", "fontSize": "13px"}, "flowchart": {"useMaxWidth": false, "diagramPadding": 30, "nodeSpacing": 40, "rankSpacing": 40}}}%%
 graph TB
     subgraph tenant[" Entra ID Tenant "]
         subgraph mg[" mg-yourcompany "]
@@ -94,11 +77,11 @@ graph TB
         policies["Azure Policies\nMCSB + Tags + Locations"]
         budgets["Budget Alerts\n50% / 80% / 100%"]
     end
-    policies --&gt; rg_mon_p
-    policies --&gt; rg_mon_n
-    budgets --&gt; rg_app_p
-    budgets --&gt; rg_net_n
-    law --&gt; defender
+    policies --> rg_mon_p
+    policies --> rg_mon_n
+    budgets --> rg_app_p
+    budgets --> rg_net_n
+    law --> defender
 
     style tenant fill:#f0f2f5,stroke:#718096,color:#1a1a2e
     style mg fill:#f8f9fa,stroke:#0078D4,color:#1a1a2e,stroke-width:2px
@@ -125,7 +108,7 @@ graph TB
     style snet_shared_n fill:#fff,color:#1a1a2e,stroke:#50E6FF
     style policies fill:#0078D4,color:#fff,stroke:#005A9E,stroke-width:2px
     style budgets fill:#50E6FF,color:#1a1a2e,stroke:#30C6DF,stroke-width:2px
-  </code></pre>
+  </div>
 </section>
 
 <section class="whats-included landing-section" id="quick-start">
