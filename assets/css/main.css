@@ -631,6 +631,45 @@ img {
 }
 
 /* ========================================
+   Image Lightbox
+   ======================================== */
+.page-content img[data-zoomable] {
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+}
+
+.page-content img[data-zoomable]:hover {
+  opacity: 0.85;
+}
+
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  cursor: zoom-out;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lightbox-overlay.active {
+  display: flex;
+}
+
+.lightbox-overlay img {
+  max-width: 95%;
+  max-height: 95vh;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================
    Mermaid
    ======================================== */
 .mermaid {

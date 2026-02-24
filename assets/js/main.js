@@ -61,6 +61,40 @@
     }
   });
 
+  /* --- Image Lightbox --- */
+  function initLightbox() {
+    var overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    overlay.innerHTML = '<img src="" alt="">';
+    document.body.appendChild(overlay);
+
+    var overlayImg = overlay.querySelector('img');
+
+    // Add data-zoomable to all images inside .page-content
+    document.querySelectorAll('.page-content img').forEach(function (img) {
+      img.setAttribute('data-zoomable', '');
+      img.addEventListener('click', function () {
+        overlayImg.src = img.src;
+        overlayImg.alt = img.alt;
+        overlay.classList.add('active');
+      });
+    });
+
+    overlay.addEventListener('click', function () {
+      overlay.classList.remove('active');
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') overlay.classList.remove('active');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLightbox);
+  } else {
+    initLightbox();
+  }
+
   /* --- Mermaid: convert markdown code blocks to mermaid divs --- */
   function convertMermaidBlocks() {
     document.querySelectorAll('pre code.language-mermaid').forEach(function (block) {
