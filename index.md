@@ -66,9 +66,29 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
+  <div class="arch-trees">
+    <div class="architecture-tree">
+      <h3>Management Hierarchy</h3>
+<pre>Tenant Root Group
+└── mg-&lt;yourcompany&gt;              ← Policies here
+    ├── sub-&lt;yourcompany&gt;-prod    ← Production
+    └── sub-&lt;yourcompany&gt;-nonprod ← Dev / Staging</pre>
+    </div>
+    <div class="architecture-tree">
+      <h3>Network Layout</h3>
+<pre>prod-vnet (10.0.0.0/16)
+├── snet-aks         10.0.0.0/18
+├── snet-app         10.0.4.0/22
+├── snet-data        10.0.8.0/22
+└── snet-shared      10.0.12.0/24
+
+nonprod-vnet (10.1.0.0/16)
+└── (same layout)</pre>
+    </div>
+  </div>
   <figure class="diagram-frame">
     <img src="{{ '/assets/images/architecture-overview.png' | relative_url }}" alt="Architecture overview showing Entra ID Tenant with management group, prod and nonprod subscriptions, networking, monitoring, policies, and budget alerts" data-zoomable>
-    <figcaption>Entra ID tenant, management group, two subscriptions, networking, monitoring, policies &amp; budgets. Click to enlarge.</figcaption>
+    <figcaption>Full architecture diagram — click to enlarge.</figcaption>
   </figure>
 </section>
 

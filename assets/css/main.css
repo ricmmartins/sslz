@@ -675,6 +675,36 @@ img {
   min-width: 700px;
 }
 
+.arch-trees {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.arch-trees .architecture-tree {
+  margin-bottom: 0;
+}
+
+.arch-trees .architecture-tree h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.arch-trees .architecture-tree pre {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
 .diagram-frame {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -1027,6 +1057,10 @@ img {
   }
 
   .quick-start-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .arch-trees {
     grid-template-columns: 1fr;
   }
 
