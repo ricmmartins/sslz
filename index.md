@@ -66,7 +66,10 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
   <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
-  <img src="{{ '/assets/images/architecture-overview.png' | relative_url }}" alt="Architecture overview showing Entra ID Tenant with management group, prod and nonprod subscriptions, networking, monitoring, policies, and budget alerts" style="max-width: 100%; border-radius: 10px; border: 1px solid var(--border-color);">
+  <figure class="diagram-frame">
+    <img src="{{ '/assets/images/architecture-overview.png' | relative_url }}" alt="Architecture overview showing Entra ID Tenant with management group, prod and nonprod subscriptions, networking, monitoring, policies, and budget alerts" data-zoomable>
+    <figcaption>Entra ID tenant, management group, two subscriptions, networking, monitoring, policies &amp; budgets. Click to enlarge.</figcaption>
+  </figure>
 </section>
 
 <section class="landing-section alt-bg" id="quick-start">

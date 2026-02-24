@@ -675,6 +675,29 @@ img {
   min-width: 700px;
 }
 
+.diagram-frame {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  margin: 0;
+}
+
+.diagram-frame img {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  cursor: zoom-in;
+}
+
+.diagram-frame figcaption {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
 /* --- Comparison grid --- */
 .compare-grid {
   display: grid;

@@ -73,6 +73,10 @@
     // Add data-zoomable to all images inside .page-content
     document.querySelectorAll('.page-content img').forEach(function (img) {
       img.setAttribute('data-zoomable', '');
+    });
+
+    // Attach lightbox click to all data-zoomable images
+    document.querySelectorAll('img[data-zoomable]').forEach(function (img) {
       img.addEventListener('click', function () {
         overlayImg.src = img.src;
         overlayImg.alt = img.alt;
