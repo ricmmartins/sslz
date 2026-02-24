@@ -17,38 +17,9 @@ description: "Mermaid diagrams of the landing zone architecture"
 
 ## Networking Architecture
 
-```mermaid
-graph TB
-    subgraph "prod-vnet 10.0.0.0/16"
-        subgraph "snet-aks 10.0.0.0/18 (16,382 IPs)"
-            aks_nodes["AKS Nodes + Pods<br/>(Azure CNI assigns pod IPs here)"]
-        end
-        subgraph "snet-app 10.0.4.0/22 (1,022 IPs)"
-            app_svc["App Services<br/>Container Apps<br/>VNet-integrated"]
-        end
-        subgraph "snet-data 10.0.8.0/22 (1,022 IPs)"
-            pe["Private Endpoints<br/>SQL, Cosmos, Redis,<br/>Storage, Key Vault"]
-        end
-        subgraph "snet-shared 10.0.12.0/24 (254 IPs)"
-            bastion["Azure Bastion"]
-            vpn["VPN Gateway<br/>(if needed)"]
-        end
-    end
+![Networking Architecture]({{ '/assets/images/networking-architecture.png' | relative_url }})
 
-    nsg_aks["NSG: snet-aks<br/>Deny all inbound (default)<br/>Allow AzureLoadBalancer<br/>Allow VNet internal"]
-    nsg_app["NSG: snet-app<br/>Deny all inbound (default)<br/>Allow HTTPS from Internet"]
-    nsg_data["NSG: snet-data<br/>Deny all inbound (default)<br/>Allow snet-aks, snet-app only"]
-
-    nsg_aks --> aks_nodes
-    nsg_app --> app_svc
-    nsg_data --> pe
-
-    internet["Internet"] -->|"HTTPS (443)"| app_svc
-    aks_nodes -->|"Private Endpoint"| pe
-    app_svc -->|"Private Endpoint"| pe
-```
-
-> **Note:** All subnets have a default deny-all-inbound NSG rule. Traffic is explicitly allowed per the arrows above. The `/18` AKS subnet is intentionally large because Azure CNI allocates one IP per pod.
+> **Note:** All subnets have a default deny-all-inbound NSG rule. The `/18` AKS subnet is intentionally large because Azure CNI allocates one IP per pod.
 
 ## Security Model
 
