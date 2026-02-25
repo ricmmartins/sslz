@@ -1,6 +1,6 @@
 ---
 layout: home
-title: "The Startup-Scale Landing Zone"
+title: "Startup-Scale Landing Zone (SSLZ)"
 description: "A stripped-down, opinionated, deployable Azure Landing Zone for startups. Deploy in under 1 hour."
 ---
 
