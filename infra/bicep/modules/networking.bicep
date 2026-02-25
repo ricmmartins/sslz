@@ -25,22 +25,27 @@ param tags object
 var baseOctet = split(split(vnetAddressPrefix, '.')[0], '/')[0]
 var secondOctet = split(vnetAddressPrefix, '.')[1]
 
+/*
+  IMPORTANT:
+  If AKS subnet is /20 starting at x.y.0.0/20, it covers x.y.0.0 - x.y.15.255.
+  Therefore, app/data/shared must start at x.y.16.0+ to avoid overlap.
+*/
 var subnets = {
   aks: {
     name: 'snet-aks'
-    addressPrefix: '${baseOctet}.${secondOctet}.0.0/20'
+    addressPrefix: '${baseOctet}.${secondOctet}.0.0/20'     // 10.x.0.0/20
   }
   app: {
     name: 'snet-app'
-    addressPrefix: '${baseOctet}.${secondOctet}.4.0/22'
+    addressPrefix: '${baseOctet}.${secondOctet}.16.0/22'    // 10.x.16.0/22
   }
   data: {
     name: 'snet-data'
-    addressPrefix: '${baseOctet}.${secondOctet}.8.0/22'
+    addressPrefix: '${baseOctet}.${secondOctet}.20.0/22'    // 10.x.20.0/22
   }
   shared: {
     name: 'snet-shared'
-    addressPrefix: '${baseOctet}.${secondOctet}.12.0/24'
+    addressPrefix: '${baseOctet}.${secondOctet}.24.0/24'    // 10.x.24.0/24
   }
 }
 
