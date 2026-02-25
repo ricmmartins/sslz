@@ -41,8 +41,8 @@ Use `10.x.0.0/16` ranges. They're private (RFC 1918), don't conflict with most c
 ```
 prod-vnet 10.0.0.0/16
 │
-├── snet-aks           10.0.0.0/18    (16,384 IPs)
-│   └── For AKS with Azure CNI — each pod gets an IP
+├── snet-aks           10.0.0.0/20    (4,096 IPs)
+│   └── For AKS nodes + Azure CNI pods (pod IPs come from the subnet)
 │
 ├── snet-app           10.0.4.0/22    (1,024 IPs)
 │   └── App Service / Container Apps VNet integration
@@ -54,7 +54,7 @@ prod-vnet 10.0.0.0/16
     └── CI/CD agents, jump boxes, Bastion subnet
 ```
 
-**Why `/18` for AKS?** Azure CNI assigns one IP per pod. A modest cluster with 10 nodes and 30 pods each = 300 IPs. But AKS also needs IPs for upgrades (surge nodes) and internal services. `/18` gives you 16k IPs — enough to not think about it for years.
+**Why `/20` for AKS?** With Azure CNI, pods consume IPs from the subnet. A modest cluster with 10 nodes and 30 pods each is ~300 pod IPs. Add headroom for upgrades (surge nodes), system components, and future node pools. A /20 gives you ~4k IPs, which is a solid default for most startup-scale clusters. If you expect a much larger cluster (high node count, multiple pools, high max-pods), bump AKS to `/19` or `/18`.
 
 **Why `/22` for data?** Each Private Endpoint uses one IP. You'll have 5-20 Private Endpoints in a typical startup. `/22` gives you 1,024 — way more than you need, but subnets are free and re-sizing them later is painful.
 
