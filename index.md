@@ -138,7 +138,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
             <code>10.0.0.0/16</code>
           </div>
           <div class="net-subnets">
-            <div class="net-subnet subnet-aks"><span>snet-aks</span><code>/18</code></div>
+            <div class="net-subnet subnet-aks"><span>snet-aks</span><code>/20</code></div>
             <div class="net-subnet subnet-app"><span>snet-app</span><code>/22</code></div>
             <div class="net-subnet subnet-data"><span>snet-data</span><code>/22</code></div>
             <div class="net-subnet subnet-shared"><span>snet-shared</span><code>/24</code></div>
