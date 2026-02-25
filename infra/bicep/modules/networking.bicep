@@ -28,7 +28,7 @@ var secondOctet = split(vnetAddressPrefix, '.')[1]
 var subnets = {
   aks: {
     name: 'snet-aks'
-    addressPrefix: '${baseOctet}.${secondOctet}.0.0/18'
+    addressPrefix: '${baseOctet}.${secondOctet}.0.0/20'
   }
   app: {
     name: 'snet-app'
