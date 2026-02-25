@@ -6,7 +6,8 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 
 <section class="hero">
   <a href="{{ site.github_repo }}" class="hero-badge" target="_blank" rel="noopener">Open Source on GitHub</a>
-  <h1>Startup-Scale Landing Zone (SSLZ): The Azure Landing Zone<br>for Startups</h1>
+  <h1>Startup-Scale Landing Zone</h1>
+  <h2>The Azure Landing Zone<br>for Startups</h2>
   <p class="tagline">A stripped-down, opinionated, production-ready Azure Landing Zone designed for startups and digital-native teams. Built for companies with 5–50 engineers that need to get Azure right from day one without enterprise complexity.</p>
   <div class="hero-ctas">
     <a href="#quick-start" class="btn btn-primary">Quick Start</a>
