@@ -1,24 +1,28 @@
 locals {
-  # Extract base octets from the address prefix (e.g., "10.0" from "10.0.0.0/16")
-  octets      = split(".", var.vnet_address_prefix)
-  base_prefix = "${local.octets[0]}.${local.octets[1]}"
+  # Build non-overlapping subnets from the VNet CIDR.
+  # Assumes the VNet is at least /16 (default in this repo is /16).
+  # Layout:
+  # - AKS:   /20  (netnum 0)   -> 10.x.0.0/20
+  # - APP:   /22  (netnum 4)   -> 10.x.16.0/22
+  # - DATA:  /22  (netnum 5)   -> 10.x.20.0/22
+  # - SHARED /24  (netnum 24)  -> 10.x.24.0/24
 
   subnets = {
     aks = {
       name           = "snet-aks"
-      address_prefix = "${local.base_prefix}.0.0/18"
+      address_prefix = cidrsubnet(var.vnet_address_prefix, 4, 0)
     }
     app = {
       name           = "snet-app"
-      address_prefix = "${local.base_prefix}.4.0/22"
+      address_prefix = cidrsubnet(var.vnet_address_prefix, 6, 4)
     }
     data = {
       name           = "snet-data"
-      address_prefix = "${local.base_prefix}.8.0/22"
+      address_prefix = cidrsubnet(var.vnet_address_prefix, 6, 5)
     }
     shared = {
       name           = "snet-shared"
-      address_prefix = "${local.base_prefix}.12.0/24"
+      address_prefix = cidrsubnet(var.vnet_address_prefix, 8, 24)
     }
   }
 }
@@ -26,7 +30,6 @@ locals {
 # ==============================================================================
 # NSGs
 # ==============================================================================
-
 resource "azurerm_network_security_group" "aks" {
   name                = "nsg-snet-aks"
   location            = var.location
@@ -92,7 +95,7 @@ resource "azurerm_network_security_group" "data" {
     source_address_prefix      = local.subnets.aks.address_prefix
     source_port_range          = "*"
     destination_address_prefix = "*"
-    destination_port_ranges    = ["1433", "5432", "6380", "443"] # SQL Server, PostgreSQL, Redis SSL, HTTPS
+    destination_port_ranges    = ["1433", "5432", "6380", "443"]
   }
 
   security_rule {
@@ -104,7 +107,7 @@ resource "azurerm_network_security_group" "data" {
     source_address_prefix      = local.subnets.app.address_prefix
     source_port_range          = "*"
     destination_address_prefix = "*"
-    destination_port_ranges    = ["1433", "5432", "6380", "443"] # SQL Server, PostgreSQL, Redis SSL, HTTPS
+    destination_port_ranges    = ["1433", "5432", "6380", "443"]
   }
 
   security_rule {
@@ -140,9 +143,8 @@ resource "azurerm_network_security_group" "shared" {
 }
 
 # ==============================================================================
-# VNet
+# VNet + Subnets
 # ==============================================================================
-
 resource "azurerm_virtual_network" "this" {
   name                = var.vnet_name
   location            = var.location
