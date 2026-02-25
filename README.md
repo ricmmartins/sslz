@@ -53,10 +53,10 @@ You need:
 - **Two Azure subscriptions** — One for prod, one for non-prod. [Create a subscription](https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription)
 - **Permissions** — Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups)
 
-Fork this repo then run the pre-flight check to verify everything:
+Run the pre-flight check to verify everything:
 
 ```bash
-git clone https://github.com/<your-username>/sslz.git
+git clone https://github.com/ricmmartins/sslz.git
 cd sslz
 
 # Login to Azure
