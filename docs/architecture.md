@@ -107,14 +107,14 @@ Self-contained VNets per subscription with no peering:
 
 ```
 prod-vnet (10.0.0.0/16)          nonprod-vnet (10.1.0.0/16)
-├── snet-aks      /18            ├── snet-aks      /18
+├── snet-aks      /20            ├── snet-aks      /20
 ├── snet-app      /22            ├── snet-app      /22
 ├── snet-data     /22            ├── snet-data     /22
 └── snet-shared   /24            └── snet-shared   /24
 ```
 
 Each VNet is an island. Subnets are sized for growth:
-- `/18` for AKS (16k IPs — enough for large clusters with Azure CNI)
+- `/20` for AKS (4k IPs — enough for most clusters using Azure CNI with sane max-pods and surge settings, and plenty for Cilium overlay)
 - `/22` for App Service / Container Apps VNet integration
 - `/22` for Private Endpoints (databases, storage, caches)
 - `/24` for shared services (CI/CD agents, jump boxes)
