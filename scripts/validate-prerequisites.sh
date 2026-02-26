@@ -29,11 +29,15 @@ fi
 # Terraform
 if command -v terraform &>/dev/null; then
   TF_VERSION=$(terraform version -json 2>/dev/null | grep -o '"terraform_version":"[^"]*"' | cut -d'"' -f4)
+  # Fallback: parse from plain text output if JSON parsing failed
+  if [[ -z "$TF_VERSION" ]]; then
+    TF_VERSION=$(terraform version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+  fi
   # Check minimum version 1.5.0
-  if printf '%s\n' "1.5.0" "$TF_VERSION" | sort -V | head -1 | grep -q "1.5.0"; then
+  if [[ -n "$TF_VERSION" ]] && printf '%s\n' "1.5.0" "$TF_VERSION" | sort -V | head -1 | grep -q "1.5.0"; then
     pass "Terraform $TF_VERSION (>= 1.5.0)"
   else
-    fail "Terraform $TF_VERSION is below minimum 1.5.0"
+    fail "Terraform ${TF_VERSION:-unknown} is below minimum 1.5.0"
   fi
 else
   warn "Terraform not found — install from https://terraform.io/downloads (only needed for Terraform option)"
