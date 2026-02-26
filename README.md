@@ -182,6 +182,10 @@ az monitor log-analytics workspace list --query "[].name" -o tsv
 az policy assignment list --query "[?contains(name, 'mcsb')].displayName" -o tsv
 ```
 
+### Step 5: Post-Deployment Setup (30 min)
+
+See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-setup.md) if you're configuring GitHub Actions.
+
 ### Teardown
 
 To destroy all landing zone resources:
@@ -193,10 +197,6 @@ To destroy all landing zone resources:
 # Bicep
 ./scripts/teardown.sh --tool bicep --env nonprod
 ```
-
-### Step 5: Post-Deployment Setup (30 min)
-
-See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-setup.md) if you're configuring GitHub Actions.
 
 ## Day-1 Checklist
 

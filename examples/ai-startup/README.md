@@ -70,7 +70,7 @@ Options ranked by complexity:
 
 ### Prerequisites
 
-- An existing resource group (created by the landing zone)
+- An existing resource group (you must create this — the landing zone does not create application resource groups)
 - An SSH public key for AKS node access
 
 ### Bicep

@@ -41,8 +41,8 @@ diagrams/output/*.svg
 *.main.json
 **/main.json
 
-# Terraform lock files (generated per-platform)
-.terraform.lock.hcl
+# Terraform lock files — commit these for reproducible builds
+# .terraform.lock.hcl
 
 # Secrets
 .env

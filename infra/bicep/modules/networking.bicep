@@ -243,7 +243,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
 
 output vnetId string = vnet.id
 output vnetName string = vnet.name
-output aksSubnetId string = vnet.properties.subnets[0].id
-output appSubnetId string = vnet.properties.subnets[1].id
-output dataSubnetId string = vnet.properties.subnets[2].id
-output sharedSubnetId string = vnet.properties.subnets[3].id
+output aksSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.aks.name)
+output appSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.app.name)
+output dataSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.data.name)
+output sharedSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.shared.name)

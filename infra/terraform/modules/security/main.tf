@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+  }
+}
+
 # CSPM Free — always enabled
 resource "azurerm_security_center_subscription_pricing" "cspm" {
   tier          = "Free"

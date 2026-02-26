@@ -1,8 +1,8 @@
 repos:
-  - repo: https://github.com/antonbabenko/pre-commit-tf-docs
-    rev: v0.3.0
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.96.3
     hooks:
-      - id: terraform-fmt
+      - id: terraform_fmt
         name: Terraform fmt
         entry: terraform fmt -recursive
         language: system

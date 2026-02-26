@@ -85,7 +85,7 @@ All secrets in Key Vault, referenced by Container Apps via managed identity. Nev
 
 ### Private Endpoints (Optional)
 
-By default, Azure SQL has `publicNetworkAccess: Disabled` and Redis uses service-level firewall rules. If you need network-level isolation through Private Endpoints:
+By default, Azure SQL and Redis have `publicNetworkAccess: Enabled`. To enable network-level isolation through Private Endpoints:
 
 **Bicep:**
 ```bash

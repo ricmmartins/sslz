@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+  }
+}
+
 locals {
   # Build non-overlapping subnets from the VNet CIDR.
   # Assumes the VNet is at least /16 (default in this repo is /16).

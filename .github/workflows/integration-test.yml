@@ -30,12 +30,12 @@ permissions:
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+  ARM_SUBSCRIPTION_ID: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   ARM_USE_OIDC: true
-  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+  TF_VAR_subscription_id: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
   TF_VAR_company_name: "lztest"
-  TF_VAR_environment: "nonprod"
+  TF_VAR_environment: ${{ github.event.inputs.environment || 'nonprod' }}
   TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
   TF_VAR_deploy_networking: "true"
   TF_VAR_security_contact_email: "landing-zone-test@contoso.com"
@@ -55,7 +55,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
       - name: Bicep What-If
         run: |
@@ -65,7 +65,7 @@ jobs:
             --parameters \
               location=eastus2 \
               companyName=lztest \
-              environment=nonprod \
+              environment=${{ env.TF_VAR_environment }} \
               monthlyBudgetAmount=500 \
               budgetAlertEmails='["landing-zone-test@contoso.com"]' \
               securityContactEmail='landing-zone-test@contoso.com'
@@ -89,7 +89,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
       - name: Set budget start date
         run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
@@ -131,7 +131,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
       - name: Set budget start date
         run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
@@ -148,18 +148,20 @@ jobs:
       # --- Validate ---
       - name: Validate resource groups exist
         run: |
+          ENV="${{ env.TF_VAR_environment }}"
           echo "=== Checking resource groups ==="
-          az group show --name "rg-lztest-nonprod-monitoring" --query "name" -o tsv
+          az group show --name "rg-lztest-${ENV}-monitoring" --query "name" -o tsv
           echo "  ✓ Monitoring RG exists"
-          az group show --name "rg-lztest-nonprod-networking" --query "name" -o tsv
+          az group show --name "rg-lztest-${ENV}-networking" --query "name" -o tsv
           echo "  ✓ Networking RG exists"
 
       - name: Validate Log Analytics workspace
         run: |
+          ENV="${{ env.TF_VAR_environment }}"
           echo "=== Checking Log Analytics ==="
           az monitor log-analytics workspace show \
-            --resource-group "rg-lztest-nonprod-monitoring" \
-            --workspace-name "law-lztest-nonprod" \
+            --resource-group "rg-lztest-${ENV}-monitoring" \
+            --workspace-name "law-lztest-${ENV}" \
             --query "provisioningState" -o tsv
           echo "  ✓ Log Analytics workspace exists"
 
@@ -173,15 +175,16 @@ jobs:
 
       - name: Validate networking resources
         run: |
+          ENV="${{ env.TF_VAR_environment }}"
           echo "=== Checking VNet and NSGs ==="
           VNET_STATE=$(az network vnet show \
-            --resource-group "rg-lztest-nonprod-networking" \
-            --name "vnet-lztest-nonprod" \
+            --resource-group "rg-lztest-${ENV}-networking" \
+            --name "vnet-lztest-${ENV}" \
             --query "provisioningState" -o tsv)
           echo "  ✓ VNet provisioning state: $VNET_STATE"
           SUBNET_COUNT=$(az network vnet subnet list \
-            --resource-group "rg-lztest-nonprod-networking" \
-            --vnet-name "vnet-lztest-nonprod" \
+            --resource-group "rg-lztest-${ENV}-networking" \
+            --vnet-name "vnet-lztest-${ENV}" \
             --query "length(@)" -o tsv)
           echo "  ✓ Subnets created: $SUBNET_COUNT (expected 4)"
           if [ "$SUBNET_COUNT" -ne 4 ]; then

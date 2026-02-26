@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [prod, nonprod]
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.environment)) || fromJSON('["prod","nonprod"]') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -62,7 +62,7 @@ jobs:
     if: github.event_name == 'pull_request'
     strategy:
       matrix:
-        environment: [prod, nonprod]
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.environment)) || fromJSON('["prod","nonprod"]') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -130,7 +130,7 @@ jobs:
     name: Deploy Non-Prod
     runs-on: ubuntu-latest
     needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.event.inputs.environment == 'nonprod')
     environment: nonprod
     steps:
       - uses: actions/checkout@v4
@@ -153,8 +153,8 @@ jobs:
   deploy-prod:
     name: Deploy Prod
     runs-on: ubuntu-latest
-    needs: deploy-nonprod
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [validate, deploy-nonprod]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.event.inputs.environment == 'prod')
     environment: prod
     steps:
       - uses: actions/checkout@v4

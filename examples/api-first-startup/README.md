@@ -89,7 +89,7 @@ Application Insights gives you:
 
 ### Prerequisites
 
-- An existing resource group (created by the landing zone)
+- An existing resource group (you must create this — the landing zone does not create application resource groups)
 - APIM publisher email and name for API Management configuration
 
 ### Bicep

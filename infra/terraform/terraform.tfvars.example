@@ -41,7 +41,9 @@ deploy_networking = true
 # Default: "Microsoft.Web/serverFarms"
 # app_subnet_delegation = "Microsoft.App/environments"
 
-# Defender for Cloud plans — enable what you need (all default to false except Key Vault)
+# Defender for Cloud plans — enable what you need
+# Servers and Databases default to null (auto-enabled for prod, disabled for nonprod).
+# Key Vault defaults to true (low cost, always worth enabling).
 enable_defender_for_servers    = true  # recommended for prod (~$15/server/month)
 enable_defender_for_containers = false # set true if running AKS (~$7/vCPU/month)
 enable_defender_for_databases  = true  # recommended for prod (~$15/server/month)

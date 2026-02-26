@@ -25,7 +25,6 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-rg-list">
 <span class="viz-rg-tag">rg-nonprod-monitoring</span>
 <span class="viz-rg-tag">rg-nonprod-networking</span>
-<span class="viz-rg-tag">rg-nonprod-app</span>
 </div>
 <div class="viz-vnet-box viz-amber-border">
 <div class="viz-vnet-title"><span>nonprod-vnet</span><code>10.1.0.0/16</code></div>
@@ -45,7 +44,6 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-rg-list">
 <span class="viz-rg-tag">rg-prod-monitoring</span>
 <span class="viz-rg-tag">rg-prod-networking</span>
-<span class="viz-rg-tag">rg-prod-app</span>
 </div>
 <div class="viz-vnet-box viz-green-border">
 <div class="viz-vnet-title"><span>prod-vnet</span><code>10.0.0.0/16</code></div>

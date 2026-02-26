@@ -33,7 +33,7 @@ targetScope = 'subscription'
 @description('Primary Azure region for all resources')
 param location string
 
-@description('Company name used for naming resources (2-10 lowercase alphanumeric characters)')
+@description('Company name used for naming resources (2-10 lowercase alphanumeric characters). Must be ≤ 10 characters — keep this short if using `azd env new`.')
 @minLength(2)
 @maxLength(10)
 param companyName string
@@ -52,6 +52,9 @@ param budgetAlertEmails string[]
 
 @description('Deploy VNet and networking resources')
 param deployNetworking bool = true
+
+@description('VNet address space (CIDR). Defaults to 10.0.0.0/16 for prod, 10.1.0.0/16 for nonprod.')
+param vnetAddressPrefix string = environment == 'prod' ? '10.0.0.0/16' : '10.1.0.0/16'
 
 @description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
 param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
@@ -76,6 +79,14 @@ param budgetStartDate string = utcNow('yyyy-MM-01')
 
 @description('Allowed Azure regions for resource deployment')
 param allowedLocations string[] = [location]
+
+@description('Log Analytics workspace retention in days')
+@minValue(30)
+@maxValue(730)
+param logRetentionInDays int = 90
+
+@description('Log Analytics daily ingestion quota in GB (0 = unlimited)')
+param logDailyQuotaGb int = 5
 
 @description('Tags applied to all resources')
 param tags object = {
@@ -119,8 +130,8 @@ module logAnalytics 'modules/log-analytics.bicep' = {
   params: {
     location: location
     workspaceName: 'law-${prefix}'
-    retentionInDays: 90
-    dailyQuotaGb: 5
+    retentionInDays: logRetentionInDays
+    dailyQuotaGb: logDailyQuotaGb
     tags: tags
   }
 }
@@ -135,7 +146,7 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
   params: {
     location: location
     vnetName: 'vnet-${prefix}'
-    vnetAddressPrefix: environment == 'prod' ? '10.0.0.0/16' : '10.1.0.0/16'
+    vnetAddressPrefix: vnetAddressPrefix
     appSubnetDelegation: appSubnetDelegation
     tags: tags
   }
@@ -183,6 +194,10 @@ resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-previ
       { category: 'Security', enabled: true }
       { category: 'Alert', enabled: true }
       { category: 'Policy', enabled: true }
+      { category: 'ServiceHealth', enabled: true }
+      { category: 'Recommendation', enabled: true }
+      { category: 'Autoscale', enabled: true }
+      { category: 'ResourceHealth', enabled: true }
     ]
   }
 }

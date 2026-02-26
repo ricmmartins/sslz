@@ -253,7 +253,7 @@ az policy assignment list \
     </div>
   </div>
   <p style="text-align: center; margin-top: 2rem;">
-    <a href="{{ '/docs/ci-cd-setup' | relative_url }}" class="btn btn-primary">Full Deployment Guide</a>
+    <a href="{{ '/docs/architecture' | relative_url }}" class="btn btn-primary">Full Deployment Guide</a>
   </p>
 </section>
 
