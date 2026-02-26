@@ -153,12 +153,23 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 
 Also add these **repository variables** (Settings > Secrets and variables > Actions > Variables tab):
 
-| Variable Name | Value | Purpose |
-|---|---|---|
-| `COMPANY_NAME` | Your company name (e.g., `acme`) | Used in resource naming |
-| `AZURE_LOCATION` | Azure region (e.g., `eastus2`) | Deployment location |
-| `BUDGET_ALERT_EMAILS` | `["team@acme.com"]` | Budget alert recipients |
-| `SECURITY_CONTACT_EMAIL` | `security@acme.com` | Defender alert recipient |
+| Variable Name | Value | Used By | Purpose |
+|---|---|---|---|
+| `AZURE_LOCATION` | Azure region (e.g., `eastus2`) | Bicep + Terraform | Deployment location |
+| `COMPANY_NAME` | Your company name (e.g., `acme`) | Terraform only | Used in resource naming |
+| `BUDGET_ALERT_EMAILS` | `["team@acme.com"]` | Terraform only | Budget alert recipients (JSON array) |
+| `SECURITY_CONTACT_EMAIL` | `security@acme.com` | Terraform only | Defender alert recipient |
+
+> **Bicep users:** The Terraform-only variables above have sensible defaults in the workflow, but Bicep gets its values from parameter files instead. See Step 5b below.
+
+### Step 5b: Customize Bicep Parameter Files (Bicep only)
+
+If deploying with the Bicep workflow, update the parameter files with your actual values **before** triggering a deploy:
+
+- `infra/bicep/parameters/prod.bicepparam` — production settings
+- `infra/bicep/parameters/nonprod.bicepparam` — non-production settings
+
+At minimum, update `companyName`, `budgetAlertEmails`, `securityContactEmail`, and `allowedLocations`. Commit and push the changes.
 
 ## Step 6: Create GitHub Environments (Optional, Recommended)
 
@@ -172,6 +183,8 @@ GitHub Environments add an approval gate before production deployments.
 
 ## Step 7: Test the Setup
 
+### Validate on a Pull Request
+
 Push a change to a branch and create a pull request:
 
 ```bash
@@ -182,6 +195,18 @@ git push -u origin test-cicd
 ```
 
 The **Validate IaC** workflow should run automatically on the PR. If you see the Terraform plan and Bicep what-if succeed, your setup is working.
+
+### Deploy via Workflow Dispatch
+
+The deploy workflows are triggered manually (not on push). To run a deployment:
+
+1. Go to **Actions** tab in your GitHub repository
+2. Select **Deploy Bicep** or **Deploy Terraform** from the left sidebar
+3. Click **Run workflow**
+4. Choose the target environment (`prod` or `nonprod`)
+5. Click **Run workflow** to start
+
+If you configured GitHub Environments with required reviewers in Step 6, production deployments will wait for approval before the deploy step runs.
 
 ## Troubleshooting
 
