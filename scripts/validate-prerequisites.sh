@@ -7,7 +7,7 @@
 #   - Required provider registrations
 #   - Basic permissions check
 # ==============================================================================
-set -euo pipefail
+set -uo pipefail
 
 ERRORS=0
 WARNINGS=0
