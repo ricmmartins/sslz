@@ -1,7 +1,20 @@
 // ============================================================================
 // Management Groups
-// Single management group with prod and nonprod subscriptions
-// Deploy at tenant scope: az deployment tenant create
+// Single management group with prod and nonprod subscriptions.
+//
+// This module deploys at TENANT scope and must be deployed separately from the
+// main landing zone (which deploys at subscription scope).
+//
+// Usage:
+//   az deployment tenant create \
+//     --location <LOCATION> \
+//     --template-file modules/management-groups.bicep \
+//     --parameters \
+//       companyName='<yourcompany>' \
+//       prodSubscriptionId='<PROD_SUB_ID>' \
+//       nonprodSubscriptionId='<NONPROD_SUB_ID>'
+//
+// Requires: Owner or Management Group Contributor on the Tenant Root Group.
 // ============================================================================
 
 targetScope = 'tenant'

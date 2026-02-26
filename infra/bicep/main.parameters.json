@@ -20,6 +20,9 @@
     },
     "securityContactEmail": {
       "value": "${AZURE_SECURITY_CONTACT_EMAIL}"
+    },
+    "budgetStartDate": {
+      "value": "${AZURE_BUDGET_START_DATE}"
     }
   }
 }

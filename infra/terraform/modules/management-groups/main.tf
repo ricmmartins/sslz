@@ -15,6 +15,11 @@ terraform {
   }
 }
 
+provider "azurerm" {
+  features {}
+  subscription_id = var.subscription_id
+}
+
 locals {
   display_name = var.display_name != "" ? var.display_name : "${var.company_name} Landing Zone"
 }

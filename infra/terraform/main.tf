@@ -13,6 +13,7 @@
 #   cd infra/terraform/modules/management-groups
 #   terraform init
 #   terraform apply \
+#     -var='subscription_id=<ANY_SUB_ID>' \
 #     -var='company_name=yourcompany' \
 #     -var='prod_subscription_id=<PROD_SUB_ID>' \
 #     -var='nonprod_subscription_id=<NONPROD_SUB_ID>'

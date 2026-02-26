@@ -69,7 +69,39 @@ az account set --subscription <YOUR_PROD_SUBSCRIPTION_ID>
 
 If the script reports errors, fix them before proceeding. See [Troubleshooting](docs/troubleshooting.md) for common issues.
 
-### Step 2: Deploy the Landing Zone (20 min)
+### Step 2: Deploy Management Groups (Optional, 5 min)
+
+This step creates the management group hierarchy shown in the [Architecture](#architecture) diagram. It requires **tenant-level permissions** (Owner or Management Group Contributor on the Tenant Root Group). Skip this if you don't have tenant-level access — the landing zone works without it.
+
+#### Option A: Bicep
+
+```bash
+cd infra/bicep
+
+az deployment tenant create \
+  --location eastus2 \
+  --template-file modules/management-groups.bicep \
+  --parameters \
+    companyName='<yourcompany>' \
+    prodSubscriptionId='<PROD_SUBSCRIPTION_ID>' \
+    nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
+```
+
+#### Option B: Terraform
+
+```bash
+cd infra/terraform/modules/management-groups
+terraform init
+terraform apply \
+  -var='subscription_id=<ANY_SUBSCRIPTION_ID>' \
+  -var='company_name=<yourcompany>' \
+  -var='prod_subscription_id=<PROD_SUBSCRIPTION_ID>' \
+  -var='nonprod_subscription_id=<NONPROD_SUBSCRIPTION_ID>'
+```
+
+> **Note:** The `subscription_id` is required by the azurerm provider for authentication, even though management groups are tenant-level resources. You can use either your prod or non-prod subscription ID.
+
+### Step 3: Deploy the Landing Zone (20 min)
 
 Choose **one** option: Bicep or Terraform.
 
@@ -136,7 +168,7 @@ terraform apply tfplan
 
 > **Tip:** For production use, set up a remote backend for Terraform state so it persists across machines and CI/CD runs. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend, then uncomment the `backend "azurerm"` block in `main.tf`.
 
-### Step 3: Verify the Deployment (5 min)
+### Step 4: Verify the Deployment (5 min)
 
 After deployment completes, verify in the Azure Portal or CLI:
 
@@ -163,7 +195,7 @@ To destroy all landing zone resources:
 ./scripts/teardown.sh --tool bicep --env nonprod
 ```
 
-### Step 4: Post-Deployment Setup (30 min)
+### Step 5: Post-Deployment Setup (30 min)
 
 See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-setup.md) if you're configuring GitHub Actions.
 

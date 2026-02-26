@@ -3,6 +3,31 @@ targetScope = 'subscription'
 // ============================================================================
 // Azure Landing Zone for Startups — Main Orchestrator
 // Deploys: Resource Groups, Log Analytics, Networking, Budgets, Defender, Policies
+//
+// NOTE: Management Groups
+// -----------------------
+// The management-groups module (modules/management-groups.bicep) is NOT called
+// from this file because it requires *tenant-level* deployment scope, while this
+// file deploys at subscription scope.
+//
+// Deploy management groups separately BEFORE running this main deployment:
+//
+//   az deployment tenant create \
+//     --location <LOCATION> \
+//     --template-file modules/management-groups.bicep \
+//     --parameters \
+//       companyName='<yourcompany>' \
+//       prodSubscriptionId='<PROD_SUB_ID>' \
+//       nonprodSubscriptionId='<NONPROD_SUB_ID>'
+//
+// After the management group exists, deploy this file per subscription:
+//
+//   az deployment sub create \
+//     --location <LOCATION> \
+//     --template-file main.bicep \
+//     --parameters parameters/prod.local.bicepparam
+//
+// See: modules/management-groups.bicep
 // ============================================================================
 
 @description('Primary Azure region for all resources')
@@ -45,6 +70,9 @@ param enableDefenderForKeyVault bool = true
 
 @description('Email address for Defender for Cloud security alerts')
 param securityContactEmail string
+
+@description('Budget start date (first day of a month, YYYY-MM-DD). Defaults to the 1st of the current month. Set explicitly to avoid re-deployment drift.')
+param budgetStartDate string = ''
 
 @description('Allowed Azure regions for resource deployment')
 param allowedLocations string[] = [location]
@@ -137,6 +165,7 @@ module budgets 'modules/budgets.bicep' = {
     budgetName: 'budget-${prefix}-monthly'
     amount: monthlyBudgetAmount
     contactEmails: budgetAlertEmails
+    startDate: budgetStartDate != '' ? budgetStartDate : '${utcNow('yyyy-MM')}-01'
   }
 }
 
