@@ -172,7 +172,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
       <div class="step-number">1</div>
       <h3>Prerequisites</h3>
       <span class="step-time">5 min</span>
-      <p>Azure CLI, Terraform (optional), two subscriptions, and Owner permissions.</p>
+      <p>Clone the repo, log in to Azure, and validate your environment. You'll need Azure CLI, two subscriptions (prod + nonprod), and Owner permissions.</p>
       <details>
         <summary>Show commands</summary>
 <pre><code>git clone https://github.com/ricmmartins/sslz.git
@@ -181,49 +181,79 @@ cd sslz
 az login
 az account set --subscription &lt;YOUR_PROD_SUBSCRIPTION_ID&gt;
 
-# Check all prerequisites
+# Validates CLI tools, Azure auth, provider registrations, and permissions
 ./scripts/validate-prerequisites.sh</code></pre>
       </details>
     </div>
     <div class="step-card">
       <div class="step-number">2</div>
+      <h3>Management Groups (Optional)</h3>
+      <span class="step-time">5 min</span>
+      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access — the landing zone works without it.</p>
+      <details>
+        <summary>Bicep command</summary>
+<pre><code>az deployment tenant create \
+  --location eastus2 \
+  --template-file infra/bicep/modules/management-groups.bicep \
+  --parameters \
+    companyName='&lt;yourcompany&gt;' \
+    prodSubscriptionId='&lt;PROD_SUB_ID&gt;' \
+    nonprodSubscriptionId='&lt;NONPROD_SUB_ID&gt;'</code></pre>
+      </details>
+      <details>
+        <summary>Terraform command</summary>
+<pre><code>cd infra/terraform/modules/management-groups
+terraform init
+terraform apply \
+  -var='subscription_id=&lt;ANY_SUB_ID&gt;' \
+  -var='company_name=&lt;yourcompany&gt;' \
+  -var='prod_subscription_id=&lt;PROD_SUB_ID&gt;' \
+  -var='nonprod_subscription_id=&lt;NONPROD_SUB_ID&gt;'
+cd ../../../..</code></pre>
+      </details>
+    </div>
+    <div class="step-card">
+      <div class="step-number">3</div>
       <h3>Deploy</h3>
       <span class="step-time">20 min</span>
-      <p>Run Bicep or Terraform to create policies, networking, monitoring, security, and budgets.</p>
+      <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values, preview with what-if/plan, then deploy.</p>
       <details>
         <summary>Bicep commands</summary>
 <pre><code>cd infra/bicep
 
+# Copy and edit parameters (companyName, emails, budget, etc.)
 cp parameters/prod.bicepparam parameters/prod.local.bicepparam
-# Edit prod.local.bicepparam with your values
 
+# Preview changes (no resources created)
 az deployment sub what-if \
   --location eastus2 \
   --template-file main.bicep \
   --parameters parameters/prod.local.bicepparam
 
+# Deploy
 az deployment sub create \
   --location eastus2 \
   --template-file main.bicep \
-  --parameters parameters/prod.local.bicepparam</code></pre>
+  --parameters parameters/prod.local.bicepparam \
+  --name "lz-prod-$(date +%Y%m%d-%H%M%S)"</code></pre>
       </details>
       <details>
         <summary>Terraform commands</summary>
 <pre><code>cd infra/terraform
 
+# Copy and edit variables (subscription_id, company_name, emails, etc.)
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
 
 terraform init
-terraform plan -out=tfplan
-terraform apply tfplan</code></pre>
+terraform plan -out=tfplan    # Preview changes
+terraform apply tfplan        # Deploy</code></pre>
       </details>
     </div>
     <div class="step-card">
-      <div class="step-number">3</div>
+      <div class="step-number">4</div>
       <h3>Verify</h3>
       <span class="step-time">5 min</span>
-      <p>Check resource groups, Log Analytics, and policy assignments in the Portal or CLI.</p>
+      <p>Confirm resource groups, Log Analytics, policies, and Defender plans were created correctly.</p>
       <details>
         <summary>Show commands</summary>
 <pre><code># Check resource groups
@@ -236,19 +266,23 @@ az monitor log-analytics workspace list \
 
 # Check policy assignments
 az policy assignment list \
-  --query "[?contains(name, 'mcsb')].displayName" -o tsv</code></pre>
+  --query "[?contains(name, 'mcsb')].displayName" -o tsv
+
+# Check Defender plans
+az security pricing list \
+  --query "[].{name:name, tier:pricingTier}" -o table</code></pre>
       </details>
     </div>
     <div class="step-card">
-      <div class="step-number">4</div>
+      <div class="step-number">5</div>
       <h3>Post-Deploy</h3>
       <span class="step-time">30 min</span>
-      <p>RBAC assignments, CI/CD setup with Workload Identity Federation, and first test deployment.</p>
+      <p>Assign RBAC roles to your team, set up CI/CD with Workload Identity Federation, and enable cost anomaly alerts. See the <a href="#day-1-checklist">Day-1 Checklist</a> below.</p>
       <details>
-        <summary>Show commands</summary>
-<pre><code># Teardown (if needed)
-./scripts/teardown.sh --tool terraform --env nonprod
-./scripts/teardown.sh --tool bicep --env nonprod</code></pre>
+        <summary>Teardown commands (if needed)</summary>
+<pre><code># Remove all landing zone resources
+./scripts/teardown.sh --tool terraform --env nonprod --company yourcompany
+./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany</code></pre>
       </details>
     </div>
   </div>
