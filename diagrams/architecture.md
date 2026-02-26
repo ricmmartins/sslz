@@ -27,7 +27,7 @@ description: "Visual diagrams of the landing zone architecture"
 <span class="viz-rg-tag">rg-&lt;co&gt;-nonprod-networking</span>
 </div>
 <div class="viz-vnet-box viz-amber-border">
-<div class="viz-vnet-title"><span>nonprod-vnet</span><code>10.1.0.0/16</code></div>
+<div class="viz-vnet-title"><span>vnet-&lt;co&gt;-nonprod</span><code>10.1.0.0/16</code></div>
 <div class="viz-subnet-grid">
 <span class="viz-subnet snet-aks">snet-aks /20</span>
 <span class="viz-subnet snet-app">snet-app /22</span>
@@ -46,7 +46,7 @@ description: "Visual diagrams of the landing zone architecture"
 <span class="viz-rg-tag">rg-&lt;co&gt;-prod-networking</span>
 </div>
 <div class="viz-vnet-box viz-green-border">
-<div class="viz-vnet-title"><span>prod-vnet</span><code>10.0.0.0/16</code></div>
+<div class="viz-vnet-title"><span>vnet-&lt;co&gt;-prod</span><code>10.0.0.0/16</code></div>
 <div class="viz-subnet-grid">
 <span class="viz-subnet snet-aks">snet-aks /20</span>
 <span class="viz-subnet snet-app">snet-app /22</span>
@@ -131,7 +131,7 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-net-nsg">
 <strong>NSG: snet-app</strong>
 <span>Deny all inbound (default)</span>
-<span>Allow HTTPS from Internet</span>
+<span>Allow VNet internal</span>
 </div>
 <div class="viz-net-nsg">
 <strong>NSG: snet-data</strong>
@@ -140,11 +140,11 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 </div>
 <div class="viz-net-vnet">
-<div class="viz-net-vnet-header"><span>prod-vnet</span><code>10.0.0.0/16</code></div>
+<div class="viz-net-vnet-header"><span>vnet-&lt;co&gt;-prod</span><code>10.0.0.0/16</code></div>
 <div class="viz-net-subnet-grid">
 <div class="viz-net-subnet-card viz-purple-top">
 <div class="viz-net-subnet-head"><strong>snet-shared</strong><code>10.0.24.0/24</code></div>
-<span class="viz-net-ip-count">254 IPs</span>
+<span class="viz-net-ip-count">251 IPs</span>
 <div class="viz-net-svc-list">
 <span>Azure Bastion</span>
 <span>VPN Gateway (if needed)</span>
@@ -160,7 +160,7 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 <div class="viz-net-subnet-card viz-green-top">
 <div class="viz-net-subnet-head"><strong>snet-app</strong><code>10.0.16.0/22</code></div>
-<span class="viz-net-ip-count">1,022 IPs</span>
+<span class="viz-net-ip-count">1,019 IPs</span>
 <div class="viz-net-svc-list">
 <span>App Services</span>
 <span>Container Apps (VNet-integrated)</span>
@@ -168,7 +168,7 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 <div class="viz-net-subnet-card viz-amber-top">
 <div class="viz-net-subnet-head"><strong>snet-data</strong><code>10.0.20.0/22</code></div>
-<span class="viz-net-ip-count">1,022 IPs</span>
+<span class="viz-net-ip-count">1,019 IPs</span>
 <div class="viz-net-svc-list">
 <span>SQL, Cosmos, Redis</span>
 <span>Storage, Key Vault</span>
@@ -212,12 +212,16 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-sec-layer-label">&#128737; Security Tooling</div>
 <div class="viz-sec-layer-cards">
 <div class="viz-sec-card">
-<strong>Databases</strong>
-<span>On (prod)</span>
+<strong>CSPM</strong>
+<span>Free (always)</span>
 </div>
 <div class="viz-sec-card">
 <strong>Servers</strong>
 <span>P2 (prod) / Free</span>
+</div>
+<div class="viz-sec-card">
+<strong>Databases</strong>
+<span>On (prod)</span>
 </div>
 <div class="viz-sec-card">
 <strong>Containers</strong>
@@ -226,6 +230,10 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-sec-card">
 <strong>Key Vault</strong>
 <span>On</span>
+</div>
+<div class="viz-sec-card">
+<strong>ARM</strong>
+<span>On (always)</span>
 </div>
 </div>
 </div>
