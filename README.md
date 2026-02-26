@@ -76,11 +76,9 @@ This step creates the management group hierarchy shown in the [Architecture](#ar
 #### Option A: Bicep
 
 ```bash
-cd infra/bicep
-
 az deployment tenant create \
   --location eastus2 \
-  --template-file modules/management-groups.bicep \
+  --template-file infra/bicep/modules/management-groups.bicep \
   --parameters \
     companyName='<yourcompany>' \
     prodSubscriptionId='<PROD_SUBSCRIPTION_ID>' \
@@ -97,6 +95,7 @@ terraform apply \
   -var='company_name=<yourcompany>' \
   -var='prod_subscription_id=<PROD_SUBSCRIPTION_ID>' \
   -var='nonprod_subscription_id=<NONPROD_SUBSCRIPTION_ID>'
+cd ../../../..
 ```
 
 > **Note:** The `subscription_id` is required by the azurerm provider for authentication, even though management groups are tenant-level resources. You can use either your prod or non-prod subscription ID.

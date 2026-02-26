@@ -72,7 +72,7 @@ param enableDefenderForKeyVault bool = true
 param securityContactEmail string
 
 @description('Budget start date (first day of a month, YYYY-MM-DD). Defaults to the 1st of the current month. Set explicitly to avoid re-deployment drift.')
-param budgetStartDate string = ''
+param budgetStartDate string = utcNow('yyyy-MM-01')
 
 @description('Allowed Azure regions for resource deployment')
 param allowedLocations string[] = [location]
@@ -165,7 +165,7 @@ module budgets 'modules/budgets.bicep' = {
     budgetName: 'budget-${prefix}-monthly'
     amount: monthlyBudgetAmount
     contactEmails: budgetAlertEmails
-    startDate: budgetStartDate != '' ? budgetStartDate : '${utcNow('yyyy-MM')}-01'
+    startDate: budgetStartDate
   }
 }
 

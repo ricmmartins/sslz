@@ -1,6 +1,6 @@
 # ==============================================================================
 # Management Groups
-# Deploy separately with: terraform apply -target=module.management_groups
+# Deploy as a standalone root module: terraform apply -var='...'
 # Requires tenant-level permissions
 # ==============================================================================
 
