@@ -50,7 +50,7 @@ Networking resources are created in `rg-{company}-{env}-networking` when `deploy
 
 | Property | Prod | Non-Prod |
 |---|---|---|
-| **Name** | `vnet-{company}-prod` | `vnet-{company}-nonprod` |
+| **Name** | `vnet-{company}-{env}` | `vnet-{company}-{env}` |
 | **Resource type** | `Microsoft.Network/virtualNetworks` | — |
 | **Address space** | `10.0.0.0/16` | `10.1.0.0/16` |
 

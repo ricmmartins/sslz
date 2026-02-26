@@ -7,7 +7,7 @@ description: "VNet design, NSGs, and when you actually need a hub"
 
 # Networking Deep Dive
 
-> See also: [Architecture Decisions](architecture.md#networking) for details on why this layout was chosen.
+> See also: [Architecture Decisions](architecture#networking) for details on why this layout was chosen.
 
 ## Do You Even Need a VNet?
 

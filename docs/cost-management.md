@@ -77,9 +77,9 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
 
 **The fix:**
 - Start with the smallest tier. Always.
-- Azure SQL: Basic ($5/month) or S0 ($15/month) for dev. S1 or elastic pool for prod.
+- Azure SQL: S0 (~$15/month) for dev. S1 or elastic pool for prod.
 - Cosmos DB: Serverless for dev (pay per request). Autoscale provisioned for prod.
-- Azure Database for PostgreSQL: Burstable B1ms ($13/month) for dev. General Purpose for prod.
+- Azure Database for PostgreSQL: Burstable B1ms (~$13/month) for dev. General Purpose for prod.
 - Scale up is instant. Scale down requires no downtime for most services.
 
 ### 3. Not Using Reserved Instances

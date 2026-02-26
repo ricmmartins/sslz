@@ -13,10 +13,16 @@ description: "Common deployment errors and fixes"
 
 **Error:** `AuthorizationFailed` when deploying management groups.
 
-**Cause:** The deploying identity lacks tenant-level permissions. Management group operations require `Microsoft.Management/managementGroups/write` at the tenant root scope.
+**Cause:** The deploying identity lacks tenant-level permissions. Management group operations require `Microsoft.Management/managementGroups/write` at the **tenant root group** scope (`/`). A subscription-level role assignment is not sufficient.
 
 **Fix:**
-1. Assign the identity the "Management Group Contributor" role at the tenant root group scope
+1. Assign the identity the "Management Group Contributor" role at the **tenant root group** scope:
+   ```bash
+   az role assignment create \
+     --assignee "<SP_OBJECT_ID>" \
+     --role "Management Group Contributor" \
+     --scope "/"
+   ```
 2. Or deploy management groups separately with a privileged identity:
    ```bash
    cd infra/terraform/modules/management-groups
