@@ -134,7 +134,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
       <div class="net-diagram">
         <div class="net-vnet net-vnet-prod">
           <div class="net-vnet-header">
-            <span>prod-vnet</span>
+            <span>vnet-&lt;co&gt;-prod</span>
             <code>10.0.0.0/16</code>
           </div>
           <div class="net-subnets">
@@ -146,7 +146,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
         </div>
         <div class="net-vnet net-vnet-nonprod">
           <div class="net-vnet-header">
-            <span>nonprod-vnet</span>
+            <span>vnet-&lt;co&gt;-nonprod</span>
             <code>10.1.0.0/16</code>
           </div>
           <div class="net-subnets">

@@ -31,15 +31,15 @@ Then you can run production without a VNet. Use service-level firewalls to restr
 
 | VNet | CIDR | Available IPs |
 |---|---|---|
-| `prod-vnet` | `10.0.0.0/16` | 65,536 |
-| `nonprod-vnet` | `10.1.0.0/16` | 65,536 |
+| `vnet-<co>-prod` | `10.0.0.0/16` | 65,536 |
+| `vnet-<co>-nonprod` | `10.1.0.0/16` | 65,536 |
 
 Use `10.x.0.0/16` ranges. They're private (RFC 1918), don't conflict with most corporate networks, and give you room to grow. **Do not use `172.16.0.0/12` or `192.168.0.0/16`** — they're more likely to conflict if you ever need VPN to an office network.
 
 ### Subnet Layout
 
 ```
-prod-vnet 10.0.0.0/16
+vnet-<co>-prod 10.0.0.0/16
 │
 ├── snet-aks           10.0.0.0/20    (4,096 IPs)
 │   └── For AKS nodes + Azure CNI pods (pod IPs come from the subnet)
@@ -185,11 +185,11 @@ When you have 5+ Private DNS Zones and 3+ VNets, managing zone links becomes ted
 ```
 Before (what we deploy):
 
-    prod-vnet ←──── (no connection) ────→ nonprod-vnet
+    vnet-<co>-prod ←──── (no connection) ────→ vnet-<co>-nonprod
 
 After (when you graduate):
 
-    prod-vnet ←── peering ──→ hub-vnet ←── peering ──→ nonprod-vnet
+    vnet-<co>-prod ←── peering ──→ hub-vnet ←── peering ──→ vnet-<co>-nonprod
                                   │
                             Azure Firewall
                             VPN Gateway
