@@ -106,11 +106,11 @@ This costs ~$1,500/month minimum (Azure Firewall alone is $900+) and adds operat
 Self-contained VNets per subscription with no peering:
 
 ```
-prod-vnet (10.0.0.0/16)          nonprod-vnet (10.1.0.0/16)
-├── snet-aks      /20            ├── snet-aks      /20
-├── snet-app      /22            ├── snet-app      /22
-├── snet-data     /22            ├── snet-data     /22
-└── snet-shared   /24            └── snet-shared   /24
+vnet-<co>-prod (10.0.0.0/16)       vnet-<co>-nonprod (10.1.0.0/16)
+├── snet-aks      /20               ├── snet-aks      /20
+├── snet-app      /22               ├── snet-app      /22
+├── snet-data     /22               ├── snet-data     /22
+└── snet-shared   /24               └── snet-shared   /24
 ```
 
 Each VNet is an island. Subnets are sized for growth:
@@ -154,8 +154,10 @@ We assign a minimal set of policies at the subscription level:
 | Microsoft Cloud Security Benchmark | Audit | Security recommendations without blocking deployments |
 | Require tag: `environment` on resource groups | Deny | Cost tracking and resource lifecycle management |
 | Require tag: `team` on resource groups | Deny | Ownership tracking and cost allocation |
-| Inherit tag: `environment` from resource group | Modify | Auto-propagate tags to child resources |
-| Allowed locations | Deny | Prevent accidental deployments to wrong regions |
+| Inherit tag: `environment` from resource group | Modify | Auto-propagate environment tag to child resources |
+| Inherit tag: `team` from resource group | Modify | Auto-propagate team tag to child resources |
+| Allowed locations | Deny | Prevent accidental resource deployments to wrong regions |
+| Allowed locations for resource groups | Deny | Prevent resource group creation in wrong regions |
 | Deploy diagnostic settings for Activity Log | DeployIfNotExists | Ensure all control plane actions are logged |
 
 ### Why Audit Mode for Security Benchmark?
