@@ -18,7 +18,7 @@ param amount int
 param contactEmails string[]
 
 @description('Budget start date (first day of current month, YYYY-MM-DD)')
-param startDate string = '${utcNow('yyyy-MM')}-01'
+param startDate string = '${utcNow('yyyy-MM')}-01T00:00:00Z'
 
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: budgetName
