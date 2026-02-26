@@ -109,6 +109,13 @@ module "security" {
   enable_defender_for_key_vault  = var.enable_defender_for_key_vault
 }
 
+# Azure pre-creates securityContacts/default on every subscription.
+# This import block lets Terraform adopt it instead of failing with "already exists".
+import {
+  to = module.security.azurerm_security_center_contact.default
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/securityContacts/default"
+}
+
 module "policy" {
   source                     = "./modules/policy"
   location                   = var.location

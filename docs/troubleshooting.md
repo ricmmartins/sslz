@@ -114,6 +114,26 @@ Or run `scripts/validate-prerequisites.sh` to check all required providers.
   az sql server update --name <server> --resource-group <rg> --set publicNetworkAccess=Enabled
   ```
 
+### Terraform "Resource Already Exists" on First Apply
+
+**Error:** `a resource with the ID "…/securityContacts/default" already exists - to be managed via Terraform this resource needs to be imported into the State`
+
+**Cause:** Azure pre-creates the `securityContacts/default` resource on every subscription. The landing zone includes an `import` block to handle this automatically (requires Terraform ≥ 1.5). If you see this error, ensure you're on a supported version.
+
+**Error:** `a resource with the ID "…|diag-activity-log-to-law" already exists`
+
+**Cause:** If you previously deployed with Bicep (or another tool) to the same subscription, the Activity Log diagnostic setting may already exist. The `activity-log-diag` DINE policy can also create this resource automatically.
+
+**Fix:**
+```bash
+# Import the existing diagnostic setting into Terraform state
+terraform import azurerm_monitor_diagnostic_setting.activity_log \
+  "/subscriptions/<SUBSCRIPTION_ID>|diag-activity-log-to-law"
+
+# Re-plan and apply
+terraform plan -out=tfplan && terraform apply tfplan
+```
+
 ### Bicep What-If Shows Unexpected Changes
 
 **Error:** `what-if` output shows resources being recreated.
