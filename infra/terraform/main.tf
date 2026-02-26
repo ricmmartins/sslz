@@ -84,8 +84,8 @@ module "log_analytics" {
   location            = var.location
   resource_group_name = azurerm_resource_group.monitoring.name
   workspace_name      = "law-${local.prefix}"
-  retention_in_days   = 90
-  daily_quota_gb      = 5
+  retention_in_days   = var.log_retention_in_days
+  daily_quota_gb      = var.log_daily_quota_gb
   tags                = local.tags
 }
 
@@ -137,6 +137,18 @@ resource "azurerm_monitor_diagnostic_setting" "activity_log" {
   }
   enabled_log {
     category = "Policy"
+  }
+  enabled_log {
+    category = "ServiceHealth"
+  }
+  enabled_log {
+    category = "Recommendation"
+  }
+  enabled_log {
+    category = "Autoscale"
+  }
+  enabled_log {
+    category = "ResourceHealth"
   }
 }
 

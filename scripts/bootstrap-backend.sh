@@ -84,8 +84,7 @@ az storage account create \
   --sku Standard_LRS \
   --kind StorageV2 \
   --https-only true \
-  --min-tls-version TLS1_2 \
-  --allow-blob-public-access false
+  --min-tls-version TLS1_2
 
 # Enable blob versioning
 echo "Enabling blob versioning..."

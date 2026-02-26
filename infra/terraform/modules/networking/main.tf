@@ -184,9 +184,6 @@ resource "azurerm_subnet" "app" {
     name = "delegation-web"
     service_delegation {
       name = var.app_subnet_delegation
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/action",
-      ]
     }
   }
 }

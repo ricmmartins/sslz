@@ -47,6 +47,22 @@ variable "deploy_networking" {
   default     = true
 }
 
+variable "log_retention_in_days" {
+  description = "Log Analytics workspace retention in days"
+  type        = number
+  default     = 90
+  validation {
+    condition     = var.log_retention_in_days >= 30 && var.log_retention_in_days <= 730
+    error_message = "log_retention_in_days must be between 30 and 730."
+  }
+}
+
+variable "log_daily_quota_gb" {
+  description = "Log Analytics daily ingestion quota in GB (-1 = unlimited)"
+  type        = number
+  default     = 5
+}
+
 variable "vnet_address_prefix" {
   description = "VNet address prefix (overrides default per-environment prefix)"
   type        = string

@@ -53,7 +53,7 @@ param budgetAlertEmails string[]
 @description('Deploy VNet and networking resources')
 param deployNetworking bool = true
 
-@description('VNet address space (CIDR). Defaults to 10.0.0.0/16 for prod, 10.1.0.0/16 for nonprod.')
+@description('VNet address space — must be a /16 CIDR block. Subnet layout assumes /16.')
 param vnetAddressPrefix string = environment == 'prod' ? '10.0.0.0/16' : '10.1.0.0/16'
 
 @description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')

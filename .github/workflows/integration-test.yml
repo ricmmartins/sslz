@@ -17,7 +17,7 @@ on:
         default: false
         type: boolean
   schedule:
-    # Run weekly on Monday at 06:00 UTC
+    # Run weekly on Monday at 06:00 UTC (plan/what-if only; deploy requires manual workflow_dispatch with deploy=true)
     - cron: '0 6 * * 1'
 
 concurrency:

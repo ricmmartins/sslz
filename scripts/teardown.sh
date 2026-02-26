@@ -22,18 +22,19 @@ REMOVE_BACKEND=false
 
 usage() {
   cat <<EOF
-Usage: $0 --tool <terraform|bicep> --env <prod|nonprod> [--yes] [--remove-backend]
+Usage: $0 --tool <terraform|bicep> --env <prod|nonprod> [--company <name>] [--yes] [--remove-backend]
 
 Options:
   --tool             Deployment tool used (terraform or bicep)
   --env              Environment to tear down (prod or nonprod)
+  --company          Company name used in resource naming (narrows RG matching for Bicep teardown)
   --yes              Skip confirmation prompt
   --remove-backend   Also remove Terraform state backend (storage account + lock)
   --help             Show this help
 
 Examples:
   $0 --tool terraform --env nonprod
-  $0 --tool bicep --env prod --yes
+  $0 --tool bicep --env prod --company mycompany --yes
 EOF
   exit 1
 }
@@ -44,6 +45,7 @@ while [[ $# -gt 0 ]]; do
     --env) ENV="$2"; shift 2 ;;
     --yes) AUTO_APPROVE=true; shift ;;
     --remove-backend) REMOVE_BACKEND=true; shift ;;
+    --company) COMPANY="$2"; shift 2 ;;
     --help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
   esac
@@ -149,9 +151,12 @@ elif [[ "$TOOL" == "bicep" ]]; then
   echo "Removing resource groups created by the landing zone..."
   echo ""
 
-  # List resource groups matching the landing zone naming convention (rg-*-<env>-*)
-  # Uses startsWith('rg-') to avoid accidentally matching unrelated resource groups.
-  RGS=$(az group list --query "[?starts_with(name, 'rg-') && contains(name, '-${ENV}')].name" -o tsv)
+  # List resource groups matching the landing zone naming convention (rg-<company>-<env>-*)
+  if [[ -n "${COMPANY:-}" ]]; then
+    RGS=$(az group list --query "[?starts_with(name, 'rg-${COMPANY}-${ENV}')].name" -o tsv)
+  else
+    RGS=$(az group list --query "[?starts_with(name, 'rg-') && contains(name, '-${ENV}')].name" -o tsv)
+  fi
 
   if [[ -z "$RGS" ]]; then
     echo "No matching resource groups found for environment: $ENV"
@@ -182,7 +187,13 @@ elif [[ "$TOOL" == "bicep" ]]; then
   echo ""
   echo "NOTE: Subscription-level resources (policies, Defender plans, diagnostic settings)"
   echo "are not removed by deleting resource groups. To remove them:"
-  echo "  az policy assignment delete --name <assignment-name>"
+  echo "  az policy assignment delete --name mcsb-audit"
+  echo "  az policy assignment delete --name allowed-locations"
+  echo "  az policy assignment delete --name allowed-locations-rg"
+  echo "  az policy assignment delete --name require-team-tag-rg"
+  echo "  az policy assignment delete --name inherit-team-tag"
+  echo "  az policy assignment delete --name require-environment-tag-rg"
+  echo "  az policy assignment delete --name inherit-environment-tag"
   echo "  az monitor diagnostic-settings subscription delete --name diag-activity-log-to-law"
 fi
 

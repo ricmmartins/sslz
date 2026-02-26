@@ -156,9 +156,9 @@ This is why we don't start with full ESLZ. At $1,500-3,000/month just for platfo
 ## See Also
 
 - [Architecture Decisions — Multi-Region and DR](architecture.md#multi-region-and-disaster-recovery) — When and how to expand to multiple regions
-- [Networking Deep Dive](networking.md) — VNet design, hub-spoke, Private Endpoints
-- [Security Baseline](security.md) — Defender, RBAC, identity hardening
-- [Cost Management](cost-management.md) — RI guidance, Savings Plans, cost mistakes
+- [Networking Deep Dive](networking) — VNet design, hub-spoke, Private Endpoints
+- [Security Baseline](security) — Defender, RBAC, identity hardening
+- [Cost Management](cost-management) — RI guidance, Savings Plans, cost mistakes
 
 ## Resources
 

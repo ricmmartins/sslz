@@ -222,7 +222,7 @@ After (when you graduate):
 
 Start with NSGs. They're free, they cover 95% of use cases, and they're per-subnet so failures are isolated. Add Azure Firewall when you have a specific compliance or operational requirement.
 
-> **See also:** The [SaaS Startup example](../examples/saas-startup/) demonstrates opt-in Private Endpoints for SQL and Redis with DNS zone configuration.
+> **See also:** The [SaaS Startup example](https://github.com/ricmmartins/sslz/tree/main/examples/saas-startup/) demonstrates opt-in Private Endpoints for SQL and Redis with DNS zone configuration.
 
 ## Front Door vs Application Gateway
 

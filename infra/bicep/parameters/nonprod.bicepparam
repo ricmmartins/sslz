@@ -1,3 +1,4 @@
+// ⚠️  EXAMPLE VALUES — copy to nonprod.local.bicepparam and customize before deploying.
 using '../main.bicep'
 
 param location = 'eastus2'

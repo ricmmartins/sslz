@@ -36,7 +36,7 @@ if command -v terraform &>/dev/null; then
     fail "Terraform $TF_VERSION is below minimum 1.5.0"
   fi
 else
-  fail "Terraform not found — install from https://terraform.io/downloads"
+  warn "Terraform not found — install from https://terraform.io/downloads (only needed for Terraform option)"
 fi
 
 # Bicep
