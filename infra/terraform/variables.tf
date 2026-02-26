@@ -151,6 +151,7 @@ locals {
     environment = var.environment
     managedBy   = "terraform"
     project     = "landing-zone"
+    team        = "platform"
   }
 
   tags = merge(local.default_tags, var.tags)

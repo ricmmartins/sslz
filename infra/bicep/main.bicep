@@ -82,6 +82,7 @@ param tags object = {
   environment: environment
   managedBy: 'bicep'
   project: 'landing-zone'
+  team: 'platform'
 }
 
 // ============================================================================

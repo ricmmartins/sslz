@@ -157,6 +157,10 @@ resource "azurerm_consumption_budget_subscription" "monthly" {
     start_date = local.budget_start_date
   }
 
+  lifecycle {
+    ignore_changes = [time_period]
+  }
+
   notification {
     enabled        = true
     threshold      = 50

@@ -33,9 +33,9 @@ Tenant Root Group
 ```
 prod-vnet (10.0.0.0/16)
 ├── snet-aks         10.0.0.0/20
-├── snet-app         10.0.4.0/22
-├── snet-data        10.0.8.0/22
-└── snet-shared      10.0.12.0/24
+├── snet-app         10.0.16.0/22
+├── snet-data        10.0.20.0/22
+└── snet-shared      10.0.24.0/24
 
 nonprod-vnet (10.1.0.0/16)
 └── (same layout)

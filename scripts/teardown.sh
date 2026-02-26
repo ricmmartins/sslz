@@ -117,7 +117,7 @@ if [[ "$TOOL" == "terraform" ]]; then
   terraform init
   terraform destroy \
     -var="environment=$ENV" \
-    ${AUTO_APPROVE:+-auto-approve}
+    $( [[ "$AUTO_APPROVE" == "true" ]] && echo "-auto-approve" )
 
   echo ""
   echo "Terraform destroy complete."

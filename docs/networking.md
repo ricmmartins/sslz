@@ -44,13 +44,13 @@ prod-vnet 10.0.0.0/16
 ├── snet-aks           10.0.0.0/20    (4,096 IPs)
 │   └── For AKS nodes + Azure CNI pods (pod IPs come from the subnet)
 │
-├── snet-app           10.0.4.0/22    (1,024 IPs)
+├── snet-app           10.0.16.0/22   (1,024 IPs)
 │   └── App Service / Container Apps VNet integration
 │
-├── snet-data          10.0.8.0/22    (1,024 IPs)
+├── snet-data          10.0.20.0/22   (1,024 IPs)
 │   └── Private Endpoints for SQL, Redis, Storage, Key Vault
 │
-└── snet-shared        10.0.12.0/24   (256 IPs)
+└── snet-shared        10.0.24.0/24   (256 IPs)
     └── CI/CD agents, jump boxes, Bastion subnet
 ```
 

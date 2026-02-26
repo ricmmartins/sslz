@@ -30,7 +30,7 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-vnet-box viz-amber-border">
 <div class="viz-vnet-title"><span>nonprod-vnet</span><code>10.1.0.0/16</code></div>
 <div class="viz-subnet-grid">
-<span class="viz-subnet snet-aks">snet-aks /18</span>
+<span class="viz-subnet snet-aks">snet-aks /20</span>
 <span class="viz-subnet snet-app">snet-app /22</span>
 <span class="viz-subnet snet-data">snet-data /22</span>
 <span class="viz-subnet snet-shared">snet-shared /24</span>
@@ -50,7 +50,7 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-vnet-box viz-green-border">
 <div class="viz-vnet-title"><span>prod-vnet</span><code>10.0.0.0/16</code></div>
 <div class="viz-subnet-grid">
-<span class="viz-subnet snet-aks">snet-aks /18</span>
+<span class="viz-subnet snet-aks">snet-aks /20</span>
 <span class="viz-subnet snet-app">snet-app /22</span>
 <span class="viz-subnet snet-data">snet-data /22</span>
 <span class="viz-subnet snet-shared">snet-shared /24</span>
@@ -145,7 +145,7 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-net-vnet-header"><span>prod-vnet</span><code>10.0.0.0/16</code></div>
 <div class="viz-net-subnet-grid">
 <div class="viz-net-subnet-card viz-purple-top">
-<div class="viz-net-subnet-head"><strong>snet-shared</strong><code>10.0.12.0/24</code></div>
+<div class="viz-net-subnet-head"><strong>snet-shared</strong><code>10.0.24.0/24</code></div>
 <span class="viz-net-ip-count">254 IPs</span>
 <div class="viz-net-svc-list">
 <span>Azure Bastion</span>
@@ -153,15 +153,15 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 </div>
 <div class="viz-net-subnet-card viz-blue-top">
-<div class="viz-net-subnet-head"><strong>snet-aks</strong><code>10.0.0.0/18</code></div>
-<span class="viz-net-ip-count">16,382 IPs</span>
+<div class="viz-net-subnet-head"><strong>snet-aks</strong><code>10.0.0.0/20</code></div>
+<span class="viz-net-ip-count">4,091 IPs</span>
 <div class="viz-net-svc-list">
 <span>AKS Nodes + Pods</span>
 <span>Azure CNI assigns pod IPs here</span>
 </div>
 </div>
 <div class="viz-net-subnet-card viz-green-top">
-<div class="viz-net-subnet-head"><strong>snet-app</strong><code>10.0.4.0/22</code></div>
+<div class="viz-net-subnet-head"><strong>snet-app</strong><code>10.0.16.0/22</code></div>
 <span class="viz-net-ip-count">1,022 IPs</span>
 <div class="viz-net-svc-list">
 <span>App Services</span>
@@ -169,7 +169,7 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 </div>
 <div class="viz-net-subnet-card viz-amber-top">
-<div class="viz-net-subnet-head"><strong>snet-data</strong><code>10.0.8.0/22</code></div>
+<div class="viz-net-subnet-head"><strong>snet-data</strong><code>10.0.20.0/22</code></div>
 <span class="viz-net-ip-count">1,022 IPs</span>
 <div class="viz-net-svc-list">
 <span>SQL, Cosmos, Redis</span>
@@ -183,7 +183,7 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 </div>
 
-> **Note:** All subnets have a default deny-all-inbound NSG rule. The `/18` AKS subnet is intentionally large because Azure CNI allocates one IP per pod.
+> **Note:** All subnets have a default deny-all-inbound NSG rule. The `/20` AKS subnet is intentionally large because Azure CNI allocates one IP per pod.
 
 ## Security Model
 
