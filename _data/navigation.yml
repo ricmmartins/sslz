@@ -11,6 +11,8 @@ docs:
     url: "/docs/ci-cd-setup"
   - title: "Troubleshooting"
     url: "/docs/troubleshooting"
+  - title: "Resource Inventory"
+    url: "/docs/resource-inventory"
   - title: "Graduation Guide"
     url: "/docs/graduation-guide"
 
