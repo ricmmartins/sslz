@@ -52,7 +52,7 @@ enable_defender_for_databases  = true  # recommended for prod (~$15/server/month
 # Restrict deployments to these Azure regions (defaults to [location] if omitted)
 # allowed_locations = ["eastus2", "centralus"]
 
-# Additional tags merged with defaults (environment, managedBy, project)
+# Additional tags merged with defaults (environment, managedBy, project, team)
 tags = {
   team = "platform"
 }
