@@ -116,23 +116,30 @@ Or run `scripts/validate-prerequisites.sh` to check all required providers.
 
 ### Terraform "Resource Already Exists" on First Apply
 
-**Error:** `a resource with the ID "…/securityContacts/default" already exists - to be managed via Terraform this resource needs to be imported into the State`
+**Error:** `a resource with the ID "…" already exists - to be managed via Terraform this resource needs to be imported into the State`
 
-**Cause:** Azure pre-creates the `securityContacts/default` resource on every subscription. The landing zone includes an `import` block to handle this automatically (requires Terraform ≥ 1.5). If you see this error, ensure you're on a supported version.
+**Cause:** If you previously deployed the landing zone with Bicep (or another tool) to the same subscription, some resources may already exist. Common examples:
 
-**Error:** `a resource with the ID "…|diag-activity-log-to-law" already exists`
-
-**Cause:** If you previously deployed with Bicep (or another tool) to the same subscription, the Activity Log diagnostic setting may already exist. The `activity-log-diag` DINE policy can also create this resource automatically.
+- `securityContacts/default` — created by a prior Bicep/Portal Defender configuration
+- `diag-activity-log-to-law` — created by a prior Bicep deployment or the `activity-log-diag` DINE policy
 
 **Fix:**
 ```bash
-# Import the existing diagnostic setting into Terraform state
+SUB_ID="<YOUR_SUBSCRIPTION_ID>"
+
+# Import pre-existing security contact
+terraform import module.security.azurerm_security_center_contact.default \
+  "/subscriptions/${SUB_ID}/providers/Microsoft.Security/securityContacts/default"
+
+# Import pre-existing diagnostic setting
 terraform import azurerm_monitor_diagnostic_setting.activity_log \
-  "/subscriptions/<SUBSCRIPTION_ID>|diag-activity-log-to-law"
+  "/subscriptions/${SUB_ID}|diag-activity-log-to-law"
 
 # Re-plan and apply
 terraform plan -out=tfplan && terraform apply tfplan
 ```
+
+> **Tip:** On a fresh subscription with no prior deployments, these errors should not occur.
 
 ### Bicep What-If Shows Unexpected Changes
 
