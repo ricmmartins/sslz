@@ -257,6 +257,7 @@ Pre-built configurations for common startup archetypes:
 ## Documentation
 
 - [Architecture Decisions](docs/architecture.md) — Why this layout, what we skipped, and when to revisit
+- [Resource Inventory](docs/resource-inventory.md) — Complete list of every Azure resource created
 - [Networking Deep Dive](docs/networking.md) — VNet design, NSGs, when you need a hub
 - [Security Baseline](docs/security.md) — Defender, RBAC, logging, network security
 - [Cost Management](docs/cost-management.md) — Budgets, RI guidance, common mistakes

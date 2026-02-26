@@ -435,6 +435,10 @@ az policy assignment list \
       <h3>Architecture Decisions</h3>
       <p>Why this layout, what we skipped, and when to revisit</p>
     </a>
+    <a href="{{ '/docs/resource-inventory' | relative_url }}" class="doc-card">
+      <h3>Resource Inventory</h3>
+      <p>Complete list of every Azure resource created</p>
+    </a>
     <a href="{{ '/docs/networking' | relative_url }}" class="doc-card">
       <h3>Networking Deep Dive</h3>
       <p>VNet design, NSGs, and when you actually need a hub</p>

@@ -23,7 +23,7 @@ This is the complete inventory of every Azure resource created by the Startup La
 
 ## Management Groups (Separate Deployment)
 
-Management groups deploy at **tenant scope** and must be deployed separately before the main landing zone.
+Management groups deploy at **tenant scope** and must be deployed separately before the main landing zone using CLI commands (see [Quick Start Step 2](https://github.com/ricmmartins/sslz#step-2-deploy-management-groups-optional-5-min) in the README). They are **not** created via the Portal or CI/CD workflows.
 
 | Name Pattern | Azure Resource Type | Purpose |
 |---|---|---|
