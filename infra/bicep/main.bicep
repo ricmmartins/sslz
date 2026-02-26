@@ -85,7 +85,7 @@ param allowedLocations string[] = [location]
 @maxValue(730)
 param logRetentionInDays int = 90
 
-@description('Log Analytics daily ingestion quota in GB (0 = unlimited)')
+@description('Log Analytics daily ingestion quota in GB (-1 = unlimited)')
 param logDailyQuotaGb int = 5
 
 @description('Tags applied to all resources')

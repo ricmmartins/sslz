@@ -38,6 +38,10 @@ Azure Container Apps Environment
 
 ## Deploy
 
+### Prerequisites
+
+- An existing resource group (you must create this — the landing zone does not create application resource groups)
+
 ### Bicep
 
 ```bash

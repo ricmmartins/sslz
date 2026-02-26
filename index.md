@@ -253,7 +253,7 @@ az policy assignment list \
     </div>
   </div>
   <p style="text-align: center; margin-top: 2rem;">
-    <a href="{{ '/docs/architecture' | relative_url }}" class="btn btn-primary">Full Deployment Guide</a>
+    <a href="{{ site.github_repo }}#quick-start" class="btn btn-primary" target="_blank" rel="noopener">Full Deployment Guide</a>
   </p>
 </section>
 
