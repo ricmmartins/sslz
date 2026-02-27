@@ -1,8 +1,3 @@
-variable "subscription_id" {
-  description = "Azure subscription ID (used for import blocks)"
-  type        = string
-}
-
 variable "security_contact_email" {
   description = "Email address for Defender for Cloud security alerts"
   type        = string
