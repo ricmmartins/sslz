@@ -102,6 +102,7 @@ module "networking" {
 
 module "security" {
   source                         = "./modules/security"
+  subscription_id               = var.subscription_id
   security_contact_email         = var.security_contact_email
   enable_defender_for_servers    = local.enable_defender_for_servers
   enable_defender_for_containers = var.enable_defender_for_containers

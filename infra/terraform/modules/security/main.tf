@@ -58,7 +58,13 @@ resource "azurerm_security_center_subscription_pricing" "arm" {
   resource_type = "Arm"
 }
 
-# Security contact
+# Security contact — Azure auto-creates securityContacts/default with empty values
+# when any Defender plan is enabled. The import block adopts it into state.
+import {
+  to = azurerm_security_center_contact.default
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/securityContacts/default"
+}
+
 resource "azurerm_security_center_contact" "default" {
   name                = "default"
   email               = var.security_contact_email
