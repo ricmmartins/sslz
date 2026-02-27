@@ -39,8 +39,8 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 }
 
 // NOTE: Activity Log diagnostic settings require subscription scope.
-// This is handled by the policy assignment in policy-assignments.bicep
-// (DeployIfNotExists policy: "Deploy Activity Log diagnostics to Log Analytics").
+// They are deployed directly in main.bicep for immediate effect and also
+// enforced by the DINE policy in policy-assignments.bicep for ongoing compliance.
 
 output workspaceId string = workspace.id
 output workspaceName string = workspace.name

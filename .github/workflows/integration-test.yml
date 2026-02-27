@@ -118,6 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bicep-whatif, terraform-plan]
     if: github.event.inputs.deploy == 'true'
+    environment: ${{ github.event.inputs.environment || 'nonprod' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -142,6 +143,7 @@ jobs:
         run: terraform init -backend=false
 
       - name: Terraform Apply
+        id: tf-apply
         working-directory: infra/terraform
         run: terraform apply -auto-approve -input=false
 
@@ -213,9 +215,9 @@ jobs:
             echo "  ⚠ Budget not found (may take time to propagate)"
           fi
 
-      # --- Teardown (runs even if validation fails, as long as apply succeeded) ---
+      # --- Teardown (runs if apply succeeded, even if validation fails) ---
       - name: Terraform Destroy
-        if: always()
+        if: always() && steps.tf-apply.outcome == 'success'
         working-directory: infra/terraform
         run: terraform destroy -auto-approve -input=false
 

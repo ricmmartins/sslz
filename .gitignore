@@ -9,6 +9,7 @@ Gemfile.lock
 *.tfstate
 *.tfstate.*
 *.tfplan
+tfplan
 terraform.tfvars
 *.auto.tfvars
 crash.log

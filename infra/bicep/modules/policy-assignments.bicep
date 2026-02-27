@@ -179,3 +179,50 @@ resource activityLogDiagAssignment 'Microsoft.Authorization/policyAssignments@20
     }
   }
 }
+
+// ============================================================================
+// Role assignments for DINE/Modify policy managed identities
+// Without these, remediation tasks will fail with AuthorizationFailed.
+// ============================================================================
+
+var roleDefinitions = {
+  tagContributor: '/providers/Microsoft.Authorization/roleDefinitions/4a9ae827-6dc8-4573-8ac7-8239d42aa03f'
+  logAnalyticsContributor: '/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293'
+  monitoringContributor: '/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa'
+}
+
+resource inheritEnvTagRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, inheritEnvironmentTag.name, roleDefinitions.tagContributor)
+  properties: {
+    principalId: inheritEnvironmentTag.identity.principalId
+    roleDefinitionId: roleDefinitions.tagContributor
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource inheritTeamTagRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, inheritTeamTag.name, roleDefinitions.tagContributor)
+  properties: {
+    principalId: inheritTeamTag.identity.principalId
+    roleDefinitionId: roleDefinitions.tagContributor
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource activityLogDiagRoleLaw 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, activityLogDiagAssignment.name, roleDefinitions.logAnalyticsContributor)
+  properties: {
+    principalId: activityLogDiagAssignment.identity.principalId
+    roleDefinitionId: roleDefinitions.logAnalyticsContributor
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource activityLogDiagRoleMonitor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, activityLogDiagAssignment.name, roleDefinitions.monitoringContributor)
+  properties: {
+    principalId: activityLogDiagAssignment.identity.principalId
+    roleDefinitionId: roleDefinitions.monitoringContributor
+    principalType: 'ServicePrincipal'
+  }
+}
