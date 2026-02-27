@@ -89,7 +89,7 @@ resource "azurerm_container_app" "api" {
 
     # Allow requests from the web frontend (matches Bicep corsPolicy)
     cors {
-      allowed_origins = ["https://${var.app_name}-web.${azurerm_container_app_environment.this.default_domain}"]
+      allowed_origins = ["https://ca-${var.app_name}-web.${azurerm_container_app_environment.this.default_domain}"]
     }
   }
 
@@ -166,6 +166,15 @@ resource "azurerm_mssql_server" "this" {
   tags                          = local.tags
 }
 
+# Allow Azure services to reach SQL when not using Private Endpoints
+resource "azurerm_mssql_firewall_rule" "allow_azure" {
+  count            = var.deploy_private_endpoints ? 0 : 1
+  name             = "AllowAllAzureIps"
+  server_id        = azurerm_mssql_server.this.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
+}
+
 resource "azurerm_mssql_elasticpool" "this" {
   name                = "pool-${var.app_name}"
   location            = var.location
@@ -222,7 +231,7 @@ resource "azurerm_key_vault" "this" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   rbac_authorization_enabled = true
-  soft_delete_retention_days = 30
+  soft_delete_retention_days = 90
   purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 
@@ -251,6 +260,47 @@ resource "azurerm_monitor_diagnostic_setting" "sql" {
   enabled_log {
     category = "SQLSecurityAuditEvents"
   }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "redis" {
+  name                       = "diag-redis"
+  target_resource_id         = azurerm_redis_cache.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "kv" {
+  name                       = "diag-kv"
+  target_resource_id         = azurerm_key_vault.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "AuditEvent"
+  }
+}
+
+# ==============================================================================
+# Resource Locks (prod only)
+# ==============================================================================
+
+resource "azurerm_management_lock" "kv" {
+  count      = var.environment == "prod" ? 1 : 0
+  name       = "protect-kv"
+  scope      = azurerm_key_vault.this.id
+  lock_level = "CanNotDelete"
+  notes      = "Protects Key Vault from accidental deletion"
+}
+
+resource "azurerm_management_lock" "sql" {
+  count      = var.environment == "prod" ? 1 : 0
+  name       = "protect-sql"
+  scope      = azurerm_mssql_server.this.id
+  lock_level = "CanNotDelete"
+  notes      = "Protects SQL Server from accidental deletion"
 }
 
 # ==============================================================================

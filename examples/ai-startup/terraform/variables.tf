@@ -65,6 +65,12 @@ variable "gpu_use_spot" {
   default     = true
 }
 
+variable "cpu_use_spot" {
+  description = "Use Spot VMs for CPU burst node pool"
+  type        = bool
+  default     = true
+}
+
 variable "kubernetes_version" {
   description = "AKS Kubernetes version"
   type        = string
@@ -93,5 +99,6 @@ locals {
     environment = var.environment
     team        = "ml-engineering"
     project     = var.app_name
+    managedBy   = "terraform"
   }, var.tags)
 }

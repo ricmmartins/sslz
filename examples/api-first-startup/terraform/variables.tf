@@ -64,5 +64,6 @@ locals {
     environment = var.environment
     team        = "engineering"
     project     = var.app_name
+    managedBy   = "terraform"
   }, var.tags)
 }

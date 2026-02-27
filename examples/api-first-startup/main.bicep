@@ -29,6 +29,7 @@ param tags object = {
   environment: environment
   team: 'engineering'
   project: appName
+  managedBy: 'bicep'
 }
 
 // ============================================================================
@@ -229,6 +230,16 @@ resource cosmosRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssi
   }
 }
 
+resource cosmosRoleAssignmentStaging 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = if (environment == 'prod') {
+  parent: cosmos
+  name: guid(cosmos.id, stagingSlot.id, 'cosmos-data-contributor-staging')
+  properties: {
+    roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
+    principalId: stagingSlot.identity.principalId
+    scope: cosmos.id
+  }
+}
+
 // ============================================================================
 // Redis — response caching
 // Standard C1 for prod (SLA, replication), Basic C0 for nonprod.
@@ -265,7 +276,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableRbacAuthorization: true
     enableSoftDelete: true
     enablePurgeProtection: environment == 'prod' ? true : null
-    softDeleteRetentionInDays: 30
+    softDeleteRetentionInDays: 90
     networkAcls: {
       defaultAction: 'Deny'
       bypass: 'AzureServices'
@@ -284,8 +295,18 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   }
 }
 
+resource kvRoleAssignmentStaging 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (environment == 'prod') {
+  name: guid(kv.id, stagingSlot.id, '4633458b-17de-408a-b874-0445c86b69e6')
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+    principalId: stagingSlot.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // ============================================================================
-// Diagnostic Settings — send audit logs to Log Analytics
+// Diagnostic Settings— send audit logs to Log Analytics
 // ============================================================================
 
 resource cosmosDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
@@ -317,6 +338,43 @@ resource apimDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
         enabled: true
       }
     ]
+  }
+}
+
+resource kvDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-kv'
+  scope: kv
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'AuditEvent'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource redisDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-redis'
+  scope: redis
+  properties: {
+    workspaceId: law.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource kvLock 'Microsoft.Authorization/locks@2020-05-01' = if (environment == 'prod') {
+  name: 'protect-kv'
+  scope: kv
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Protects Key Vault from accidental deletion'
   }
 }
 

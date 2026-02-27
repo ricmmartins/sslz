@@ -24,6 +24,9 @@ param gpuNodeVmSize string = 'Standard_NC6s_v3'
 @description('Use Spot VMs for GPU node pool')
 param gpuUseSpot bool = true
 
+@description('Use Spot VMs for CPU burst node pool')
+param cpuUseSpot bool = true
+
 @description('CPU burst node pool VM size')
 param cpuNodeVmSize string = 'Standard_D4s_v5'
 
@@ -41,6 +44,7 @@ param tags object = {
   environment: environment
   team: 'ml-engineering'
   project: appName
+  managedBy: 'bicep'
 }
 
 // ============================================================================
@@ -151,9 +155,9 @@ resource cpuNodePool 'Microsoft.ContainerService/managedClusters/agentPools@2024
     vmSize: cpuNodeVmSize
     osType: 'Linux'
     osSKU: 'AzureLinux'
-    scaleSetPriority: 'Spot'
-    scaleSetEvictionPolicy: 'Delete'
-    spotMaxPrice: json('-1')
+    scaleSetPriority: cpuUseSpot ? 'Spot' : 'Regular'
+    scaleSetEvictionPolicy: cpuUseSpot ? 'Delete' : null
+    spotMaxPrice: cpuUseSpot ? json('-1') : null
     nodeLabels: {
       'workload-type': 'cpu-batch'
     }
@@ -236,6 +240,10 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
     allowBlobPublicAccess: false
+    networkRuleSet: {
+      defaultAction: 'Deny'
+      bypass: 'AzureServices'
+    }
   }
 }
 
@@ -304,6 +312,43 @@ resource storageBlobDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-previ
   }
 }
 
+resource kvDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-kv'
+  scope: kv
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'AuditEvent'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource redisDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-redis'
+  scope: redis
+  properties: {
+    workspaceId: law.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource kvLock 'Microsoft.Authorization/locks@2020-05-01' = if (environment == 'prod') {
+  name: 'protect-kv'
+  scope: kv
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Protects Key Vault from accidental deletion'
+  }
+}
+
 // ============================================================================
 // Key Vault
 // ============================================================================
@@ -318,7 +363,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableRbacAuthorization: true
     enableSoftDelete: true
     enablePurgeProtection: environment == 'prod' ? true : null
-    softDeleteRetentionInDays: 30
+    softDeleteRetentionInDays: 90
     networkAcls: {
       defaultAction: 'Deny'
       bypass: 'AzureServices'

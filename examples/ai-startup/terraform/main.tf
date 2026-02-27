@@ -127,9 +127,9 @@ resource "azurerm_kubernetes_cluster_node_pool" "cpu" {
   max_count             = 10
   auto_scaling_enabled  = true
   os_sku                = "AzureLinux"
-  priority              = "Spot"
-  eviction_policy       = "Delete"
-  spot_max_price        = -1
+  priority              = var.cpu_use_spot ? "Spot" : "Regular"
+  eviction_policy       = var.cpu_use_spot ? "Delete" : null
+  spot_max_price        = var.cpu_use_spot ? -1 : null
 
   node_labels = {
     "workload-type" = "cpu-batch"
@@ -208,6 +208,11 @@ resource "azurerm_storage_account" "this" {
   https_traffic_only_enabled      = true
   allow_nested_items_to_be_public = false
   tags                            = local.tags
+
+  network_rules {
+    default_action = "Deny"
+    bypass         = ["AzureServices"]
+  }
 }
 
 resource "azurerm_storage_container" "models" {
@@ -261,6 +266,35 @@ resource "azurerm_monitor_diagnostic_setting" "storage_blob" {
   }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "key_vault" {
+  name                       = "diag-kv"
+  target_resource_id         = azurerm_key_vault.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "AuditEvent"
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "redis" {
+  name                       = "diag-redis"
+  target_resource_id         = azurerm_redis_cache.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
+resource "azurerm_management_lock" "key_vault" {
+  count      = var.environment == "prod" ? 1 : 0
+  name       = "protect-kv"
+  scope      = azurerm_key_vault.this.id
+  lock_level = "CanNotDelete"
+  notes      = "Protects Key Vault from accidental deletion"
+}
+
 # ==============================================================================
 # Key Vault
 # ==============================================================================
@@ -272,7 +306,7 @@ resource "azurerm_key_vault" "this" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   rbac_authorization_enabled = true
-  soft_delete_retention_days = 30
+  soft_delete_retention_days = 90
   purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 

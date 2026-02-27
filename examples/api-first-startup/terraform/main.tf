@@ -211,6 +211,15 @@ resource "azurerm_cosmosdb_sql_role_assignment" "app_cosmos" {
   scope               = azurerm_cosmosdb_account.this.id
 }
 
+resource "azurerm_cosmosdb_sql_role_assignment" "staging_cosmos" {
+  count               = var.environment == "prod" ? 1 : 0
+  resource_group_name = data.azurerm_resource_group.this.name
+  account_name        = azurerm_cosmosdb_account.this.name
+  role_definition_id  = "${azurerm_cosmosdb_account.this.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id        = azurerm_linux_web_app_slot.staging[0].identity[0].principal_id
+  scope               = azurerm_cosmosdb_account.this.id
+}
+
 # ==============================================================================
 # Redis — response caching
 # Standard C1 for prod (SLA, replication), Basic C0 for nonprod.
@@ -241,7 +250,7 @@ resource "azurerm_key_vault" "this" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   rbac_authorization_enabled = true
-  soft_delete_retention_days = 30
+  soft_delete_retention_days = 90
   purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 
@@ -258,8 +267,15 @@ resource "azurerm_role_assignment" "app_kv_secrets" {
   principal_id         = azurerm_linux_web_app.this.identity[0].principal_id
 }
 
+resource "azurerm_role_assignment" "staging_kv_secrets" {
+  count                = var.environment == "prod" ? 1 : 0
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_linux_web_app_slot.staging[0].identity[0].principal_id
+}
+
 # ==============================================================================
-# Diagnostic Settings — send audit logs to Log Analytics
+# Diagnostic Settings— send audit logs to Log Analytics
 # ==============================================================================
 
 resource "azurerm_monitor_diagnostic_setting" "cosmos" {
@@ -284,4 +300,33 @@ resource "azurerm_monitor_diagnostic_setting" "apim" {
   enabled_log {
     category = "GatewayLogs"
   }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "kv" {
+  name                       = "diag-kv"
+  target_resource_id         = azurerm_key_vault.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "AuditEvent"
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "redis" {
+  name                       = "diag-redis"
+  target_resource_id         = azurerm_redis_cache.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
+resource "azurerm_management_lock" "kv" {
+  count      = var.environment == "prod" ? 1 : 0
+  name       = "protect-kv"
+  scope      = azurerm_key_vault.this.id
+  lock_level = "CanNotDelete"
+  notes      = "Protects Key Vault from accidental deletion"
 }

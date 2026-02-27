@@ -7,12 +7,10 @@ An AI/ML startup running inference workloads on AKS with GPU node pools, Azure O
 ```
 Internet
     │
-Azure Front Door (WAF)
-    │
 AKS Cluster
     ├── System node pool     (Standard_D4s_v5, 2-5 nodes)
-    ├── GPU node pool         (Standard_NC6s_v3, 1-3 nodes, Spot)
-    └── CPU inference pool    (Standard_D4s_v5, 0-10 nodes, Spot)
+    ├── GPU node pool         (Standard_NC6s_v3, 0-3 nodes, Spot)
+    └── CPU burst pool        (Standard_D4s_v5, 0-10 nodes, Spot)
     │
     ├── Azure OpenAI Service
     ├── Azure Blob Storage    (models, datasets, outputs)
@@ -34,15 +32,15 @@ AKS Cluster
 
 | Resource | SKU | Est. Cost |
 |---|---|---|
-| AKS system pool (3x D4s_v5) | On-demand | $420 |
+| AKS system pool (2x D4s_v5) | On-demand | $280 |
 | AKS GPU pool (2x NC6s_v3 Spot) | Spot (~70% off) | $600 |
-| AKS CPU inference pool (3x D8s_v5) | 1yr RI | $550 |
+| AKS CPU burst pool (3x D4s_v5) | Spot (~70% off) | $200 |
 | Azure OpenAI | GPT-4o, ~1M tokens/day | $30-100 |
 | Storage | 1TB LRS Hot | $20 |
 | Redis | Standard C1 | $80 |
 | ACR | Standard | $20 |
 | Key Vault | Standard | $5 |
-| **Total** | | **~$1,700-1,800/month** |
+| **Total** | | **~$1,200-1,300/month** |
 
 ## Key Decisions
 
@@ -70,8 +68,10 @@ Options ranked by complexity:
 
 ### Prerequisites
 
+- Azure CLI >= 2.53.0 with Bicep CLI (or Terraform >= 1.5.0)
 - An existing resource group (you must create this — the landing zone does not create application resource groups)
 - An SSH public key for AKS node access
+- You may need to request GPU quota for NC-series VMs via the Azure Portal (Quotas page)
 
 ### Bicep
 
@@ -119,6 +119,14 @@ terraform apply
 ## Teardown
 
 To destroy all resources created by this example:
+
+### Bicep
+
+```bash
+az group delete --name <RESOURCE_GROUP_NAME> --yes --no-wait
+```
+
+### Terraform
 
 ```bash
 cd examples/ai-startup/terraform

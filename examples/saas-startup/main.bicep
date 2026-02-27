@@ -43,6 +43,7 @@ param tags object = {
   environment: environment
   team: 'engineering'
   project: appName
+  managedBy: 'bicep'
 }
 
 // ============================================================================
@@ -97,7 +98,7 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
         targetPort: 80
         transport: 'auto'
         corsPolicy: {
-          allowedOrigins: ['https://${appName}-web.${cae.properties.defaultDomain}']
+          allowedOrigins: ['https://ca-${appName}-web.${cae.properties.defaultDomain}']
         }
       }
       secrets: []
@@ -184,6 +185,16 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   }
 }
 
+// Allow Azure services to reach SQL when not using Private Endpoints
+resource sqlFirewall 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = if (!deployPrivateEndpoints) {
+  parent: sqlServer
+  name: 'AllowAllAzureIps'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
 resource elasticPool 'Microsoft.Sql/servers/elasticPools@2023-08-01-preview' = {
   parent: sqlServer
   name: 'pool-${appName}'
@@ -250,7 +261,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableRbacAuthorization: true
     enableSoftDelete: true
     enablePurgeProtection: environment == 'prod' ? true : null
-    softDeleteRetentionInDays: 30
+    softDeleteRetentionInDays: 90
     networkAcls: {
       defaultAction: 'Deny'
       bypass: 'AzureServices'
@@ -284,6 +295,56 @@ resource sqlDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
         enabled: true
       }
     ]
+  }
+}
+
+resource redisDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-redis'
+  scope: redis
+  properties: {
+    workspaceId: law.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource kvDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag-kv'
+  scope: kv
+  properties: {
+    workspaceId: law.id
+    logs: [
+      {
+        category: 'AuditEvent'
+        enabled: true
+      }
+    ]
+  }
+}
+
+// ============================================================================
+// Resource Locks (prod only)
+// ============================================================================
+
+resource kvLock 'Microsoft.Authorization/locks@2020-05-01' = if (environment == 'prod') {
+  name: 'protect-kv'
+  scope: kv
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Protects Key Vault from accidental deletion'
+  }
+}
+
+resource sqlLock 'Microsoft.Authorization/locks@2020-05-01' = if (environment == 'prod') {
+  name: 'protect-sql'
+  scope: sqlServer
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Protects SQL Server from accidental deletion'
   }
 }
 

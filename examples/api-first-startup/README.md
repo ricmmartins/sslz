@@ -16,7 +16,6 @@ Azure App Service (Linux, P1v3)
     │
     ├── Azure Cosmos DB     (NoSQL, multi-region ready)
     ├── Azure Cache for Redis (response caching)
-    ├── Azure Storage       (file uploads, static assets)
     ├── Application Insights (APM, distributed tracing)
     └── Azure Key Vault
 ```
@@ -37,11 +36,10 @@ Azure App Service (Linux, P1v3)
 | App Service | P1v3 (1yr RI) | $53 |
 | APIM Consumption | ~500k calls/month | $17 |
 | Cosmos DB | Serverless (dev) / 400 RU/s autoscale (prod) | $25-200 |
-| Redis | Basic C0 | $16 |
+| Redis | Standard C1 (prod) / Basic C0 (nonprod) | $54 / $16 |
 | Application Insights | ~5GB/month | $12 |
-| Storage | LRS Hot 100GB | $5 |
 | Key Vault | Standard | $1-5 |
-| **Total** | | **~$130-310/month** |
+| **Total** | | **~$163-345/month** |
 
 ## Key Decisions
 
@@ -89,6 +87,7 @@ Application Insights gives you:
 
 ### Prerequisites
 
+- Azure CLI >= 2.53.0 with Bicep CLI (or Terraform >= 1.5.0)
 - An existing resource group (you must create this — the landing zone does not create application resource groups)
 - APIM publisher email and name for API Management configuration
 
@@ -138,6 +137,14 @@ terraform apply
 ## Teardown
 
 To destroy all resources created by this example:
+
+### Bicep
+
+```bash
+az group delete --name rg-mycompany-prod-app --yes --no-wait
+```
+
+### Terraform
 
 ```bash
 cd examples/api-first-startup/terraform
