@@ -37,10 +37,10 @@ AKS Cluster
 | AKS CPU burst pool (3x D4s_v5) | Spot (~70% off) | $200 |
 | Azure OpenAI | GPT-4o, ~1M tokens/day | $30-100 |
 | Storage | 1TB LRS Hot | $20 |
-| Redis | Standard C1 | $80 |
+| Redis | Standard C1 | $54 |
 | ACR | Standard | $20 |
 | Key Vault | Standard | $5 |
-| **Total** | | **~$1,200-1,300/month** |
+| **Total** | | **~$1,150-1,250/month** |
 
 ## Key Decisions
 
@@ -123,6 +123,12 @@ To destroy all resources created by this example:
 ### Bicep
 
 ```bash
+# Remove resource locks first if deploying to prod
+az lock delete --name protect-kv \
+  --resource rg-mycompany-prod-app \
+  --resource-type Microsoft.KeyVault/vaults \
+  --resource-name kv-<APP_NAME>-<ENV>
+
 az group delete --name <RESOURCE_GROUP_NAME> --yes --no-wait
 ```
 

@@ -260,8 +260,8 @@ Key additions when you graduate to multi-region:
 
 ### See Also
 
-- [Graduation Guide](graduation-guide) — Full migration path to enterprise-scale
-- [Networking Deep Dive](networking) — When to add a hub VNet
-- [Security Baseline](security) — Defender, RBAC, logging
-- [Cost Management](cost-management) — Budgets and cost optimization
-- [Troubleshooting](troubleshooting) — Common deployment errors
+- [Graduation Guide](graduation-guide.md) — Full migration path to enterprise-scale
+- [Networking Deep Dive](networking.md) — When to add a hub VNet
+- [Security Baseline](security.md) — Defender, RBAC, logging
+- [Cost Management](cost-management.md) — Budgets and cost optimization
+- [Troubleshooting](troubleshooting.md) — Common deployment errors

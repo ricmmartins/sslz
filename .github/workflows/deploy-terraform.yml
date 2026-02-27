@@ -30,6 +30,10 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: deploy-terraform-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   TF_DIR: infra/terraform
   ARM_USE_OIDC: true

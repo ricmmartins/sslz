@@ -121,9 +121,15 @@ This creates Private Endpoints and Private DNS Zones for both SQL Server (`priva
 ### Bicep
 
 ```bash
-# Note: remove resource locks first if deploying to prod
-az lock delete --name protect-kv --resource-group <RG>
-az lock delete --name protect-sql --resource-group <RG>
+# Remove resource locks first if deploying to prod
+az lock delete --name protect-kv \
+  --resource-group <RG> \
+  --resource-type Microsoft.KeyVault/vaults \
+  --resource-name kv-<APP_NAME>-<ENV>
+az lock delete --name protect-sql \
+  --resource-group <RG> \
+  --resource-type Microsoft.Sql/servers \
+  --resource-name sql-<APP_NAME>-<ENV>
 
 az group delete --name <RG> --yes
 ```

@@ -101,7 +101,7 @@ resource "azurerm_subscription_policy_assignment" "require_team_tag" {
 resource "azurerm_subscription_policy_assignment" "inherit_env_tag" {
   name                 = "inherit-env-tag"
   display_name         = "Inherit environment tag from resource group"
-  description          = "Automatically propagate environment tag from resource groups to child resources."
+  description          = "Automatically propagate the environment tag from resource groups to child resources."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.inherit_tag
   location             = var.location
@@ -119,7 +119,7 @@ resource "azurerm_subscription_policy_assignment" "inherit_env_tag" {
 resource "azurerm_subscription_policy_assignment" "inherit_team_tag" {
   name                 = "inherit-team-tag"
   display_name         = "Inherit team tag from resource group"
-  description          = "Automatically propagate team tag from resource groups to child resources."
+  description          = "Automatically propagate the team tag from resource groups to child resources."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.inherit_tag
   location             = var.location
@@ -162,25 +162,29 @@ resource "azurerm_subscription_policy_assignment" "activity_log_diag" {
 # ==============================================================================
 
 resource "azurerm_role_assignment" "inherit_env_tag" {
-  scope                = local.subscription_scope
-  role_definition_name = "Tag Contributor"
-  principal_id         = azurerm_subscription_policy_assignment.inherit_env_tag.identity[0].principal_id
+  scope                            = local.subscription_scope
+  role_definition_name             = "Tag Contributor"
+  principal_id                     = azurerm_subscription_policy_assignment.inherit_env_tag.identity[0].principal_id
+  skip_service_principal_aad_check = true
 }
 
 resource "azurerm_role_assignment" "inherit_team_tag" {
-  scope                = local.subscription_scope
-  role_definition_name = "Tag Contributor"
-  principal_id         = azurerm_subscription_policy_assignment.inherit_team_tag.identity[0].principal_id
+  scope                            = local.subscription_scope
+  role_definition_name             = "Tag Contributor"
+  principal_id                     = azurerm_subscription_policy_assignment.inherit_team_tag.identity[0].principal_id
+  skip_service_principal_aad_check = true
 }
 
 resource "azurerm_role_assignment" "activity_log_diag_law" {
-  scope                = local.subscription_scope
-  role_definition_name = "Log Analytics Contributor"
-  principal_id         = azurerm_subscription_policy_assignment.activity_log_diag.identity[0].principal_id
+  scope                            = local.subscription_scope
+  role_definition_name             = "Log Analytics Contributor"
+  principal_id                     = azurerm_subscription_policy_assignment.activity_log_diag.identity[0].principal_id
+  skip_service_principal_aad_check = true
 }
 
 resource "azurerm_role_assignment" "activity_log_diag_monitor" {
-  scope                = local.subscription_scope
-  role_definition_name = "Monitoring Contributor"
-  principal_id         = azurerm_subscription_policy_assignment.activity_log_diag.identity[0].principal_id
+  scope                            = local.subscription_scope
+  role_definition_name             = "Monitoring Contributor"
+  principal_id                     = azurerm_subscription_policy_assignment.activity_log_diag.identity[0].principal_id
+  skip_service_principal_aad_check = true
 }

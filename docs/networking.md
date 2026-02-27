@@ -7,7 +7,7 @@ description: "VNet design, NSGs, and when you actually need a hub"
 
 # Networking Deep Dive
 
-> See also: [Architecture Decisions](architecture#networking) for details on why this layout was chosen.
+> See also: [Architecture Decisions](architecture.md#networking) for details on why this layout was chosen.
 
 ## Do You Even Need a VNet?
 
@@ -41,22 +41,22 @@ Use `10.x.0.0/16` ranges. They're private (RFC 1918), don't conflict with most c
 ```
 vnet-<co>-prod 10.0.0.0/16
 │
-├── snet-aks           10.0.0.0/20    (4,096 IPs)
+├── snet-aks           10.0.0.0/20    (4,091 usable IPs)
 │   └── For AKS nodes + Azure CNI pods (pod IPs come from the subnet)
 │
-├── snet-app           10.0.16.0/22   (1,024 IPs)
+├── snet-app           10.0.16.0/22   (1,019 usable IPs)
 │   └── App Service / Container Apps VNet integration
 │
-├── snet-data          10.0.20.0/22   (1,024 IPs)
+├── snet-data          10.0.20.0/22   (1,019 usable IPs)
 │   └── Private Endpoints for SQL, Redis, Storage, Key Vault
 │
-└── snet-shared        10.0.24.0/24   (256 IPs)
+└── snet-shared        10.0.24.0/24   (251 usable IPs)
     └── CI/CD agents, jump boxes, Bastion subnet
 ```
 
-**Why `/20` for AKS?** With Azure CNI, pods consume IPs from the subnet. A modest cluster with 10 nodes and 30 pods each is ~300 pod IPs. Add headroom for upgrades (surge nodes), system components, and future node pools. A /20 gives you ~4k IPs, which is a solid default for most startup-scale clusters. If you expect a much larger cluster (high node count, multiple pools, high max-pods), bump AKS to `/19` or `/18`.
+**Why `/20` for AKS?** With Azure CNI, pods consume IPs from the subnet. A modest cluster with 10 nodes and 30 pods each is ~300 pod IPs. Add headroom for upgrades (surge nodes), system components, and future node pools. A /20 gives you ~4k usable IPs (Azure reserves 5 per subnet), which is a solid default for most startup-scale clusters. If you expect a much larger cluster (high node count, multiple pools, high max-pods), bump AKS to `/19` or `/18`.
 
-**Why `/22` for data?** Each Private Endpoint uses one IP. You'll have 5-20 Private Endpoints in a typical startup. `/22` gives you 1,024 — way more than you need, but subnets are free and re-sizing them later is painful.
+**Why `/22` for data?** Each Private Endpoint uses one IP. You'll have 5-20 Private Endpoints in a typical startup. `/22` gives you 1,019 usable IPs — way more than you need, but subnets are free and re-sizing them later is painful.
 
 ### Subnet Delegation
 

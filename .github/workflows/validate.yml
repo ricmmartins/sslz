@@ -12,6 +12,9 @@ on:
       - 'infra/**'
       - 'examples/**'
 
+permissions:
+  contents: read
+
 jobs:
   validate-bicep:
     name: Validate Bicep

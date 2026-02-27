@@ -206,7 +206,7 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 
 ## See Also
 
-- [Networking Deep Dive](networking) — NSG rules, Private Endpoints, VNet design
-- [CI/CD Setup](ci-cd-setup) — Workload Identity Federation configuration
-- [Architecture Decisions](architecture) — Policy baseline, management groups, identity
-- [Troubleshooting](troubleshooting) — Common deployment errors and fixes
+- [Networking Deep Dive](networking.md) — NSG rules, Private Endpoints, VNet design
+- [CI/CD Setup](ci-cd-setup.md) — Workload Identity Federation configuration
+- [Architecture Decisions](architecture.md) — Policy baseline, management groups, identity
+- [Troubleshooting](troubleshooting.md) — Common deployment errors and fixes

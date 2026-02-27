@@ -18,6 +18,7 @@ Set these on both subscriptions immediately. Budget alerts are free and take 5 m
 | 50% of monthly budget | Platform team / SRE | Awareness. Check if spend is tracking normally. |
 | 80% of monthly budget | Platform team + CTO | Review. Are there unexpected resources? Runaway scaling? |
 | 100% of monthly budget | Platform team + CTO + Finance | Investigate immediately. |
+| 100% forecasted | Platform team + CTO | Early warning. You're projected to exceed your budget this month. |
 
 ### Setting Your Initial Budget
 
@@ -240,6 +241,6 @@ resources
 
 ## See Also
 
-- [Architecture Decisions](architecture) — Why two subscriptions, budget design
-- [Troubleshooting](troubleshooting) — Budget start date format errors
-- [Graduation Guide](graduation-guide) — When to add cost management tooling
+- [Architecture Decisions](architecture.md) — Why two subscriptions, budget design
+- [Troubleshooting](troubleshooting.md) — Budget start date format errors
+- [Graduation Guide](graduation-guide.md) — When to add cost management tooling
