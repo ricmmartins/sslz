@@ -324,7 +324,7 @@ az security pricing list \
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Run <a href="#quick-start">Bicep or Terraform deployment</a> (creates policies, networking, monitoring, security, budgets)</li>
+          <li>Run <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription" target="_blank" rel="noopener">Bicep</a> or <a href="https://learn.microsoft.com/azure/developer/terraform/overview" target="_blank" rel="noopener">Terraform</a> deployment — see <a href="#quick-start">Step 3</a> above</li>
           <li>Verify resources in <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal</a></li>
         </ul>
       </div>
@@ -339,7 +339,7 @@ az security pricing list \
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Assign <code>sg-azure-admins</code> as <a href="https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal" target="_blank" rel="noopener">Owner on the management group</a></li>
+          <li><a href="https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal" target="_blank" rel="noopener">Assign</a> <code>sg-azure-admins</code> as Owner on the management group</li>
           <li>Create Entra ID groups: <code>sg-azure-developers</code>, <code>sg-azure-readers</code></li>
           <li>Assign <a href="https://learn.microsoft.com/azure/role-based-access-control/built-in-roles" target="_blank" rel="noopener">RBAC roles</a> (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
           <li>Set up <a href="{{ '/docs/ci-cd-setup' | relative_url }}">CI/CD</a> with <a href="https://learn.microsoft.com/entra/workload-id/workload-identity-federation" target="_blank" rel="noopener">Workload Identity Federation</a></li>
