@@ -201,20 +201,20 @@ To destroy all landing zone resources:
 ## Day-1 Checklist
 
 ### Pre-Deployment (30 min)
-- [ ] Verify Entra ID tenant is set up, custom domain added
-- [ ] Enable Security Defaults (Entra ID > Properties > Security Defaults)
-- [ ] Create break-glass account with hardware MFA key
-- [ ] Create security group `sg-azure-admins`, add 2-3 founders/leads
+- [ ] [Verify Entra ID tenant is set up](https://learn.microsoft.com/entra/fundamentals/whatis), [custom domain added](https://learn.microsoft.com/entra/fundamentals/add-custom-domain)
+- [ ] [Enable Security Defaults](https://learn.microsoft.com/entra/fundamentals/security-defaults) (Entra ID > Properties > Security Defaults)
+- [ ] [Create break-glass account](https://learn.microsoft.com/entra/identity/role-based-access-control/security-emergency-access) with hardware MFA key
+- [ ] [Create security group](https://learn.microsoft.com/entra/fundamentals/groups-view-azure-portal) `sg-azure-admins`, add 2-3 founders/leads
 
 ### Deploy Landing Zone (30 min)
-- [ ] Run Bicep or Terraform deployment (creates policies, networking, monitoring, security, budgets)
+- [ ] Run [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription) or [Terraform](https://learn.microsoft.com/azure/developer/terraform/overview) deployment — see [Step 3](#step-3-deploy-the-landing-zone-20-min) above
 - [ ] Verify resources in Azure Portal
 
 ### Post-Deployment (30 min)
-- [ ] Assign `sg-azure-admins` as Owner on the management group
+- [ ] [Assign](https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal) `sg-azure-admins` as Owner on the management group
 - [ ] Create Entra ID groups: `sg-azure-developers`, `sg-azure-readers`
-- [ ] Assign RBAC roles (see [Security docs](docs/security.md))
-- [ ] Set up CI/CD with Workload Identity Federation
+- [ ] Assign [RBAC roles](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles) (see [Security docs](docs/security.md))
+- [ ] Set up [CI/CD with Workload Identity Federation](https://learn.microsoft.com/entra/workload-id/workload-identity-federation)
 - [ ] Test a sample deployment end-to-end
 
 ## What's Included
