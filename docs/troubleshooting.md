@@ -157,3 +157,22 @@ terraform plan -out=tfplan && terraform apply tfplan
 - Review the what-if output carefully before deploying
 - For critical resources, use `az deployment sub create --mode Incremental` (default)
 - Never use `--mode Complete` at subscription scope — it will delete unmanaged resource groups
+
+### RoleAssignmentUpdateNotPermitted on Redeploy
+
+**Error:** `Tenant ID, application ID, principal ID, and scope are not allowed to be updated.`
+
+**Cause:** When DINE/Modify policy assignments are deleted and recreated, they get new managed identity principal IDs. But the old role assignments (with deterministic GUIDs) still exist with the old principal IDs. Azure does not allow updating the `principalId` on an existing role assignment.
+
+**Fix:** Delete the orphaned role assignments before redeploying:
+```bash
+SUB_ID=$(az account show --query id -o tsv)
+az role assignment list --all \
+  --query "[?(roleDefinitionName=='Tag Contributor' || roleDefinitionName=='Log Analytics Contributor' || roleDefinitionName=='Monitoring Contributor')].name" \
+  -o tsv | while read name; do
+    az rest --method DELETE \
+      -u "https://management.azure.com/subscriptions/${SUB_ID}/providers/Microsoft.Authorization/roleAssignments/${name}?api-version=2022-04-01"
+done
+```
+
+> **Note:** The standard `az role assignment delete` command cannot remove these because the managed identity principals no longer exist in Entra ID. The REST API bypass is required.
