@@ -306,10 +306,10 @@ az security pricing list \
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Verify Entra ID tenant is set up, custom domain added</li>
-          <li>Enable Security Defaults (Entra ID &gt; Properties &gt; Security Defaults)</li>
-          <li>Create break-glass account with hardware MFA key</li>
-          <li>Create security group <code>sg-azure-admins</code>, add 2-3 founders/leads</li>
+          <li><a href="https://learn.microsoft.com/entra/fundamentals/whatis" target="_blank" rel="noopener">Verify Entra ID tenant is set up</a>, <a href="https://learn.microsoft.com/entra/fundamentals/add-custom-domain" target="_blank" rel="noopener">custom domain added</a></li>
+          <li><a href="https://learn.microsoft.com/entra/fundamentals/security-defaults" target="_blank" rel="noopener">Enable Security Defaults</a> (Entra ID &gt; Properties &gt; Security Defaults)</li>
+          <li><a href="https://learn.microsoft.com/entra/identity/role-based-access-control/security-emergency-access" target="_blank" rel="noopener">Create break-glass account</a> with hardware MFA key</li>
+          <li><a href="https://learn.microsoft.com/entra/fundamentals/groups-view-azure-portal" target="_blank" rel="noopener">Create security group</a> <code>sg-azure-admins</code>, add 2-3 founders/leads</li>
         </ul>
       </div>
     </div>
@@ -324,8 +324,8 @@ az security pricing list \
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Run Bicep or Terraform deployment (creates policies, networking, monitoring, security, budgets)</li>
-          <li>Verify resources in Azure Portal</li>
+          <li>Run <a href="{{ '/docs/ci-cd-setup' | relative_url }}">Bicep or Terraform deployment</a> (creates policies, networking, monitoring, security, budgets)</li>
+          <li>Verify resources in <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal</a></li>
         </ul>
       </div>
     </div>
@@ -339,10 +339,10 @@ az security pricing list \
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Assign <code>sg-azure-admins</code> as Owner on the management group</li>
+          <li>Assign <code>sg-azure-admins</code> as <a href="https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal" target="_blank" rel="noopener">Owner on the management group</a></li>
           <li>Create Entra ID groups: <code>sg-azure-developers</code>, <code>sg-azure-readers</code></li>
-          <li>Assign RBAC roles (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
-          <li>Set up CI/CD with Workload Identity Federation</li>
+          <li>Assign <a href="https://learn.microsoft.com/azure/role-based-access-control/built-in-roles" target="_blank" rel="noopener">RBAC roles</a> (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
+          <li>Set up <a href="https://learn.microsoft.com/entra/workload-id/workload-identity-federation" target="_blank" rel="noopener">CI/CD with Workload Identity Federation</a></li>
           <li>Test a sample deployment end-to-end</li>
         </ul>
       </div>
