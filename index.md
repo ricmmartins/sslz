@@ -342,7 +342,7 @@ az security pricing list \
           <li>Assign <code>sg-azure-admins</code> as <a href="https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal" target="_blank" rel="noopener">Owner on the management group</a></li>
           <li>Create Entra ID groups: <code>sg-azure-developers</code>, <code>sg-azure-readers</code></li>
           <li>Assign <a href="https://learn.microsoft.com/azure/role-based-access-control/built-in-roles" target="_blank" rel="noopener">RBAC roles</a> (see <a href="{{ '/docs/security' | relative_url }}">Security docs</a>)</li>
-          <li>Set up <a href="https://learn.microsoft.com/entra/workload-id/workload-identity-federation" target="_blank" rel="noopener">CI/CD with Workload Identity Federation</a></li>
+          <li>Set up <a href="{{ '/docs/ci-cd-setup' | relative_url }}">CI/CD</a> with <a href="https://learn.microsoft.com/entra/workload-id/workload-identity-federation" target="_blank" rel="noopener">Workload Identity Federation</a></li>
           <li>Test a sample deployment end-to-end</li>
         </ul>
       </div>

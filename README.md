@@ -214,7 +214,7 @@ To destroy all landing zone resources:
 - [ ] [Assign](https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal) `sg-azure-admins` as Owner on the management group
 - [ ] Create Entra ID groups: `sg-azure-developers`, `sg-azure-readers`
 - [ ] Assign [RBAC roles](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles) (see [Security docs](docs/security.md))
-- [ ] Set up [CI/CD with Workload Identity Federation](https://learn.microsoft.com/entra/workload-id/workload-identity-federation)
+- [ ] Set up [CI/CD](https://azurelanding.zone/docs/ci-cd-setup/) with [Workload Identity Federation](https://learn.microsoft.com/entra/workload-id/workload-identity-federation)
 - [ ] Test a sample deployment end-to-end
 
 ## What's Included
