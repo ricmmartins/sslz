@@ -324,7 +324,7 @@ az security pricing list \
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Run <a href="{{ '/docs/ci-cd-setup' | relative_url }}">Bicep or Terraform deployment</a> (creates policies, networking, monitoring, security, budgets)</li>
+          <li>Run <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription" target="_blank" rel="noopener">Bicep</a> or <a href="https://learn.microsoft.com/azure/developer/terraform/overview" target="_blank" rel="noopener">Terraform</a> deployment (creates policies, networking, monitoring, security, budgets)</li>
           <li>Verify resources in <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal</a></li>
         </ul>
       </div>
