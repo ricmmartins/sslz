@@ -95,28 +95,35 @@ az ad app federated-credential create --id "$APP_ID" --parameters '{
 
 ## Step 4: Assign Azure Roles (5 min)
 
-Grant the service principal Contributor access on both subscriptions. Contributor can create and manage resources but cannot modify role assignments (which is the right level of access for CI/CD).
+Grant the service principal the required roles on both subscriptions:
 
 ```bash
 PROD_SUB_ID="your-prod-subscription-id"
 NONPROD_SUB_ID="your-nonprod-subscription-id"
 
-# Contributor on prod subscription
+# Contributor — create and manage all resources
 az role assignment create \
   --assignee "$APP_ID" \
   --role "Contributor" \
   --scope "/subscriptions/$PROD_SUB_ID"
 
-# Contributor on nonprod subscription
 az role assignment create \
   --assignee "$APP_ID" \
   --role "Contributor" \
   --scope "/subscriptions/$NONPROD_SUB_ID"
-```
 
-Some resources in this landing zone also need these additional roles:
+# User Access Administrator — required for DINE/Modify policies that create
+# managed identities and their role assignments
+az role assignment create \
+  --assignee "$APP_ID" \
+  --role "User Access Administrator" \
+  --scope "/subscriptions/$PROD_SUB_ID"
 
-```bash
+az role assignment create \
+  --assignee "$APP_ID" \
+  --role "User Access Administrator" \
+  --scope "/subscriptions/$NONPROD_SUB_ID"
+
 # Resource Policy Contributor — required for policy assignments
 az role assignment create \
   --assignee "$APP_ID" \
@@ -139,6 +146,8 @@ az role assignment create \
   --role "Security Admin" \
   --scope "/subscriptions/$NONPROD_SUB_ID"
 ```
+
+> **Why User Access Administrator?** The landing zone includes DINE (Deploy If Not Exists) and Modify policies. When Azure enforces these policies, it creates system-assigned managed identities and grants them role assignments. The service principal deploying these policies needs `Microsoft.Authorization/roleAssignments/write` permission, which Contributor alone does not provide.
 
 ## Step 5: Configure GitHub Repository Secrets (5 min)
 
@@ -218,6 +227,20 @@ The federated credential `subject` doesn't match the GitHub Actions context. Com
 - Using `environment:prod` but the job doesn't have `environment: prod` set
 
 **Fix:** Check the exact subject claim in the GitHub Actions run log and compare to your federated credential.
+
+### "AuthorizationFailed" on role assignments
+
+The deployment fails with `does not have permission to perform action 'Microsoft.Authorization/roleAssignments/write'`.
+
+**Cause:** The DINE/Modify policies create managed identities that need role assignments. The service principal needs `User Access Administrator` to create these.
+
+**Fix:** Add the missing role:
+```bash
+az role assignment create \
+  --assignee "$APP_ID" \
+  --role "User Access Administrator" \
+  --scope "/subscriptions/$SUB_ID"
+```
 
 ### "AuthorizationFailed" on resource creation
 
