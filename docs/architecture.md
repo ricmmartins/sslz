@@ -72,6 +72,17 @@ The subscription is Azure's strongest isolation boundary. Separating prod from n
 3. **Blast radius containment** — `az group delete` in dev can't touch prod
 4. **Quota isolation** — Non-prod experiments won't consume prod resource quotas
 
+### ⚠️ One Workload Per Subscription
+
+This layout assumes **one primary workload per subscription**. If you're deploying a second independent workload (separate team, separate lifecycle, separate cost center), don't put it in the same subscription — create a new one.
+
+Why this matters:
+- **Resource groups are not isolation boundaries.** They don't provide separate RBAC inheritance, cost tracking, or policy scopes the way subscriptions do.
+- **Habits form early.** Once your team starts treating resource groups as workload boundaries, it becomes an embedded practice that's expensive to refactor later.
+- **Subscriptions are free.** Adding a subscription costs nothing — the overhead is only in CI/CD and RBAC setup, which takes an hour.
+
+If you find yourself adding a second workload, that's a [graduation signal](graduation-guide.md).
+
 ### Why Not Three+ Subscriptions?
 
 You can. Common third subscriptions:

@@ -13,6 +13,7 @@ You don't need all of these. If 2-3 apply simultaneously, start planning.
 
 | Signal | Why It Matters |
 |---|---|
+| **Second independent workload** | Each workload should live in its own subscription. If you're deploying a second product, service, or team's workload, create a new subscription — don't colocate in the same one. Resource groups are not isolation boundaries. |
 | **Engineering team > 50 people** | Different teams need different permissions, policies, and cost boundaries. A flat structure can't support this. |
 | **Regulatory compliance** (SOC2 Type II, HIPAA, PCI-DSS, FedRAMP) | Compliance frameworks require specific controls: network segmentation, centralized logging, access reviews, change management. The starter landing zone doesn't cover these. |
 | **Multi-region deployment** | Cross-region networking, global DNS, traffic routing — you need centralized network management. |
