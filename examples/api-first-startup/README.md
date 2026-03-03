@@ -143,7 +143,7 @@ To destroy all resources created by this example:
 ```bash
 # Remove resource locks first if deploying to prod
 az lock delete --name protect-kv \
-  --resource rg-mycompany-prod-app \
+  --resource-group rg-mycompany-prod-app \
   --resource-type Microsoft.KeyVault/vaults \
   --resource-name kv-<APP_NAME>-<ENV>
 

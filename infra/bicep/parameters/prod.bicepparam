@@ -10,6 +10,7 @@ param budgetAlertEmails = [
   'cto@mycompany.com'
 ]
 param deployNetworking = true
+param budgetStartDate = '2026-03-01T00:00:00Z'
 param enableDefenderForServers = true
 param enableDefenderForContainers = false // set to true if running AKS
 param enableDefenderForDatabases = true
@@ -18,7 +19,3 @@ param allowedLocations = [
   'eastus2'
   'centralus' // DR region
 ]
-// Budget start date — set explicitly after first deployment to avoid re-deployment drift.
-// IMPORTANT: Must be the 1st of a month in ISO 8601 format (e.g., '2026-02-01T00:00:00Z').
-// Any other day will fail. Defaults to 1st of current month if omitted.
-// param budgetStartDate = '2026-02-01T00:00:00Z'

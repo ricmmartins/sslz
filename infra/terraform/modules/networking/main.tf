@@ -58,6 +58,18 @@ resource "azurerm_network_security_group" "aks" {
   }
 
   security_rule {
+    name                       = "AllowVNetInbound"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_address_prefix      = "VirtualNetwork"
+    source_port_range          = "*"
+    destination_address_prefix = "VirtualNetwork"
+    destination_port_range     = "*"
+  }
+
+  security_rule {
     name                       = "DenyAllInbound"
     priority                   = 4096
     direction                  = "Inbound"

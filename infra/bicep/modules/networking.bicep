@@ -73,6 +73,19 @@ resource nsgAks 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
         }
       }
       {
+        name: 'AllowVNetInbound'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'VirtualNetwork'
+          destinationPortRange: '*'
+        }
+      }
+      {
         name: 'DenyAllInbound'
         properties: {
           priority: 4096

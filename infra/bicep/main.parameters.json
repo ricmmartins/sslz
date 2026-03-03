@@ -20,6 +20,9 @@
     },
     "securityContactEmail": {
       "value": "${AZURE_SECURITY_CONTACT_EMAIL}"
+    },
+    "budgetStartDate": {
+      "value": "2026-03-01T00:00:00Z"
     }
   }
 }

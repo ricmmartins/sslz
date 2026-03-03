@@ -68,7 +68,8 @@ jobs:
               environment=${{ env.TF_VAR_environment }} \
               monthlyBudgetAmount=500 \
               budgetAlertEmails='["landing-zone-test@contoso.com"]' \
-              securityContactEmail='landing-zone-test@contoso.com'
+              securityContactEmail='landing-zone-test@contoso.com' \
+              budgetStartDate='2026-01-01T00:00:00Z'
 
   # ============================================================================
   # Terraform: Plan

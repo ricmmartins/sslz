@@ -80,13 +80,15 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
           TF_VAR_budget_alert_emails: ${{ vars.BUDGET_ALERT_EMAILS || '["platform@example.com"]' }}
           TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
+          COMPANY_NAME: ${{ vars.COMPANY_NAME || 'mycompany' }}
+          ENVIRONMENT: ${{ matrix.environment }}
         run: |
           terraform plan \
             -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
-            -var="environment=${{ matrix.environment }}" \
-            -var="company_name=${{ vars.COMPANY_NAME || 'mycompany' }}" \
+            -var="environment=${ENVIRONMENT}" \
+            -var="company_name=${COMPANY_NAME}" \
             -no-color \
-            -out=tfplan-${{ matrix.environment }} 2>&1 | tee plan-output.txt
+            -out=tfplan-${ENVIRONMENT} 2>&1 | tee plan-output.txt
 
       - name: Post Plan to PR
         if: github.event_name == 'pull_request'
@@ -214,11 +216,12 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
           TF_VAR_budget_alert_emails: ${{ vars.BUDGET_ALERT_EMAILS || '["platform@example.com"]' }}
           TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
+          COMPANY_NAME: ${{ vars.COMPANY_NAME || 'mycompany' }}
         run: |
           terraform plan \
             -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
             -var="environment=prod" \
-            -var="company_name=${{ vars.COMPANY_NAME || 'mycompany' }}" \
+            -var="company_name=${COMPANY_NAME}" \
             -out=tfplan-prod
 
       - name: Terraform Apply

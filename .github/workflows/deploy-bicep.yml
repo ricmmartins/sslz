@@ -53,9 +53,11 @@ jobs:
           subscription-id: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
 
       - name: Validate Bicep
+        env:
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
         run: |
           az deployment sub validate \
-            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
+            --location "$AZURE_LOCATION" \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam
 
@@ -79,9 +81,11 @@ jobs:
 
       - name: What-If
         id: whatif
+        env:
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
         run: |
           az deployment sub what-if \
-            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
+            --location "$AZURE_LOCATION" \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam \
             2>&1 | tee whatif-output.txt
@@ -147,9 +151,11 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
 
       - name: Deploy
+        env:
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
         run: |
           az deployment sub create \
-            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
+            --location "$AZURE_LOCATION" \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/nonprod.bicepparam \
             --name "lz-nonprod-$(date +%Y%m%d-%H%M%S)"
@@ -171,9 +177,11 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
 
       - name: Deploy
+        env:
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
         run: |
           az deployment sub create \
-            --location ${{ vars.AZURE_LOCATION || 'eastus2' }} \
+            --location "$AZURE_LOCATION" \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/prod.bicepparam \
             --name "lz-prod-$(date +%Y%m%d-%H%M%S)"

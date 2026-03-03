@@ -33,12 +33,12 @@ description: "Common deployment errors and fixes"
 
 **Error:** `budget_start_date must be the first of a month in ISO 8601 format`
 
-**Cause:** The budget start date must be exactly `YYYY-MM-01T00:00:00Z`.
+**Cause:** The budget start date must be exactly `YYYY-MM-01T00:00:00Z`. Additionally, Azure rejects changes to `startDate` on existing budgets — so this value must remain constant across redeployments.
 
 **Fix:**
-- Leave `budget_start_date` empty to use the default (1st of current month)
-- Or set it explicitly: `budget_start_date = "2026-01-01T00:00:00Z"`
-- In CI, it's auto-set: `TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)`
+- **Bicep:** Set `budgetStartDate` in your `.bicepparam` file to a fixed date (e.g., `'2026-01-01T00:00:00Z'`). This is a required parameter.
+- **Terraform:** The workflow auto-sets `TF_VAR_budget_start_date` and the budget resource uses `ignore_changes = [time_period]` to prevent drift.
+- For manual CLI deployments: `budget_start_date = "2026-01-01T00:00:00Z"`
 
 ### Backend Not Configured
 

@@ -74,8 +74,8 @@ param enableDefenderForKeyVault bool = true
 @description('Email address for Defender for Cloud security alerts')
 param securityContactEmail string
 
-@description('Budget start date (must be the 1st of a month in ISO 8601 format, e.g., 2026-02-01T00:00:00Z). Defaults to 1st of current month. Set explicitly after first deployment to avoid drift.')
-param budgetStartDate string = '${utcNow('yyyy-MM')}-01T00:00:00Z'
+@description('Budget start date (must be the 1st of a month in ISO 8601 format, e.g., 2026-01-01T00:00:00Z). Set this to a fixed date — using dynamic values causes redeployment failures because Azure rejects changes to startDate on existing budgets.')
+param budgetStartDate string
 
 @description('Allowed Azure regions for resource deployment')
 param allowedLocations string[] = [location]

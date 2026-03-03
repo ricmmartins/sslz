@@ -81,6 +81,7 @@ Each subnet has a dedicated NSG. All NSGs include a **DenyAllInbound** catch-all
 | Rule Name | Priority | Direction | Access | Protocol | Source | Dest Port | Dest |
 |---|---|---|---|---|---|---|---|
 | AllowAzureLoadBalancerInbound | 110 | Inbound | Allow | `*` | `AzureLoadBalancer` | `*` | `*` |
+| AllowVNetInbound | 120 | Inbound | Allow | `*` | `VirtualNetwork` | `*` | `VirtualNetwork` |
 | DenyAllInbound | 4096 | Inbound | Deny | `*` | `*` | `*` | `*` |
 
 #### nsg-snet-app

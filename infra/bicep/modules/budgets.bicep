@@ -17,8 +17,8 @@ param amount int
 @description('Email addresses for budget notifications')
 param contactEmails string[]
 
-@description('Budget start date (first day of a month in ISO 8601 format, e.g., 2026-02-01T00:00:00Z)')
-param startDate string = '${utcNow('yyyy-MM')}-01T00:00:00Z'
+@description('Budget start date (first day of a month in ISO 8601 format, e.g., 2026-01-01T00:00:00Z)')
+param startDate string
 
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: budgetName
