@@ -65,8 +65,7 @@ resource "azurerm_security_center_subscription_pricing" "storage" {
   subplan       = "DefenderForStorageV2"
 }
 
-# Security contact — Azure auto-creates securityContacts/default with empty values
-# when any Defender plan is enabled. Terraform will adopt it on first apply.
+# Security contact
 resource "azurerm_security_center_contact" "default" {
   name                = "default"
   email               = var.security_contact_email

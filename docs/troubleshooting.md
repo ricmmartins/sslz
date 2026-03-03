@@ -124,12 +124,12 @@ Or run `scripts/validate-prerequisites.sh` to check all required providers.
 
 **Error:** `a resource with the ID "…" already exists - to be managed via Terraform this resource needs to be imported into the State`
 
-**Cause:** Azure auto-creates `securityContacts/default` with empty values when any Defender plan is enabled on a subscription. The activity log diagnostic setting may exist from a prior deployment or from the `activity-log-diag` DINE policy. Common examples:
+**Cause:** Some Azure resources may already exist from a prior deployment (Bicep, Portal, or policy). Common examples:
 
-- `securityContacts/default` — auto-created by Azure when any Defender plan is enabled (even via Portal)
+- `securityContacts/default` — may exist from a prior deployment or if created manually via the Portal
 - `diag-activity-log-to-law` — created by a prior Bicep deployment or the `activity-log-diag` DINE policy
 
-**Fix:** The Terraform code includes an `import` block that automatically adopts the pre-existing security contact into state. If you still see this error, run:
+**Fix:** Import the pre-existing resource into Terraform state. The Terraform code includes a commented-out `import` block in `main.tf` — uncomment it if needed. Alternatively, run manually:
 ```bash
 SUB_ID="<YOUR_SUBSCRIPTION_ID>"
 

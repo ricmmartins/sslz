@@ -103,12 +103,14 @@ module "networking" {
   tags                  = local.tags
 }
 
-# Azure auto-creates securityContacts/default when any Defender plan is enabled.
-# This import block adopts the pre-existing resource into Terraform state.
-import {
-  to = module.security.azurerm_security_center_contact.default
-  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/securityContacts/default"
-}
+# securityContacts/default does NOT exist on a clean subscription.
+# On FIRST deploy, leave this import block commented out — Terraform will create it.
+# If you get "already exists" errors on subsequent deploys, uncomment this block
+# to adopt the existing resource into Terraform state.
+# import {
+#   to = module.security.azurerm_security_center_contact.default
+#   id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/securityContacts/default"
+# }
 
 module "security" {
   source                         = "./modules/security"
