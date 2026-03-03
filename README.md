@@ -183,7 +183,7 @@ az group list --query "[?contains(name, 'yourcompany')].name" -o tsv
 az monitor log-analytics workspace list --query "[].name" -o tsv
 
 # Check policy assignments
-az policy assignment list --query "[?contains(name, 'mcsb')].displayName" -o tsv
+az policy assignment list --query "[].displayName" -o tsv
 
 # Check Defender plans enabled
 az security pricing list --query "[?pricingTier=='Standard'].{Name:name, Tier:pricingTier}" -o table

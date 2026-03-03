@@ -266,7 +266,7 @@ az monitor log-analytics workspace list \
 
 # Check policy assignments
 az policy assignment list \
-  --query "[?contains(name, 'mcsb')].displayName" -o tsv
+  --query "[].displayName" -o tsv
 
 # Check Defender plans
 az security pricing list \
