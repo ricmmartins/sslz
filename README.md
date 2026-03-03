@@ -4,7 +4,7 @@
 [![Deploy Landing Zone (Bicep)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Bicep)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-bicep.yml)
 [![Deploy Landing Zone (Terraform)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Terraform)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-terraform.yml)
 
-A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's Enterprise Scale Landing Zone (ESLZ), minus the enterprise complexity.
+A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's [Azure Landing Zone (ALZ)](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/) — formerly Enterprise-Scale Landing Zone (ESLZ) — minus the enterprise complexity.
 
 > Built for teams of 5-50 engineers who need to get Azure right from day one without spending two months on "cloud foundations."
 
@@ -14,7 +14,7 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 - **Skip the hub network, Azure Firewall, and dedicated Connectivity subscription** until you actually have hybrid/on-prem requirements or 10+ workloads.
 - **Enable Defender for Cloud CSPM (free) + Defender for Servers P2 on prod only.** Turn on diagnostic settings to a single Log Analytics workspace. That's your security baseline.
 - **Set budget alerts at 50%, 80%, and 100% of your monthly burn.** Tag everything with `environment` and `team`. No exceptions.
-- **Deploy this in under 1 hour with Bicep or Terraform.** Graduate to full ESLZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.
+- **Deploy this in under 1 hour with Bicep or Terraform.** Graduate to full ALZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.
 
 ## Why This Exists
 
@@ -246,7 +246,7 @@ These are enterprise components you should add later when needed:
 | Advanced Conditional Access | 30+ Azure users or regulated customer data |
 | PIM (Privileged Identity Management) | You need just-in-time admin access (Series B+) |
 
-See [Graduation Guide](docs/graduation-guide.md) for detailed migration paths to full ESLZ.
+See [Graduation Guide](docs/graduation-guide.md) for detailed migration paths to full ALZ.
 
 ## Examples
 
@@ -267,7 +267,7 @@ Pre-built configurations for common startup archetypes:
 - [Cost Management](docs/cost-management.md) — Budgets, RI guidance, common mistakes
 - [CI/CD Setup](docs/ci-cd-setup.md) — Workload Identity Federation, GitHub Actions, secrets
 - [Troubleshooting](docs/troubleshooting.md) — Common deployment errors and fixes
-- [Graduation Guide](docs/graduation-guide.md) — When and how to migrate to full ESLZ
+- [Graduation Guide](docs/graduation-guide.md) — When and how to migrate to full ALZ
 
 ## Contributing
 

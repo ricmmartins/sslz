@@ -110,7 +110,7 @@ description: "Visual diagrams of the landing zone architecture"
 </div>
 <div class="viz-grad-step viz-grad-final">
 <div class="viz-grad-num">&#9733;</div>
-<strong>Full ESLZ</strong>
+<strong>Full ALZ</strong>
 <span>Enterprise-ready</span>
 </div>
 </div>

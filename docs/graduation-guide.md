@@ -2,10 +2,10 @@
 layout: page
 title: "Graduation Guide"
 nav_order: 7
-description: "When and how to migrate to full ESLZ"
+description: "When and how to migrate to full ALZ"
 ---
 
-# Graduation Guide: When and How to Migrate to Full ESLZ
+# Graduation Guide: When and How to Migrate to Full ALZ (formerly ESLZ)
 
 ## Signals It's Time
 
@@ -137,7 +137,7 @@ Tenant Root Group
 | Block sign-in from risky locations | Block countries you don't operate in |
 | Require MFA for risky sign-ins | Extra verification for unusual behavior |
 
-## Cost of Full ESLZ
+## Cost of Full ALZ
 
 Be aware of the additional monthly costs:
 
@@ -152,7 +152,7 @@ Be aware of the additional monthly costs:
 | Entra ID P2 | $9/user/month |
 | **Total platform overhead** | **$1,500-3,000/month** |
 
-This is why we don't start with full ESLZ. At $1,500-3,000/month just for platform overhead, it needs to be justified by team size, compliance requirements, or operational needs.
+This is why we don't start with full ALZ. At $1,500-3,000/month just for platform overhead, it needs to be justified by team size, compliance requirements, or operational needs.
 
 ## See Also
 

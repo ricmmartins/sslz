@@ -24,7 +24,7 @@ Tenant Root Group
 
 ### Why a Single Management Group
 
-Enterprise Scale Landing Zone uses a deep hierarchy:
+Azure Landing Zone (ALZ) uses a deep hierarchy:
 
 ```
 Tenant Root Group
@@ -96,7 +96,7 @@ But don't create them until you feel the pain of not having them. Each subscript
 
 ### No Hub VNet
 
-The full ESLZ deploys a hub-spoke topology:
+The full ALZ deploys a hub-spoke topology:
 
 ```
 Hub VNet (Connectivity subscription)

@@ -39,7 +39,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
       </div>
       <div class="tldr-line">
         <span class="tldr-prompt">5</span>
-        <div><strong>Deploy this in under 1 hour with Bicep or Terraform.</strong> Graduate to full ESLZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.</div>
+        <div><strong>Deploy this in under 1 hour with Bicep or Terraform.</strong> Graduate to full ALZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.</div>
       </div>
     </div>
   </div>
@@ -495,7 +495,7 @@ az security pricing list \
     </a>
     <a href="{{ '/docs/graduation-guide' | relative_url }}" class="doc-card">
       <h3>Graduation Guide</h3>
-      <p>When and how to migrate to full ESLZ</p>
+      <p>When and how to migrate to full ALZ</p>
     </a>
     <a href="{{ '/diagrams/architecture' | relative_url }}" class="doc-card">
       <h3>Architecture Diagrams</h3>
