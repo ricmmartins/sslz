@@ -13,19 +13,11 @@ resource "azurerm_security_center_subscription_pricing" "cspm" {
   resource_type = "CloudPosture"
 }
 
-# Defender for Servers — Standard P2 when enabled
-resource "azurerm_security_center_subscription_pricing" "servers_standard" {
-  count         = var.enable_defender_for_servers ? 1 : 0
-  tier          = "Standard"
+# Defender for Servers
+resource "azurerm_security_center_subscription_pricing" "servers" {
+  tier          = var.enable_defender_for_servers ? "Standard" : "Free"
   resource_type = "VirtualMachines"
-  subplan       = "P2"
-}
-
-# Defender for Servers — Free when disabled (subplan not applicable)
-resource "azurerm_security_center_subscription_pricing" "servers_free" {
-  count         = var.enable_defender_for_servers ? 0 : 1
-  tier          = "Free"
-  resource_type = "VirtualMachines"
+  subplan       = var.enable_defender_for_servers ? "P2" : null
 }
 
 # Defender for Containers

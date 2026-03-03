@@ -124,12 +124,13 @@ Or run `scripts/validate-prerequisites.sh` to check all required providers.
 
 **Error:** `a resource with the ID "…" already exists - to be managed via Terraform this resource needs to be imported into the State`
 
-**Cause:** Some Azure resources may already exist from a prior deployment (Bicep, Portal, or policy). Common examples:
+**Cause:** Some Azure resources already exist on every subscription or from a prior deployment. Common examples:
 
+- `Microsoft.Security/pricings/*` — Defender plan pricing resources exist on every subscription at "Free" tier. The Terraform code includes `import` blocks in `main.tf` to handle these automatically.
 - `securityContacts/default` — may exist from a prior deployment or if created manually via the Portal
 - `diag-activity-log-to-law` — created by a prior Bicep deployment or the `activity-log-diag` DINE policy
 
-**Fix:** Import the pre-existing resource into Terraform state. The Terraform code includes a commented-out `import` block in `main.tf` — uncomment it if needed. Alternatively, run manually:
+**Fix:** For Defender pricing, the `import` blocks in `main.tf` handle this automatically. For other resources, uncomment the relevant import block in `main.tf` or run manually:
 ```bash
 SUB_ID="<YOUR_SUBSCRIPTION_ID>"
 

@@ -103,6 +103,41 @@ module "networking" {
   tags                  = local.tags
 }
 
+# Defender pricing resources (Microsoft.Security/pricings/*) already exist on every
+# Azure subscription at "Free" tier. They must be imported into Terraform state.
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.cspm
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/CloudPosture"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.servers
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/VirtualMachines"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.containers
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/Containers"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.sql
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/SqlServers"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.oss_db
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/OpenSourceRelationalDatabases"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.keyvault
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/KeyVaults"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.arm
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/Arm"
+}
+import {
+  to = module.security.azurerm_security_center_subscription_pricing.storage
+  id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Security/pricings/StorageAccounts"
+}
+
 # securityContacts/default does NOT exist on a clean subscription.
 # On FIRST deploy, leave this import block commented out — Terraform will create it.
 # If you get "already exists" errors on subsequent deploys, uncomment this block
