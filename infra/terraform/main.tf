@@ -1,5 +1,5 @@
 # ==============================================================================
-# Azure Landing Zone for Startups — Terraform Main
+# Startup-Scale Landing Zone (SSLZ) — Terraform Root Module
 # ==============================================================================
 #
 # NOTE: Management Groups
