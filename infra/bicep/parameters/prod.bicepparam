@@ -10,7 +10,7 @@ param budgetAlertEmails = [
   'cto@mycompany.com'
 ]
 param deployNetworking = true
-param budgetStartDate = '2026-03-01T00:00:00Z'
+param budgetStartDate = '2026-03-01T00:00:00Z' // set to 1st of your deployment month
 param enableDefenderForServers = true
 param enableDefenderForContainers = false // set to true if running AKS
 param enableDefenderForDatabases = true

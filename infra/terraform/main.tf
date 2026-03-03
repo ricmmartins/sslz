@@ -36,15 +36,16 @@ terraform {
     }
   }
 
-  # Remote backend — update storage_account_name with your own value.
-  # Run ./scripts/bootstrap-backend.sh to create the storage account.
-  backend "azurerm" {
-    resource_group_name  = "rg-terraform-state"
-    storage_account_name = "REPLACE_WITH_YOUR_STORAGE_ACCOUNT"
-    container_name       = "tfstate"
-    key                  = "landing-zone.tfstate"
-    use_oidc             = true
-  }
+  # Remote backend — uncomment and update storage_account_name with your value.
+  # Run ./scripts/bootstrap-backend.sh to create the storage account, then
+  # uncomment this block and run: terraform init -migrate-state
+  # backend "azurerm" {
+  #   resource_group_name  = "rg-terraform-state"
+  #   storage_account_name = "REPLACE_WITH_YOUR_STORAGE_ACCOUNT"
+  #   container_name       = "tfstate"
+  #   key                  = "landing-zone.tfstate"
+  #   use_oidc             = true
+  # }
 }
 
 provider "azurerm" {

@@ -1,5 +1,9 @@
 # The Startup-Scale Landing Zone
 
+[![Validate IaC](https://github.com/ricmmartins/sslz/workflows/Validate%20IaC/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml)
+[![Deploy Landing Zone (Bicep)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Bicep)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-bicep.yml)
+[![Deploy Landing Zone (Terraform)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Terraform)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-terraform.yml)
+
 A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's Enterprise Scale Landing Zone (ESLZ), minus the enterprise complexity.
 
 > Built for teams of 5-50 engineers who need to get Azure right from day one without spending two months on "cloud foundations."
@@ -165,7 +169,7 @@ terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-> **Tip:** For production use, set up a remote backend for Terraform state so it persists across machines and CI/CD runs. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend, then update the `backend "azurerm"` block in `main.tf` with your storage account name.
+> **Tip:** For production use, set up a remote backend for Terraform state so it persists across machines and CI/CD runs. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend, then uncomment the `backend "azurerm"` block in `main.tf`, set your storage account name, and run `terraform init -migrate-state`.
 
 ### Step 4: Verify the Deployment (5 min)
 

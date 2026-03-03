@@ -48,8 +48,8 @@ description: "Common deployment errors and fixes"
 
 **Fix:**
 1. Run `scripts/bootstrap-backend.sh` to create the storage account
-2. Update the `backend "azurerm"` block in `infra/terraform/main.tf` with your storage account name
-3. Run `terraform init -reconfigure` to reinitialize with the new backend
+2. Uncomment the `backend "azurerm"` block in `infra/terraform/main.tf` and set your storage account name
+3. Run `terraform init -migrate-state` to move existing state to the remote backend
 
 ### Policy Assignment Conflicts
 
