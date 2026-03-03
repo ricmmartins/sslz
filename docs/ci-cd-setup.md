@@ -151,7 +151,7 @@ az role assignment create \
 
 ## Step 5: Configure GitHub Repository Secrets (5 min)
 
-In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these secrets:
+In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these as **repository-level** secrets (not environment secrets — the validate/plan jobs don't reference a GitHub environment):
 
 | Secret Name | Value | Where to Find It |
 |---|---|---|
@@ -160,7 +160,9 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 | `AZURE_SUBSCRIPTION_ID_PROD` | Prod subscription UUID | Azure Portal > Subscriptions |
 | `AZURE_SUBSCRIPTION_ID_NONPROD` | Non-prod subscription UUID | Azure Portal > Subscriptions |
 
-Also add these **repository variables** (Settings > Secrets and variables > Actions > Variables tab):
+> **Single subscription?** If you only have one subscription, set both `AZURE_SUBSCRIPTION_ID_PROD` and `AZURE_SUBSCRIPTION_ID_NONPROD` to the same value.
+
+Also add these **repository-level variables** (Settings > Secrets and variables > Actions > Variables tab):
 
 | Variable Name | Value | Used By | Purpose |
 |---|---|---|---|
