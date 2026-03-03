@@ -36,9 +36,11 @@ terraform {
     }
   }
 
+  # Remote backend — update storage_account_name with your own value.
+  # Run ./scripts/bootstrap-backend.sh to create the storage account.
   backend "azurerm" {
     resource_group_name  = "rg-terraform-state"
-    storage_account_name = "stterraformstate654074ca"
+    storage_account_name = "REPLACE_WITH_YOUR_STORAGE_ACCOUNT"
     container_name       = "tfstate"
     key                  = "landing-zone.tfstate"
     use_oidc             = true

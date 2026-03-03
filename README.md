@@ -165,7 +165,7 @@ terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-> **Tip:** For production use, set up a remote backend for Terraform state so it persists across machines and CI/CD runs. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend, then uncomment the `backend "azurerm"` block in `main.tf`.
+> **Tip:** For production use, set up a remote backend for Terraform state so it persists across machines and CI/CD runs. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend, then update the `backend "azurerm"` block in `main.tf` with your storage account name.
 
 ### Step 4: Verify the Deployment (5 min)
 

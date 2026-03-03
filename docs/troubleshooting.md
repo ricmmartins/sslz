@@ -44,12 +44,12 @@ description: "Common deployment errors and fixes"
 
 **Error:** `Backend initialization required` or state file conflicts in CI.
 
-**Cause:** The default backend is local. CI runs need remote state to persist between runs.
+**Cause:** The remote backend requires an Azure Storage account. If the storage account doesn't exist or credentials are misconfigured, Terraform can't initialize.
 
 **Fix:**
 1. Run `scripts/bootstrap-backend.sh` to create the storage account
-2. Uncomment and configure the `backend "azurerm"` block in `infra/terraform/main.tf`
-3. Run `terraform init -migrate-state` to move existing state
+2. Update the `backend "azurerm"` block in `infra/terraform/main.tf` with your storage account name
+3. Run `terraform init -reconfigure` to reinitialize with the new backend
 
 ### Policy Assignment Conflicts
 

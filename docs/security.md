@@ -43,14 +43,14 @@ Don't chase a perfect score. A score of 60-70% with the high-severity items reso
 | `sg-azure-admins` | Owner | Management Group | CTO, Lead SRE, Co-founders (2-3 max) |
 | `sg-azure-developers` | Contributor | Non-prod subscription | All developers |
 | `sg-azure-developers` | Reader | Prod subscription | All developers |
-| CI/CD Service Principal | Contributor | Both subscriptions | GitHub Actions / Azure DevOps |
+| CI/CD Service Principal | Contributor, User Access Administrator, Resource Policy Contributor, Security Admin | Both subscriptions | GitHub Actions / Azure DevOps |
 
 ### Rules
 
 1. **Never assign roles to individual users.** Always use groups. When someone leaves, you remove them from the group, not from 15 role assignments.
 2. **Developers don't get Contributor on prod.** Deployments go through CI/CD. Debug with Reader + Log Analytics + Application Insights.
 3. **No Owner at subscription level for non-admins.** Owner can modify RBAC, which means one compromised account can grant itself anything.
-4. **Service Principals get Contributor, not Owner.** CI/CD doesn't need to manage RBAC.
+4. **Service Principals need elevated roles for policy enforcement.** CI/CD needs User Access Administrator because DINE/Modify policies create managed identities with role assignments. See the [CI/CD Setup guide](ci-cd-setup.md#step-4-assign-azure-roles-5-min) for details.
 
 ### Emergency Access
 

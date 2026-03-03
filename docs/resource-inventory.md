@@ -248,8 +248,8 @@ Tag governance is enforced via policy:
 | Workflow File | Name | Trigger | Purpose |
 |---|---|---|---|
 | `validate.yml` | Validate IaC | PR and push to `main` on `infra/**` or `examples/**` | Builds and lints all Bicep files; runs `terraform fmt`, TFLint, and `terraform validate` |
-| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Push to `main` on `infra/bicep/**`, PR, or manual dispatch | Validates, runs What-If on PRs (posts result as PR comment), deploys nonprod → prod sequentially |
-| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Push to `main` on `infra/terraform/**`, PR, or manual dispatch | Plans (posts result as PR comment), applies nonprod → prod sequentially (prod re-plans before apply) |
+| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Push to `main` on `infra/bicep/**`, PR, or manual dispatch | Validates, runs What-If on PRs (posts result as PR comment), deploys nonprod and prod independently |
+| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Push to `main` on `infra/terraform/**`, PR, or manual dispatch | Plans (posts result as PR comment), applies nonprod and prod independently (prod re-plans before apply) |
 | `integration-test.yml` | Integration Test | Manual dispatch or weekly schedule (Monday 06:00 UTC) | Runs Bicep What-If and Terraform Plan; optionally deploys, validates resources, and tears down |
 | `github-pages.yml` | Deploy to GitHub Pages | Push to `main` or manual dispatch | Builds Jekyll site and deploys to GitHub Pages |
 
