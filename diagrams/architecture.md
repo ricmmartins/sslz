@@ -103,6 +103,11 @@ description: "Visual diagrams of the landing zone architecture"
 <strong>Policy Hardening</strong>
 <span>Deny-mode policies</span>
 </div>
+<div class="viz-grad-step">
+<div class="viz-grad-num">5</div>
+<strong>Identity Hardening</strong>
+<span>PIM, Access Reviews</span>
+</div>
 <div class="viz-grad-step viz-grad-final">
 <div class="viz-grad-num">&#9733;</div>
 <strong>Full ESLZ</strong>

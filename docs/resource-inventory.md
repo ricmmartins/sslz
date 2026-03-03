@@ -1,6 +1,7 @@
 ---
 layout: page
 title: "Resource Inventory"
+nav_order: 8
 description: "Complete list of Azure resources created by the landing zone"
 ---
 
@@ -161,6 +162,7 @@ All plans are `Microsoft.Security/pricings` resources at subscription scope.
 | `OpenSourceRelationalDatabases` | PostgreSQL, MySQL, MariaDB | Standard | Free | — |
 | `KeyVaults` | Key Vault | Standard | Standard | — |
 | `Arm` | ARM control plane | Standard | Standard | — |
+| `StorageAccounts` | Storage | Standard | Standard | DefenderForStorageV2 |
 
 > **Notes:**
 > - Defender for Servers, Databases are enabled by default in prod, disabled in nonprod.

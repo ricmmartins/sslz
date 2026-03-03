@@ -89,6 +89,15 @@ resource defenderArm 'Microsoft.Security/pricings@2024-01-01' = {
   }
 }
 
+// Defender for Storage — detect malicious uploads and anomalous access
+resource defenderStorage 'Microsoft.Security/pricings@2024-01-01' = {
+  name: 'StorageAccounts'
+  properties: {
+    pricingTier: 'Standard'
+    subPlan: 'DefenderForStorageV2'
+  }
+}
+
 // ============================================================================
 // Security Contact
 // ============================================================================

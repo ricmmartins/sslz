@@ -58,6 +58,13 @@ resource "azurerm_security_center_subscription_pricing" "arm" {
   resource_type = "Arm"
 }
 
+# Defender for Storage — detect malicious uploads and anomalous access
+resource "azurerm_security_center_subscription_pricing" "storage" {
+  tier          = "Standard"
+  resource_type = "StorageAccounts"
+  subplan       = "DefenderForStorageV2"
+}
+
 # Security contact — Azure auto-creates securityContacts/default with empty values
 # when any Defender plan is enabled. Terraform will adopt it on first apply.
 resource "azurerm_security_center_contact" "default" {
