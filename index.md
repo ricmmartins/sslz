@@ -270,7 +270,18 @@ az policy assignment list \
 
 # Check Defender plans
 az security pricing list \
-  --query "[].{name:name, tier:pricingTier}" -o table</code></pre>
+  --query "[?pricingTier=='Standard'].{Name:name, Tier:pricingTier}" -o table
+
+# Check security contact
+az security contact list \
+  --query "[].{Name:name, Email:email}" -o table
+
+# Check budget
+az consumption budget list \
+  --query "[].{Name:name, Amount:amount, TimeGrain:timeGrain}" -o table
+
+# Check NSG rules
+az network nsg list --query "[].name" -o tsv</code></pre>
       </details>
     </div>
     <div class="step-card">
