@@ -186,10 +186,10 @@ az monitor log-analytics workspace list --query "[].name" -o tsv
 az policy assignment list --query "[].displayName" -o tsv
 
 # Check Defender plans enabled
-az security pricing list --query "[?pricingTier=='Standard'].{Name:name, Tier:pricingTier}" -o table
+az security pricing list --query "value[?pricingTier=='Standard'].{Name:name, Tier:pricingTier}" -o table
 
 # Check security contact
-az security contact list --query "[].{Name:name, Email:email}" -o table
+az security contact show --name default --query "{Email:emails, Roles:notificationsByRole.roles}" -o table
 
 # Check budget
 az consumption budget list --query "[].{Name:name, Amount:amount, TimeGrain:timeGrain}" -o table

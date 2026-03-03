@@ -270,11 +270,11 @@ az policy assignment list \
 
 # Check Defender plans
 az security pricing list \
-  --query "[?pricingTier=='Standard'].{Name:name, Tier:pricingTier}" -o table
+  --query "value[?pricingTier=='Standard'].{Name:name, Tier:pricingTier}" -o table
 
 # Check security contact
-az security contact list \
-  --query "[].{Name:name, Email:email}" -o table
+az security contact show --name default \
+  --query "{Email:emails, Roles:notificationsByRole.roles}" -o table
 
 # Check budget
 az consumption budget list \
