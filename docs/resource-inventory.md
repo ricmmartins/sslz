@@ -177,7 +177,7 @@ All plans are `Microsoft.Security/pricings` resources at subscription scope.
 | **Name** | `default` |
 | **Email** | Configured via `securityContactEmail` parameter |
 | **Notifications** | Enabled |
-| **Notify roles** | Owner, Contributor |
+| **Notify roles** | Owner |
 | **Minimum severity** | Medium |
 | **Alert source** | Alert |
 

@@ -109,7 +109,7 @@ resource securityContact 'Microsoft.Security/securityContacts@2023-12-01-preview
     isEnabled: true
     notificationsByRole: {
       state: 'On'
-      roles: ['Owner', 'Contributor']
+      roles: ['Owner']
     }
     notificationsSources: [
       {

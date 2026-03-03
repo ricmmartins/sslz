@@ -88,12 +88,12 @@ param logRetentionInDays int = 90
 @description('Log Analytics daily ingestion quota in GB (-1 = unlimited)')
 param logDailyQuotaGb int = 5
 
-@description('Tags applied to all resources')
+@description('Tags applied to all resources. Override to change team name or add custom tags.')
 param tags object = {
   environment: environment
   managedBy: 'bicep'
   project: 'landing-zone'
-  team: 'platform'
+  team: 'platform' // change to your team name
 }
 
 // ============================================================================

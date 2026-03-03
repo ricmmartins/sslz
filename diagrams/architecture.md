@@ -136,7 +136,6 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-net-nsg">
 <strong>NSG: snet-app</strong>
 <span>Deny all inbound (default)</span>
-<span>Allow VNet internal</span>
 </div>
 <div class="viz-net-nsg">
 <strong>NSG: snet-data</strong>
@@ -198,7 +197,7 @@ description: "Visual diagrams of the landing zone architecture"
 <div class="viz-sec-card">
 <strong>Global Admin</strong>
 <span>Break-glass account</span>
-<span>MFA enforced, PIM eligible</span>
+<span>MFA enforced, no PIM</span>
 <span class="viz-sec-badge viz-badge-red">Emergency only</span>
 </div>
 <div class="viz-sec-card">

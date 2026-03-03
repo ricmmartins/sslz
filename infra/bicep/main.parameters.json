@@ -16,7 +16,7 @@
       "value": 5000
     },
     "budgetAlertEmails": {
-      "value": ["platform-team@contoso.com"]
+      "value": ["platform-team@mycompany.com"]
     },
     "securityContactEmail": {
       "value": "${AZURE_SECURITY_CONTACT_EMAIL}"
