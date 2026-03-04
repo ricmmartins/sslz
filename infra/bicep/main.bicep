@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
 // ============================================================================
-// Azure Landing Zone for Startups — Main Orchestrator
+// Startup-Scale Landing Zone (SSLZ) — Main Orchestrator
 // Deploys: Resource Groups, Log Analytics, Networking, Budgets, Defender, Policies
 //
 // NOTE: Management Groups
