@@ -18,11 +18,11 @@ variable "location" {
 }
 
 variable "company_name" {
-  description = "Company name used in resource naming (2-10 lowercase alphanumeric characters)"
+  description = "Company name used in resource naming (2-20 lowercase alphanumeric characters)"
   type        = string
   validation {
-    condition     = can(regex("^[a-z][a-z0-9]{1,9}$", var.company_name))
-    error_message = "company_name must be 2-10 lowercase alphanumeric characters, starting with a letter."
+    condition     = can(regex("^[a-z][a-z0-9]{1,19}$", var.company_name))
+    error_message = "company_name must be 2-20 lowercase alphanumeric characters, starting with a letter."
   }
 }
 

@@ -59,7 +59,8 @@ jobs:
           az deployment sub validate \
             --location "$AZURE_LOCATION" \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam
+            --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam \
+            --name "sslz-validate-${{ matrix.environment }}"
 
   what-if:
     name: What-If (${{ matrix.environment }})
@@ -88,6 +89,7 @@ jobs:
             --location "$AZURE_LOCATION" \
             --template-file ${{ env.BICEP_DIR }}/main.bicep \
             --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam \
+            --name "sslz-whatif-${{ matrix.environment }}" \
             2>&1 | tee whatif-output.txt
 
       - name: Post What-If to PR
