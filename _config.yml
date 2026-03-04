@@ -1,6 +1,6 @@
 title: "Azure Landing Zone for Startups"
 description: "A stripped-down, opinionated, deployable Azure Landing Zone for startups"
-url: "https://azurelanding.zone"
+url: "https://startupscalelanding.zone"
 baseurl: ""
 
 markdown: kramdown
