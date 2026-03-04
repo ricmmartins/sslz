@@ -95,9 +95,18 @@ jobs:
       - name: Set budget start date
         run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
 
+      - name: Override backend to local
+        working-directory: infra/terraform
+        run: |
+          cat > backend_override.tf << 'EOF'
+          terraform {
+            backend "local" {}
+          }
+          EOF
+
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -backend=false -reconfigure
+        run: terraform init -reconfigure
 
       - name: Terraform Plan
         working-directory: infra/terraform
@@ -139,9 +148,18 @@ jobs:
         run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
 
       # --- Deploy ---
+      - name: Override backend to local
+        working-directory: infra/terraform
+        run: |
+          cat > backend_override.tf << 'EOF'
+          terraform {
+            backend "local" {}
+          }
+          EOF
+
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -backend=false -reconfigure
+        run: terraform init -reconfigure
 
       - name: Terraform Apply
         id: tf-apply
