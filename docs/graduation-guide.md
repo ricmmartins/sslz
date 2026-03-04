@@ -163,6 +163,7 @@ This is why we don't start with full ALZ. At $1,500-3,000/month just for platfor
 
 ## Resources
 
+- [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195) — Step-by-step guide covering the full ALZ journey, from identity and RBAC to Platform and Application Landing Zones
 - [Azure Landing Zones documentation](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/)
 - [ALZ Bicep modules](https://github.com/Azure/ALZ-Bicep)
 - [ALZ Terraform module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) (extended support, archived Aug 2026)

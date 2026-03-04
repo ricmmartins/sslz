@@ -16,6 +16,10 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 - **Set budget alerts at 50%, 80%, and 100% of your monthly burn.** Tag everything with `environment` and `team`. No exceptions.
 - **Deploy this in under 1 hour with Bicep or Terraform.** Graduate to full ALZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.
 
+## Background
+
+For a comprehensive walkthrough of the full Azure Landing Zone journey — from identity and RBAC to Platform and Application Landing Zones — see [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195). This project takes that foundation and distills it into a deployable starting point for startups.
+
 ## Why This Exists
 
 | What Exists Today | The Problem |
