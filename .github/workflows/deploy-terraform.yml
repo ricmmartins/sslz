@@ -68,8 +68,15 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
         run: terraform init
 
-      - name: Set budget start date
-        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+      - name: Set Terraform variables
+        run: |
+          echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+          # Convert comma-separated emails to HCL list format
+          RAW_EMAILS="${{ vars.BUDGET_ALERT_EMAILS }}"
+          if [ -n "$RAW_EMAILS" ]; then
+            HCL_LIST=$(echo "$RAW_EMAILS" | sed 's/[[:space:]]*,[[:space:]]*/","/g; s/^/["/; s/$/"]/')
+            echo "TF_VAR_budget_alert_emails=$HCL_LIST" >> "$GITHUB_ENV"
+          fi
 
       - name: Terraform Plan
         id: plan
@@ -78,11 +85,11 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-          TF_VAR_budget_alert_emails: ${{ vars.BUDGET_ALERT_EMAILS || '["platform@example.com"]' }}
           TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
           COMPANY_NAME: ${{ vars.COMPANY_NAME || 'mycompany' }}
           ENVIRONMENT: ${{ matrix.environment }}
         run: |
+          set -o pipefail
           terraform plan \
             -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
             -var="environment=${ENVIRONMENT}" \
@@ -205,8 +212,14 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
         run: terraform init
 
-      - name: Set budget start date
-        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+      - name: Set Terraform variables
+        run: |
+          echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+          RAW_EMAILS="${{ vars.BUDGET_ALERT_EMAILS }}"
+          if [ -n "$RAW_EMAILS" ]; then
+            HCL_LIST=$(echo "$RAW_EMAILS" | sed 's/[[:space:]]*,[[:space:]]*/","/g; s/^/["/; s/$/"]/')
+            echo "TF_VAR_budget_alert_emails=$HCL_LIST" >> "$GITHUB_ENV"
+          fi
 
       - name: Terraform Plan (fresh)
         working-directory: ${{ env.TF_DIR }}
@@ -214,7 +227,6 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-          TF_VAR_budget_alert_emails: ${{ vars.BUDGET_ALERT_EMAILS || '["platform@example.com"]' }}
           TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
           COMPANY_NAME: ${{ vars.COMPANY_NAME || 'mycompany' }}
         run: |

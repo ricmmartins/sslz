@@ -168,7 +168,7 @@ Also add these **repository-level variables** (Settings > Secrets and variables 
 |---|---|---|---|
 | `AZURE_LOCATION` | Azure region (e.g., `eastus2`) | Bicep + Terraform | Deployment location |
 | `COMPANY_NAME` | Your company name (e.g., `acme`) | Terraform only | Used in resource naming |
-| `BUDGET_ALERT_EMAILS` | `["team@acme.com"]` | Terraform only | Budget alert recipients (JSON array) |
+| `BUDGET_ALERT_EMAILS` | `team@acme.com,cto@acme.com` | Terraform only | Budget alert recipients (comma-separated) |
 | `SECURITY_CONTACT_EMAIL` | `security@acme.com` | Terraform only | Defender alert recipient |
 
 > **Bicep users:** The Terraform-only variables above have sensible defaults in the workflow, but Bicep gets its values from parameter files instead. See Step 5b below.
