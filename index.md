@@ -244,7 +244,12 @@ az deployment sub create \
 # Copy and edit variables (subscription_id, company_name, emails, etc.)
 cp terraform.tfvars.example terraform.tfvars
 
-terraform init
+# For local dev (no remote backend):
+terraform init -backend=false
+# For CI/CD or team use, set up remote backend first:
+#   ./scripts/bootstrap-backend.sh -s &lt;storage-account-name&gt;
+#   terraform init -backend-config="storage_account_name=&lt;name&gt;"
+
 terraform plan -out=tfplan    # Preview changes
 terraform apply tfplan        # Deploy</code></pre>
       </details>
