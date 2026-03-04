@@ -88,6 +88,7 @@ variable "monthly_budget_amount" {
 variable "budget_alert_emails" {
   description = "Email addresses for budget alerts"
   type        = list(string)
+  default     = ["platform@example.com"]
   validation {
     condition     = length(var.budget_alert_emails) > 0
     error_message = "budget_alert_emails must contain at least one email address."
@@ -107,6 +108,7 @@ variable "budget_start_date" {
 variable "security_contact_email" {
   description = "Email address for Defender for Cloud security alerts"
   type        = string
+  default     = "security@example.com"
   validation {
     condition     = can(regex("^[^@]+@[^@]+\\.[^@]+$", var.security_contact_email))
     error_message = "security_contact_email must be a valid email address."
