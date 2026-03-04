@@ -66,9 +66,11 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-        run: terraform init
-
-      - name: Set Terraform variables
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
+            -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
+            -backend-config="key=landing-zone-${{ matrix.environment }}.tfstate"
         run: |
           echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
           # Convert comma-separated emails to HCL list format
@@ -170,7 +172,11 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
+            -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
+            -backend-config="key=landing-zone-nonprod.tfstate"
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_DIR }}
@@ -210,7 +216,11 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
+            -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
+            -backend-config="key=landing-zone-prod.tfstate"
 
       - name: Set Terraform variables
         run: |

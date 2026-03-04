@@ -37,16 +37,16 @@ terraform {
     }
   }
 
-  # Remote backend — uncomment and update storage_account_name with your value.
-  # Run ./scripts/bootstrap-backend.sh to create the storage account, then
-  # uncomment this block and run: terraform init -migrate-state
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-terraform-state"
-  #   storage_account_name = "REPLACE_WITH_YOUR_STORAGE_ACCOUNT"
-  #   container_name       = "tfstate"
-  #   key                  = "landing-zone.tfstate"
-  #   use_oidc             = true
-  # }
+  # Remote backend for shared state. Required for CI/CD.
+  # Run ./scripts/bootstrap-backend.sh -s <storage-account-name> to create the storage account.
+  # For local dev without backend, run: terraform init -backend=false
+  backend "azurerm" {
+    resource_group_name  = "rg-terraform-state"
+    storage_account_name = "yourStorageAccount"
+    container_name       = "tfstate"
+    key                  = "landing-zone.tfstate"
+    use_oidc             = true
+  }
 }
 
 provider "azurerm" {
