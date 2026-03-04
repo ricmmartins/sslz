@@ -97,7 +97,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -backend=false
+        run: terraform init -backend=false -reconfigure
 
       - name: Terraform Plan
         working-directory: infra/terraform
@@ -141,7 +141,7 @@ jobs:
       # --- Deploy ---
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -backend=false
+        run: terraform init -backend=false -reconfigure
 
       - name: Terraform Apply
         id: tf-apply
