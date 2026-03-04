@@ -71,6 +71,8 @@ jobs:
             -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
             -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
             -backend-config="key=landing-zone-${{ matrix.environment }}.tfstate"
+
+      - name: Set Terraform variables
         run: |
           echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
           # Convert comma-separated emails to HCL list format

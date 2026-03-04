@@ -126,7 +126,7 @@ resource rgNetworkingRes 'Microsoft.Resources/resourceGroups@2024-03-01' = if (d
 // ============================================================================
 
 module logAnalytics 'modules/log-analytics.bicep' = {
-  name: 'deploy-log-analytics'
+  name: 'deploy-log-analytics-${environment}'
   scope: rgMonitoringRes
   params: {
     location: location
@@ -142,7 +142,7 @@ module logAnalytics 'modules/log-analytics.bicep' = {
 // ============================================================================
 
 module networking 'modules/networking.bicep' = if (deployNetworking) {
-  name: 'deploy-networking'
+  name: 'deploy-networking-${environment}'
   scope: rgNetworkingRes
   params: {
     location: location
@@ -158,7 +158,7 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
 // ============================================================================
 
 module defender 'modules/defender.bicep' = {
-  name: 'deploy-defender'
+  name: 'deploy-defender-${environment}'
   params: {
     enableDefenderForServers: enableDefenderForServers
     enableDefenderForContainers: enableDefenderForContainers
@@ -173,7 +173,7 @@ module defender 'modules/defender.bicep' = {
 // ============================================================================
 
 module budgets 'modules/budgets.bicep' = {
-  name: 'deploy-budgets'
+  name: 'deploy-budgets-${environment}'
   params: {
     budgetName: 'budget-${prefix}-monthly'
     amount: monthlyBudgetAmount
@@ -208,7 +208,7 @@ resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-previ
 // ============================================================================
 
 module policies 'modules/policy-assignments.bicep' = {
-  name: 'deploy-policies'
+  name: 'deploy-policies-${environment}'
   params: {
     location: location
     allowedLocations: allowedLocations
