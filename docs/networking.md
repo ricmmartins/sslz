@@ -222,6 +222,43 @@ After (when you graduate):
 
 Start with NSGs. They're free, they cover 95% of use cases, and they're per-subnet so failures are isolated. Add Azure Firewall when you have a specific compliance or operational requirement.
 
+## Outbound Internet Access
+
+### Default Outbound Access Retirement
+
+Azure [retired default outbound internet access](https://learn.microsoft.com/azure/virtual-network/ip-services/default-outbound-access) for new VMs and subnets in September 2025. This means new VMs deployed into a subnet without an explicit outbound path (NAT Gateway, Load Balancer outbound rules, or public IP) will have **no internet connectivity**.
+
+### How This Affects the Landing Zone
+
+For most SSLZ workload patterns, this is **not a breaking issue** — here's why:
+
+| Subnet | Typical Workload | Outbound Strategy | Impact |
+|---|---|---|---|
+| `snet-aks` | AKS with Standard Load Balancer | LB outbound rules handle egress automatically | ✅ Not affected |
+| `snet-app` | App Service / Container Apps with VNet integration | Platform manages outbound connectivity | ✅ Not affected |
+| `snet-data` | Private Endpoints | No outbound internet needed | ✅ Not affected |
+| `snet-shared` | Jump boxes, CI/CD agents (VMs) | ⚠️ Needs explicit outbound if deploying VMs | ⚠️ Needs attention |
+
+**Bottom line:** If your stack is PaaS-first (Container Apps, App Service, AKS with Load Balancer), outbound connectivity is handled by the platform and you don't need to take additional action. The only subnet where this matters is `snet-shared` — and only if you deploy VMs or VMSS into it.
+
+### If You Need Outbound for VMs
+
+If you deploy VMs into `snet-shared` (jump boxes, self-hosted CI/CD agents, etc.), you need one of these:
+
+| Option | Cost | Best For |
+|---|---|---|
+| **NAT Gateway** | ~$32/month + data processing | Most scenarios — simple, per-subnet, static outbound IPs |
+| **Standard Load Balancer** outbound rules | Included with LB | When you already have a Load Balancer |
+| **Azure Firewall** (hub) | ~$900+/month | When you need L7 inspection and centralized egress (graduation path) |
+
+**NAT Gateway** is the recommended option for startups. It's simple, cost-effective, and provides a predictable static outbound IP — useful for allowlisting with third-party APIs.
+
+### Private Subnets (Optional Hardening)
+
+You can explicitly set `defaultOutboundAccess: false` on subnets to make them "private" — blocking all outbound internet access unless a NAT Gateway or other explicit path is configured. This is a security best practice but only needed if you're deploying VMs and want to ensure no accidental outbound access.
+
+For PaaS-only subnets (`snet-app`, `snet-data`), this setting has no practical effect since the platform services manage their own connectivity.
+
 > **See also:** The [SaaS Startup example](../examples/saas-startup/) demonstrates opt-in Private Endpoints for SQL and Redis with DNS zone configuration.
 
 ## Front Door vs Application Gateway
