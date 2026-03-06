@@ -29,6 +29,8 @@ For a comprehensive walkthrough of the full Azure Landing Zone journey — from 
 | [CAF Terraform Module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) | Enterprise-scoped, in extended support (archived Aug 2026). Microsoft recommends migrating to [Azure Verified Modules](https://aka.ms/avm). |
 | **This project** | **Deploys in 1 hour. Grows with you. Written for engineers, not consultants.** |
 
+> **⚠️ Important:** This project is **not** a replacement or competitor to [Azure Landing Zones (ALZ)](https://aka.ms/alz) or the [Trey Research](https://github.com/Azure/Enterprise-Scale/tree/main/docs/reference/treyresearch) small-enterprise reference. It targets a different profile entirely: very early-stage startups (pre-seed to Series A), 5–15 engineers, no dedicated platform team, typically a single workload in a single region, and no hybrid connectivity requirements. For those teams, the alternative isn't ALZ — it's usually a single subscription with zero governance. This project provides a minimal but secure baseline to start with, and an explicit [graduation guide](docs/graduation-guide.md) for when they're ready to evolve into the full ALZ architecture.
+
 ## Architecture
 
 ```
