@@ -216,7 +216,7 @@ After (when you graduate):
 | L3/L4 filtering | Yes | Yes |
 | L7 (FQDN) filtering | No | Yes |
 | TLS inspection | No | Yes (Premium) |
-| Centralized logging | Via Flow Logs | Built-in |
+| Centralized logging | Via Vnet Flow Logs | Built-in |
 | Threat intelligence | No | Yes |
 | Good for startups? | **Yes** | **Not until compliance or hybrid demands it** |
 
