@@ -108,26 +108,26 @@ No inbound rules needed — VNet integration is outbound only.
 110  Inbound  Allow  VirtualNetwork  snet-shared  22  (SSH to jump box, if needed)
 ```
 
-### NSG Flow Logs
+### VNet Flow Logs
 
-Enable NSG Flow Logs version 2 on all NSGs and send them to your Log Analytics workspace. This gives you:
-- Network traffic visibility
+Enable [VNet Flow Logs](https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview) on your virtual networks and send them to your Log Analytics workspace. VNet flow logs replace the deprecated NSG flow logs, providing broader visibility across the entire VNet rather than per-NSG. This gives you:
+- Network traffic visibility across the entire virtual network
 - Connection troubleshooting
 - Traffic analytics (optional, costs extra)
 
 ```bicep
 // Illustrative — requires a Storage Account and Log Analytics Workspace
 // to be deployed separately for flow log storage and analytics.
-param nsgName string
-param nsgId string
+param vnetName string
+param vnetId string
 param storageAccountId string
 param logAnalyticsWorkspaceId string
 
-resource flowLog 'Microsoft.Network/networkWatchers/flowLogs@2023-11-01' = {
-  name: 'nw-${location}/fl-${nsgName}'
+resource flowLog 'Microsoft.Network/networkWatchers/flowLogs@2024-05-01' = {
+  name: 'nw-${location}/fl-${vnetName}'
   location: location
   properties: {
-    targetResourceId: nsgId
+    targetResourceId: vnetId
     storageId: storageAccountId
     enabled: true
     format: { type: 'JSON', version: 2 }
@@ -216,7 +216,7 @@ After (when you graduate):
 | L3/L4 filtering | Yes | Yes |
 | L7 (FQDN) filtering | No | Yes |
 | TLS inspection | No | Yes (Premium) |
-| Centralized logging | Via Flow Logs | Built-in |
+| Centralized logging | Via VNet Flow Logs | Built-in |
 | Threat intelligence | No | Yes |
 | Good for startups? | **Yes** | **Not until compliance or hybrid demands it** |
 
