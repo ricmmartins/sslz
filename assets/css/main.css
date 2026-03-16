@@ -978,6 +978,32 @@ img {
   color: var(--link-color);
 }
 
+/* --- Callout / Warning --- */
+.callout-warning {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: #fff3cd;
+  color: #664d03;
+  border-left: 4px solid #ffc107;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.callout-warning a {
+  color: #664d03;
+  text-decoration: underline;
+}
+
+[data-theme="dark"] .callout-warning {
+  background: #332701;
+  color: #ffc107;
+  border-left-color: #ffc107;
+}
+
+[data-theme="dark"] .callout-warning a {
+  color: #ffda6a;
+}
+
 /* --- Included grid --- */
 .included-grid {
   display: grid;

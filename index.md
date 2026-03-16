@@ -92,7 +92,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
       <p>Deploys in 1 hour. Grows with you. Written for engineers, not consultants.</p>
     </div>
   </div>
-  <div style="margin-top: 1.5rem; padding: 1.25rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; font-size: 0.9rem;">
+  <div class="callout-warning">
     <strong>⚠️ Important:</strong> This project is <strong>not</strong> a replacement or competitor to <a href="https://aka.ms/alz">Azure Landing Zones (ALZ)</a> or the <a href="https://github.com/Azure/Enterprise-Scale/tree/main/docs/reference/treyresearch">Trey Research</a> small-enterprise reference. It targets a different profile entirely: very early-stage startups (pre-seed to Series A), 5–15 engineers, no dedicated platform team, typically a single workload in a single region, and no hybrid connectivity requirements. For those teams, the alternative isn't ALZ — it's usually a single subscription with zero governance. This project provides a minimal but secure baseline to start with, and an explicit <a href="/docs/graduation-guide">graduation guide</a> for when they're ready to evolve into the full ALZ architecture.
   </div>
 </section>
