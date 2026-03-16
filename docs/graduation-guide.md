@@ -26,7 +26,44 @@ You don't need all of these. If 2-3 apply simultaneously, start planning.
 
 The good news: if you followed this guide, migration is incremental. You're adding layers, not rebuilding.
 
-### Phase 1: Management Group Hierarchy (Week 1)
+### Phase 0: Lightweight Management Group Split (Optional)
+
+If your team is growing (20–50 engineers) and you're starting to see a natural separation between infrastructure/platform responsibilities and application/product teams, consider this intermediate step before going full ALZ.
+
+**From:**
+```
+Tenant Root Group
+└── mg-yourcompany
+    ├── sub-prod
+    └── sub-nonprod
+```
+
+**To:**
+```
+Tenant Root Group
+└── mg-yourcompany
+    ├── mg-platform          (cross-cutting: monitoring, security, shared infra)
+    │   └── sub-prod
+    └── mg-landing-zones     (workloads: application environments)
+        └── sub-nonprod
+```
+
+**Why this helps:**
+- Separates platform policies (security baselines, logging requirements) from workload policies (resource type restrictions, naming conventions)
+- Gives infrastructure and product teams clear boundaries without the overhead of dedicated Platform subscriptions
+- Makes the eventual move to full ALZ (Phase 1) smoother — the hierarchy is already in place
+
+**Steps:**
+1. Create `mg-platform` and `mg-landing-zones` under your root MG
+2. Move `sub-prod` under `mg-platform` and `sub-nonprod` under `mg-landing-zones`
+3. Reassign policies to the appropriate MG level
+4. Verify policy inheritance works correctly
+
+**Risk:** Low. Moving subscriptions between MGs is instant and doesn't affect running resources.
+
+**When to skip this and go straight to Phase 1:** If you already need dedicated Connectivity or Management subscriptions, or have 5+ subscriptions, jump directly to the full ALZ hierarchy below.
+
+### Phase 1: Full Management Group Hierarchy (Week 1)
 
 **From:**
 ```
