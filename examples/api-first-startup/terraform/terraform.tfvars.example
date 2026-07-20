@@ -1,0 +1,7 @@
+subscription_id      = "00000000-0000-0000-0000-000000000000"
+resource_group_name  = "rg-myapi-prod-app"
+location             = "eastus2"
+app_name             = "myapi"
+environment          = "prod"
+apim_publisher_email = "admin@example.com"
+apim_publisher_name  = "My API Company"

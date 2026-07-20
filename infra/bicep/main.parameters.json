@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "_comment": "This file uses ${...} placeholders resolved by Azure Developer CLI (azd). Do not use with 'az deployment' directly — use the .bicepparam files in parameters/ instead.",
+  "parameters": {
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "companyName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "environment": {
+      "value": "prod"
+    },
+    "monthlyBudgetAmount": {
+      "value": 5000
+    },
+    "budgetAlertEmails": {
+      "value": ["platform-team@mycompany.com"]
+    },
+    "securityContactEmail": {
+      "value": "${AZURE_SECURITY_CONTACT_EMAIL}"
+    },
+    "budgetStartDate": {
+      "value": "2026-03-01T00:00:00Z"
+    }
+  }
+}

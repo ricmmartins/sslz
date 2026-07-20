@@ -1,0 +1,23 @@
+docs:
+  - title: "Architecture"
+    url: "/docs/architecture"
+  - title: "Networking"
+    url: "/docs/networking"
+  - title: "Security"
+    url: "/docs/security"
+  - title: "Cost Management"
+    url: "/docs/cost-management"
+  - title: "CI/CD Setup"
+    url: "/docs/ci-cd-setup"
+  - title: "Troubleshooting"
+    url: "/docs/troubleshooting"
+  - title: "Resource Inventory"
+    url: "/docs/resource-inventory"
+  - title: "Graduation Guide"
+    url: "/docs/graduation-guide"
+
+resources:
+  - title: "Diagrams"
+    url: "/diagrams/architecture"
+  - title: "Contributing"
+    url: "/contributing"

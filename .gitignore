@@ -1,0 +1,51 @@
+# Jekyll
+_site/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+terraform.tfvars
+*.auto.tfvars
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Bicep
+*.local.bicepparam
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Generated diagrams
+diagrams/output/*.png
+diagrams/output/*.svg
+
+# Azure Developer CLI
+.azure/
+
+# Compiled Bicep output
+*.main.json
+**/main.json
+
+# Terraform lock files — commit these for reproducible builds
+# .terraform.lock.hcl
+
+# Secrets
+.env
+*.pem
+*.key

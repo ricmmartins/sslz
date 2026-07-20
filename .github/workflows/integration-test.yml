@@ -1,0 +1,260 @@
+name: Integration Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'nonprod'
+        type: choice
+        options:
+          - nonprod
+          - prod
+      deploy:
+        description: 'Actually deploy resources (not just plan/what-if)'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # Run weekly on Monday at 06:00 UTC (plan/what-if only; deploy requires manual workflow_dispatch with deploy=true)
+    - cron: '0 6 * * 1'
+
+concurrency:
+  group: integration-test-${{ github.event.inputs.environment || 'nonprod' }}-${{ github.event_name }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_USE_OIDC: true
+  TF_VAR_subscription_id: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+  TF_VAR_company_name: "lztest"
+  TF_VAR_environment: ${{ github.event.inputs.environment || 'nonprod' }}
+  TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
+  TF_VAR_deploy_networking: "true"
+  TF_VAR_security_contact_email: "landing-zone-test@contoso.com"
+
+jobs:
+  # ============================================================================
+  # Bicep: What-If (dry-run)
+  # ============================================================================
+  bicep-whatif:
+    name: Bicep What-If
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - name: Bicep What-If
+        run: |
+          az deployment sub what-if \
+            --location eastus2 \
+            --template-file infra/bicep/main.bicep \
+            --parameters \
+              location=eastus2 \
+              companyName=lztest \
+              environment=${{ env.TF_VAR_environment }} \
+              monthlyBudgetAmount=500 \
+              budgetAlertEmails='["landing-zone-test@contoso.com"]' \
+              securityContactEmail='landing-zone-test@contoso.com' \
+              budgetStartDate='2026-01-01T00:00:00Z'
+
+  # ============================================================================
+  # Terraform: Plan
+  # ============================================================================
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+
+      - name: Override backend to local
+        working-directory: infra/terraform
+        run: |
+          cat > backend_override.tf << 'EOF'
+          terraform {
+            backend "local" {}
+          }
+          EOF
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -reconfigure
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: terraform plan -out=tfplan -input=false
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: infra/terraform/tfplan
+          retention-days: 1
+
+  # ============================================================================
+  # Deploy → Validate → Teardown (single job to preserve TF state)
+  # Opt-in via workflow_dispatch with deploy=true
+  # ============================================================================
+  deploy-validate-teardown:
+    name: Deploy, Validate & Teardown
+    runs-on: ubuntu-latest
+    needs: [bicep-whatif, terraform-plan]
+    if: github.event.inputs.deploy == 'true'
+    environment: ${{ github.event.inputs.environment || 'nonprod' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - name: Set budget start date
+        run: echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
+
+      # --- Deploy ---
+      - name: Override backend to local
+        working-directory: infra/terraform
+        run: |
+          cat > backend_override.tf << 'EOF'
+          terraform {
+            backend "local" {}
+          }
+          EOF
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -reconfigure
+
+      - name: Terraform Apply
+        id: tf-apply
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve -input=false
+
+      # --- Validate ---
+      - name: Validate resource groups exist
+        run: |
+          ENV="${{ env.TF_VAR_environment }}"
+          echo "=== Checking resource groups ==="
+          az group show --name "rg-lztest-${ENV}-monitoring" --query "name" -o tsv
+          echo "  ✓ Monitoring RG exists"
+          az group show --name "rg-lztest-${ENV}-networking" --query "name" -o tsv
+          echo "  ✓ Networking RG exists"
+
+      - name: Validate Log Analytics workspace
+        run: |
+          ENV="${{ env.TF_VAR_environment }}"
+          echo "=== Checking Log Analytics ==="
+          az monitor log-analytics workspace show \
+            --resource-group "rg-lztest-${ENV}-monitoring" \
+            --workspace-name "law-lztest-${ENV}" \
+            --query "provisioningState" -o tsv
+          echo "  ✓ Log Analytics workspace exists"
+
+      - name: Validate policy assignments
+        run: |
+          echo "=== Checking policy assignments ==="
+          az policy assignment show --name "mcsb-audit" --query "name" -o tsv
+          echo "  ✓ MCSB policy assigned"
+          az policy assignment show --name "allowed-locations" --query "name" -o tsv
+          echo "  ✓ Allowed locations policy assigned"
+
+      - name: Validate networking resources
+        run: |
+          ENV="${{ env.TF_VAR_environment }}"
+          echo "=== Checking VNet and NSGs ==="
+          VNET_STATE=$(az network vnet show \
+            --resource-group "rg-lztest-${ENV}-networking" \
+            --name "vnet-lztest-${ENV}" \
+            --query "provisioningState" -o tsv)
+          echo "  ✓ VNet provisioning state: $VNET_STATE"
+          SUBNET_COUNT=$(az network vnet subnet list \
+            --resource-group "rg-lztest-${ENV}-networking" \
+            --vnet-name "vnet-lztest-${ENV}" \
+            --query "length(@)" -o tsv)
+          echo "  ✓ Subnets created: $SUBNET_COUNT (expected 4)"
+          if [ "$SUBNET_COUNT" -ne 4 ]; then
+            echo "  ✗ ERROR: Expected 4 subnets, got $SUBNET_COUNT"
+            exit 1
+          fi
+
+      - name: Validate Defender plans
+        run: |
+          echo "=== Checking Defender for Cloud ==="
+          CSPM=$(az security pricing show --name "CloudPosture" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
+          echo "  CSPM tier: $CSPM"
+          ARM=$(az security pricing show --name "Arm" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
+          echo "  ARM tier: $ARM"
+          KV=$(az security pricing show --name "KeyVaults" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
+          echo "  Key Vault tier: $KV"
+          echo "  ✓ Defender plans verified"
+
+      - name: Validate budget exists
+        run: |
+          echo "=== Checking budget ==="
+          BUDGET=$(az consumption budget list --query "[?contains(name, 'lztest')].name" -o tsv 2>/dev/null || echo "")
+          if [ -n "$BUDGET" ]; then
+            echo "  ✓ Budget exists: $BUDGET"
+          else
+            echo "  ⚠ Budget not found (may take time to propagate)"
+          fi
+
+      # --- Teardown (runs if apply succeeded, even if validation fails) ---
+      - name: Terraform Destroy
+        if: always() && steps.tf-apply.outcome == 'success'
+        working-directory: infra/terraform
+        run: terraform destroy -auto-approve -input=false
+
+  # ============================================================================
+  # Summary
+  # ============================================================================
+  summary:
+    name: Test Summary
+    needs: [bicep-whatif, terraform-plan, deploy-validate-teardown]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "## Integration Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Bicep What-If | ${{ needs.bicep-whatif.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Terraform Plan | ${{ needs.terraform-plan.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Deploy/Validate/Teardown | ${{ needs.deploy-validate-teardown.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"

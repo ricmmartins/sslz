@@ -1,0 +1,121 @@
+name: Validate IaC
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'examples/**'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'examples/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-bicep:
+    name: Validate Bicep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Build all Bicep files
+        run: |
+          echo "=== Validating Bicep modules ==="
+          failed=0
+          for file in $(find infra/bicep examples -name '*.bicep' -not -name '*.bicepparam'); do
+            echo "Building: $file"
+            if az bicep build --file "$file" --stdout > /dev/null 2>&1; then
+              echo "  ✓ OK"
+            else
+              echo "  ✗ FAILED"
+              az bicep build --file "$file" 2>&1 || true
+              failed=1
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo "::error::One or more Bicep files failed validation"
+            exit 1
+          fi
+
+      - name: Lint Bicep files (strict)
+        run: |
+          echo "=== Linting Bicep modules ==="
+          failed=0
+          for file in $(find infra/bicep examples -name '*.bicep' -not -name '*.bicepparam'); do
+            echo "Linting: $file"
+            if ! az bicep lint --file "$file" 2>&1; then
+              failed=1
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo "::error::One or more Bicep files have lint warnings or errors"
+            exit 1
+          fi
+
+  validate-terraform:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Init TFLint
+        run: tflint --init --config=.tflint.hcl
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive -diff
+
+      - name: TFLint — Landing Zone
+        working-directory: infra/terraform
+        run: tflint --config="${{ github.workspace }}/.tflint.hcl"
+
+      - name: TFLint — Examples
+        run: |
+          for dir in examples/*/terraform; do
+            if [ -d "$dir" ]; then
+              echo "=== Linting $dir ==="
+              tflint --config="${{ github.workspace }}/.tflint.hcl" --chdir="$dir" --minimum-failure-severity=error
+            fi
+          done
+
+      - name: Terraform Init — Landing Zone
+        working-directory: infra/terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate — Landing Zone
+        working-directory: infra/terraform
+        run: terraform validate
+
+      - name: Terraform Init & Validate — Examples
+        run: |
+          failed=0
+          for dir in examples/*/terraform; do
+            if [ -d "$dir" ]; then
+              echo "=== Validating $dir ==="
+              terraform -chdir="$dir" init -backend=false
+              if terraform -chdir="$dir" validate; then
+                echo "  ✓ OK"
+              else
+                echo "  ✗ FAILED"
+                failed=1
+              fi
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo "::error::One or more example Terraform configs failed validation"
+            exit 1
+          fi
