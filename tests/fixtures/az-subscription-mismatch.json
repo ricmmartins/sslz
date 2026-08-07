@@ -1,0 +1,10 @@
+{
+  "extends": "az-success.json",
+  "subscriptions": {
+    "nonprod": {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "state": "Enabled"
+    }
+  }
+}
