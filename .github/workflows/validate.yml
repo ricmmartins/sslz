@@ -4,18 +4,32 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'agent/**'
       - 'infra/**'
       - 'examples/**'
+      - 'scripts/validate-agent-contracts.mjs'
   push:
     branches: [main]
     paths:
+      - 'agent/**'
       - 'infra/**'
       - 'examples/**'
+      - 'scripts/validate-agent-contracts.mjs'
 
 permissions:
   contents: read
 
 jobs:
+  validate-agent-contracts:
+    name: Validate Agent Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate schemas, catalog, and examples
+        run: node scripts/validate-agent-contracts.mjs
+
+
   validate-bicep:
     name: Validate Bicep
     runs-on: ubuntu-latest

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0.0",
+  "checks": [
+    {
+      "id": "account.authentication.active",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/cli/azure/authenticate-azure-cli"
+    },
+    {
+      "id": "account.subscription.explicit-selection",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/cli/azure/manage-azure-subscriptions-azure-cli"
+    },
+    {
+      "id": "account.subscription.tenant-match",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "identity.secondary-admin.present",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "identity.company-domain.verified",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "identity.deployment-role.sufficient",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/role-assignments-list-cli"
+    },
+    {
+      "id": "billing.startup-credit.context-visible",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "billing.subscription.credit-association",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "account.provider.required-registrations",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "approvedWrite",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/resource-providers-and-types"
+    },
+    {
+      "id": "quota.workload.headroom",
+      "category": "quota",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/quotas/quotas-overview"
+    },
+    {
+      "id": "region.services.available",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "region.skus.eligible",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-machines/sizes/overview"
+    },
+    {
+      "id": "region.foundry-model.available",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure"
+    },
+    {
+      "id": "security.defender.selection-reviewed",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/defender-for-cloud/connect-azure-subscription"
+    },
+    {
+      "id": "operations.monitoring.destination-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/fundamentals/monitor-azure-resource"
+    }
+  ]
+}
