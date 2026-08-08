@@ -16,7 +16,10 @@
     "requiresRelationalDatabase": true,
     "usesFoundryModels": false,
     "requiresCustomerManagedGpu": false,
-    "incidentOwnerConfirmed": true
+    "incidentOwnerConfirmed": true,
+    "usesDocker": true,
+    "kubernetesRequirements": [],
+    "managedModelFit": "unknown"
   },
   "reliability": {
     "dataResidency": "United States",
@@ -28,5 +31,16 @@
   "budget": {
     "currency": "USD",
     "monthlyPlatformMaximum": 500
+  },
+  "architecture": {
+    "regulatedControlsBeyondBaseline": false,
+    "activeActiveMultiRegionWrites": false,
+    "independentProductionWorkloads": 1,
+    "subscriptionCount": 2,
+    "hybridConnectivity": false,
+    "centralizedEgressInspection": false,
+    "automaticFailoverWithoutDataStrategy": false,
+    "dedicatedPlatformTeamSharedServices": false,
+    "unsupportedRequirements": []
   }
 }

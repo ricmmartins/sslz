@@ -1,0 +1,19 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "aks",
+  "kind": "compute",
+  "requiredChecks": [
+    "account.provider.required-registrations",
+    "quota.workload.headroom",
+    "region.services.available",
+    "region.skus.eligible",
+    "operations.aks-owner.confirmed",
+    "security.defender.selection-reviewed",
+    "operations.monitoring.destination-valid"
+  ],
+  "costAssumptions": [
+    "Production uses the AKS Standard tier and uptime SLA.",
+    "The baseline includes one system node pool and one user node pool.",
+    "Node, disk, load balancer, network, observability, and support charges are not priced until region and sizing checks complete."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "AKS without an operations owner is blocked",
+  "overrides": {
+    "workload": {
+      "description": "An application that requires Kubernetes APIs.",
+      "traffic": ["mixed"],
+      "requiresKubernetes": true,
+      "requiresRelationalDatabase": false,
+      "kubernetesRequirements": ["kubernetes-api"],
+      "incidentOwnerConfirmed": false
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "computeProfile": "aks",
+    "profileExtensions": [],
+    "blockingDecision": "operations.aks-owner.required"
+  }
+}

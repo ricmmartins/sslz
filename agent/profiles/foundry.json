@@ -1,0 +1,14 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "foundry",
+  "kind": "extension",
+  "requiredChecks": [
+    "region.foundry-model.available",
+    "quota.workload.headroom",
+    "workload.managed-model-fit.reviewed"
+  ],
+  "costAssumptions": [
+    "Model token, provisioned throughput, evaluation, and content-safety charges depend on the selected model and deployment type.",
+    "No model, deployment type, regional availability, quota, or capacity is assumed."
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "postgresql",
+  "kind": "extension",
+  "requiredChecks": [
+    "region.services.available",
+    "quota.workload.headroom"
+  ],
+  "costAssumptions": [
+    "Nonproduction begins with Burstable compute when the workload supports it.",
+    "Production begins with General Purpose compute; high availability is included only when the resilience requirement justifies it.",
+    "Backup storage, retained backups, and cross-region recovery are not priced until retention and recovery decisions are complete."
+  ]
+}

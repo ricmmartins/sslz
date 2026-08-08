@@ -229,6 +229,31 @@ function validateExamplesAgainstCatalog(examples, catalog) {
   }
 }
 
+function validateProfileDefinitions(profiles, catalog) {
+  const catalogIds = new Set(catalog.checks.map((check) => check.id));
+  const profileIds = new Set();
+
+  for (const profile of profiles) {
+    assert.equal(profile.profileVersion, "1.0.0");
+    assert.match(profile.id, /^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    assert(["compute", "extension"].includes(profile.kind));
+    assert(!profileIds.has(profile.id), `Duplicate profile ID: ${profile.id}`);
+    profileIds.add(profile.id);
+    assert(Array.isArray(profile.requiredChecks) && profile.requiredChecks.length > 0);
+    assert(Array.isArray(profile.costAssumptions) && profile.costAssumptions.length > 0);
+    for (const checkId of profile.requiredChecks) {
+      assert(catalogIds.has(checkId), `Unknown check ID in ${profile.id}: ${checkId}`);
+    }
+  }
+}
+
+function validateWorkloadProfilePlan(plan, catalog) {
+  const catalogIds = new Set(catalog.checks.map((check) => check.id));
+  for (const checkId of plan.requiredChecks) {
+    assert(catalogIds.has(checkId), `Unknown workload plan check ID: ${checkId}`);
+  }
+}
+
 function validateSensitiveData(documents) {
   const text = JSON.stringify(documents);
   const forbidden = [
@@ -249,19 +274,39 @@ export { validateDocument };
 function main() {
   const startupInputSchema = load("agent/schemas/startup-input.schema.json");
   const deploymentPlanSchema = load("agent/schemas/deployment-plan.schema.json");
+  const workloadProfilePlanSchema = load(
+    "agent/schemas/workload-profile-plan.schema.json",
+  );
   const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
   const startupInput = load("agent/examples/startup-input.json");
+  const workloadProfilePlan = load("agent/examples/workload-profile-plan.json");
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
   const catalog = load("agent/checks/check-catalog.json");
+  const profiles = [
+    load("agent/profiles/container-apps.json"),
+    load("agent/profiles/aks.json"),
+    load("agent/profiles/postgresql.json"),
+    load("agent/profiles/foundry.json"),
+    load("agent/profiles/gpu.json"),
+  ];
 
   validateDocument(startupInputSchema, startupInput);
+  validateDocument(workloadProfilePlanSchema, workloadProfilePlan);
   validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
   validateDocument(preflightResultSchema, readyExample);
   validateDocument(preflightResultSchema, blockedExample);
   validateCatalog(catalog);
+  validateProfileDefinitions(profiles, catalog);
+  validateWorkloadProfilePlan(workloadProfilePlan, catalog);
   validateExamplesAgainstCatalog([readyExample, blockedExample], catalog);
-  validateSensitiveData([startupInput, readyExample, blockedExample]);
+  validateSensitiveData([
+    startupInput,
+    workloadProfilePlan,
+    readyExample,
+    blockedExample,
+    profiles,
+  ]);
 
   console.log("Agent contracts are valid.");
 }

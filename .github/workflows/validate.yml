@@ -9,6 +9,7 @@ on:
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
       - 'scripts/startup-preflight.*'
+      - 'scripts/startup-workload-plan.*'
       - 'tests/**'
   push:
     branches: [main]
@@ -18,6 +19,7 @@ on:
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
       - 'scripts/startup-preflight.*'
+      - 'scripts/startup-workload-plan.*'
       - 'tests/**'
 
 permissions:
@@ -35,6 +37,9 @@ jobs:
 
       - name: Test read-only startup preflight
         run: node tests/startup-preflight.mjs
+
+      - name: Test read-only workload planner
+        run: node tests/startup-workload-plan.mjs
 
   validate-bicep:
     name: Validate Bicep

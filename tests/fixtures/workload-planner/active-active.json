@@ -1,0 +1,13 @@
+{
+  "name": "Active-active writes stop for architecture review",
+  "overrides": {
+    "architecture": {
+      "activeActiveMultiRegionWrites": true
+    }
+  },
+  "expected": {
+    "status": "architecture-review",
+    "computeProfile": null,
+    "profileExtensions": []
+  }
+}

@@ -137,6 +137,10 @@ decision.
 
 **Purpose:** select a startup-scale workload composition without deploying it.
 
+**Implementation status:** implemented by `scripts/startup-workload-plan.sh`, the versioned definitions under
+`agent/profiles/`, and the deterministic fixtures in `tests/fixtures/workload-planner/`. The output uses
+`agent/schemas/workload-profile-plan.schema.json` and explicitly generates no IaC.
+
 **Input:**
 
 - workload shape;
