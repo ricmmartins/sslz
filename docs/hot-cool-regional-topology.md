@@ -9,8 +9,8 @@ description: "Startup-scale regional capacity and recovery planning"
 
 ## Status
 
-This is a planning design. SSLZ remains single-region until deployable modules, validation, and recovery tests are
-implemented.
+The regional and capacity evaluator is implemented as a read-only planning command. SSLZ remains single-region until
+deployable modules, explicit approval, validation, and recovery tests are implemented.
 
 ## Purpose
 
@@ -73,7 +73,7 @@ but it does not replace per-service availability and recovery validation.
 
 | Mode | Secondary baseline | Application compute | Data | Traffic |
 |---|---|---|---|---|
-| `single-region-ready` | Parameter file and validated plan | Not deployed | Backup or service default | Primary only |
+| `single-region-ready` | Validated regional plan | Not deployed | Backup or service default | Primary only |
 | `cool-infrastructure` | Baseline deployed | Scale zero, minimum, or ready | Backup or replica | Manual |
 | `warm-workload` | Baseline deployed | Minimum healthy scale | Online replica | Manual or automatic |
 
@@ -196,10 +196,9 @@ The first implementation should:
 
 1. collect regional requirements and recovery targets;
 2. evaluate two regions;
-3. generate distinct regional parameter sets;
-4. validate service, model, SKU, quota, policy, and address-space compatibility;
-5. produce a sanitized Hot/Cool plan and cost assumptions;
-6. stop before deploying the secondary region.
+3. validate service, model, SKU, quota, capacity, policy, and address-space compatibility from supplied evidence;
+4. produce a sanitized Hot/Cool plan and cost assumptions;
+5. stop before generating IaC, parameter files, or deploying the secondary region.
 
 Deployment follows only after the plan and service-specific recovery approach are reviewed.
 

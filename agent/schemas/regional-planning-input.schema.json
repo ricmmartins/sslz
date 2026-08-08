@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/regional-planning-input.schema.json",
+  "title": "SSLZ regional planning input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "planningAt",
+    "maxEvidenceAgeHours",
+    "startupInput",
+    "workloadPlan",
+    "regionalRequirements",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "planningAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "maxEvidenceAgeHours": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "startupInput": {
+      "$ref": "startup-input.schema.json"
+    },
+    "workloadPlan": {
+      "$ref": "workload-profile-plan.schema.json"
+    },
+    "regionalRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primaryCandidates",
+        "secondaryCandidates",
+        "additionalRequiredServices",
+        "requireAvailabilityZones",
+        "computeSku",
+        "gpuSku",
+        "foundry",
+        "secondaryBaseline"
+      ],
+      "properties": {
+        "primaryCandidates": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/regionName"
+          }
+        },
+        "secondaryCandidates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/regionName"
+          }
+        },
+        "additionalRequiredServices": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "requireAvailabilityZones": {
+          "type": "boolean"
+        },
+        "computeSku": {
+          "type": ["string", "null"]
+        },
+        "gpuSku": {
+          "type": ["string", "null"]
+        },
+        "foundry": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["model", "deploymentType"],
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "deploymentType": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "secondaryBaseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["currency", "minimum", "maximum", "assumptions"],
+          "properties": {
+            "currency": {
+              "const": "USD"
+            },
+            "minimum": {
+              "type": "number",
+              "minimum": 0
+            },
+            "maximum": {
+              "type": "number",
+              "minimum": 0
+            },
+            "assumptions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regions"],
+      "properties": {
+        "regions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/regionEvidence"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "regionName": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "regionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "region",
+        "observedAt",
+        "allowedByPolicy",
+        "availableServices",
+        "availabilityZonesSupported",
+        "eligibleComputeSkus",
+        "eligibleGpuSkus",
+        "quota",
+        "capacity",
+        "residencyBoundaries",
+        "proposedVnetCidr",
+        "foundryDeployments",
+        "alternates",
+        "latencyRank",
+        "estimatedMonthlyCost"
+      ],
+      "properties": {
+        "region": {
+          "$ref": "#/$defs/regionName"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "allowedByPolicy": {
+          "type": ["boolean", "null"]
+        },
+        "availableServices": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "availabilityZonesSupported": {
+          "type": ["boolean", "null"]
+        },
+        "eligibleComputeSkus": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "eligibleGpuSkus": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "quota": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "available", "unit"],
+          "properties": {
+            "required": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "available": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "capacity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "observedAt"],
+          "properties": {
+            "status": {
+              "enum": ["available", "unavailable", "unknown"]
+            },
+            "observedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "residencyBoundaries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "proposedVnetCidr": {
+          "type": "string",
+          "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/(?:[0-9]|[12][0-9]|3[0-2])$"
+        },
+        "foundryDeployments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["model", "deploymentType", "available"],
+            "properties": {
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "deploymentType": {
+                "type": "string",
+                "minLength": 1
+              },
+              "available": {
+                "type": ["boolean", "null"]
+              }
+            }
+          }
+        },
+        "alternates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "value", "available"],
+            "properties": {
+              "type": {
+                "enum": ["compute-sku", "gpu-sku", "foundry-deployment"]
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "available": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "latencyRank": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "estimatedMonthlyCost": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

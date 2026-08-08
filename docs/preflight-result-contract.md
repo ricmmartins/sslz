@@ -14,6 +14,9 @@ The JSON schemas, check catalog, and sanitized examples are implemented under [`
 [`scripts/startup-workload-plan.sh`](../scripts/startup-workload-plan.sh) implements the local-only workload profile
 planner defined by
 [`workload-profile-plan.schema.json`](../agent/schemas/workload-profile-plan.schema.json).
+[`scripts/startup-regional-plan.sh`](../scripts/startup-regional-plan.sh) evaluates supplied, timestamped regional
+evidence against
+[`regional-capacity-plan.schema.json`](../agent/schemas/regional-capacity-plan.schema.json).
 The existing SSLZ prerequisite command remains unchanged.
 
 Validate the contract assets locally:
@@ -22,10 +25,15 @@ Validate the contract assets locally:
 node scripts/validate-agent-contracts.mjs
 node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
+node tests/startup-regional-plan.mjs
 ```
 
 The workload profile plan is intentionally separate from `deployment-plan.schema.json`: Phase 2 selects and explains
 a profile but does not generate IaC, preview artifacts, deployment services, or approval digests.
+
+The regional capacity plan is also separate from `deployment-plan.schema.json`. It ranks evidence-backed candidates,
+keeps quota and point-in-time capacity as distinct classifications, and reports `iacGenerated: false` and
+`azureOperations: "none"`. A capacity observation is not a reservation.
 
 ## Purpose
 

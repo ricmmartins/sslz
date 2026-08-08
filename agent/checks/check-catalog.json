@@ -79,6 +79,20 @@
       "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
     },
     {
+      "id": "region.policy.allowed-locations",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/governance/policy/concepts/effect-deny"
+    },
+    {
+      "id": "region.availability-zones.supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/availability-zones-overview"
+    },
+    {
       "id": "region.skus.eligible",
       "category": "region",
       "severity": "blocking",
@@ -86,11 +100,32 @@
       "documentationUrl": "https://learn.microsoft.com/azure/virtual-machines/sizes/overview"
     },
     {
+      "id": "capacity.workload.available",
+      "category": "capacity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-machines/allocation-failure"
+    },
+    {
       "id": "region.foundry-model.available",
       "category": "region",
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure"
+    },
+    {
+      "id": "region.data-residency.compatible",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "network.regional-address-space.non-overlapping",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq"
     },
     {
       "id": "security.defender.selection-reviewed",

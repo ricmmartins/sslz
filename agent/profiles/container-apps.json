@@ -9,6 +9,14 @@
     "security.defender.selection-reviewed",
     "operations.monitoring.destination-valid"
   ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.App/managedEnvironments"
+    ],
+    "computeSkuEvidence": false,
+    "gpuSkuEvidence": false,
+    "foundryDeploymentEvidence": false
+  },
   "costAssumptions": [
     "Container Apps consumption charges depend on requested CPU, memory, execution time, and replica minimums.",
     "Nonproduction can scale to zero unless startup latency requires a minimum replica."

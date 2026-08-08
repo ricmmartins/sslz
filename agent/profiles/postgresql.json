@@ -6,6 +6,14 @@
     "region.services.available",
     "quota.workload.headroom"
   ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.DBforPostgreSQL/flexibleServers"
+    ],
+    "computeSkuEvidence": false,
+    "gpuSkuEvidence": false,
+    "foundryDeploymentEvidence": false
+  },
   "costAssumptions": [
     "Nonproduction begins with Burstable compute when the workload supports it.",
     "Production begins with General Purpose compute; high availability is included only when the resilience requirement justifies it.",

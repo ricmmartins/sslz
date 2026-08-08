@@ -126,6 +126,9 @@ See [Startup Workload Profiles](workload-profiles.md) for the complete selection
 Region selection is workload-specific. A region pair alone does not guarantee that every required service, model,
 SKU, or availability-zone feature exists in both regions.
 
+The implemented `scripts/startup-regional-plan.sh` command evaluates supplied, timestamped evidence without calling
+Azure. It reports quota and point-in-time capacity separately and never treats observed capacity as reserved.
+
 For each candidate region, check:
 
 - subscription access to the region;
@@ -170,6 +173,9 @@ available there.
 
 See [Hot/Cool Regional Topology](hot-cool-regional-topology.md) for entry criteria, service-specific recovery, cost
 controls, and testing requirements.
+
+The first planner release marks only current `single-region-ready` output as executable readiness. A
+`cool-infrastructure` or `warm-workload` request remains review-only and generates no IaC or Azure operations.
 
 ## Phase 4: Plan and approval
 

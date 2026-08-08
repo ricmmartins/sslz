@@ -184,6 +184,11 @@ decision.
 
 **Purpose:** evaluate a primary and optional secondary region without claiming reserved capacity.
 
+**Implementation status:** implemented by `scripts/startup-regional-plan.sh`, the timestamped evidence contract in
+`agent/schemas/regional-planning-input.schema.json`, and the read-only result contract in
+`agent/schemas/regional-capacity-plan.schema.json`. The first release marks only current `single-region-ready` output
+as executable readiness. Cool and warm requests produce review-required planning output and no infrastructure.
+
 **Checks:**
 
 - allowed-location policies;

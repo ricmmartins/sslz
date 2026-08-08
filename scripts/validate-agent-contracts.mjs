@@ -195,7 +195,9 @@ function validateCatalog(catalog) {
     "identity",
     "billing",
     "quota",
+    "capacity",
     "region",
+    "network",
     "workload",
     "security",
     "operations",
@@ -241,6 +243,17 @@ function validateProfileDefinitions(profiles, catalog) {
     profileIds.add(profile.id);
     assert(Array.isArray(profile.requiredChecks) && profile.requiredChecks.length > 0);
     assert(Array.isArray(profile.costAssumptions) && profile.costAssumptions.length > 0);
+    assert(profile.regionalRequirements);
+    assert(Array.isArray(profile.regionalRequirements.services));
+    assert.equal(
+      typeof profile.regionalRequirements.computeSkuEvidence,
+      "boolean",
+    );
+    assert.equal(typeof profile.regionalRequirements.gpuSkuEvidence, "boolean");
+    assert.equal(
+      typeof profile.regionalRequirements.foundryDeploymentEvidence,
+      "boolean",
+    );
     for (const checkId of profile.requiredChecks) {
       assert(catalogIds.has(checkId), `Unknown check ID in ${profile.id}: ${checkId}`);
     }
@@ -277,9 +290,15 @@ function main() {
   const workloadProfilePlanSchema = load(
     "agent/schemas/workload-profile-plan.schema.json",
   );
+  const regionalPlanningInputSchema = load(
+    "agent/schemas/regional-planning-input.schema.json",
+  );
   const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
   const startupInput = load("agent/examples/startup-input.json");
   const workloadProfilePlan = load("agent/examples/workload-profile-plan.json");
+  const regionalPlanningInput = load(
+    "agent/examples/regional-planning-input.json",
+  );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
   const catalog = load("agent/checks/check-catalog.json");
@@ -293,6 +312,7 @@ function main() {
 
   validateDocument(startupInputSchema, startupInput);
   validateDocument(workloadProfilePlanSchema, workloadProfilePlan);
+  validateDocument(regionalPlanningInputSchema, regionalPlanningInput);
   validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
   validateDocument(preflightResultSchema, readyExample);
   validateDocument(preflightResultSchema, blockedExample);
@@ -303,6 +323,7 @@ function main() {
   validateSensitiveData([
     startupInput,
     workloadProfilePlan,
+    regionalPlanningInput,
     readyExample,
     blockedExample,
     profiles,

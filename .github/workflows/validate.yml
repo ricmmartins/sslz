@@ -10,6 +10,7 @@ on:
       - 'scripts/validate-agent-contracts.mjs'
       - 'scripts/startup-preflight.*'
       - 'scripts/startup-workload-plan.*'
+      - 'scripts/startup-regional-plan.*'
       - 'tests/**'
   push:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'scripts/validate-agent-contracts.mjs'
       - 'scripts/startup-preflight.*'
       - 'scripts/startup-workload-plan.*'
+      - 'scripts/startup-regional-plan.*'
       - 'tests/**'
 
 permissions:
@@ -40,6 +42,9 @@ jobs:
 
       - name: Test read-only workload planner
         run: node tests/startup-workload-plan.mjs
+
+      - name: Test read-only regional planner
+        run: node tests/startup-regional-plan.mjs
 
   validate-bicep:
     name: Validate Bicep
