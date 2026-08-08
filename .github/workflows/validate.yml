@@ -8,6 +8,8 @@ on:
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
+      - 'scripts/startup-preflight.*'
+      - 'tests/**'
   push:
     branches: [main]
     paths:
@@ -15,6 +17,8 @@ on:
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
+      - 'scripts/startup-preflight.*'
+      - 'tests/**'
 
 permissions:
   contents: read
@@ -29,6 +33,8 @@ jobs:
       - name: Validate schemas, catalog, and examples
         run: node scripts/validate-agent-contracts.mjs
 
+      - name: Test read-only startup preflight
+        run: node tests/startup-preflight.mjs
 
   validate-bicep:
     name: Validate Bicep

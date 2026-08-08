@@ -1,0 +1,6 @@
+{
+  "extends": "az-success.json",
+  "errors": {
+    "billing": "AuthorizationFailed: billing evidence is unavailable"
+  }
+}
