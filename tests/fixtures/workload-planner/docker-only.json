@@ -1,0 +1,16 @@
+{
+  "name": "Docker alone does not select AKS",
+  "overrides": {
+    "workload": {
+      "description": "A Docker-packaged web application.",
+      "traffic": ["http"],
+      "requiresRelationalDatabase": false,
+      "usesDocker": true
+    }
+  },
+  "expected": {
+    "status": "ready",
+    "computeProfile": "container-apps",
+    "profileExtensions": []
+  }
+}

@@ -9,7 +9,21 @@ description: "Opinionated workload choices for agent-assisted SSLZ planning"
 
 ## Status
 
-This document defines planning profiles. It does not add or change deployable examples.
+These profiles are implemented by the dependency-free, read-only workload planner. They do not add or change
+deployable examples.
+
+Run the planner with a local startup input:
+
+```bash
+./scripts/startup-workload-plan.sh plan \
+  --input agent/examples/startup-input.json \
+  --output json
+```
+
+The output conforms to
+[`agent/schemas/workload-profile-plan.schema.json`](../agent/schemas/workload-profile-plan.schema.json). It includes
+the profile version, selection rationale, assumptions, required checks, unresolved decisions, and cost assumptions.
+The command makes no Azure calls, writes no files, and always reports `iacGenerated: false`.
 
 ## Profile selection rules
 
@@ -48,6 +62,8 @@ The profiles assume:
 4. Prefer Foundry-managed models over customer-managed model serving.
 5. Keep the profile single-region unless the founder provides a recovery or capacity requirement.
 6. Stop and recommend further architecture review when the workload falls outside SSLZ boundaries.
+
+Docker packaging is input context only. It is never an AKS selection reason.
 
 ## Profile: Container Apps
 

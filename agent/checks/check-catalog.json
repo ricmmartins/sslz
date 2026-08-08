@@ -105,6 +105,27 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/fundamentals/monitor-azure-resource"
+    },
+    {
+      "id": "operations.aks-owner.confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/architecture/framework/services/compute/azure-kubernetes-service/operational-excellence"
+    },
+    {
+      "id": "workload.managed-model-fit.reviewed",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure"
+    },
+    {
+      "id": "workload.profile.requirements-supported",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/app-platform/aks/plan"
     }
   ]
 }

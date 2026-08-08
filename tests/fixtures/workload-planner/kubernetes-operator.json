@@ -1,0 +1,18 @@
+{
+  "name": "Kubernetes operator requirement selects AKS",
+  "overrides": {
+    "workload": {
+      "description": "An application that depends on a Kubernetes operator.",
+      "traffic": ["mixed"],
+      "requiresKubernetes": false,
+      "requiresRelationalDatabase": false,
+      "kubernetesRequirements": ["operator"],
+      "incidentOwnerConfirmed": true
+    }
+  },
+  "expected": {
+    "status": "ready",
+    "computeProfile": "aks",
+    "profileExtensions": []
+  }
+}

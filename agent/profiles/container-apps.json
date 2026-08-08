@@ -1,0 +1,16 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "container-apps",
+  "kind": "compute",
+  "requiredChecks": [
+    "account.provider.required-registrations",
+    "quota.workload.headroom",
+    "region.services.available",
+    "security.defender.selection-reviewed",
+    "operations.monitoring.destination-valid"
+  ],
+  "costAssumptions": [
+    "Container Apps consumption charges depend on requested CPU, memory, execution time, and replica minimums.",
+    "Nonproduction can scale to zero unless startup latency requires a minimum replica."
+  ]
+}

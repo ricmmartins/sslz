@@ -89,6 +89,26 @@
         },
         "incidentOwnerConfirmed": {
           "type": "boolean"
+        },
+        "usesDocker": {
+          "type": "boolean"
+        },
+        "kubernetesRequirements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "kubernetes-api",
+              "operator",
+              "specialized-networking",
+              "custom-scheduler",
+              "service-mesh",
+              "ecosystem-component"
+            ]
+          }
+        },
+        "managedModelFit": {
+          "enum": ["yes", "no", "unknown"]
         }
       }
     },
@@ -135,6 +155,58 @@
         "monthlyPlatformMaximum": {
           "type": "number",
           "minimum": 0
+        }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regulatedControlsBeyondBaseline",
+        "activeActiveMultiRegionWrites",
+        "independentProductionWorkloads",
+        "subscriptionCount",
+        "hybridConnectivity",
+        "centralizedEgressInspection",
+        "automaticFailoverWithoutDataStrategy",
+        "dedicatedPlatformTeamSharedServices",
+        "unsupportedRequirements"
+      ],
+      "properties": {
+        "regulatedControlsBeyondBaseline": {
+          "type": "boolean"
+        },
+        "activeActiveMultiRegionWrites": {
+          "type": "boolean"
+        },
+        "independentProductionWorkloads": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "subscriptionCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hybridConnectivity": {
+          "type": "boolean"
+        },
+        "centralizedEgressInspection": {
+          "type": "boolean"
+        },
+        "automaticFailoverWithoutDataStrategy": {
+          "type": "boolean"
+        },
+        "dedicatedPlatformTeamSharedServices": {
+          "type": "boolean"
+        },
+        "unsupportedRequirements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
         }
       }
     }

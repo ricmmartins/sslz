@@ -1,0 +1,16 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "gpu",
+  "kind": "extension",
+  "requiredChecks": [
+    "region.skus.eligible",
+    "quota.workload.headroom",
+    "workload.managed-model-fit.reviewed",
+    "operations.aks-owner.confirmed"
+  ],
+  "costAssumptions": [
+    "GPU node, managed disk, image registry, model storage, networking, and observability charges require regional sizing.",
+    "Spot pricing is considered only for interruption-tolerant workloads.",
+    "No GPU SKU eligibility, quota, capacity, or alternate region is assumed."
+  ]
+}
