@@ -1,0 +1,271 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+function load(relativePath) {
+  return JSON.parse(readFileSync(resolve(root, relativePath), "utf8"));
+}
+
+function fail(path, message) {
+  throw new Error(`${path}: ${message}`);
+}
+
+function validateType(value, expected, path) {
+  const allowed = Array.isArray(expected) ? expected : [expected];
+  let actual =
+    value === null ? "null" : Array.isArray(value) ? "array" : typeof value;
+
+  if (actual === "number" && Number.isInteger(value) && allowed.includes("integer")) {
+    actual = "integer";
+  }
+
+  if (!allowed.includes(actual)) {
+    fail(path, `expected ${allowed.join(" or ")}, got ${actual}`);
+  }
+}
+
+function validateFormat(value, format, path) {
+  if (format === "date-time" && Number.isNaN(Date.parse(value))) {
+    fail(path, `invalid date-time: ${value}`);
+  }
+
+  if (format === "uri") {
+    try {
+      new URL(value);
+    } catch {
+      fail(path, `invalid URI: ${value}`);
+    }
+  }
+}
+
+function validate(schema, value, path, schemaDirectory) {
+  if (schema.$ref) {
+    if (schema.$ref.startsWith("#/$defs/")) {
+      fail(path, "local references must be resolved by validateDocument");
+    }
+
+    const referenced = load(`agent/schemas/${schema.$ref}`);
+    validateDocument(referenced, value, path);
+    return;
+  }
+
+  if (schema.oneOf) {
+    const successes = schema.oneOf.filter((candidate) => {
+      try {
+        validate(candidate, value, path, schemaDirectory);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    if (successes.length !== 1) {
+      fail(path, `expected exactly one oneOf match, got ${successes.length}`);
+    }
+    return;
+  }
+
+  if (Object.hasOwn(schema, "const") && value !== schema.const) {
+    fail(path, `expected constant ${JSON.stringify(schema.const)}`);
+  }
+
+  if (schema.enum && !schema.enum.includes(value)) {
+    fail(path, `unsupported value ${JSON.stringify(value)}`);
+  }
+
+  if (schema.type) {
+    validateType(value, schema.type, path);
+  }
+
+  if (typeof value === "string") {
+    if (schema.minLength !== undefined && value.length < schema.minLength) {
+      fail(path, `minimum length is ${schema.minLength}`);
+    }
+    if (schema.maxLength !== undefined && value.length > schema.maxLength) {
+      fail(path, `maximum length is ${schema.maxLength}`);
+    }
+    if (schema.pattern && !new RegExp(schema.pattern).test(value)) {
+      fail(path, `does not match ${schema.pattern}`);
+    }
+    if (schema.format) {
+      validateFormat(value, schema.format, path);
+    }
+  }
+
+  if (typeof value === "number") {
+    if (schema.type === "integer" && !Number.isInteger(value)) {
+      fail(path, "expected integer");
+    }
+    if (schema.minimum !== undefined && value < schema.minimum) {
+      fail(path, `minimum value is ${schema.minimum}`);
+    }
+    if (schema.maximum !== undefined && value > schema.maximum) {
+      fail(path, `maximum value is ${schema.maximum}`);
+    }
+  }
+
+  if (Array.isArray(value)) {
+    if (schema.minItems !== undefined && value.length < schema.minItems) {
+      fail(path, `minimum item count is ${schema.minItems}`);
+    }
+    if (schema.uniqueItems) {
+      const serialized = value.map((item) => JSON.stringify(item));
+      if (new Set(serialized).size !== serialized.length) {
+        fail(path, "items must be unique");
+      }
+    }
+    if (schema.items) {
+      value.forEach((item, index) =>
+        validate(schema.items, item, `${path}[${index}]`, schemaDirectory),
+      );
+    }
+  }
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    for (const required of schema.required ?? []) {
+      if (!Object.hasOwn(value, required)) {
+        fail(path, `missing required property ${required}`);
+      }
+    }
+
+    if (schema.additionalProperties === false) {
+      for (const property of Object.keys(value)) {
+        if (!Object.hasOwn(schema.properties ?? {}, property)) {
+          fail(path, `unexpected property ${property}`);
+        }
+      }
+    }
+
+    for (const [property, propertyValue] of Object.entries(value)) {
+      const propertySchema = schema.properties?.[property];
+      if (propertySchema) {
+        validate(
+          propertySchema,
+          propertyValue,
+          `${path}.${property}`,
+          schemaDirectory,
+        );
+      }
+    }
+  }
+}
+
+function resolveLocalReferences(schema, node) {
+  if (Array.isArray(node)) {
+    return node.map((item) => resolveLocalReferences(schema, item));
+  }
+
+  if (!node || typeof node !== "object") {
+    return node;
+  }
+
+  if (node.$ref?.startsWith("#/$defs/")) {
+    const key = node.$ref.slice("#/$defs/".length);
+    assert(schema.$defs?.[key], `Missing local definition: ${key}`);
+    return resolveLocalReferences(schema, schema.$defs[key]);
+  }
+
+  return Object.fromEntries(
+    Object.entries(node).map(([key, value]) => [
+      key,
+      resolveLocalReferences(schema, value),
+    ]),
+  );
+}
+
+function validateDocument(schema, value, path = "$") {
+  const resolved = resolveLocalReferences(schema, schema);
+  validate(resolved, value, path, resolve(root, "agent/schemas"));
+}
+
+function validateCatalog(catalog) {
+  assert.equal(catalog.schemaVersion, "1.0.0");
+  assert(Array.isArray(catalog.checks) && catalog.checks.length > 0);
+
+  const ids = catalog.checks.map((check) => check.id);
+  assert.equal(new Set(ids).size, ids.length, "Check catalog IDs must be unique");
+
+  const categories = new Set([
+    "account",
+    "identity",
+    "billing",
+    "quota",
+    "region",
+    "workload",
+    "security",
+    "operations",
+  ]);
+  const severities = new Set(["blocking", "high", "medium", "low", "info"]);
+  const automation = new Set([
+    "readOnly",
+    "manual",
+    "support",
+    "approvedWrite",
+  ]);
+
+  for (const check of catalog.checks) {
+    assert.match(check.id, /^[a-z0-9]+([.-][a-z0-9]+)+$/);
+    assert(categories.has(check.category), `Invalid category for ${check.id}`);
+    assert(severities.has(check.severity), `Invalid severity for ${check.id}`);
+    assert(automation.has(check.automation), `Invalid automation for ${check.id}`);
+    assert(
+      check.documentationUrl.startsWith("https://learn.microsoft.com/"),
+      `Check ${check.id} must use official Microsoft Learn documentation`,
+    );
+  }
+}
+
+function validateExamplesAgainstCatalog(examples, catalog) {
+  const catalogIds = new Set(catalog.checks.map((check) => check.id));
+  for (const example of examples) {
+    for (const check of example.checks) {
+      assert(catalogIds.has(check.id), `Unknown check ID in example: ${check.id}`);
+    }
+  }
+}
+
+function validateSensitiveData(documents) {
+  const text = JSON.stringify(documents);
+  const forbidden = [
+    /"accessToken"/i,
+    /"refreshToken"/i,
+    /"clientSecret"/i,
+    /"connectionString"/i,
+    /-----BEGIN [A-Z ]+PRIVATE KEY-----/,
+    /@[a-z0-9.-]+\.[a-z]{2,}/i,
+  ];
+  for (const pattern of forbidden) {
+    assert(!pattern.test(text), `Sensitive-data pattern found: ${pattern}`);
+  }
+}
+
+export { validateDocument };
+
+function main() {
+  const startupInputSchema = load("agent/schemas/startup-input.schema.json");
+  const deploymentPlanSchema = load("agent/schemas/deployment-plan.schema.json");
+  const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
+  const startupInput = load("agent/examples/startup-input.json");
+  const readyExample = load("agent/examples/ready-container-apps.json");
+  const blockedExample = load("agent/examples/blocked-billing.json");
+  const catalog = load("agent/checks/check-catalog.json");
+
+  validateDocument(startupInputSchema, startupInput);
+  validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
+  validateDocument(preflightResultSchema, readyExample);
+  validateDocument(preflightResultSchema, blockedExample);
+  validateCatalog(catalog);
+  validateExamplesAgainstCatalog([readyExample, blockedExample], catalog);
+  validateSensitiveData([startupInput, readyExample, blockedExample]);
+
+  console.log("Agent contracts are valid.");
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}

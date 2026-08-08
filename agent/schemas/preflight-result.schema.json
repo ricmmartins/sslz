@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/preflight-result.schema.json",
+  "title": "SSLZ preflight result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "generatedAt",
+    "mode",
+    "overallStatus",
+    "target",
+    "checks",
+    "actions",
+    "deploymentPlan",
+    "approval",
+    "summary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": ["inspect", "plan", "apply"]
+    },
+    "overallStatus": {
+      "enum": ["pass", "warning", "blocked", "error"]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantId",
+        "prodSubscriptionId",
+        "nonprodSubscriptionId",
+        "primaryRegion",
+        "secondaryRegion"
+      ],
+      "properties": {
+        "tenantId": {
+          "type": ["string", "null"]
+        },
+        "prodSubscriptionId": {
+          "type": ["string", "null"]
+        },
+        "nonprodSubscriptionId": {
+          "type": ["string", "null"]
+        },
+        "primaryRegion": {
+          "type": ["string", "null"]
+        },
+        "secondaryRegion": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "deploymentPlan": {
+      "oneOf": [
+        {
+          "$ref": "deployment-plan.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "approval": {
+      "$ref": "#/$defs/approval"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "status",
+        "severity",
+        "summary",
+        "evidence",
+        "remediationActionIds",
+        "documentationUrl"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+        },
+        "category": {
+          "enum": [
+            "account",
+            "identity",
+            "billing",
+            "quota",
+            "region",
+            "workload",
+            "security",
+            "operations"
+          ]
+        },
+        "status": {
+          "enum": ["pass", "warning", "fail", "unknown", "skipped", "error"]
+        },
+        "severity": {
+          "enum": ["blocking", "high", "medium", "low", "info"]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "object"
+        },
+        "remediationActionIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "documentationUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://learn\\.microsoft\\.com/"
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["class", "code", "message"],
+          "properties": {
+            "class": {
+              "enum": [
+                "configuration",
+                "permission",
+                "billing",
+                "entitlement",
+                "quota",
+                "capacity",
+                "availability",
+                "policy",
+                "transient"
+              ]
+            },
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "status",
+        "summary",
+        "automatic",
+        "approvalRequired",
+        "risk",
+        "scope",
+        "commandPreview",
+        "documentationUrl"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+        },
+        "type": {
+          "enum": ["azureWrite", "manual", "support", "information"]
+        },
+        "status": {
+          "enum": [
+            "proposed",
+            "approved",
+            "running",
+            "succeeded",
+            "failed",
+            "declined",
+            "notApplicable"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "automatic": {
+          "type": "boolean"
+        },
+        "approvalRequired": {
+          "type": "boolean"
+        },
+        "risk": {
+          "enum": ["low", "medium", "high"]
+        },
+        "scope": {
+          "type": ["string", "null"]
+        },
+        "commandPreview": {
+          "type": ["string", "null"]
+        },
+        "documentationUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://learn\\.microsoft\\.com/"
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "status",
+        "planId",
+        "planDigest",
+        "approvedAt",
+        "expiresAt"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["pending", "approved", "declined", "expired", "notApplicable"]
+        },
+        "planId": {
+          "type": ["string", "null"]
+        },
+        "planDigest": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "approvedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks", "actions"],
+      "properties": {
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pass", "warning", "fail", "unknown", "skipped", "error"],
+          "properties": {
+            "pass": {"type": "integer", "minimum": 0},
+            "warning": {"type": "integer", "minimum": 0},
+            "fail": {"type": "integer", "minimum": 0},
+            "unknown": {"type": "integer", "minimum": 0},
+            "skipped": {"type": "integer", "minimum": 0},
+            "error": {"type": "integer", "minimum": 0}
+          }
+        },
+        "actions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["azureWrite", "manual", "support", "information"],
+          "properties": {
+            "azureWrite": {"type": "integer", "minimum": 0},
+            "manual": {"type": "integer", "minimum": 0},
+            "support": {"type": "integer", "minimum": 0},
+            "information": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    }
+  }
+}
