@@ -1,0 +1,20 @@
+{
+  "name": "Sufficient quota and unavailable capacity remain separate classifications",
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": []
+  },
+  "regionEvidenceOverrides": {
+    "eastus2": {
+      "capacity": {
+        "status": "unavailable"
+      }
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "primaryDisposition": "rejected",
+    "quotaClassification": "pass",
+    "capacityClassification": "fail"
+  }
+}

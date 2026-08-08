@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/regional-capacity-plan.schema.json",
+  "title": "SSLZ regional and capacity plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "profileVersion",
+    "status",
+    "requestedRegionalMode",
+    "executableRegionalMode",
+    "reviewOnly",
+    "recoveryTargets",
+    "requiredChecks",
+    "rankedCandidates",
+    "selectedPrimary",
+    "secondaryCandidates",
+    "secondaryRecommendation",
+    "evidence",
+    "costAssumptions",
+    "requiredActions",
+    "unresolvedDecisions",
+    "iacGenerated",
+    "azureOperations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "plannerVersion": {
+      "const": "1.0.0"
+    },
+    "profileVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "enum": ["ready", "blocked", "review-required"]
+    },
+    "requestedRegionalMode": {
+      "enum": ["single-region-ready", "cool-infrastructure", "warm-workload"]
+    },
+    "executableRegionalMode": {
+      "enum": ["single-region-ready", null]
+    },
+    "reviewOnly": {
+      "type": "boolean"
+    },
+    "recoveryTargets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rtoMinutes", "rpoMinutes"],
+      "properties": {
+        "rtoMinutes": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "rpoMinutes": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    },
+    "requiredChecks": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+      }
+    },
+    "rankedCandidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "selectedPrimary": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/candidate"
+        }
+      ]
+    },
+    "secondaryCandidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "secondaryRecommendation": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/candidate"
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planningAt",
+        "maxEvidenceAgeHours",
+        "primaryPointInTimeCapacityAt",
+        "overallFreshness"
+      ],
+      "properties": {
+        "planningAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "maxEvidenceAgeHours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "primaryPointInTimeCapacityAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "overallFreshness": {
+          "enum": ["current", "stale", "unresolved"]
+        }
+      }
+    },
+    "costAssumptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "selectedPrimaryEstimate", "secondaryBaseline"],
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "selectedPrimaryEstimate": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "secondaryBaseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum", "maximum", "assumptions"],
+          "properties": {
+            "minimum": {
+              "type": "number",
+              "minimum": 0
+            },
+            "maximum": {
+              "type": "number",
+              "minimum": 0
+            },
+            "assumptions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "requiredActions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "unresolvedDecisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision"
+      }
+    },
+    "iacGenerated": {
+      "const": false
+    },
+    "azureOperations": {
+      "const": "none"
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "freshness",
+        "evidenceTimestamp",
+        "summary"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+        },
+        "classification": {
+          "enum": ["pass", "fail", "unresolved", "not-required"]
+        },
+        "freshness": {
+          "enum": ["current", "stale", "unresolved", "not-applicable"]
+        },
+        "evidenceTimestamp": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "alternate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "enum": ["compute-sku", "gpu-sku", "foundry-deployment"]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "region",
+        "rank",
+        "role",
+        "disposition",
+        "score",
+        "checks",
+        "alternateOptions",
+        "proposedVnetCidr",
+        "estimatedMonthlyCost"
+      ],
+      "properties": {
+        "region": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "role": {
+          "enum": ["primary", "secondary"]
+        },
+        "disposition": {
+          "enum": ["eligible", "rejected", "unresolved"]
+        },
+        "score": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "failures",
+            "unresolved",
+            "stale",
+            "preferenceRank",
+            "latencyRank"
+          ],
+          "properties": {
+            "failures": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unresolved": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stale": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "preferenceRank": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "latencyRank": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        },
+        "alternateOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/alternate"
+          }
+        },
+        "proposedVnetCidr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "estimatedMonthlyCost": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "region", "summary"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+        },
+        "type": {
+          "enum": ["manual", "support", "information"]
+        },
+        "region": {
+          "type": ["string", "null"]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "question", "reason"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+        },
+        "severity": {
+          "enum": ["blocking", "advisory"]
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

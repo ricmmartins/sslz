@@ -25,6 +25,10 @@ The output conforms to
 the profile version, selection rationale, assumptions, required checks, unresolved decisions, and cost assumptions.
 The command makes no Azure calls, writes no files, and always reports `iacGenerated: false`.
 
+A ready workload profile can be passed with timestamped evidence to the
+[regional and capacity planner](preflight-result-contract.md). That planner consumes the versioned profile selection;
+it does not change the selected compute profile or extensions.
+
 ## Profile selection rules
 
 The agent asks only questions that change architecture, cost, or operational ownership. It selects the simplest

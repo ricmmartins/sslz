@@ -1,0 +1,17 @@
+{
+  "name": "Allowed-location policy rejection blocks a region",
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": []
+  },
+  "regionEvidenceOverrides": {
+    "eastus2": {
+      "allowedByPolicy": false
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "primaryDisposition": "rejected",
+    "failedCheck": "region.policy.allowed-locations"
+  }
+}

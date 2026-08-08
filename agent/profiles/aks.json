@@ -11,6 +11,14 @@
     "security.defender.selection-reviewed",
     "operations.monitoring.destination-valid"
   ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.ContainerService/managedClusters"
+    ],
+    "computeSkuEvidence": true,
+    "gpuSkuEvidence": false,
+    "foundryDeploymentEvidence": false
+  },
   "costAssumptions": [
     "Production uses the AKS Standard tier and uptime SLA.",
     "The baseline includes one system node pool and one user node pool.",

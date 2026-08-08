@@ -1,0 +1,26 @@
+{
+  "name": "Overlapping secondary VNet blocks Hot/Cool planning",
+  "startupOverrides": {
+    "reliability": {
+      "regionalMode": "cool-infrastructure",
+      "rtoMinutes": 240,
+      "rpoMinutes": 60,
+      "failoverOwnerConfirmed": true
+    }
+  },
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": ["centralus"]
+  },
+  "regionEvidenceOverrides": {
+    "centralus": {
+      "proposedVnetCidr": "10.20.128.0/17"
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "selectedPrimary": "eastus2",
+    "secondaryDisposition": "rejected",
+    "secondaryFailedCheck": "network.regional-address-space.non-overlapping"
+  }
+}

@@ -8,6 +8,14 @@
     "workload.managed-model-fit.reviewed",
     "operations.aks-owner.confirmed"
   ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.Compute/virtualMachines"
+    ],
+    "computeSkuEvidence": true,
+    "gpuSkuEvidence": true,
+    "foundryDeploymentEvidence": false
+  },
   "costAssumptions": [
     "GPU node, managed disk, image registry, model storage, networking, and observability charges require regional sizing.",
     "Spot pricing is considered only for interruption-tolerant workloads.",
