@@ -202,6 +202,10 @@ The first implementation should:
 
 Deployment follows only after the plan and service-specific recovery approach are reviewed.
 
+The separate [IaC plan generation](iac-plan-generation.md) phase can turn a reviewed recommendation into distinct
+primary and secondary local parameter representations. It does not change this evaluator's read-only behavior and
+does not deploy either region.
+
 ## Official guidance
 
 - [Azure reliability guidance](https://learn.microsoft.com/azure/reliability/)

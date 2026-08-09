@@ -6,8 +6,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { validateDocument } from "./validate-agent-contracts.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SCHEMA_VERSION = "1.0.0";
-const PLANNER_VERSION = "1.0.0";
+const SCHEMA_VERSION = "1.1.0";
+const PLANNER_VERSION = "1.1.0";
 const PROFILE_ORDER = [
   "container-apps",
   "aks",
@@ -750,6 +750,10 @@ function planRegions(input) {
     schemaVersion: SCHEMA_VERSION,
     plannerVersion: PLANNER_VERSION,
     profileVersion: input.workloadPlan.profileVersion,
+    workloadSelection: {
+      computeProfile: input.workloadPlan.computeProfile,
+      profileExtensions: [...input.workloadPlan.profileExtensions],
+    },
     status,
     requestedRegionalMode,
     executableRegionalMode: status === "ready" ? "single-region-ready" : null,

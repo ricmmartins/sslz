@@ -165,6 +165,10 @@ for (const fixtureFile of fixtureFiles) {
   validateDocument(planSchema, first);
   assertExpected(first, fixture.expected, fixture.name);
   assert.equal(first.profileVersion, input.workloadPlan.profileVersion);
+  assert.deepEqual(first.workloadSelection, {
+    computeProfile: input.workloadPlan.computeProfile,
+    profileExtensions: input.workloadPlan.profileExtensions,
+  });
   assert.equal(first.iacGenerated, false);
   assert.equal(first.azureOperations, "none");
   assert.equal(first.executableRegionalMode, first.status === "ready" ? "single-region-ready" : null);

@@ -11,10 +11,12 @@ on:
     branches: [main]
     paths:
       - 'infra/terraform/**'
+      - '!infra/terraform/.terraform.lock.hcl'
   pull_request:
     branches: [main]
     paths:
       - 'infra/terraform/**'
+      - '!infra/terraform/.terraform.lock.hcl'
   workflow_dispatch:
     inputs:
       environment:
