@@ -2,6 +2,9 @@
   "profileVersion": "1.0.0",
   "id": "aks",
   "kind": "compute",
+  "providerNamespaces": [
+    "Microsoft.ContainerService"
+  ],
   "requiredChecks": [
     "account.provider.required-registrations",
     "quota.workload.headroom",

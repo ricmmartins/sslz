@@ -19,6 +19,8 @@ evidence against
 [`regional-capacity-plan.schema.json`](../agent/schemas/regional-capacity-plan.schema.json).
 [`scripts/startup-iac-plan.sh`](../scripts/startup-iac-plan.sh) converts ready profile and regional decisions into
 ignored local Bicep or Terraform review inputs and a digest-bound sanitized summary.
+[`scripts/startup-provider-remediation.sh`](../scripts/startup-provider-remediation.sh) can apply exactly one unchanged,
+profile-allowlisted provider-registration action with a separate unexpired, single-use approval artifact.
 The existing SSLZ prerequisite command remains unchanged.
 
 Validate the contract assets locally:
@@ -29,6 +31,7 @@ node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-iac-plan.mjs
+node tests/startup-provider-remediation.mjs
 ```
 
 The workload profile plan is intentionally separate from `deployment-plan.schema.json`: Phase 2 selects and explains
@@ -220,6 +223,12 @@ actions. Recalculate the plan and request approval again if any of those values 
 
 The result must not store personal approval identity unless the surrounding platform has an approved audit system.
 The agent should rely on that platform for authentication and audit records.
+
+Provider-remediation approval uses the separate
+[`provider-remediation-approval.schema.json`](../agent/schemas/provider-remediation-approval.schema.json) contract. It
+requires non-null approval and expiry timestamps, limits the validity window to 24 hours, binds every action and plan
+field, and is consumed in ignored local state before Azure execution. The result contains no personal approval
+identity.
 
 ## Overall status rules
 

@@ -2,6 +2,9 @@
   "profileVersion": "1.0.0",
   "id": "foundry",
   "kind": "extension",
+  "providerNamespaces": [
+    "Microsoft.CognitiveServices"
+  ],
   "requiredChecks": [
     "region.foundry-model.available",
     "quota.workload.headroom",

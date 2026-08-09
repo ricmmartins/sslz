@@ -195,7 +195,17 @@ Before deployment, present:
 Approval applies to a specific plan. Any change to subscription, region, paid plan, privileged role, or resource
 scope invalidates the approval and requires a new plan.
 
-## Phase 5: Deployment and validation
+## Phase 5: Approved provider remediation
+
+The implemented first write-capable command is limited to one resource-provider registration already present in the
+reviewed plan. The provider namespace must be required by the selected workload profile. Apply requires a separate,
+unexpired, single-use approval artifact bound to the plan digest and every action field, rechecks the exact tenant and
+subscription, runs one argument-array Azure CLI command, and verifies `Registered`. It performs no deployment,
+feature registration, policy, role, billing, entitlement, subscription, or domain change.
+
+See [Approved Provider Remediation](provider-remediation.md).
+
+## Phase 6: Deployment and validation
 
 The agent uses the existing SSLZ Bicep or Terraform path. It must:
 

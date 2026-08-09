@@ -2,6 +2,9 @@
   "profileVersion": "1.0.0",
   "id": "container-apps",
   "kind": "compute",
+  "providerNamespaces": [
+    "Microsoft.App"
+  ],
   "requiredChecks": [
     "account.provider.required-registrations",
     "quota.workload.headroom",

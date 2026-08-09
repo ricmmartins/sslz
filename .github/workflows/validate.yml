@@ -12,6 +12,7 @@ on:
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
+      - 'scripts/startup-provider-remediation.*'
       - 'tests/**'
   push:
     branches: [main]
@@ -24,6 +25,7 @@ on:
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
+      - 'scripts/startup-provider-remediation.*'
       - 'tests/**'
 
 permissions:
@@ -50,6 +52,9 @@ jobs:
 
       - name: Test local IaC plan generation
         run: node tests/startup-iac-plan.mjs
+
+      - name: Test approved provider remediation
+        run: node tests/startup-provider-remediation.mjs
 
   validate-bicep:
     name: Validate Bicep

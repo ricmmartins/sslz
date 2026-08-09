@@ -21,6 +21,8 @@ const requiredProviders = [
   "Microsoft.Resources",
 ];
 const sufficientRoles = new Set(["Owner", "Contributor"]);
+const uuidPattern =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const sensitivePattern =
   /(access|refresh)[_-]?token|client[_-]?secret|connection[_-]?string|authorization:\s*bearer|-----BEGIN [A-Z ]+PRIVATE KEY-----/gi;
 const emailPattern = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
@@ -61,6 +63,14 @@ function parseArguments(argv) {
   if (!options.prodSubscriptionId || !options.nonprodSubscriptionId) {
     usage("Both subscription IDs are required.");
   }
+  if (
+    !uuidPattern.test(options.prodSubscriptionId) ||
+    !uuidPattern.test(options.nonprodSubscriptionId)
+  ) {
+    usage("Subscription IDs must be canonical UUIDs.");
+  }
+  options.prodSubscriptionId = options.prodSubscriptionId.toLowerCase();
+  options.nonprodSubscriptionId = options.nonprodSubscriptionId.toLowerCase();
   if (!["json", "text"].includes(options.output)) {
     usage("--output must be json or text.");
   }
@@ -492,6 +502,15 @@ function evaluate(options) {
       provider.environment === "prod"
         ? options.prodSubscriptionId
         : options.nonprodSubscriptionId;
+    const commandArguments = [
+      "az",
+      "provider",
+      "register",
+      "--subscription",
+      subscriptionId,
+      "--namespace",
+      provider.namespace,
+    ];
     actions.push(
       makeAction(
         providerActionIds[index],
@@ -503,7 +522,7 @@ function evaluate(options) {
           approvalRequired: true,
           risk: "low",
           scope: `/subscriptions/${subscriptionId}`,
-          commandPreview: `az provider register --subscription ${subscriptionId} --namespace ${provider.namespace}`,
+          commandPreview: commandArguments.join(" "),
         },
       ),
     );

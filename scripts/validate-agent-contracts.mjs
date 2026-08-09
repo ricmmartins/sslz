@@ -241,6 +241,13 @@ function validateProfileDefinitions(profiles, catalog) {
     assert(["compute", "extension"].includes(profile.kind));
     assert(!profileIds.has(profile.id), `Duplicate profile ID: ${profile.id}`);
     profileIds.add(profile.id);
+    assert(
+      Array.isArray(profile.providerNamespaces) &&
+        profile.providerNamespaces.length > 0,
+    );
+    for (const namespace of profile.providerNamespaces) {
+      assert.match(namespace, /^Microsoft\.[A-Za-z0-9]+$/);
+    }
     assert(Array.isArray(profile.requiredChecks) && profile.requiredChecks.length > 0);
     assert(Array.isArray(profile.costAssumptions) && profile.costAssumptions.length > 0);
     assert(profile.regionalRequirements);
@@ -295,6 +302,12 @@ function main() {
   );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanSummarySchema = load("agent/schemas/iac-plan-summary.schema.json");
+  const providerRemediationApprovalSchema = load(
+    "agent/schemas/provider-remediation-approval.schema.json",
+  );
+  const providerRemediationResultSchema = load(
+    "agent/schemas/provider-remediation-result.schema.json",
+  );
   const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
   const startupInput = load("agent/examples/startup-input.json");
   const workloadProfilePlan = load("agent/examples/workload-profile-plan.json");
@@ -303,6 +316,12 @@ function main() {
   );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
+  const providerRegistrationApproval = load(
+    "agent/examples/provider-registration-approval.json",
+  );
+  const providerRegistrationDryRun = load(
+    "agent/examples/provider-registration-dry-run.json",
+  );
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
     load("agent/profiles/container-apps.json"),
@@ -326,6 +345,11 @@ function main() {
   validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
   validateDocument(preflightResultSchema, readyExample);
   validateDocument(preflightResultSchema, blockedExample);
+  validateDocument(
+    providerRemediationApprovalSchema,
+    providerRegistrationApproval,
+  );
+  validateDocument(providerRemediationResultSchema, providerRegistrationDryRun);
   validateCatalog(catalog);
   validateProfileDefinitions(profiles, catalog);
   validateWorkloadProfilePlan(workloadProfilePlan, catalog);
@@ -336,6 +360,8 @@ function main() {
     regionalPlanningInput,
     readyExample,
     blockedExample,
+    providerRegistrationApproval,
+    providerRegistrationDryRun,
     profiles,
   ]);
 

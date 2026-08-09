@@ -261,11 +261,14 @@ as executable readiness. Cool and warm requests produce review-required planning
 
 ## Phase 5: Approved remediation
 
+**Status:** Implemented as a standalone, approval-bound provider-registration command. It is not integrated with
+deployment.
+
 **Purpose:** automate low-risk prerequisites without broad write authority.
 
 **Initial allowlist:**
 
-- register an explicitly listed resource provider;
+- register one resource provider explicitly listed by the selected workload profiles;
 - create no roles, subscriptions, domains, billing links, or entitlements.
 
 **Guardrails:**
@@ -276,6 +279,9 @@ as executable readiness. Cool and warm requests produce review-required planning
 - the agent shows the exact command before execution;
 - post-action read verifies the intended state;
 - partial failure produces a new plan instead of continuing blindly.
+- replay and concurrent use are blocked by constrained, ignored local state;
+- every Azure CLI operation uses an argument array and an explicit subscription;
+- dry run performs no Azure calls or local writes.
 
 **Acceptance:**
 

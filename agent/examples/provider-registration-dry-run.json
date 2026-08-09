@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "executorVersion": "1.0.0",
+  "generatedBy": "startup-provider-remediation.mjs",
+  "generatedAt": "2026-08-09T12:00:00Z",
+  "mode": "dry-run",
+  "status": "planned",
+  "code": "remediation.dry-run.ready",
+  "message": "Dry run completed with zero Azure writes; explicit apply requires a matching approval artifact.",
+  "plan": {
+    "version": "1.0.0",
+    "id": "plan-ready-example",
+    "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "action": {
+    "id": "provider.register.prod.microsoft-app",
+    "type": "azureWrite",
+    "operation": "provider.register",
+    "namespace": "Microsoft.App",
+    "subscriptionId": "22222222-2222-2222-2222-222222222222",
+    "scope": "/subscriptions/22222222-2222-2222-2222-222222222222"
+  },
+  "approval": {
+    "provided": false,
+    "status": "notProvided",
+    "consumed": false,
+    "expiresAt": null,
+    "artifactDigest": null
+  },
+  "command": {
+    "executable": "az",
+    "arguments": [
+      "provider",
+      "register",
+      "--subscription",
+      "22222222-2222-2222-2222-222222222222",
+      "--namespace",
+      "Microsoft.App",
+      "--wait",
+      "--output",
+      "none"
+    ],
+    "preview": "az provider register --subscription 22222222-2222-2222-2222-222222222222 --namespace Microsoft.App --wait --output none",
+    "executed": false
+  },
+  "verification": {
+    "performed": false,
+    "registrationState": null
+  },
+  "safety": {
+    "azureWrites": 0,
+    "localState": "none",
+    "rawOutputRetained": false,
+    "personalApprovalIdentityRetained": false
+  }
+}

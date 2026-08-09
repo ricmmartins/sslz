@@ -2,6 +2,9 @@
   "profileVersion": "1.0.0",
   "id": "postgresql",
   "kind": "extension",
+  "providerNamespaces": [
+    "Microsoft.DBforPostgreSQL"
+  ],
   "requiredChecks": [
     "region.services.available",
     "quota.workload.headroom"

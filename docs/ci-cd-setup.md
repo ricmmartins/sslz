@@ -301,10 +301,14 @@ az role assignment list --assignee "$APP_ID" --all --query "[].{role:roleDefinit
 
 ### "Resource provider not registered"
 
-Some providers need to be registered before use. Run `./scripts/validate-prerequisites.sh` to check, or register manually:
+Some providers need to be registered before use. Run `./scripts/validate-prerequisites.sh` to check. A provider
+required by the selected startup workload profile can be registered only through a reviewed Phase 4 action and
+separate approval:
 
 ```bash
-az provider register --namespace Microsoft.Insights
-az provider register --namespace Microsoft.Security
-az provider register --namespace Microsoft.PolicyInsights
+./scripts/startup-provider-remediation.sh dry-run \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --action provider.register.prod.microsoft-app
 ```
+
+See [Approved Provider Remediation](provider-remediation.md). Other providers remain manual prerequisites.

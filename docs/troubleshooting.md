@@ -88,13 +88,15 @@ description: "Common deployment errors and fixes"
 
 **Fix:**
 ```bash
-az provider register --namespace Microsoft.Insights
-az provider register --namespace Microsoft.Security
-az provider register --namespace Microsoft.PolicyInsights
-az provider register --namespace Microsoft.App
+./scripts/startup-provider-remediation.sh dry-run \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --action provider.register.prod.microsoft-app
 ```
 
-Or run `scripts/validate-prerequisites.sh` to check all required providers.
+After review, use `apply` with the separate approval artifact as documented in
+[Approved Provider Remediation](provider-remediation.md). The command only accepts namespaces required by the selected
+workload profiles. Run `scripts/validate-prerequisites.sh` to check other baseline providers and remediate them
+manually.
 
 ### Subscription Tenant Mismatch
 
