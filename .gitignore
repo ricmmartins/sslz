@@ -21,6 +21,10 @@ override.tf.json
 # Bicep
 *.local.bicepparam
 
+# Startup agent generated plans and local parameters
+.sslz/generated/
+*.auto.tfvars.json
+
 # OS
 .DS_Store
 Thumbs.db

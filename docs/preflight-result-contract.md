@@ -17,6 +17,8 @@ planner defined by
 [`scripts/startup-regional-plan.sh`](../scripts/startup-regional-plan.sh) evaluates supplied, timestamped regional
 evidence against
 [`regional-capacity-plan.schema.json`](../agent/schemas/regional-capacity-plan.schema.json).
+[`scripts/startup-iac-plan.sh`](../scripts/startup-iac-plan.sh) converts ready profile and regional decisions into
+ignored local Bicep or Terraform review inputs and a digest-bound sanitized summary.
 The existing SSLZ prerequisite command remains unchanged.
 
 Validate the contract assets locally:
@@ -26,6 +28,7 @@ node scripts/validate-agent-contracts.mjs
 node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
+node tests/startup-iac-plan.mjs
 ```
 
 The workload profile plan is intentionally separate from `deployment-plan.schema.json`: Phase 2 selects and explains
@@ -34,6 +37,14 @@ a profile but does not generate IaC, preview artifacts, deployment services, or 
 The regional capacity plan is also separate from `deployment-plan.schema.json`. It ranks evidence-backed candidates,
 keeps quota and point-in-time capacity as distinct classifications, and reports `iacGenerated: false` and
 `azureOperations: "none"`. A capacity observation is not a reservation.
+
+Phase 4 uses
+[`iac-plan-input.schema.json`](../agent/schemas/iac-plan-input.schema.json) and
+[`iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json). Its canonical decision model binds
+the tenant, subscriptions, profile and extensions, regions and regional mode, services, paid plans, cost assumptions,
+proposed actions, and Terraform backend to one SHA-256 digest. Object key order does not affect the digest. A supplied
+approval remains approved only when both its plan ID and digest match; otherwise the summary explicitly requires
+reapproval.
 
 ## Purpose
 

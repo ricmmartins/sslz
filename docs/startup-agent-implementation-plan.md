@@ -230,6 +230,8 @@ as executable readiness. Cool and warm requests produce review-required planning
 
 ## Phase 4: IaC plan generation
 
+**Status:** Implemented as an additive, local-only generator and optional read-only preview command.
+
 **Purpose:** convert an approved profile into reviewable inputs for existing SSLZ deployment paths.
 
 **Changes:**

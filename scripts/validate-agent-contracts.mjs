@@ -293,6 +293,8 @@ function main() {
   const regionalPlanningInputSchema = load(
     "agent/schemas/regional-planning-input.schema.json",
   );
+  const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
+  const iacPlanSummarySchema = load("agent/schemas/iac-plan-summary.schema.json");
   const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
   const startupInput = load("agent/examples/startup-input.json");
   const workloadProfilePlan = load("agent/examples/workload-profile-plan.json");
@@ -313,6 +315,14 @@ function main() {
   validateDocument(startupInputSchema, startupInput);
   validateDocument(workloadProfilePlanSchema, workloadProfilePlan);
   validateDocument(regionalPlanningInputSchema, regionalPlanningInput);
+  assert.equal(
+    iacPlanInputSchema.$id,
+    "https://aka.ms/sslz/schemas/iac-plan-input.schema.json",
+  );
+  assert.equal(
+    iacPlanSummarySchema.$id,
+    "https://aka.ms/sslz/schemas/iac-plan-summary.schema.json",
+  );
   validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
   validateDocument(preflightResultSchema, readyExample);
   validateDocument(preflightResultSchema, blockedExample);

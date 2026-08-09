@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/iac-plan-input.schema.json",
+  "title": "SSLZ IaC plan input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "planId",
+    "target",
+    "workloadPlan",
+    "regionalPlan",
+    "deployment",
+    "approval"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tenantId", "environments"],
+      "properties": {
+        "tenantId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "environments": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "subscriptionId"],
+            "properties": {
+              "name": {
+                "enum": ["prod", "nonprod"]
+              },
+              "subscriptionId": {
+                "$ref": "#/$defs/uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "workloadPlan": {
+      "$ref": "workload-profile-plan.schema.json"
+    },
+    "regionalPlan": {
+      "$ref": "regional-capacity-plan.schema.json"
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "companyName",
+        "budgetStartDate",
+        "monthlyBudgetAmounts",
+        "deployNetworking",
+        "logRetentionInDays",
+        "logDailyQuotaGb",
+        "paidPlans",
+        "services",
+        "proposedActions",
+        "terraformBackend"
+      ],
+      "properties": {
+        "companyName": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]{1,9}$"
+        },
+        "budgetStartDate": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-01T00:00:00Z$"
+        },
+        "monthlyBudgetAmounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prod", "nonprod"],
+          "properties": {
+            "prod": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "nonprod": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "deployNetworking": {
+          "type": "boolean"
+        },
+        "logRetentionInDays": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 730
+        },
+        "logDailyQuotaGb": {
+          "type": "integer"
+        },
+        "paidPlans": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "defenderForServers",
+            "defenderForContainers",
+            "defenderForDatabases",
+            "defenderForKeyVault",
+            "defenderForResourceManager",
+            "defenderForStorage"
+          ],
+          "properties": {
+            "defenderForServers": {
+              "type": "boolean"
+            },
+            "defenderForContainers": {
+              "type": "boolean"
+            },
+            "defenderForDatabases": {
+              "type": "boolean"
+            },
+            "defenderForKeyVault": {
+              "type": "boolean"
+            },
+            "defenderForResourceManager": {
+              "const": true
+            },
+            "defenderForStorage": {
+              "const": true
+            }
+          }
+        },
+        "services": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "purpose"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "proposedActions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        },
+        "terraformBackend": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "resourceGroupName",
+            "storageAccountName",
+            "containerName",
+            "keyPrefix"
+          ],
+          "properties": {
+            "type": {
+              "const": "azurerm"
+            },
+            "resourceGroupName": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._()-]+$"
+            },
+            "storageAccountName": {
+              "type": "string",
+              "pattern": "^[a-z0-9]{3,24}$"
+            },
+            "containerName": {
+              "type": "string",
+              "pattern": "^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$"
+            },
+            "keyPrefix": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        }
+      }
+    },
+    "approval": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/approval"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "region", "scope", "summary"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+        },
+        "type": {
+          "enum": ["manual", "support", "information"]
+        },
+        "region": {
+          "type": ["string", "null"]
+        },
+        "scope": {
+          "type": ["string", "null"]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "planId",
+        "planDigest",
+        "approvedAt",
+        "expiresAt"
+      ],
+      "properties": {
+        "status": {
+          "const": "approved"
+        },
+        "planId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "approvedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

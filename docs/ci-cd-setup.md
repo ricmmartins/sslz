@@ -221,6 +221,23 @@ GitHub Environments add an approval gate before production deployments.
    - **Required reviewers:** Add 1-2 team members who must approve production deployments
    - **Deployment branches:** Restrict to `main` only
 
+## Local agent-generated review inputs
+
+The startup IaC planner is additive and does not replace either manual deployment workflow. It writes generated
+`.local.bicepparam` and `.auto.tfvars` files only under the ignored `.sslz/generated/` directory:
+
+```bash
+./scripts/startup-iac-plan.sh generate \
+  --input <iac-plan-input.json> \
+  --provider both \
+  --output-dir .sslz/generated/review
+```
+
+Add `--preview` only in an authenticated environment. Bicep uses subscription-scope what-if with incremental-only
+semantics. Terraform uses plan and requires explicit `azurerm` remote-backend coordinates in the input; the command
+does not invent credentials or allow local shared state. Raw preview output is not retained unless
+`--raw-artifact-dir` explicitly names a subdirectory beneath the selected generated output directory.
+
 ## Step 8: Test the Setup
 
 ### Validate on a Pull Request

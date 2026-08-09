@@ -8,6 +8,7 @@
     "schemaVersion",
     "plannerVersion",
     "profileVersion",
+    "workloadSelection",
     "status",
     "requestedRegionalMode",
     "executableRegionalMode",
@@ -27,14 +28,31 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "plannerVersion": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "profileVersion": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "workloadSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["computeProfile", "profileExtensions"],
+      "properties": {
+        "computeProfile": {
+          "enum": ["container-apps", "aks"]
+        },
+        "profileExtensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["postgresql", "foundry", "gpu"]
+          }
+        }
+      }
     },
     "status": {
       "enum": ["ready", "blocked", "review-required"]
