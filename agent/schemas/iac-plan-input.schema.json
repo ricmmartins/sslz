@@ -215,28 +215,81 @@
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
     },
     "action": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "type", "region", "scope", "summary"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "region", "scope", "summary"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$"
+            },
+            "type": {
+              "enum": ["manual", "support", "information"]
+            },
+            "region": {
+              "type": ["string", "null"]
+            },
+            "scope": {
+              "type": ["string", "null"]
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         },
-        "type": {
-          "enum": ["manual", "support", "information"]
-        },
-        "region": {
-          "type": ["string", "null"]
-        },
-        "scope": {
-          "type": ["string", "null"]
-        },
-        "summary": {
-          "type": "string",
-          "minLength": 1
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "operation",
+            "namespace",
+            "subscriptionId",
+            "region",
+            "scope",
+            "summary"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^provider\\.register\\.(prod|nonprod)\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "type": {
+              "const": "azureWrite"
+            },
+            "operation": {
+              "const": "provider.register"
+            },
+            "namespace": {
+              "enum": [
+                "Microsoft.App",
+                "Microsoft.CognitiveServices",
+                "Microsoft.Compute",
+                "Microsoft.ContainerService",
+                "Microsoft.DBforPostgreSQL"
+              ]
+            },
+            "subscriptionId": {
+              "$ref": "#/$defs/uuid"
+            },
+            "region": {
+              "const": null
+            },
+            "scope": {
+              "type": "string",
+              "pattern": "^/subscriptions/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
-      }
+      ]
     },
     "approval": {
       "type": "object",
@@ -265,7 +318,7 @@
           "format": "date-time"
         },
         "expiresAt": {
-          "type": ["string", "null"],
+          "type": "string",
           "format": "date-time"
         }
       }

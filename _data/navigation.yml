@@ -13,6 +13,8 @@ docs:
     url: "/docs/troubleshooting"
   - title: "Resource Inventory"
     url: "/docs/resource-inventory"
+  - title: "Approved Provider Remediation"
+    url: "/docs/provider-remediation"
   - title: "Graduation Guide"
     url: "/docs/graduation-guide"
 

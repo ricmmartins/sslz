@@ -2,6 +2,9 @@
   "profileVersion": "1.0.0",
   "id": "gpu",
   "kind": "extension",
+  "providerNamespaces": [
+    "Microsoft.Compute"
+  ],
   "requiredChecks": [
     "region.skus.eligible",
     "quota.workload.headroom",

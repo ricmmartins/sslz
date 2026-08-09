@@ -16,6 +16,8 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/regional-capacity-plan.schema.json` | Read-only regional and capacity recommendation |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-summary.schema.json` | Sanitized parameter, preview, digest, and approval summary |
+| `schemas/provider-remediation-approval.schema.json` | Single-use approval bound to one reviewed provider action |
+| `schemas/provider-remediation-result.schema.json` | Sanitized dry-run and apply audit result |
 | `checks/check-catalog.json` | Stable check IDs and official documentation |
 | `profiles/` | Versioned compute and extension decision data |
 | `examples/` | Sanitized ready, blocked, and input examples |
@@ -28,6 +30,7 @@ node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-iac-plan.mjs
+node tests/startup-provider-remediation.mjs
 ```
 
 Validation and fixture tests use Node.js built-in modules and require no package installation, Azure login, or Azure
@@ -85,6 +88,24 @@ approval-bound decision invalidates a supplied approval. Add `--preview` to run 
 Terraform preview requires the input's explicit `azurerm` remote-backend coordinates and ambient authentication; the
 planner does not create a backend or credentials.
 
+## Apply one approved provider registration
+
+```bash
+./scripts/startup-provider-remediation.sh dry-run \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --action provider.register.prod.microsoft-app
+
+./scripts/startup-provider-remediation.sh apply \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --action provider.register.prod.microsoft-app \
+  --approval <approval-artifact.json>
+```
+
+The action must be unchanged in the reviewed plan and allowed by its selected workload profiles. Apply accepts one
+unexpired, unconsumed approval artifact, rechecks the exact tenant and subscription, executes one Azure CLI provider
+registration with argument arrays, verifies `Registered`, and records replay state only under the ignored
+`.sslz/remediation-state/` directory.
+
 ## Safety boundary
 
 The account preflight implements only `inspect`. Domain and secondary-administrator checks return `unknown` when
@@ -92,4 +113,5 @@ Microsoft Graph evidence is unavailable. Startup-credit association remains bloc
 authoritative billing or Microsoft for Startups support evidence. Workload and regional planning are separate
 local-only commands. The regional planner does not reserve capacity, create parameter files, generate IaC, or perform
 Azure operations. IaC generation is a separate command with no deployment, remediation, provider-registration, role,
-or billing operation.
+or billing operation. Approved provider remediation is a separate command whose only Azure write is one
+profile-allowlisted resource-provider registration; it cannot call either deployment path.

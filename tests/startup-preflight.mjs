@@ -103,6 +103,23 @@ assert.equal(
   "fail",
 );
 
+const invalidSubscription = spawnSync(
+  process.execPath,
+  [
+    script,
+    "inspect",
+    "--prod-subscription",
+    "not-a-subscription;provider register",
+    "--nonprod-subscription",
+    nonprod,
+    "--output",
+    "json",
+  ],
+  { encoding: "utf8" },
+);
+assert.equal(invalidSubscription.status, 2);
+assert.match(invalidSubscription.stderr, /canonical UUIDs/);
+
 for (const result of [
   success,
   tenantMismatch,

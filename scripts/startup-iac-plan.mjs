@@ -200,11 +200,15 @@ function assertSemanticInput(input) {
   ) {
     throw new Error("logDailyQuotaGb must be -1 or at least 1.");
   }
-  if (
-    input.approval?.expiresAt &&
-    Date.parse(input.approval.expiresAt) <= Date.parse(input.approval.approvedAt)
-  ) {
-    throw new Error("Approval expiration must be later than its approval timestamp.");
+  if (input.approval) {
+    const approvedAt = Date.parse(input.approval.approvedAt);
+    const expiresAt = Date.parse(input.approval.expiresAt);
+    if (expiresAt <= approvedAt) {
+      throw new Error("Approval expiration must be later than its approval timestamp.");
+    }
+    if (expiresAt - approvedAt > 24 * 60 * 60 * 1000) {
+      throw new Error("Approval validity cannot exceed 24 hours.");
+    }
   }
 
   const selectedProfileIds = new Set([
@@ -225,13 +229,20 @@ function assertSemanticInput(input) {
 }
 
 function normalizeAction(action) {
-  return {
+  const normalized = {
     id: action.id,
     type: action.type,
     region: action.region ?? null,
     scope: action.scope ?? null,
     summary: action.summary,
   };
+  if (action.type === "azureWrite") {
+    normalized.operation = action.operation;
+    normalized.namespace = action.namespace;
+    normalized.subscriptionId = action.subscriptionId.toLowerCase();
+    normalized.scope = `/subscriptions/${normalized.subscriptionId}`;
+  }
+  return normalized;
 }
 
 function buildDecisionModel(input) {
@@ -329,9 +340,7 @@ function approvalFor(inputApproval, planId, digest, evaluatedAt) {
 
   const samePlan = inputApproval.planId === planId;
   const sameDigest = inputApproval.planDigest === digest;
-  const expired =
-    inputApproval.expiresAt !== null &&
-    Date.parse(inputApproval.expiresAt) <= evaluatedAt;
+  const expired = Date.parse(inputApproval.expiresAt) <= evaluatedAt;
   if (samePlan && sameDigest && !expired) {
     return {
       required: true,

@@ -355,7 +355,7 @@ try {
     planId: input.planId,
     planDigest: first.planDigest,
     approvedAt: "2026-08-08T20:00:00Z",
-    expiresAt: null,
+    expiresAt: "2026-08-09T20:00:00Z",
   };
   const approved = generateIacPlan(approvedInput, {
     outputPath: `${outputRelative}/approved`,

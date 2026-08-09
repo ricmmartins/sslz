@@ -58,6 +58,8 @@ The planner canonicalizes object keys and computes a SHA-256 digest over all app
 
 Approval metadata contains the immutable plan ID and digest. If either value changes, an earlier approval is replaced
 with `pending`, `reapprovalRequired` is true, and the summary records why it was invalidated.
+An approved Phase 4 input must include a non-null expiry no more than 24 hours after approval; expired or overlong
+approvals are rejected. Phase 5 provider remediation uses a separate single-use action approval.
 
 ## Read-only previews
 
