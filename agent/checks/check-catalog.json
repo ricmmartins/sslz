@@ -161,6 +161,55 @@
       "severity": "blocking",
       "automation": "manual",
       "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/app-platform/aks/plan"
+    },
+    {
+      "id": "deployment.platform.expected-resources",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-cli"
+    },
+    {
+      "id": "deployment.platform.monitoring",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/logs/quick-create-workspace"
+    },
+    {
+      "id": "deployment.platform.activity-log-forwarding",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log"
+    },
+    {
+      "id": "deployment.platform.policy",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/governance/policy/assign-policy-azurecli"
+    },
+    {
+      "id": "deployment.platform.defender",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/defender-for-cloud/connect-azure-subscription"
+    },
+    {
+      "id": "deployment.platform.budget",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
+    },
+    {
+      "id": "deployment.platform.networking",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/manage-virtual-network"
     }
   ]
 }

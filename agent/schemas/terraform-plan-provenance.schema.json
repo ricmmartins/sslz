@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/terraform-plan-provenance.schema.json",
+  "title": "SSLZ signed Terraform plan provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedBy",
+    "sourceDigest",
+    "parameterDigest",
+    "backendDigest",
+    "providerLockDigest",
+    "savedPlanDigest",
+    "planJsonDigest",
+    "configurationDigest",
+    "plannedValuesDigest",
+    "providerConfigurationDigest",
+    "resourceChangesDigest",
+    "variablesDigest",
+    "terraformVersion",
+    "terraformPlatform",
+    "terraformExecutableDigest",
+    "signatureAlgorithm",
+    "keyId",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "generatedBy": {
+      "const": "startup-iac-plan.mjs"
+    },
+    "sourceDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "parameterDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "backendDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "providerLockDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "savedPlanDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "planJsonDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "configurationDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "plannedValuesDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "providerConfigurationDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "resourceChangesDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "variablesDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "terraformVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$"
+    },
+    "terraformPlatform": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+_[a-z0-9]+$"
+    },
+    "terraformExecutableDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "signatureAlgorithm": {
+      "const": "Ed25519"
+    },
+    "keyId": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$"
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

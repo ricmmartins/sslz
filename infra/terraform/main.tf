@@ -50,6 +50,9 @@ terraform {
 }
 
 provider "azurerm" {
+  resource_provider_registrations = var.resource_provider_registrations
+  resource_providers_to_register  = var.resource_providers_to_register
+
   features {
     resource_group {
       prevent_deletion_if_contains_resources = true

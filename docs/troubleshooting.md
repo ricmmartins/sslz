@@ -98,6 +98,23 @@ After review, use `apply` with the separate approval artifact as documented in
 workload profiles. Run `scripts/validate-prerequisites.sh` to check other baseline providers and remediate them
 manually.
 
+### Approved deployment rejected or baseline unhealthy
+
+**Cause:** The Phase 4 approval expired, an artifact/provider/target changed, the trusted signature failed, the approval
+was already consumed locally, deployment failed, or a required platform check did not match the reviewed state.
+
+**Fix:**
+
+1. Use the result `code` and failed check IDs; raw Azure or Terraform output is intentionally not retained.
+2. Confirm the protected `SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE` and exact tenant/subscription.
+3. For Terraform, confirm the reviewed saved `.tfplan`, remote backend, Terraform version/platform, and lock file still
+   match.
+4. Correct or roll back the platform through the existing IaC path.
+5. Generate a new Phase 4 preview, Phase 6 manifest, and signed approval. Never reuse consumed state.
+
+Workload deployment remains blocked when any post-deployment check fails. See
+[Approved Deployment Integration](approved-deployment-integration.md).
+
 ### Subscription Tenant Mismatch
 
 **Error:** `InvalidSubscriptionId` or `SubscriptionNotFound`

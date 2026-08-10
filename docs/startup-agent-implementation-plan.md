@@ -295,14 +295,20 @@ deployment.
 
 ## Phase 6: Existing SSLZ deployment integration
 
+**Status:** Implemented as a standalone signed-approval path for one existing primary Bicep or Terraform platform
+baseline. Existing manual workflows remain unchanged.
+
 **Purpose:** call the current Bicep or Terraform path after checks and approval.
 
 **Guardrails:**
 
 - deployment uses the reviewed plan artifact;
 - subscription and tenant are rechecked immediately before execution;
-- Bicep runs incrementally;
+- Bicep template and concrete parameters are compiled into an approval-bound exact semantic resource graph, reproduced
+  once from the execution snapshot, and the resulting read-only ARM JSON runs incrementally without external templates,
+  scripts, copy loops, or cross-subscription scopes;
 - Terraform applies the saved plan, not a newly calculated unreviewed plan;
+- both AzureRM automatic provider-registration controls remain disabled so Phase 5 is the only registration writer;
 - post-deployment checks verify monitoring, Defender selection, policy, budgets, and expected resources;
 - failure stops before workload deployment when the platform baseline is unhealthy.
 

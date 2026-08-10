@@ -70,6 +70,12 @@ function validate(schema, value, path, schemaDirectory) {
     return;
   }
 
+  if (schema.allOf) {
+    for (const candidate of schema.allOf) {
+      validate(candidate, value, path, schemaDirectory);
+    }
+  }
+
   if (Object.hasOwn(schema, "const") && value !== schema.const) {
     fail(path, `expected constant ${JSON.stringify(schema.const)}`);
   }
@@ -301,12 +307,27 @@ function main() {
     "agent/schemas/regional-planning-input.schema.json",
   );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
+  const iacPlanInputV2Schema = load(
+    "agent/schemas/iac-plan-input-v2.schema.json",
+  );
   const iacPlanSummarySchema = load("agent/schemas/iac-plan-summary.schema.json");
   const providerRemediationApprovalSchema = load(
     "agent/schemas/provider-remediation-approval.schema.json",
   );
   const providerRemediationResultSchema = load(
     "agent/schemas/provider-remediation-result.schema.json",
+  );
+  const deploymentExecutionManifestSchema = load(
+    "agent/schemas/deployment-execution-manifest.schema.json",
+  );
+  const deploymentApprovalSchema = load(
+    "agent/schemas/deployment-approval.schema.json",
+  );
+  const deploymentResultSchema = load(
+    "agent/schemas/deployment-result.schema.json",
+  );
+  const terraformPlanProvenanceSchema = load(
+    "agent/schemas/terraform-plan-provenance.schema.json",
   );
   const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
   const startupInput = load("agent/examples/startup-input.json");
@@ -321,6 +342,13 @@ function main() {
   );
   const providerRegistrationDryRun = load(
     "agent/examples/provider-registration-dry-run.json",
+  );
+  const deploymentExecutionManifest = load(
+    "agent/examples/deployment-execution-manifest.json",
+  );
+  const deploymentApproval = load("agent/examples/deployment-approval.json");
+  const terraformPlanProvenance = load(
+    "agent/examples/terraform-plan-provenance.json",
   );
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
@@ -339,6 +367,10 @@ function main() {
     "https://aka.ms/sslz/schemas/iac-plan-input.schema.json",
   );
   assert.equal(
+    iacPlanInputV2Schema.$id,
+    "https://aka.ms/sslz/schemas/iac-plan-input-v2.schema.json",
+  );
+  assert.equal(
     iacPlanSummarySchema.$id,
     "https://aka.ms/sslz/schemas/iac-plan-summary.schema.json",
   );
@@ -350,6 +382,16 @@ function main() {
     providerRegistrationApproval,
   );
   validateDocument(providerRemediationResultSchema, providerRegistrationDryRun);
+  validateDocument(
+    deploymentExecutionManifestSchema,
+    deploymentExecutionManifest,
+  );
+  validateDocument(deploymentApprovalSchema, deploymentApproval);
+  validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
+  assert.equal(
+    deploymentResultSchema.$id,
+    "https://aka.ms/sslz/schemas/deployment-result.schema.json",
+  );
   validateCatalog(catalog);
   validateProfileDefinitions(profiles, catalog);
   validateWorkloadProfilePlan(workloadProfilePlan, catalog);
@@ -362,6 +404,9 @@ function main() {
     blockedExample,
     providerRegistrationApproval,
     providerRegistrationDryRun,
+    deploymentExecutionManifest,
+    deploymentApproval,
+    terraformPlanProvenance,
     profiles,
   ]);
 

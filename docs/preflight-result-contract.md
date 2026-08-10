@@ -21,6 +21,8 @@ evidence against
 ignored local Bicep or Terraform review inputs and a digest-bound sanitized summary.
 [`scripts/startup-provider-remediation.sh`](../scripts/startup-provider-remediation.sh) can apply exactly one unchanged,
 profile-allowlisted provider-registration action with a separate unexpired, single-use approval artifact.
+[`scripts/startup-deployment-integration.sh`](../scripts/startup-deployment-integration.sh) can preview and apply one
+immutable primary platform baseline through the existing SSLZ Bicep or Terraform root with a trusted signed approval.
 The existing SSLZ prerequisite command remains unchanged.
 
 Validate the contract assets locally:
@@ -32,6 +34,7 @@ node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-provider-remediation.mjs
+node tests/startup-deployment-integration.mjs
 ```
 
 The workload profile plan is intentionally separate from `deployment-plan.schema.json`: Phase 2 selects and explains
@@ -48,6 +51,12 @@ the tenant, subscriptions, profile and extensions, regions and regional mode, se
 proposed actions, and Terraform backend to one SHA-256 digest. Object key order does not affect the digest. A supplied
 approval remains approved only when both its plan ID and digest match; otherwise the summary explicitly requires
 reapproval.
+
+Phase 6 adds a second immutable digest over the complete Phase 4 artifact, selected parameter bytes, existing SSLZ
+source tree, provider/environment choice, command preview evidence, and saved Terraform plan where applicable. A
+trusted Ed25519 signature authorizes that exact manifest once; a local checksum is never treated as authorization. The
+approval separately binds a privacy-preserving notification-recipient digest that the signer must compare with its
+authorization-controlled recipient policy.
 
 ## Purpose
 
