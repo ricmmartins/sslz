@@ -70,6 +70,9 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
         run: |
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            # PRs validate a read-only, state-independent plan when the shared
+            # backend is unavailable to the pull-request runner.
+            sed -i '/^  backend "azurerm" {$/,/^  }$/d' main.tf
             terraform init -backend=false
           else
             terraform init \
