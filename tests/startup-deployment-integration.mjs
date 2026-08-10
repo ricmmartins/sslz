@@ -1848,7 +1848,8 @@ try {
   const originalStatePath = `${statePath}-original`;
   renameSync(statePath, originalStatePath);
   try {
-    mkdirSync(statePath, { recursive: true });
+    mkdirSync(statePath, { recursive: true, mode: 0o700 });
+    chmodSync(statePath, 0o700);
     writeFileSync(
       resolve(statePath, ".durable-store.json"),
       readFileSync(resolve(originalStatePath, ".durable-store.json")),

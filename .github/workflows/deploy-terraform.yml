@@ -69,10 +69,14 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
         run: |
-          terraform init \
-            -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
-            -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
-            -backend-config="key=landing-zone-${{ matrix.environment }}.tfstate"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            terraform init -backend=false
+          else
+            terraform init \
+              -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
+              -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
+              -backend-config="key=landing-zone-${{ matrix.environment }}.tfstate"
+          fi
 
       - name: Set Terraform variables
         run: |
@@ -100,6 +104,7 @@ jobs:
             -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
             -var="environment=${ENVIRONMENT}" \
             -var="company_name=${COMPANY_NAME}" \
+            -var="resource_provider_registrations=${{ github.event_name == 'pull_request' && 'none' || 'legacy' }}" \
             -no-color \
             -out=tfplan-${ENVIRONMENT} 2>&1 | tee plan-output.txt
 
