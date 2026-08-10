@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "generatedBy": "startup-deployment-integration.mjs",
+  "manifestDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "plan": {
+    "version": "1.0.0",
+    "id": "startup-primary-baseline",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "artifactPath": ".sslz/generated/startup-primary-baseline/plan-summary.json",
+    "artifactDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "approvalExpiresAt": "2026-08-09T13:00:00Z"
+  },
+  "execution": {
+    "operation": "platform-baseline.deploy",
+    "provider": "bicep",
+    "environment": "nonprod",
+    "regionRole": "primary",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "subscriptionId": "33333333-3333-3333-3333-333333333333",
+    "scope": "/subscriptions/33333333-3333-3333-3333-333333333333",
+    "region": "eastus2",
+    "stateStoreId": "77777777-7777-4777-8777-777777777777",
+    "terraformAuthMode": null
+  },
+  "artifacts": {
+    "parameter": {
+      "path": ".sslz/generated/startup-primary-baseline/bicep/nonprod-primary.local.bicepparam",
+      "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "source": {
+      "path": "infra/bicep",
+      "digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "fileCount": 8
+    },
+    "savedPlan": null,
+    "provenance": null,
+    "planJson": null
+  },
+  "preview": {
+    "reviewedSummaryDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "source": "command",
+    "status": "succeeded",
+    "changes": {
+      "create": 12,
+      "modify": 0,
+      "remove": 0
+    },
+    "rawOutputDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "terraformVersion": null,
+    "terraformPlatform": null,
+    "terraformExecutableDigest": null,
+    "bicepAttestation": {
+      "compiledTemplateDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "compiledParametersDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "notificationContactsDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "resourceGraphDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "terraformAttestation": null
+  },
+  "commands": {
+    "preparation": null,
+    "deployment": {
+      "executable": "az",
+      "arguments": [
+        "deployment",
+        "sub",
+        "create",
+        "--subscription",
+        "33333333-3333-3333-3333-333333333333",
+        "--location",
+        "eastus2",
+        "--template-file",
+        "infra/bicep/main.bicep",
+        "--parameters",
+        ".sslz/generated/startup-primary-baseline/bicep/nonprod-primary.local.bicepparam",
+        "--name",
+        "sslz-nonprod-bbbbbbbbbbbb",
+        "--output",
+        "none"
+      ]
+    }
+  },
+  "validationCheckIds": [
+    "deployment.platform.expected-resources",
+    "deployment.platform.monitoring",
+    "deployment.platform.activity-log-forwarding",
+    "deployment.platform.policy",
+    "deployment.platform.defender",
+    "deployment.platform.budget",
+    "deployment.platform.networking"
+  ],
+  "safety": {
+    "previewWrites": 0,
+    "bicepMode": "Incremental",
+    "terraformSavedPlanOnly": false,
+    "secondaryRegionDeployment": false,
+    "workloadDeployment": false,
+    "rawOutputRetained": false,
+    "personalDataRetained": false
+  }
+}

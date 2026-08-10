@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   readFileSync,
   readdirSync,
@@ -11,12 +12,16 @@ import {
 } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { azureCliInvocation } from "../scripts/azure-cli-invocation.mjs";
 import {
+  assertArtifactDestinationsAvailable,
   buildDecisionModel,
   canonicalJson,
   generateIacPlan,
   planDigest,
+  sanitizedTerraformEnvironment as sanitizedPlannerTerraformEnvironment,
   summarizePreview,
+  writeExclusiveArtifacts,
 } from "../scripts/startup-iac-plan.mjs";
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
@@ -44,6 +49,14 @@ const failureFixture = JSON.parse(
 );
 const outputRelative = `.sslz/generated/tests-${process.pid}`;
 const outputPath = resolve(root, outputRelative);
+const terraformVariables = readFileSync(
+  resolve(root, "infra/terraform/variables.tf"),
+  "utf8",
+);
+assert.match(
+  terraformVariables,
+  /variable "resource_provider_registrations" \{[\s\S]*?default\s+=\s+"legacy"/,
+);
 
 function createInput({ regionalMode = "cool-infrastructure" } = {}) {
   const planningInput = structuredClone(regionalInput);
@@ -54,7 +67,7 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
   const regionalPlan = planRegions(planningInput);
 
   return {
-    schemaVersion: "1.0.0",
+    schemaVersion: "2.0.0",
     planId: "phase-four-test",
     target: {
       tenantId: "11111111-1111-1111-1111-111111111111",
@@ -112,6 +125,8 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
       ],
       terraformBackend: {
         type: "azurerm",
+        subscriptionId:
+          planningInput.startupInput.subscriptions.prodSubscriptionId,
         resourceGroupName: "rg-terraform-state",
         storageAccountName: "stsslzfixture",
         containerName: "tfstate",
@@ -189,6 +204,15 @@ function assertDigestChanges(base, mutate, label) {
 }
 
 try {
+  if (process.platform === "win32") {
+    const invocation = azureCliInvocation(["version", "--output", "none"]);
+    const execution = spawnSync(invocation.executable, invocation.arguments, {
+      cwd: root,
+      encoding: "utf8",
+      shell: false,
+    });
+    assert.equal(execution.status, 0, execution.stderr);
+  }
   const input = createInput();
   const first = generateIacPlan(input, {
     outputPath: outputRelative,
@@ -231,6 +255,10 @@ try {
   );
   const terraformSubscriptionId = terraformParameters.subscription_id;
   delete terraformParameters.subscription_id;
+  assert.equal(terraformParameters.resource_provider_registrations, "none");
+  assert.deepEqual(terraformParameters.resource_providers_to_register, []);
+  delete terraformParameters.resource_provider_registrations;
+  delete terraformParameters.resource_providers_to_register;
   assert.deepEqual(
     Object.fromEntries(
       Object.entries(terraformParameters).map(([name, value]) => [
@@ -246,6 +274,46 @@ try {
     first.decisionModel.target.environments.find(
       (environment) => environment.name === "prod",
     ).subscriptionId,
+  );
+  const realContacts = {
+    budgetAlertEmails: ["cloud-operations@contoso.example"],
+    securityContactEmail: "security-operations@contoso.example",
+  };
+  const contactPlan = generateIacPlan(input, {
+    providers: ["bicep", "terraform"],
+    outputPath: `${outputRelative}/real-contacts`,
+    previewFixtures: successFixture,
+    notificationContacts: realContacts,
+  });
+  const contactBicep = readFileSync(
+    resolve(
+      root,
+      contactPlan.artifacts.find(
+        (artifact) =>
+          artifact.provider === "bicep" &&
+          artifact.environment === "prod" &&
+          artifact.regionRole === "primary",
+      ).path,
+    ),
+    "utf8",
+  );
+  const contactTerraform = readFileSync(
+    resolve(
+      root,
+      contactPlan.artifacts.find(
+        (artifact) =>
+          artifact.provider === "terraform" &&
+          artifact.environment === "prod" &&
+          artifact.regionRole === "primary",
+      ).path,
+    ),
+    "utf8",
+  );
+  assert.match(contactBicep, /cloud-operations@contoso\.example/);
+  assert.match(contactTerraform, /security-operations@contoso\.example/);
+  assert.doesNotMatch(
+    JSON.stringify(contactPlan),
+    /cloud-operations@|security-operations@/,
   );
 
   const bicepParameterNames = new Set(Object.keys(bicepParameters));
@@ -360,6 +428,7 @@ try {
   const approved = generateIacPlan(approvedInput, {
     outputPath: `${outputRelative}/approved`,
     providers: ["bicep"],
+    evaluatedAt: Date.parse("2026-08-09T19:00:00Z"),
   });
   assert.equal(approved.approval.status, "approved");
   assert.equal(approved.approval.reapprovalRequired, false);
@@ -369,6 +438,7 @@ try {
   const modified = generateIacPlan(modifiedInput, {
     outputPath: `${outputRelative}/modified`,
     providers: ["terraform"],
+    evaluatedAt: Date.parse("2026-08-09T19:00:00Z"),
   });
   assert.notEqual(modified.planDigest, first.planDigest);
   assert.equal(modified.approval.status, "pending");
@@ -378,6 +448,7 @@ try {
   const replaced = generateIacPlan(modifiedInput, {
     outputPath: outputRelative,
     providers: ["bicep", "terraform"],
+    evaluatedAt: Date.parse("2026-08-09T19:00:00Z"),
   });
   assert.equal(
     JSON.parse(
@@ -527,15 +598,118 @@ try {
       }),
     /expected constant "azurerm"/,
   );
+  const invalidBackendSubscription = structuredClone(input);
+  invalidBackendSubscription.deployment.terraformBackend.subscriptionId =
+    "not-a-subscription";
+  assert.throws(
+    () =>
+      generateIacPlan(invalidBackendSubscription, {
+        outputPath: `${outputRelative}/invalid-backend-subscription`,
+      }),
+    /does not match/,
+  );
+  const missingV2BackendSubscription = structuredClone(input);
+  delete missingV2BackendSubscription.deployment.terraformBackend
+    .subscriptionId;
+  assert.throws(
+    () =>
+      generateIacPlan(missingV2BackendSubscription, {
+        outputPath: `${outputRelative}/missing-v2-backend-subscription`,
+      }),
+    /missing required property subscriptionId/,
+  );
+  const legacyInput = structuredClone(input);
+  legacyInput.schemaVersion = "1.0.0";
+  delete legacyInput.deployment.terraformBackend.subscriptionId;
+  const legacyPlan = generateIacPlan(legacyInput, {
+    providers: ["terraform"],
+    outputPath: `${outputRelative}/legacy-v1`,
+    previewFixtures: { terraform: successFixture },
+  });
+  assert.equal(
+    Object.hasOwn(legacyPlan.decisionModel.terraformBackend, "subscriptionId"),
+    false,
+  );
+  assert.equal(legacyPlan.inputContractVersion, "1.0.0");
+  assert.equal(first.inputContractVersion, "2.0.0");
   const unsupported = structuredClone(input);
-  unsupported.schemaVersion = "2.0.0";
+  unsupported.schemaVersion = "3.0.0";
   assert.throws(
     () =>
       generateIacPlan(unsupported, {
         outputPath: `${outputRelative}/unsupported`,
       }),
-    /expected constant "1.0.0"/,
+    /unsupported value "3.0.0"/,
   );
+  const collisionDirectory = resolve(outputPath, "artifact-collision");
+  mkdirSync(collisionDirectory, { recursive: true });
+  const existingPlanJson = resolve(collisionDirectory, "reviewed.plan.json");
+  writeFileSync(existingPlanJson, "reviewed-artifact", { mode: 0o600 });
+  assert.throws(
+    () =>
+      assertArtifactDestinationsAvailable([
+        resolve(collisionDirectory, "reviewed.tfplan"),
+        existingPlanJson,
+        resolve(collisionDirectory, "reviewed.provenance.json"),
+      ]),
+    /Refusing to overwrite an existing raw artifact/,
+  );
+  assert.equal(readFileSync(existingPlanJson, "utf8"), "reviewed-artifact");
+  const existingPlanLog = resolve(collisionDirectory, "terraform-plan.txt");
+  writeFileSync(existingPlanLog, "reviewed-log", { mode: 0o600 });
+  const transactionPaths = [
+    resolve(collisionDirectory, "transaction.tfplan"),
+    resolve(collisionDirectory, "transaction.plan.json"),
+    resolve(collisionDirectory, "transaction.provenance.json"),
+  ];
+  assert.throws(
+    () =>
+      writeExclusiveArtifacts([
+        { path: transactionPaths[0], content: "plan" },
+        { path: transactionPaths[1], content: "json" },
+        { path: transactionPaths[2], content: "provenance" },
+        { path: existingPlanLog, content: "new-log" },
+      ]),
+    /Refusing to overwrite an existing raw artifact/,
+  );
+  assert.equal(readFileSync(existingPlanLog, "utf8"), "reviewed-log");
+  assert.equal(transactionPaths.some((path) => existsSync(path)), false);
+  process.env.ARM_OIDC_REQUEST_TOKEN = "fixture-arm-token";
+  process.env.ARM_OIDC_REQUEST_URL = "https://arm-token.example";
+  process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN = "fixture-actions-token";
+  process.env.ACTIONS_ID_TOKEN_REQUEST_URL = "https://actions-token.example";
+  const plannerCliEnvironment = sanitizedPlannerTerraformEnvironment(
+    { TF_DATA_DIR: "safe-data" },
+    "safe-cli-config",
+    "cli",
+  );
+  assert.equal(plannerCliEnvironment.ARM_OIDC_REQUEST_TOKEN, undefined);
+  assert.equal(plannerCliEnvironment.ARM_OIDC_REQUEST_URL, undefined);
+  assert.equal(
+    plannerCliEnvironment.ACTIONS_ID_TOKEN_REQUEST_TOKEN,
+    undefined,
+  );
+  assert.equal(plannerCliEnvironment.ACTIONS_ID_TOKEN_REQUEST_URL, undefined);
+  const plannerOidcEnvironment = sanitizedPlannerTerraformEnvironment(
+    { TF_DATA_DIR: "safe-data" },
+    "safe-cli-config",
+    "oidc",
+  );
+  assert.equal(
+    plannerOidcEnvironment.ARM_OIDC_REQUEST_TOKEN,
+    "fixture-arm-token",
+  );
+  assert.equal(
+    plannerOidcEnvironment.ACTIONS_ID_TOKEN_REQUEST_TOKEN,
+    "fixture-actions-token",
+  );
+  assert.equal(plannerOidcEnvironment.TEMP, "safe-data");
+  assert.equal(plannerOidcEnvironment.TMP, "safe-data");
+  assert.equal(plannerOidcEnvironment.TMPDIR, "safe-data");
+  delete process.env.ARM_OIDC_REQUEST_TOKEN;
+  delete process.env.ARM_OIDC_REQUEST_URL;
+  delete process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+  delete process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
   const unsupportedWorkload = structuredClone(input);
   unsupportedWorkload.workloadPlan.schemaVersion = "2.0.0";
   assert.throws(
@@ -672,6 +846,8 @@ try {
   assert.doesNotMatch(source, /\bprovider\s+register\b|\brole\s+assignment\b/i);
   assert.match(source, /-backend-config=use_oidc=/);
   assert.match(source, /-backend-config=use_cli=/);
+  assert.match(source, /-backend-config=subscription_id=/);
+  assert.match(source, /-backend-config=use_azuread_auth=true/);
 
   console.log("Startup IaC planner fixture tests passed.");
 } finally {

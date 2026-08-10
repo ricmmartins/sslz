@@ -15,8 +15,10 @@ run an Azure or Terraform write operation.
 
 The input and output contracts are:
 
-- [`agent/schemas/iac-plan-input.schema.json`](../agent/schemas/iac-plan-input.schema.json)
+- [`agent/schemas/iac-plan-input.schema.json`](../agent/schemas/iac-plan-input.schema.json) for compatible Phase 4 v1 inputs
+- [`agent/schemas/iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json) for Phase 6-capable plans with an exact backend subscription
 - [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
+- [`agent/schemas/terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
 
 ## Generate review inputs
 
@@ -40,9 +42,20 @@ VNet CIDR. Secondary files remain representation-only because the existing roots
 resources and do not yet provide collision-free multi-region naming. The planner never previews a secondary file as
 an independent root or state.
 
-Generated files use nonpersonal `example.invalid` contact placeholders. Replace them only in the ignored local files
-when an authenticated preview requires the real notification contacts. Secrets, connection strings, tokens, private
-keys, credentials, personal email addresses, and secure parameter values are rejected as planner input.
+Generated files use nonpersonal `example.invalid` contact placeholders unless a protected contacts file is supplied.
+For deployable previews, create an owner-only JSON file outside the repository:
+
+```json
+{
+  "budgetAlertEmails": ["cloud-operations@contoso.example"],
+  "securityContactEmail": "security-operations@contoso.example"
+}
+```
+
+Pass its absolute path with `--notification-contacts-file`. Contact values are written only to the ignored local
+parameter artifacts required by Azure; summaries, results, replay state, and command output retain only their digest.
+Secrets, connection strings, tokens, private keys, credentials, personal email addresses in the main planner input, and
+secure parameter values are rejected.
 
 ## Digest and approval
 
@@ -54,7 +67,7 @@ The planner canonicalizes object keys and computes a SHA-256 digest over all app
 - planned services and paid Defender selections;
 - deployment and cost assumptions;
 - proposed manual, support, and information actions;
-- explicit Terraform remote-backend coordinates.
+- explicit Terraform remote-backend coordinates, including the backend subscription.
 
 Approval metadata contains the immutable plan ID and digest. If either value changes, an earlier approval is replaced
 with `pending`, `reapprovalRequired` is true, and the summary records why it was invalidated.
@@ -70,12 +83,13 @@ Use previews only in an environment that already has the required tools and auth
   --input <iac-plan-input.json> \
   --provider both \
   --output-dir .sslz/generated/my-plan \
-  --preview
+  --preview \
+  --notification-contacts-file /protected/sslz-notification-contacts.json
 ```
 
 Bicep runs subscription-scope what-if. Complete-mode semantics are not accepted. Terraform initializes the explicitly
-configured `azurerm` remote backend and runs plan; local shared state is not accepted. The planner does not create the
-backend or configure credentials.
+configured `azurerm` remote backend in its bound subscription with Azure AD data-plane authentication and runs plan;
+local shared state is not accepted. The planner does not create the backend or configure credentials.
 
 The retained summary contains only deterministic change counts, destructive-change classification, and a bounded
 error class. Raw tool text, environment variables, and account output are not retained. To preserve raw output for an
@@ -85,7 +99,22 @@ approved local or CI diagnostic workflow, explicitly provide a path inside the s
 --raw-artifact-dir .sslz/generated/my-plan/raw
 ```
 
-That directory remains ignored by Git. Existing raw files are never overwritten.
+`--raw-artifact-dir` requires `--notification-contacts-file`. That directory remains ignored by Git. Existing raw files
+are never overwritten.
+Phase 6 Terraform apply requires this option because it applies the exact saved `<environment>-primary.tfplan` from
+the reviewed preview and never recalculates a plan. Raw Terraform plan generation also requires an Ed25519 builder key:
+
+```bash
+export SSLZ_TERRAFORM_PROVENANCE_PRIVATE_KEY_FILE=/protected/sslz-terraform-builder.key
+export SSLZ_TERRAFORM_EXECUTABLE=/opt/hashicorp/terraform
+```
+
+The planner copies the Terraform root, lock file, controlled CLI configuration, and generated parameter artifact into
+a random owner-only build snapshot. It resolves Terraform only from a trusted absolute non-link path, runs `init`, `plan`,
+and `show` only there, and signs the executable digest, source, parameter, backend, provider-lock, saved-plan,
+platform/version, configuration, planned-values, variables, and resource-change digests, then
+writes `<environment>-primary.provenance.json` beside the saved plan and removes the snapshot. Phase 6 trusts only the
+matching provisioned public key.
 
 ## Safety boundary
 
@@ -95,3 +124,6 @@ That directory remains ignored by Git. Existing raw files are never overwritten.
 - generated paths cannot escape `.sslz/generated/`;
 - non-generated files are not overwritten;
 - generated parameter artifacts remain ignored and are not committed.
+
+Deployment is a separate signed-approval command. See
+[Approved Deployment Integration](approved-deployment-integration.md).

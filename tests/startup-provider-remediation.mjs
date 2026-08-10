@@ -119,6 +119,7 @@ function createPlan({
       ],
       terraformBackend: {
         type: "azurerm",
+        subscriptionId: prod,
         resourceGroupName: "rg-terraform-state",
         storageAccountName: "stsslzfixture",
         containerName: "tfstate",

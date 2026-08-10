@@ -234,8 +234,9 @@ The startup IaC planner is additive and does not replace either manual deploymen
 ```
 
 Add `--preview` only in an authenticated environment. Bicep uses subscription-scope what-if with incremental-only
-semantics. Terraform uses plan and requires explicit `azurerm` remote-backend coordinates in the input; the command
-does not invent credentials or allow local shared state. Raw preview output is not retained unless
+semantics. Terraform uses plan and requires explicit `azurerm` remote-backend coordinates, including the backend
+subscription ID, in the input. Backend access uses Azure AD data-plane authentication; the command does not invent
+credentials or allow local shared state. Raw preview output is not retained unless
 `--raw-artifact-dir` explicitly names a subdirectory beneath the selected generated output directory.
 
 ## Step 8: Test the Setup
@@ -312,3 +313,25 @@ separate approval:
 ```
 
 See [Approved Provider Remediation](provider-remediation.md). Other providers remain manual prerequisites.
+
+## Optional approved deployment integration
+
+The agent-assisted deployment command is additive and is not called by either existing deployment workflow. Provision
+the Ed25519 approval public key as a protected read-only runner file and expose only its absolute path through
+`SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE`. Keep `.sslz/generated/` and `.sslz/deployment-state/` on protected storage
+for the review and apply jobs.
+
+Run Phase 6 preview first, send its nested immutable manifest to the approval system, and apply only the returned signed
+artifact:
+
+```bash
+./scripts/startup-deployment-integration.sh preview \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --provider terraform \
+  --environment nonprod \
+  --terraform-auth oidc
+```
+
+The identity needs only the existing SSLZ root's permissions at the exact target subscription, read permissions for the
+post-deployment checks, and access to the reviewed Terraform backend. Do not grant automatic role escalation. See
+[Approved Deployment Integration](approved-deployment-integration.md).

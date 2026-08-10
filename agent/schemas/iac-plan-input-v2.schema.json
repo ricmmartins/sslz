@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/iac-plan-input-v2.schema.json",
+  "title": "SSLZ IaC plan input v2",
+  "allOf": [
+    {
+      "$ref": "iac-plan-input.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "2.0.0"
+        },
+        "deployment": {
+          "type": "object",
+          "properties": {
+            "terraformBackend": {
+              "type": "object",
+              "required": ["subscriptionId"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

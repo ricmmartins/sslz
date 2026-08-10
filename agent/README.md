@@ -15,9 +15,14 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/regional-planning-input.schema.json` | Timestamped, supplied regional evidence |
 | `schemas/regional-capacity-plan.schema.json` | Read-only regional and capacity recommendation |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
+| `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-summary.schema.json` | Sanitized parameter, preview, digest, and approval summary |
+| `schemas/terraform-plan-provenance.schema.json` | Signed atomic-build provenance for one Terraform saved plan |
 | `schemas/provider-remediation-approval.schema.json` | Single-use approval bound to one reviewed provider action |
 | `schemas/provider-remediation-result.schema.json` | Sanitized dry-run and apply audit result |
+| `schemas/deployment-execution-manifest.schema.json` | Immutable provider, target, artifact, preview, and command binding |
+| `schemas/deployment-approval.schema.json` | Trusted signed approval for one exact platform deployment |
+| `schemas/deployment-result.schema.json` | Sanitized deployment and post-validation audit result |
 | `checks/check-catalog.json` | Stable check IDs and official documentation |
 | `profiles/` | Versioned compute and extension decision data |
 | `examples/` | Sanitized ready, blocked, and input examples |
@@ -31,6 +36,7 @@ node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-provider-remediation.mjs
+node tests/startup-deployment-integration.mjs
 ```
 
 Validation and fixture tests use Node.js built-in modules and require no package installation, Azure login, or Azure
@@ -106,6 +112,33 @@ unexpired, unconsumed approval artifact, rechecks the exact tenant and subscript
 registration with argument arrays, verifies `Registered`, and records replay state only under the ignored
 `.sslz/remediation-state/` directory.
 
+## Preview and apply one approved platform baseline
+
+```bash
+./scripts/startup-deployment-integration.sh preview \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --provider bicep \
+  --environment nonprod
+
+SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE=/protected/sslz-terraform-builder.pub \
+SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE=/protected/sslz-deployment.pub \
+  ./scripts/startup-deployment-integration.sh apply \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --manifest <reviewed-deployment-manifest.json> \
+  --approval <signed-deployment-approval.json>
+```
+
+Preview reruns read-only inspection over the exact hashed artifact set and emits an immutable manifest without writing
+Azure or local state. Bicep preview binds exact compiled-template, concrete-parameter, and semantic resource-graph
+digests. Terraform
+additionally requires Phase 4 Ed25519 provenance tying the saved plan to an atomic source snapshot. Apply verifies both
+trust anchors, compiles Bicep template and parameters once into read-only ARM JSON when selected, rechecks the exact
+target, executes only incremental Bicep or the exact saved Terraform plan, and blocks workloads unless every platform
+check passes. Preview and approval bind the documented owner-protected local replay store at the fixed
+`.sslz/deployment-state` path, including its filesystem identity; preview and apply run on the same protected executor,
+and apply fails closed if that exact store is absent. The signed approval also binds a dedicated notification-recipient
+digest that the approval service must recompute from its protected recipient policy without persisting email addresses.
+
 ## Safety boundary
 
 The account preflight implements only `inspect`. Domain and secondary-administrator checks return `unknown` when
@@ -114,4 +147,6 @@ authoritative billing or Microsoft for Startups support evidence. Workload and r
 local-only commands. The regional planner does not reserve capacity, create parameter files, generate IaC, or perform
 Azure operations. IaC generation is a separate command with no deployment, remediation, provider-registration, role,
 or billing operation. Approved provider remediation is a separate command whose only Azure write is one
-profile-allowlisted resource-provider registration; it cannot call either deployment path.
+profile-allowlisted resource-provider registration; it cannot call either deployment path. Approved deployment is
+another standalone command and supports only the primary `single-region-ready` platform baseline. It does not deploy a
+workload or secondary region.

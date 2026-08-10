@@ -15,7 +15,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "1.0.0"
+      "enum": ["1.0.0", "2.0.0"]
     },
     "planId": {
       "type": "string",
@@ -177,6 +177,9 @@
           "properties": {
             "type": {
               "const": "azurerm"
+            },
+            "subscriptionId": {
+              "$ref": "#/$defs/uuid"
             },
             "resourceGroupName": {
               "type": "string",

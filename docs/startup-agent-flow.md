@@ -207,6 +207,10 @@ See [Approved Provider Remediation](provider-remediation.md).
 
 ## Phase 6: Deployment and validation
 
+Phase 6 is implemented by `scripts/startup-deployment-integration.sh`. It consumes an approved Phase 4 artifact, emits
+an immutable provider-specific manifest through zero-write preview, and requires a trusted Ed25519-signed approval for
+apply. It supports only the primary `single-region-ready` platform baseline.
+
 The agent uses the existing SSLZ Bicep or Terraform path. It must:
 
 1. preserve idempotency;
@@ -217,16 +221,19 @@ The agent uses the existing SSLZ Bicep or Terraform path. It must:
 6. record the plan, approval, deployment IDs, and validation result;
 7. validate the deployed state instead of treating a successful command as success.
 
-Post-deployment validation includes:
+Post-deployment platform validation includes:
 
 - expected resource groups and regional resources;
 - policy assignments and compliance state;
 - Log Analytics and Activity Log forwarding;
 - selected Defender plans and their cost;
 - budgets and alert recipients;
-- application health endpoint;
-- database connectivity through managed identity where applicable;
-- regional recovery readiness for Hot/Cool profiles.
+- explicit `workloadDeploymentAllowed: false` until every baseline check passes.
+
+Application health, database connectivity, secondary-region deployment, and Hot/Cool recovery are workload or Phase 7
+work and are not performed by Phase 6.
+
+See [Approved Deployment Integration](approved-deployment-integration.md).
 
 ## Agent result contract
 

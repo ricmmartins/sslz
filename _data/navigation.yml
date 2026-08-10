@@ -15,6 +15,8 @@ docs:
     url: "/docs/resource-inventory"
   - title: "Approved Provider Remediation"
     url: "/docs/provider-remediation"
+  - title: "Approved Deployment Integration"
+    url: "/docs/approved-deployment-integration"
   - title: "Graduation Guide"
     url: "/docs/graduation-guide"
 

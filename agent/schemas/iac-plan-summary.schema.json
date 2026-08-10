@@ -23,6 +23,9 @@
     "plannerVersion": {
       "const": "1.0.0"
     },
+    "inputContractVersion": {
+      "enum": ["1.0.0", "2.0.0"]
+    },
     "generatedBy": {
       "const": "startup-iac-plan.mjs"
     },
@@ -221,6 +224,12 @@
           "minLength": 1
         },
         "rawArtifact": {
+          "type": ["string", "null"]
+        },
+        "provenanceArtifact": {
+          "type": ["string", "null"]
+        },
+        "planJsonArtifact": {
           "type": ["string", "null"]
         }
       }

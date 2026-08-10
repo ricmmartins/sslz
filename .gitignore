@@ -24,6 +24,7 @@ override.tf.json
 # Startup agent generated plans and local parameters
 .sslz/generated/
 .sslz/remediation-state/
+.sslz/deployment-state/
 *.auto.tfvars.json
 
 # OS

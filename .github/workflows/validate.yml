@@ -13,6 +13,9 @@ on:
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-provider-remediation.*'
+      - 'scripts/startup-deployment-integration.*'
+      - 'scripts/azure-cli-invocation.mjs'
+      - 'scripts/terraform-plan-provenance.mjs'
       - 'tests/**'
   push:
     branches: [main]
@@ -26,6 +29,9 @@ on:
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-provider-remediation.*'
+      - 'scripts/startup-deployment-integration.*'
+      - 'scripts/azure-cli-invocation.mjs'
+      - 'scripts/terraform-plan-provenance.mjs'
       - 'tests/**'
 
 permissions:
@@ -55,6 +61,9 @@ jobs:
 
       - name: Test approved provider remediation
         run: node tests/startup-provider-remediation.mjs
+
+      - name: Test approved deployment integration
+        run: node tests/startup-deployment-integration.mjs
 
   validate-bicep:
     name: Validate Bicep

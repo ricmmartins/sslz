@@ -7,6 +7,22 @@ variable "subscription_id" {
   }
 }
 
+variable "resource_provider_registrations" {
+  description = "AzureRM automatic resource provider registration mode. Manual deployments preserve the AzureRM v4 legacy behavior; approved agent plans set none."
+  type        = string
+  default     = "legacy"
+  validation {
+    condition     = contains(["core", "extended", "all", "legacy", "none"], var.resource_provider_registrations)
+    error_message = "resource_provider_registrations must be core, extended, all, legacy, or none."
+  }
+}
+
+variable "resource_providers_to_register" {
+  description = "Additional Azure resource providers to register automatically. Approved agent plans require an empty list."
+  type        = list(string)
+  default     = []
+}
+
 variable "location" {
   description = "Primary Azure region"
   type        = string

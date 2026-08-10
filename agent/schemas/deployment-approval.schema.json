@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/deployment-approval.schema.json",
+  "title": "SSLZ signed deployment approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "manifestVersion",
+    "manifestDigest",
+    "planVersion",
+    "planId",
+    "planDigest",
+    "operation",
+    "provider",
+    "environment",
+    "regionRole",
+    "tenantId",
+    "subscriptionId",
+    "scope",
+    "region",
+    "stateStoreId",
+    "parameterDigest",
+    "sourceDigest",
+    "savedPlanDigest",
+    "planJsonDigest",
+    "notificationContactsDigest",
+    "terraformAuthMode",
+    "nonce",
+    "approvedAt",
+    "expiresAt",
+    "signatureAlgorithm",
+    "keyId",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": ["pending", "approved", "declined", "consumed"]
+    },
+    "manifestVersion": {
+      "const": "1.0.0"
+    },
+    "manifestDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "planVersion": {
+      "const": "1.0.0"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "planDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "operation": {
+      "const": "platform-baseline.deploy"
+    },
+    "provider": {
+      "enum": ["bicep", "terraform"]
+    },
+    "environment": {
+      "enum": ["prod", "nonprod"]
+    },
+    "regionRole": {
+      "const": "primary"
+    },
+    "tenantId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "subscriptionId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "stateStoreId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "parameterDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "sourceDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "savedPlanDigest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "planJsonDigest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "notificationContactsDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "terraformAuthMode": {
+      "enum": ["cli", "oidc", null]
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signatureAlgorithm": {
+      "const": "Ed25519"
+    },
+    "keyId": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$"
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
