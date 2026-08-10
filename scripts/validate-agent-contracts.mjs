@@ -310,6 +310,12 @@ function main() {
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
   );
+  const iacPlanInputV3Schema = load(
+    "agent/schemas/iac-plan-input-v3.schema.json",
+  );
+  const readinessEvidenceSchema = load(
+    "agent/schemas/readiness-evidence.schema.json",
+  );
   const iacPlanSummarySchema = load("agent/schemas/iac-plan-summary.schema.json");
   const providerRemediationApprovalSchema = load(
     "agent/schemas/provider-remediation-approval.schema.json",
@@ -350,6 +356,7 @@ function main() {
   const terraformPlanProvenance = load(
     "agent/examples/terraform-plan-provenance.json",
   );
+  const readinessEvidence = load("agent/examples/readiness-evidence.json");
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
     load("agent/profiles/container-apps.json"),
@@ -371,6 +378,14 @@ function main() {
     "https://aka.ms/sslz/schemas/iac-plan-input-v2.schema.json",
   );
   assert.equal(
+    iacPlanInputV3Schema.$id,
+    "https://aka.ms/sslz/schemas/iac-plan-input-v3.schema.json",
+  );
+  assert.equal(
+    readinessEvidenceSchema.$id,
+    "https://aka.ms/sslz/schemas/readiness-evidence.schema.json",
+  );
+  assert.equal(
     iacPlanSummarySchema.$id,
     "https://aka.ms/sslz/schemas/iac-plan-summary.schema.json",
   );
@@ -388,6 +403,7 @@ function main() {
   );
   validateDocument(deploymentApprovalSchema, deploymentApproval);
   validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
+  validateDocument(readinessEvidenceSchema, readinessEvidence);
   assert.equal(
     deploymentResultSchema.$id,
     "https://aka.ms/sslz/schemas/deployment-result.schema.json",
@@ -407,6 +423,7 @@ function main() {
     deploymentExecutionManifest,
     deploymentApproval,
     terraformPlanProvenance,
+    readinessEvidence,
     profiles,
   ]);
 

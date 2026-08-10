@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/iac-plan-input-v3.schema.json",
+  "title": "SSLZ IaC plan input v3",
+  "allOf": [
+    {
+      "$ref": "iac-plan-input-v2.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["readinessEvidence"],
+      "properties": {
+        "schemaVersion": {
+          "const": "3.0.0"
+        },
+        "readinessEvidence": {
+          "$ref": "readiness-evidence.schema.json"
+        }
+      }
+    }
+  ]
+}

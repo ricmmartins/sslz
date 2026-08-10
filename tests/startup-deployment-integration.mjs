@@ -42,6 +42,7 @@ import {
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
 import { validateDocument } from "../scripts/validate-agent-contracts.mjs";
+import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const previousTerraformExecutable = process.env.SSLZ_TERRAFORM_EXECUTABLE;
@@ -111,10 +112,12 @@ function createInput({ regionalMode = "single-region-ready" } = {}) {
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.failoverOwnerConfirmed =
     regionalMode !== "single-region-ready";
+  planningInput.startupInput.reliability.rtoMinutes = 60;
+  planningInput.startupInput.reliability.rpoMinutes = 15;
   planningInput.workloadPlan = planWorkload(planningInput.startupInput);
   const regionalPlan = planRegions(planningInput);
-  return {
-    schemaVersion: "2.0.0",
+  const input = {
+    schemaVersion: "3.0.0",
     planId: "phase-six-test",
     target: {
       tenantId,
@@ -162,6 +165,8 @@ function createInput({ regionalMode = "single-region-ready" } = {}) {
     },
     approval: null,
   };
+  input.readinessEvidence = buildReadinessEvidence(input);
+  return input;
 }
 
 function terraformPlanDocument(
@@ -1333,6 +1338,10 @@ function createApproval(manifest, overrides = {}, signingKey = privateKey) {
     planVersion: manifest.plan.version,
     planId: manifest.plan.id,
     planDigest: manifest.plan.digest,
+    readinessEvidenceVersion: manifest.readinessEvidence.version,
+    readinessEvidenceId: manifest.readinessEvidence.id,
+    readinessEvidenceDigest: manifest.readinessEvidence.digest,
+    readinessEvidenceExpiresAt: manifest.readinessEvidence.expiresAt,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,
@@ -2000,6 +2009,10 @@ try {
     planVersion: "2.0.0",
     planId: "other-plan",
     planDigest: `sha256:${"c".repeat(64)}`,
+    readinessEvidenceVersion: "2.0.0",
+    readinessEvidenceId: "readiness.other-plan.001",
+    readinessEvidenceDigest: `sha256:${"9".repeat(64)}`,
+    readinessEvidenceExpiresAt: "2026-08-09T11:59:59Z",
     operation: "platform-baseline.other",
     provider: "terraform",
     environment: "nonprod",
@@ -2034,6 +2047,34 @@ try {
       `${field} was not rejected: ${result.code}`,
     );
   }
+
+  const omittedApprovalEvidence = { ...approval };
+  delete omittedApprovalEvidence.readinessEvidenceDigest;
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      bicepManifest,
+      omittedApprovalEvidence,
+      mockRuntime(),
+      "approval-readiness-omitted",
+    ).code,
+    "deployment.approval.malformed",
+  );
+
+  const omittedManifestEvidence = structuredClone(bicepManifest);
+  delete omittedManifestEvidence.readinessEvidence;
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      omittedManifestEvidence,
+      approval,
+      mockRuntime(),
+      "manifest-readiness-omitted",
+    ).code,
+    "deployment.input.malformed",
+  );
 
   const changedManifest = structuredClone(bicepManifest);
   changedManifest.execution.provider = "terraform";
@@ -2448,7 +2489,7 @@ try {
         evaluatedAt,
         runner: terraformPreviewRuntime.runner,
       }),
-    /requires a Phase 4 v2 plan/,
+    /requires a Phase 4 v3 plan/,
   );
   const terraformManifest = buildDeploymentManifest(plan, {
     provider: "terraform",

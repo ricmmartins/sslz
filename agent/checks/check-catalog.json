@@ -163,6 +163,62 @@
       "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/app-platform/aks/plan"
     },
     {
+      "id": "readiness.preflight.authoritative",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/azure-subscription-service-limits"
+    },
+    {
+      "id": "readiness.support.startup-confirmed",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "readiness.failover.owner-confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "readiness.recovery.objectives-measured",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "readiness.recovery.service-tested",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "readiness.cost.cool-footprint-provenance",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cost-management-billing/costs/pricing-calculator"
+    },
+    {
+      "id": "readiness.region.evidence-current",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "readiness.foundry.deployment-quota-current",
+      "category": "quota",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/foundry/openai/quotas-limits"
+    },
+    {
       "id": "deployment.platform.expected-resources",
       "category": "operations",
       "severity": "blocking",

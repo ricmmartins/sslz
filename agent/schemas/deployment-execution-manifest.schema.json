@@ -10,6 +10,7 @@
     "generatedBy",
     "manifestDigest",
     "plan",
+    "readinessEvidence",
     "execution",
     "artifacts",
     "preview",
@@ -59,6 +60,26 @@
           "$ref": "#/$defs/digest"
         },
         "approvalExpiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "readinessEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "id", "digest", "expiresAt"],
+      "properties": {
+        "version": {
+          "const": "1.0.0"
+        },
+        "id": {
+          "$ref": "#/$defs/reference"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "expiresAt": {
           "type": "string",
           "format": "date-time"
         }
@@ -413,6 +434,10 @@
     "digest": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
     },
     "generatedPath": {
       "type": "string",

@@ -58,6 +58,17 @@ function load(relativePath) {
 
 const inputSchema = load("agent/schemas/iac-plan-input.schema.json");
 const inputSchemaV2 = load("agent/schemas/iac-plan-input-v2.schema.json");
+const inputSchemaV3 = load("agent/schemas/iac-plan-input-v3.schema.json");
+const readinessEvidenceSchema = load(
+  "agent/schemas/readiness-evidence.schema.json",
+);
+
+class ReadinessEvidenceError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.code = code;
+  }
+}
 
 function canonicalJson(value) {
   if (Array.isArray(value)) {
@@ -86,6 +97,308 @@ function planDigest(decisionModel) {
   return `sha256:${createHash("sha256")
     .update(canonicalJson(decisionModel))
     .digest("hex")}`;
+}
+
+function readinessEvidencePayload(evidence) {
+  const { evidenceDigest: omitted, ...payload } = evidence;
+  return payload;
+}
+
+function readinessEvidenceDigest(evidence) {
+  return `sha256:${createHash("sha256")
+    .update(canonicalJson(readinessEvidencePayload(evidence)))
+    .digest("hex")}`;
+}
+
+function readinessFail(code, message) {
+  throw new ReadinessEvidenceError(code, message);
+}
+
+function assertEvidenceCurrent(item, evaluatedAt, label, timestampField) {
+  const observedAt = Date.parse(item[timestampField]);
+  const expiresAt = Date.parse(item.expiresAt);
+  if (
+    !Number.isFinite(observedAt) ||
+    !Number.isFinite(expiresAt) ||
+    observedAt > evaluatedAt ||
+    expiresAt <= evaluatedAt ||
+    expiresAt <= observedAt
+  ) {
+    readinessFail(
+      "readiness.evidence.stale",
+      `${label} is future-dated, stale, expired, or has an invalid freshness window.`,
+    );
+  }
+}
+
+function assertExactEvidenceSet(items, expectedKeys, keyFor, code, label) {
+  const actual = items.map(keyFor);
+  if (
+    actual.length !== new Set(actual).size ||
+    canonicalJson([...actual].sort()) !== canonicalJson([...expectedKeys].sort())
+  ) {
+    readinessFail(code, `${label} does not exactly cover the selected readiness scope.`);
+  }
+}
+
+function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
+  const evidence = input.readinessEvidence;
+  if (!evidence) {
+    readinessFail(
+      "readiness.evidence.required",
+      "IaC approval requires a versioned readiness evidence artifact.",
+    );
+  }
+  validateDocument(readinessEvidenceSchema, evidence);
+  assertSafeInput(evidence, "$.readinessEvidence");
+  if (evidence.status !== "ready") {
+    readinessFail(
+      "readiness.evidence.blocked",
+      "The readiness evidence artifact is not in ready status.",
+    );
+  }
+  if (readinessEvidenceDigest(evidence) !== evidence.evidenceDigest) {
+    readinessFail(
+      "readiness.evidence.digest-mismatch",
+      "The readiness evidence digest does not match its canonical content.",
+    );
+  }
+  assertEvidenceCurrent(evidence, evaluatedAt, "The readiness artifact", "issuedAt");
+
+  const environments = Object.fromEntries(
+    input.target.environments.map((environment) => [
+      environment.name,
+      environment.subscriptionId.toLowerCase(),
+    ]),
+  );
+  const secondary =
+    input.regionalPlan.requestedRegionalMode === "single-region-ready"
+      ? null
+      : input.regionalPlan.secondaryRecommendation?.region ?? null;
+  const expectedSubject = {
+    planId: input.planId,
+    tenantId: input.target.tenantId.toLowerCase(),
+    prodSubscriptionId: environments.prod,
+    nonprodSubscriptionId: environments.nonprod,
+    profileVersion: input.workloadPlan.profileVersion,
+    computeProfile: input.workloadPlan.computeProfile,
+    profileExtensions: [...input.workloadPlan.profileExtensions].sort(),
+    regionalMode: input.regionalPlan.requestedRegionalMode,
+    primaryRegion: input.regionalPlan.selectedPrimary?.region,
+    secondaryRegion: secondary,
+  };
+  const actualSubject = {
+    ...evidence.subject,
+    profileExtensions: [...evidence.subject.profileExtensions].sort(),
+  };
+  if (canonicalJson(actualSubject) !== canonicalJson(expectedSubject)) {
+    readinessFail(
+      "readiness.evidence.scope-mismatch",
+      "The readiness evidence subject does not match the exact plan, target, profiles, and regions.",
+    );
+  }
+
+  const preflight = evidence.codeEvidence.preflight;
+  assertEvidenceCurrent(preflight, evaluatedAt, "Authoritative preflight evidence", "observedAt");
+  if (preflight.status !== "pass") {
+    readinessFail(
+      "readiness.preflight.blocked",
+      "Authoritative preflight evidence is missing or blocked.",
+    );
+  }
+
+  const support = evidence.humanAttestations.startupBillingSupport;
+  assertEvidenceCurrent(
+    support,
+    evaluatedAt,
+    "Microsoft for Startups billing and support confirmation",
+    "attestedAt",
+  );
+  if (support.status !== "confirmed") {
+    readinessFail(
+      "readiness.support.confirmation-required",
+      "An explicit current Microsoft for Startups billing and support confirmation is required.",
+    );
+  }
+
+  const owner = evidence.humanAttestations.failoverOwner;
+  assertEvidenceCurrent(owner, evaluatedAt, "Failover owner attestation", "attestedAt");
+  if (
+    owner.status !== "confirmed" ||
+    !owner.ownerReference ||
+    !owner.roleReference
+  ) {
+    readinessFail(
+      "readiness.failover.owner-required",
+      "A current named failover owner reference and role reference are required.",
+    );
+  }
+
+  const selectedProfiles = [
+    input.workloadPlan.computeProfile,
+    ...input.workloadPlan.profileExtensions,
+  ];
+  const recovery = evidence.humanAttestations.recoveryMeasurements;
+  assertExactEvidenceSet(
+    recovery,
+    selectedProfiles,
+    (measurement) => measurement.profileId,
+    "readiness.recovery.measurement-required",
+    "Recovery measurements",
+  );
+  const targetRto = input.regionalPlan.recoveryTargets.rtoMinutes;
+  const targetRpo = input.regionalPlan.recoveryTargets.rpoMinutes;
+  if (!Number.isFinite(targetRto) || !Number.isFinite(targetRpo)) {
+    readinessFail(
+      "readiness.recovery.target-required",
+      "Explicit RTO and RPO targets are required before readiness can pass.",
+    );
+  }
+  for (const measurement of recovery) {
+    assertEvidenceCurrent(
+      measurement,
+      evaluatedAt,
+      `Recovery measurement for ${measurement.profileId}`,
+      "attestedAt",
+    );
+    if (
+      measurement.status !== "met" ||
+      measurement.targetRtoMinutes !== targetRto ||
+      measurement.targetRpoMinutes !== targetRpo ||
+      measurement.measuredRtoMinutes > targetRto ||
+      measurement.measuredRpoMinutes > targetRpo
+    ) {
+      readinessFail(
+        "readiness.recovery.objective-unmet",
+        `Measured recovery for ${measurement.profileId} does not meet the selected RTO/RPO.`,
+      );
+    }
+  }
+
+  const serviceTests = evidence.humanAttestations.serviceRecoveryTests;
+  assertExactEvidenceSet(
+    serviceTests,
+    input.workloadPlan.profileExtensions,
+    (test) => test.profileExtension,
+    "readiness.recovery.service-test-required",
+    "Service-specific recovery tests",
+  );
+  for (const test of serviceTests) {
+    assertEvidenceCurrent(
+      test,
+      evaluatedAt,
+      `Recovery test for ${test.profileExtension}`,
+      "attestedAt",
+    );
+    if (test.status !== "pass") {
+      readinessFail(
+        "readiness.recovery.service-test-failed",
+        `The ${test.profileExtension} recovery test has not passed.`,
+      );
+    }
+  }
+
+  const expectedRegions = [
+    `primary:${expectedSubject.primaryRegion}`,
+    ...(secondary ? [`secondary:${secondary}`] : []),
+  ];
+  const regional = evidence.codeEvidence.regional;
+  assertExactEvidenceSet(
+    regional,
+    expectedRegions,
+    (item) => `${item.role}:${item.region}`,
+    "readiness.region.scope-mismatch",
+    "Regional evidence",
+  );
+  for (const item of regional) {
+    assertEvidenceCurrent(
+      item,
+      evaluatedAt,
+      `${item.role} regional evidence`,
+      "observedAt",
+    );
+    if (item.status !== "pass") {
+      readinessFail(
+        "readiness.region.blocked",
+        `${item.role} regional evidence is not passing.`,
+      );
+    }
+  }
+
+  const cost = evidence.humanAttestations.coolFootprintCost;
+  if (expectedSubject.regionalMode === "cool-infrastructure") {
+    if (!cost) {
+      readinessFail(
+        "readiness.cost.provenance-required",
+        "Cool-infrastructure readiness requires a current cost range and provenance reference.",
+      );
+    }
+    assertEvidenceCurrent(cost, evaluatedAt, "Cool-footprint cost attestation", "attestedAt");
+    if (
+      cost.status !== "confirmed" ||
+      !cost.provenanceReference ||
+      cost.minimum > cost.maximum
+    ) {
+      readinessFail(
+        "readiness.cost.range-invalid",
+        "The cool-footprint cost range or provenance is invalid.",
+      );
+    }
+    const selectedCost = input.regionalPlan.costAssumptions.secondaryBaseline;
+    if (
+      cost.currency !== input.regionalPlan.costAssumptions.currency ||
+      cost.minimum !== selectedCost.minimum ||
+      cost.maximum !== selectedCost.maximum
+    ) {
+      readinessFail(
+        "readiness.cost.scope-mismatch",
+        "The cool-footprint cost attestation does not match the selected regional plan.",
+      );
+    }
+  } else if (cost !== null) {
+    readinessFail(
+      "readiness.cost.scope-mismatch",
+      "Cool-footprint cost evidence must be omitted when cool-infrastructure is not selected.",
+    );
+  }
+
+  const foundry = evidence.codeEvidence.foundry;
+  if (input.workloadPlan.profileExtensions.includes("foundry")) {
+    assertExactEvidenceSet(
+      foundry,
+      expectedRegions,
+      (item) => `${item.role}:${item.region}`,
+      "readiness.foundry.evidence-required",
+      "Foundry evidence",
+    );
+    for (const item of foundry) {
+      assertEvidenceCurrent(
+        item,
+        evaluatedAt,
+        `${item.role} Foundry evidence`,
+        "observedAt",
+      );
+      if (
+        item.status !== "pass" ||
+        !item.modelReference ||
+        !item.modelVersion ||
+        !item.deploymentType ||
+        item.availableQuota < item.requiredQuota
+      ) {
+        readinessFail(
+          "readiness.foundry.blocked",
+          "Foundry model version, deployment type, and sufficient current quota are required.",
+        );
+      }
+    }
+  } else if (foundry.length !== 0) {
+    readinessFail(
+      "readiness.foundry.scope-mismatch",
+      "Foundry evidence is only valid when the Foundry profile extension is selected.",
+    );
+  }
+
+  return evidence;
 }
 
 function relativePath(path) {
@@ -131,10 +444,13 @@ function assertSupportedVersion(version, label, supportedMajors = [1]) {
   }
 }
 
-function assertSemanticInput(input) {
-  assertSupportedVersion(input.schemaVersion, "IaC plan input schema", [1, 2]);
+function assertSemanticInput(input, evaluatedAt) {
+  assertSupportedVersion(input.schemaVersion, "IaC plan input schema", [1, 2, 3]);
   assertSupportedVersion(input.workloadPlan.schemaVersion, "workload plan schema");
   assertSupportedVersion(input.regionalPlan.schemaVersion, "regional plan schema");
+  if (input.schemaVersion === "3.0.0") {
+    assertReadinessEvidence(input, evaluatedAt);
+  }
 
   if (input.workloadPlan.status !== "ready") {
     throw new Error("IaC planning requires a ready workload profile plan.");
@@ -232,6 +548,12 @@ function assertSemanticInput(input) {
     if (expiresAt - approvedAt > 24 * 60 * 60 * 1000) {
       throw new Error("Approval validity cannot exceed 24 hours.");
     }
+    if (
+      input.readinessEvidence &&
+      expiresAt > Date.parse(input.readinessEvidence.expiresAt)
+    ) {
+      throw new Error("Approval expiration cannot exceed readiness evidence expiry.");
+    }
   }
 
   const selectedProfileIds = new Set([
@@ -296,8 +618,21 @@ function buildDecisionModel(input) {
       computeProfile: input.workloadPlan.computeProfile,
       profileExtensions: [...input.workloadPlan.profileExtensions].sort(),
     },
+    readinessEvidence: input.readinessEvidence
+      ? {
+          schemaVersion: input.readinessEvidence.schemaVersion,
+          evidenceId: input.readinessEvidence.evidenceId,
+          evidenceDigest: input.readinessEvidence.evidenceDigest,
+          issuedAt: input.readinessEvidence.issuedAt,
+          expiresAt: input.readinessEvidence.expiresAt,
+        }
+      : null,
     regional: {
       mode: input.regionalPlan.requestedRegionalMode,
+      recoveryTargets: {
+        rtoMinutes: input.regionalPlan.recoveryTargets.rtoMinutes,
+        rpoMinutes: input.regionalPlan.recoveryTargets.rpoMinutes,
+      },
       primary: {
         region: primary.region,
         vnetCidr: primary.proposedVnetCidr,
@@ -353,7 +688,25 @@ function buildDecisionModel(input) {
   };
 }
 
-function approvalFor(inputApproval, planId, digest, evaluatedAt) {
+function approvalFor(
+  inputApproval,
+  planId,
+  digest,
+  evaluatedAt,
+  readinessEvidence,
+) {
+  if (!readinessEvidence) {
+    return {
+      required: true,
+      status: "pending",
+      planId,
+      planDigest: digest,
+      approvedAt: null,
+      expiresAt: null,
+      reapprovalRequired: true,
+      invalidationReason: "readiness-evidence-required",
+    };
+  }
   if (!inputApproval) {
     return {
       required: true,
@@ -1509,11 +1862,15 @@ function generateIacPlan(
   } = {},
 ) {
   validateDocument(
-    input?.schemaVersion === "2.0.0" ? inputSchemaV2 : inputSchema,
+    input?.schemaVersion === "3.0.0"
+      ? inputSchemaV3
+      : input?.schemaVersion === "2.0.0"
+        ? inputSchemaV2
+        : inputSchema,
     input,
   );
   assertSafeInput(input);
-  assertSemanticInput(input);
+  assertSemanticInput(input, evaluatedAt);
 
   const selectedProviders = normalizeProviders(providers);
   const outputDirectory = ensureGeneratedPath(outputPath, "Output directory");
@@ -1552,7 +1909,14 @@ function generateIacPlan(
     planId: input.planId,
     planDigest: digest,
     decisionModel,
-    approval: approvalFor(input.approval, input.planId, digest, evaluatedAt),
+    readinessEvidence: input.readinessEvidence ?? null,
+    approval: approvalFor(
+      input.approval,
+      input.planId,
+      digest,
+      evaluatedAt,
+      input.readinessEvidence ?? null,
+    ),
     artifacts: definitions.map((definition) => ({
       provider: definition.provider,
       environment: definition.environment.name,
@@ -1677,11 +2041,14 @@ function main() {
 }
 
 export {
+  ReadinessEvidenceError,
   assertArtifactDestinationsAvailable,
+  assertReadinessEvidence,
   buildDecisionModel,
   canonicalJson,
   generateIacPlan,
   planDigest,
+  readinessEvidenceDigest,
   sanitizedTerraformEnvironment,
   summarizePreview,
   writeExclusiveArtifacts,
