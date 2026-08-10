@@ -10,7 +10,7 @@
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": "2.0.0"
+          "enum": ["2.0.0", "3.0.0"]
         },
         "deployment": {
           "type": "object",

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0.0",
+  "evidenceId": "readiness.startup-primary-baseline.001",
+  "status": "ready",
+  "issuedAt": "2026-08-09T10:00:00Z",
+  "expiresAt": "2026-08-09T13:00:00Z",
+  "subject": {
+    "planId": "startup-primary-baseline",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "prodSubscriptionId": "22222222-2222-2222-2222-222222222222",
+    "nonprodSubscriptionId": "33333333-3333-3333-3333-333333333333",
+    "profileVersion": "1.0.0",
+    "computeProfile": "container-apps",
+    "profileExtensions": [
+      "postgresql"
+    ],
+    "regionalMode": "single-region-ready",
+    "primaryRegion": "eastus2",
+    "secondaryRegion": null
+  },
+  "codeEvidence": {
+    "preflight": {
+      "status": "pass",
+      "issuer": "startup-preflight.mjs",
+      "reference": "preflight.run-ready-001",
+      "observedAt": "2026-08-09T10:00:00Z",
+      "expiresAt": "2026-08-09T13:00:00Z",
+      "evidenceDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "regional": [
+      {
+        "status": "pass",
+        "issuer": "startup-regional-plan.mjs",
+        "reference": "regional.primary.001",
+        "observedAt": "2026-08-09T10:00:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "role": "primary",
+        "region": "eastus2"
+      }
+    ],
+    "foundry": []
+  },
+  "humanAttestations": {
+    "startupBillingSupport": {
+      "status": "confirmed",
+      "issuerRole": "role.microsoft-startups-support",
+      "reference": "attestation.billing-support.001",
+      "subjectScope": "microsoft-for-startups-billing-and-support",
+      "attestedAt": "2026-08-09T10:30:00Z",
+      "expiresAt": "2026-08-09T13:00:00Z",
+      "evidenceDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "failoverOwner": {
+      "status": "confirmed",
+      "issuerRole": "role.platform-governance",
+      "reference": "attestation.failover-owner.001",
+      "subjectScope": "workload-failover-accountability",
+      "attestedAt": "2026-08-09T10:30:00Z",
+      "expiresAt": "2026-08-09T13:00:00Z",
+      "evidenceDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "ownerReference": "identity.oncall-primary",
+      "roleReference": "role.incident-commander"
+    },
+    "recoveryMeasurements": [
+      {
+        "status": "met",
+        "issuerRole": "role.recovery-test-authority",
+        "reference": "measurement.container-apps.001",
+        "subjectScope": "profile-recovery-measurement",
+        "attestedAt": "2026-08-09T10:30:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "profileId": "container-apps",
+        "targetRtoMinutes": 60,
+        "targetRpoMinutes": 15,
+        "measuredRtoMinutes": 55,
+        "measuredRpoMinutes": 13
+      },
+      {
+        "status": "met",
+        "issuerRole": "role.recovery-test-authority",
+        "reference": "measurement.postgresql.001",
+        "subjectScope": "profile-recovery-measurement",
+        "attestedAt": "2026-08-09T10:30:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "profileId": "postgresql",
+        "targetRtoMinutes": 60,
+        "targetRpoMinutes": 15,
+        "measuredRtoMinutes": 55,
+        "measuredRpoMinutes": 13
+      }
+    ],
+    "serviceRecoveryTests": [
+      {
+        "status": "pass",
+        "issuerRole": "role.recovery-test-authority",
+        "reference": "service-test.postgresql.001",
+        "subjectScope": "service-specific-recovery-test",
+        "attestedAt": "2026-08-09T10:30:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "profileExtension": "postgresql"
+      }
+    ],
+    "coolFootprintCost": null
+  },
+  "evidenceDigest": "sha256:9091e6b706b755656cb29e628a6ee78f827a0a3ffb77e0f50045af3b1c675691"
+}

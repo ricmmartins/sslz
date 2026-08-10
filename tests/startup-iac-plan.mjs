@@ -26,6 +26,7 @@ import {
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
 import { validateDocument } from "../scripts/validate-agent-contracts.mjs";
+import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const script = resolve(root, "scripts/startup-iac-plan.mjs");
@@ -63,11 +64,13 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.failoverOwnerConfirmed =
     regionalMode !== "single-region-ready";
+  planningInput.startupInput.reliability.rtoMinutes = 60;
+  planningInput.startupInput.reliability.rpoMinutes = 15;
   planningInput.workloadPlan = planWorkload(planningInput.startupInput);
   const regionalPlan = planRegions(planningInput);
 
-  return {
-    schemaVersion: "2.0.0",
+  const input = {
+    schemaVersion: "3.0.0",
     planId: "phase-four-test",
     target: {
       tenantId: "11111111-1111-1111-1111-111111111111",
@@ -135,6 +138,8 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
     },
     approval: null,
   };
+  input.readinessEvidence = buildReadinessEvidence(input);
+  return input;
 }
 
 function parseLiteral(value) {
@@ -620,6 +625,7 @@ try {
   );
   const legacyInput = structuredClone(input);
   legacyInput.schemaVersion = "1.0.0";
+  delete legacyInput.readinessEvidence;
   delete legacyInput.deployment.terraformBackend.subscriptionId;
   const legacyPlan = generateIacPlan(legacyInput, {
     providers: ["terraform"],
@@ -631,15 +637,16 @@ try {
     false,
   );
   assert.equal(legacyPlan.inputContractVersion, "1.0.0");
-  assert.equal(first.inputContractVersion, "2.0.0");
+  assert.equal(legacyPlan.approval.invalidationReason, "readiness-evidence-required");
+  assert.equal(first.inputContractVersion, "3.0.0");
   const unsupported = structuredClone(input);
-  unsupported.schemaVersion = "3.0.0";
+  unsupported.schemaVersion = "4.0.0";
   assert.throws(
     () =>
       generateIacPlan(unsupported, {
         outputPath: `${outputRelative}/unsupported`,
       }),
-    /unsupported value "3.0.0"/,
+    /unsupported value "4.0.0"/,
   );
   const collisionDirectory = resolve(outputPath, "artifact-collision");
   mkdirSync(collisionDirectory, { recursive: true });

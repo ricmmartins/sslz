@@ -11,6 +11,7 @@
     "planId",
     "planDigest",
     "decisionModel",
+    "readinessEvidence",
     "approval",
     "artifacts",
     "previews",
@@ -24,7 +25,7 @@
       "const": "1.0.0"
     },
     "inputContractVersion": {
-      "enum": ["1.0.0", "2.0.0"]
+      "enum": ["1.0.0", "2.0.0", "3.0.0"]
     },
     "generatedBy": {
       "const": "startup-iac-plan.mjs"
@@ -39,6 +40,16 @@
     },
     "decisionModel": {
       "type": "object"
+    },
+    "readinessEvidence": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "readiness-evidence.schema.json"
+        }
+      ]
     },
     "approval": {
       "$ref": "#/$defs/approval"
@@ -127,7 +138,13 @@
           "type": "boolean"
         },
         "invalidationReason": {
-          "enum": ["plan-id-changed", "plan-digest-changed", "approval-expired", null]
+          "enum": [
+            "plan-id-changed",
+            "plan-digest-changed",
+            "approval-expired",
+            "readiness-evidence-required",
+            null
+          ]
         }
       }
     },

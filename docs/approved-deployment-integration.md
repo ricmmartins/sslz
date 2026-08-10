@@ -16,6 +16,8 @@ region. Only an approved primary `single-region-ready` platform baseline is exec
 The versioned contracts are:
 
 - [`iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json)
+- [`iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json)
+- [`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
 - [`deployment-execution-manifest.schema.json`](../agent/schemas/deployment-execution-manifest.schema.json)
 - [`deployment-approval.schema.json`](../agent/schemas/deployment-approval.schema.json)
 - [`deployment-result.schema.json`](../agent/schemas/deployment-result.schema.json)
@@ -26,9 +28,9 @@ The versioned contracts are:
 Generate an approved Phase 4 plan with a real command preview. Terraform requires an explicit raw-artifact directory so
 the reviewed saved plan is available:
 
-Use the `2.0.0` IaC input contract for Terraform plans intended for Phase 6. It requires the exact remote-backend
-subscription. Version `1.0.0` remains accepted by the standalone Phase 4 planner for compatibility but is not eligible
-for approved Terraform execution.
+Use the `3.0.0` IaC input contract for plans intended for Phase 6. It requires the exact remote-backend subscription and
+the current readiness-evidence artifact. Versions `1.0.0` and `2.0.0` remain accepted by the standalone Phase 4 planner
+for compatibility but are not eligible for approved execution.
 
 ```bash
 SSLZ_TERRAFORM_PROVENANCE_PRIVATE_KEY_FILE=/protected/sslz-terraform-builder.key \
@@ -64,7 +66,7 @@ SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE=/protected/sslz-terraform-builder.pub 
 
 Preview performs no Azure or local write. It:
 
-1. validates the approved Phase 4 plan and expiry;
+1. validates the approved Phase 4 plan, readiness artifact digest/scope/freshness, and expiry;
 2. selects exactly one primary provider and environment;
 3. hashes the complete plan artifact, selected parameters, current SSLZ source tree, controlled Terraform CLI
    configuration, and Terraform lock file;
@@ -96,7 +98,8 @@ Apply accepts only an Ed25519-signed approval. The signed payload uses canonical
 only `signature`, and is prefixed with `sslz-deployment-approval-v1` plus a NUL byte. `keyId` is the SHA-256 digest of
 the trusted public key's SPKI DER representation.
 
-The approval duplicates and binds the manifest digest, plan identity, provider, environment, primary region, tenant,
+The approval duplicates and binds the manifest digest, plan identity, readiness evidence version/opaque ID/digest/expiry,
+provider, environment, primary region, tenant,
 subscription, exact subscription scope, protected durable-store identity, parameter/source/saved-plan hashes, Terraform
 authentication choice, notification-recipient commitment, unique nonce, and validity window. The window cannot exceed
 24 hours.

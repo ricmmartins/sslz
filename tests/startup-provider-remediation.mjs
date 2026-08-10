@@ -24,6 +24,7 @@ import {
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
 import { validateDocument } from "../scripts/validate-agent-contracts.mjs";
+import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const regionalInput = JSON.parse(
@@ -57,6 +58,8 @@ function createPlan({
 } = {}) {
   const planningInput = structuredClone(regionalInput);
   planningInput.startupInput.reliability.regionalMode = "single-region-ready";
+  planningInput.startupInput.reliability.rtoMinutes = 60;
+  planningInput.startupInput.reliability.rpoMinutes = 15;
   planningInput.workloadPlan = planWorkload(planningInput.startupInput);
   if (profile) {
     planningInput.workloadPlan.computeProfile = profile.computeProfile;
@@ -65,7 +68,7 @@ function createPlan({
   const regionalPlan = planRegions(planningInput);
   const namespaceSlug = namespace.toLowerCase().replaceAll(".", "-");
   const input = {
-    schemaVersion: "1.0.0",
+    schemaVersion: "3.0.0",
     planId,
     target: {
       tenantId,
@@ -128,6 +131,7 @@ function createPlan({
     },
     approval: null,
   };
+  input.readinessEvidence = buildReadinessEvidence(input);
   const decisionModel = buildDecisionModel(input);
   const digest = planDigest(decisionModel);
   return {
@@ -137,6 +141,7 @@ function createPlan({
     planId,
     planDigest: digest,
     decisionModel,
+    readinessEvidence: input.readinessEvidence,
     approval: {
       required: true,
       status: "pending",

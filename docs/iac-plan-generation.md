@@ -17,6 +17,8 @@ The input and output contracts are:
 
 - [`agent/schemas/iac-plan-input.schema.json`](../agent/schemas/iac-plan-input.schema.json) for compatible Phase 4 v1 inputs
 - [`agent/schemas/iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json) for Phase 6-capable plans with an exact backend subscription
+- [`agent/schemas/iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json) for approval-capable plans with readiness evidence
+- [`agent/schemas/readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
 - [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
 - [`agent/schemas/terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
 
@@ -68,11 +70,17 @@ The planner canonicalizes object keys and computes a SHA-256 digest over all app
 - deployment and cost assumptions;
 - proposed manual, support, and information actions;
 - explicit Terraform remote-backend coordinates, including the backend subscription.
+- the readiness evidence version, opaque artifact ID, canonical digest, issue time, and expiry.
 
 Approval metadata contains the immutable plan ID and digest. If either value changes, an earlier approval is replaced
 with `pending`, `reapprovalRequired` is true, and the summary records why it was invalidated.
 An approved Phase 4 input must include a non-null expiry no more than 24 hours after approval; expired or overlong
 approvals are rejected. Phase 5 provider remediation uses a separate single-use action approval.
+
+Only v3 inputs can carry approval-eligible readiness evidence. The planner validates its self-digest, current freshness,
+exact tenant/subscription/plan/profile/region scope, explicit human confirmations, recovery measurements, service tests,
+cost provenance, and conditional Foundry evidence. Legacy v1/v2 inputs remain representable for compatibility, but their
+approval is forced to `pending` with `readiness-evidence-required`.
 
 ## Read-only previews
 

@@ -35,6 +35,8 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
+  ReadinessEvidenceError,
+  assertReadinessEvidence,
   canonicalJson,
   planDigest,
 } from "./startup-iac-plan.mjs";
@@ -688,6 +690,57 @@ function validateReviewedPlan(plan, evaluatedAt) {
     fail(
       "deployment.plan.digest-mismatch",
       "The reviewed Phase 4 plan digest does not match its canonical decisions.",
+    );
+  }
+  if (plan.inputContractVersion !== "3.0.0" || !plan.readinessEvidence) {
+    fail(
+      "deployment.readiness.required",
+      "Deployment requires a Phase 4 v3 plan with bound readiness evidence.",
+    );
+  }
+  const profile = plan.decisionModel.profile;
+  const regional = plan.decisionModel.regional;
+  try {
+    assertReadinessEvidence(
+      {
+        schemaVersion: "3.0.0",
+        planId: plan.planId,
+        target: plan.decisionModel.target,
+        workloadPlan: {
+          profileVersion: profile.profileVersion,
+          computeProfile: profile.computeProfile,
+          profileExtensions: profile.profileExtensions,
+        },
+        regionalPlan: {
+          requestedRegionalMode: regional.mode,
+          selectedPrimary: regional.primary,
+          secondaryRecommendation: regional.secondary,
+          recoveryTargets: regional.recoveryTargets,
+          costAssumptions: plan.decisionModel.costAssumptions.regional,
+        },
+        readinessEvidence: plan.readinessEvidence,
+      },
+      evaluatedAt,
+    );
+  } catch (error) {
+    if (error instanceof ReadinessEvidenceError) {
+      fail(error.code, error.message);
+    }
+    throw error;
+  }
+  if (
+    canonicalJson(plan.decisionModel.readinessEvidence) !==
+    canonicalJson({
+      schemaVersion: plan.readinessEvidence.schemaVersion,
+      evidenceId: plan.readinessEvidence.evidenceId,
+      evidenceDigest: plan.readinessEvidence.evidenceDigest,
+      issuedAt: plan.readinessEvidence.issuedAt,
+      expiresAt: plan.readinessEvidence.expiresAt,
+    })
+  ) {
+    fail(
+      "deployment.readiness.binding-mismatch",
+      "The Phase 4 readiness evidence does not match its canonical plan binding.",
     );
   }
   const planApproval = plan.approval;
@@ -2252,7 +2305,7 @@ function buildDeploymentManifest(
   const selection = selectExecution(plan, provider, environment);
   if (
     provider === "terraform" &&
-    (plan.inputContractVersion !== "2.0.0" ||
+    (plan.inputContractVersion !== "3.0.0" ||
       !UUID.test(plan.decisionModel.terraformBackend?.subscriptionId ?? ""))
   ) {
     fail(
@@ -2378,6 +2431,12 @@ function buildDeploymentManifest(
       artifactPath: relativePath(planArtifactPath),
       artifactDigest: fileDigest(planArtifactPath),
       approvalExpiresAt: plan.approval.expiresAt,
+    },
+    readinessEvidence: {
+      version: plan.readinessEvidence.schemaVersion,
+      id: plan.readinessEvidence.evidenceId,
+      digest: plan.readinessEvidence.evidenceDigest,
+      expiresAt: plan.readinessEvidence.expiresAt,
     },
     execution: {
       operation: "platform-baseline.deploy",
@@ -2585,6 +2644,12 @@ function assertManifestCurrent(
       artifactDigest: fileDigest(planArtifactPath),
       approvalExpiresAt: plan.approval.expiresAt,
     },
+    readinessEvidence: {
+      version: plan.readinessEvidence.schemaVersion,
+      id: plan.readinessEvidence.evidenceId,
+      digest: plan.readinessEvidence.evidenceDigest,
+      expiresAt: plan.readinessEvidence.expiresAt,
+    },
     execution: {
       operation: "platform-baseline.deploy",
       provider: manifest.execution.provider,
@@ -2650,6 +2715,8 @@ function assertManifestCurrent(
   };
   if (
     canonicalJson(manifest.plan) !== canonicalJson(expected.plan) ||
+    canonicalJson(manifest.readinessEvidence) !==
+      canonicalJson(expected.readinessEvidence) ||
     canonicalJson(manifest.execution) !== canonicalJson(expected.execution) ||
     canonicalJson(manifest.artifacts) !== canonicalJson(expected.artifacts) ||
     manifest.preview.reviewedSummaryDigest !== expected.reviewedSummaryDigest ||
@@ -2711,6 +2778,15 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
     );
   }
   approvalWindow(approval, evaluatedAt, "deployment.approval");
+  if (
+    Date.parse(approval.expiresAt) >
+    Date.parse(manifest.readinessEvidence.expiresAt)
+  ) {
+    fail(
+      "deployment.approval.readiness-window",
+      "The deployment approval cannot outlive its bound readiness evidence.",
+    );
+  }
   const expectedKeyId = keyFingerprint(publicKey);
   if (approval.keyId !== expectedKeyId) {
     fail(
@@ -2755,6 +2831,10 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
     planVersion: manifest.plan.version,
     planId: manifest.plan.id,
     planDigest: manifest.plan.digest,
+    readinessEvidenceVersion: manifest.readinessEvidence.version,
+    readinessEvidenceId: manifest.readinessEvidence.id,
+    readinessEvidenceDigest: manifest.readinessEvidence.digest,
+    readinessEvidenceExpiresAt: manifest.readinessEvidence.expiresAt,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,

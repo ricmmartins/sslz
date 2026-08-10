@@ -16,6 +16,8 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/regional-capacity-plan.schema.json` | Read-only regional and capacity recommendation |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
+| `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
+| `schemas/readiness-evidence.schema.json` | Versioned code evidence and external/human attestations |
 | `schemas/iac-plan-summary.schema.json` | Sanitized parameter, preview, digest, and approval summary |
 | `schemas/terraform-plan-provenance.schema.json` | Signed atomic-build provenance for one Terraform saved plan |
 | `schemas/provider-remediation-approval.schema.json` | Single-use approval bound to one reviewed provider action |
@@ -35,6 +37,7 @@ node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-iac-plan.mjs
+node tests/startup-readiness-evidence.mjs
 node tests/startup-provider-remediation.mjs
 node tests/startup-deployment-integration.mjs
 ```
@@ -88,7 +91,8 @@ Exit status is `0` only for executable readiness, `1` for blocked or review-requ
   --output-dir .sslz/generated/my-plan
 ```
 
-The command derives Bicep and Terraform parameters from one canonical decision model. It writes only beneath
+The command derives Bicep and Terraform parameters from one canonical decision model. Approval-capable v3 inputs must
+include current readiness evidence whose canonical digest is bound into the plan. It writes only beneath
 `.sslz/generated/`, which is ignored by Git, and emits a stable SHA-256 digest plus approval metadata. A changed
 approval-bound decision invalidates a supplied approval. Add `--preview` to run only Bicep what-if or Terraform plan.
 Terraform preview requires the input's explicit `azurerm` remote-backend coordinates and ambient authentication; the

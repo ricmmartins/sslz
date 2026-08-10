@@ -15,7 +15,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "enum": ["1.0.0", "2.0.0"]
+      "enum": ["1.0.0", "2.0.0", "3.0.0"]
     },
     "planId": {
       "type": "string",
@@ -54,6 +54,9 @@
     },
     "regionalPlan": {
       "$ref": "regional-capacity-plan.schema.json"
+    },
+    "readinessEvidence": {
+      "$ref": "readiness-evidence.schema.json"
     },
     "deployment": {
       "type": "object",

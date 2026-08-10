@@ -12,6 +12,10 @@
     "planVersion",
     "planId",
     "planDigest",
+    "readinessEvidenceVersion",
+    "readinessEvidenceId",
+    "readinessEvidenceDigest",
+    "readinessEvidenceExpiresAt",
     "operation",
     "provider",
     "environment",
@@ -56,6 +60,19 @@
     },
     "planDigest": {
       "$ref": "#/$defs/digest"
+    },
+    "readinessEvidenceVersion": {
+      "const": "1.0.0"
+    },
+    "readinessEvidenceId": {
+      "$ref": "#/$defs/reference"
+    },
+    "readinessEvidenceDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "readinessEvidenceExpiresAt": {
+      "type": "string",
+      "format": "date-time"
     },
     "operation": {
       "const": "platform-baseline.deploy"
@@ -137,6 +154,11 @@
     "digest": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+    ,
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
     }
   }
 }
