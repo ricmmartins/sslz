@@ -217,6 +217,7 @@ try {
 
   const alternateReservation = reserveRegionalAttempt(alternate, stateDirectory, {
     previousAttemptKey: cleaned.identities.attemptKey,
+    previousTargetRegion: cleaned.targetRegion,
   });
   assert.equal(alternateReservation.status, "reserved");
   releaseRegionalAttemptReservation(alternateReservation);

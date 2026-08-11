@@ -67,7 +67,8 @@ review-only and does not generate a secondary foundation.
 attempt must provide the complete immutable predecessor record for both production and nonproduction. Each record must
 match its environment, chain, attempt number, original region, identity, and record digest. A changed-region attempt must
 also provide successful cleanup evidence for each environment; otherwise planning fails closed. The selected primary
-region must exactly match the attempt target.
+region must exactly match the attempt target. The production planner compares the new region-bound readiness evidence and
+computed plan digest with each predecessor binding and rejects reuse before writing retry artifacts.
 
 Every later attempt receives deterministic, collision-safe Bicep nested deployment names, resource and policy-assignment
 suffixes, Terraform workspace identities, raw saved-plan paths, and generated artifact paths. Terraform deliberately

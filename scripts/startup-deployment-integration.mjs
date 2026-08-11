@@ -52,6 +52,7 @@ import {
 } from "./terraform-plan-provenance.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
 import {
+  assertFreshRegionalBindings,
   attemptIdentity,
   completeRegionalAttemptReservation,
   createRegionalAttempt,
@@ -359,6 +360,38 @@ const VALIDATION_CHECK_IDS = [
 
 function load(relativePath) {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8"));
+}
+
+function assertManifestRegionalBindingsFresh(manifest, approval = null) {
+  const attempt = manifest.regionalAttempt;
+  if (attempt.attemptNumber === 1) {
+    return;
+  }
+  if (!attempt.previousBindings || !attempt.previousTargetRegion) {
+    fail(
+      "deployment.regional-attempt.predecessor-binding-missing",
+      "The changed-region attempt is missing its reviewed predecessor bindings.",
+    );
+  }
+  const freshBindings = {
+    regionalEvidenceDigest: manifest.readinessEvidence.digest,
+    planDigest: manifest.plan.digest,
+    artifactDigest: hashCanonical(manifest.artifacts),
+    manifestDigest: manifest.manifestDigest,
+    ...(approval ? { approvalDigest: approvalArtifactDigest(approval) } : {}),
+  };
+  try {
+    assertFreshRegionalBindings(
+      attempt.previousBindings,
+      freshBindings,
+      attempt.targetRegion !== attempt.previousTargetRegion,
+    );
+  } catch (error) {
+    fail(
+      "deployment.regional-attempt.binding-reused",
+      error.message,
+    );
+  }
 }
 
 const planSchema = load("agent/schemas/iac-plan-summary.schema.json");
@@ -1107,6 +1140,9 @@ function regionalAttemptBinding(plan, selection) {
       attempt.cleanupEvidenceDigests[selection.target.name],
     safeSameRegionRetry: attempt.safeSameRegionRetry,
     previousAttemptKey: attempt.previousAttemptKeys[selection.target.name],
+    previousTargetRegion:
+      attempt.previousTargetRegions[selection.target.name],
+    previousBindings: attempt.previousBindings[selection.target.name],
     retiredPolicyAssignmentNames:
       attempt.retiredPolicyAssignmentNames[selection.target.name],
     identityDigest: identity.identityDigest,
@@ -1126,6 +1162,7 @@ function regionalAttemptBinding(plan, selection) {
 
 function deploymentRegionalAttemptRecord(manifest, approval, occurredAt) {
   const attempt = manifest.regionalAttempt;
+  assertManifestRegionalBindingsFresh(manifest, approval);
   const stateSuffix =
     `-${manifest.execution.environment}-primary.tfstate`;
   if (!attempt.stateKey.endsWith(stateSuffix)) {
@@ -2957,6 +2994,7 @@ function buildDeploymentManifest(
     },
   };
   manifest.manifestDigest = manifestDigest(manifest);
+  assertManifestRegionalBindingsFresh(manifest);
   validateDocument(manifestSchema, manifest);
   return manifest;
 }
@@ -2982,6 +3020,7 @@ function assertManifestCurrent(
       "The deployment manifest digest does not match its canonical content.",
     );
   }
+  assertManifestRegionalBindingsFresh(manifest);
   const planArtifactPath = assertPlanArtifact(plan, planPath);
   const selection = selectExecution(
     plan,
@@ -4852,7 +4891,10 @@ function runDeploymentIntegration(
     regionalReservation = reserveRegionalAttempt(
       plannedRegionalAttempt,
       regionalStatePath ?? resolve(stateStore.directory, "regional-attempts"),
-      { previousAttemptKey: manifest.regionalAttempt.previousAttemptKey },
+      {
+        previousAttemptKey: manifest.regionalAttempt.previousAttemptKey,
+        previousTargetRegion: manifest.regionalAttempt.previousTargetRegion,
+      },
     );
     if (regionalReservation.status === "replayed") {
       completeReservation(

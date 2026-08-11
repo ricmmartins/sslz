@@ -47,6 +47,7 @@ import {
   digest as defenderWorkspaceDigest,
 } from "./defender-workspace-placement.mjs";
 import {
+  assertFreshRegionalBindings,
   assertRegionalAttemptRecord,
   attemptIdentity,
 } from "./regional-attempt.mjs";
@@ -995,6 +996,8 @@ function regionalAttemptModel(input, primary) {
   const previousAttemptDigests = { prod: null, nonprod: null };
   const cleanupEvidenceDigests = { prod: null, nonprod: null };
   const previousAttemptKeys = { prod: null, nonprod: null };
+  const previousTargetRegions = { prod: null, nonprod: null };
+  const previousBindings = { prod: null, nonprod: null };
   const retiredPolicyAssignmentNames = { prod: [], nonprod: [] };
   if (attempt.attemptNumber === 1) {
     if (Object.values(attempt.previousAttempts).some(Boolean)) {
@@ -1032,6 +1035,8 @@ function regionalAttemptModel(input, primary) {
       previousAttemptDigests[environment] = previous.recordDigest;
       cleanupEvidenceDigests[environment] = previous.cleanup.evidenceDigest;
       previousAttemptKeys[environment] = previous.identities.attemptKey;
+      previousTargetRegions[environment] = previous.targetRegion;
+      previousBindings[environment] = structuredClone(previous.bindings);
       retiredPolicyAssignmentNames[environment] = Object.values(
         previous.identities.policyAssignmentNames,
       ).sort();
@@ -1044,6 +1049,13 @@ function regionalAttemptModel(input, primary) {
         );
       }
       const changedRegion = attempt.targetRegion !== previous.targetRegion;
+      assertFreshRegionalBindings(
+        previous.bindings,
+        {
+          regionalEvidenceDigest: input.readinessEvidence.evidenceDigest,
+        },
+        changedRegion,
+      );
       if (
         changedRegion &&
         previous.writeStarted &&
@@ -1074,9 +1086,30 @@ function regionalAttemptModel(input, primary) {
     previousAttemptDigests,
     cleanupEvidenceDigests,
     previousAttemptKeys,
+    previousTargetRegions,
+    previousBindings,
     retiredPolicyAssignmentNames,
     safeSameRegionRetry: attempt.safeSameRegionRetry,
   };
+}
+
+function assertRegionalPlanBindingsFresh(decisionModel, digest) {
+  const attempt = decisionModel.regionalAttempt;
+  for (const environment of ["prod", "nonprod"]) {
+    const previous = attempt.previousBindings[environment];
+    if (!previous) {
+      continue;
+    }
+    assertFreshRegionalBindings(
+      previous,
+      {
+        regionalEvidenceDigest:
+          decisionModel.readinessEvidence.evidenceDigest,
+        planDigest: digest,
+      },
+      attempt.targetRegion !== attempt.previousTargetRegions[environment],
+    );
+  }
 }
 
 function regionalAttemptIdentity(decisionModel, provider, environment) {
@@ -2627,6 +2660,7 @@ function generateIacPlan(
   const resolvedNotificationContacts =
     validatedNotificationContacts(notificationContacts);
   const digest = planDigest(decisionModel);
+  assertRegionalPlanBindingsFresh(decisionModel, digest);
   const planAttemptDirectory = resolve(
     planOutputDirectory,
     `a${String(decisionModel.regionalAttempt.attemptNumber).padStart(2, "0")}-` +

@@ -341,7 +341,12 @@ try {
   alternateInput.regionalPlan.selectedPrimary =
     alternateInput.regionalPlan.secondaryRecommendation;
   alternateInput.regionalPlan.secondaryRecommendation = originalPrimary;
-  const primaryAttempt = (environment, provider, character) =>
+  const primaryAttempt = (
+    environment,
+    provider,
+    character,
+    regionalEvidenceDigest = input.readinessEvidence.evidenceDigest,
+  ) =>
     createRegionalAttempt({
       chainId: input.planId,
       planId: input.planId,
@@ -351,7 +356,7 @@ try {
       provider,
       environment,
       backendKeyPrefix: input.deployment.terraformBackend.keyPrefix,
-      regionalEvidenceDigest: input.readinessEvidence.evidenceDigest,
+      regionalEvidenceDigest,
       planDigest: first.planDigest,
       artifactDigest: `sha256:${character.repeat(64)}`,
       manifestDigest:
@@ -360,8 +365,18 @@ try {
         "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       createdAt: "2026-08-08T10:00:00Z",
     });
-  const cleanedAttempt = (environment, provider, character) => {
-    const attempt = primaryAttempt(environment, provider, character);
+  const cleanedAttempt = (
+    environment,
+    provider,
+    character,
+    regionalEvidenceDigest,
+  ) => {
+    const attempt = primaryAttempt(
+      environment,
+      provider,
+      character,
+      regionalEvidenceDigest,
+    );
     const failedPrimaryAttempt = recordAttemptFailure(
       recordAttemptStarted(attempt, "2026-08-08T10:01:00Z"),
       {
@@ -394,6 +409,41 @@ try {
   };
   delete alternateInput.deployment.defenderWorkspacePlacement;
   alternateInput.readinessEvidence = buildReadinessEvidence(alternateInput);
+  const staleRegionEvidenceRetry = structuredClone(alternateInput);
+  staleRegionEvidenceRetry.readinessEvidence = structuredClone(
+    input.readinessEvidence,
+  );
+  assert.throws(
+    () =>
+      generateIacPlan(staleRegionEvidenceRetry, {
+        outputPath: `${outputRelative}-stale-region-evidence`,
+        previewFixtures: successFixture,
+      }),
+    /exact plan, target, profiles, and regions|selected regional scope|target region/i,
+  );
+  const reusedRegionalDigestRetry = structuredClone(alternateInput);
+  reusedRegionalDigestRetry.regionalAttempt.previousAttempts = {
+    prod: cleanedAttempt(
+      "prod",
+      "terraform",
+      "a",
+      alternateInput.readinessEvidence.evidenceDigest,
+    ),
+    nonprod: cleanedAttempt(
+      "nonprod",
+      "bicep",
+      "e",
+      alternateInput.readinessEvidence.evidenceDigest,
+    ),
+  };
+  assert.throws(
+    () =>
+      generateIacPlan(reusedRegionalDigestRetry, {
+        outputPath: `${outputRelative}-reused-regional-evidence`,
+        previewFixtures: successFixture,
+      }),
+    /cannot reuse the prior regionalEvidenceDigest/,
+  );
   const alternate = generateIacPlan(alternateInput, {
     outputPath: `${outputRelative}-alternate`,
     previewFixtures: successFixture,

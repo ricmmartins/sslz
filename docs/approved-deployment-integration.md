@@ -203,8 +203,8 @@ repository-relative `.sslz/deployment-state` path. The manifest and signed appro
 identity derived from the marker UUID and the mounted directory and marker filesystem identities, so copying the marker
 to a fresh directory cannot create a new replay namespace. Preview and apply for an approval must run on the same protected executor and unchanged local filesystem identity. Apply
 never creates or silently substitutes the durable store. Atomic single-use records block replay and concurrent use on
-that executor. Workflow concurrency is shared across Bicep and Terraform by environment and regional-attempt chain, so
-provider switching cannot create parallel attempts. The state stores only allowlisted hashes, targets, phases,
+that executor. Workflow concurrency is shared across Bicep and Terraform for the whole environment, regardless of
+regional-attempt chain, so provider or chain switching cannot create parallel attempts. The state stores only allowlisted hashes, targets, phases,
 timestamps, and result codes.
 
 ## Post-deployment gate

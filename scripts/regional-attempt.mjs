@@ -425,6 +425,19 @@ function recordCleanupOutcome(
   });
 }
 
+function assertFreshRegionalBindings(
+  previousBindings,
+  freshBindings,
+  changedRegion,
+) {
+  for (const [label, digest] of Object.entries(freshBindings)) {
+    assertDigest(digest, label);
+    if (changedRegion && digest === previousBindings[label]) {
+      throw new Error(`Changed-region retry cannot reuse the prior ${label}.`);
+    }
+  }
+}
+
 function replanRegionalAttempt(previous, input) {
   assertCurrentRecord(previous);
   const targetRegion = normalizeRegion(input.targetRegion, "targetRegion");
@@ -460,12 +473,7 @@ function replanRegionalAttempt(previous, input) {
     manifestDigest: input.manifestDigest,
     approvalDigest: input.approvalDigest,
   };
-  for (const [label, digest] of Object.entries(freshBindings)) {
-    assertDigest(digest, label);
-    if (changedRegion && digest === previous.bindings[label]) {
-      throw new Error(`Changed-region retry cannot reuse the prior ${label}.`);
-    }
-  }
+  assertFreshRegionalBindings(previous.bindings, freshBindings, changedRegion);
   return createRegionalAttempt({
     ...input,
     chainId: previous.chainId,
@@ -510,7 +518,12 @@ function regionalStatePaths(record, stateDirectory) {
   };
 }
 
-function persistedPredecessorMatches(record, previousAttemptKey, stateDirectory) {
+function persistedPredecessorMatches(
+  record,
+  previousAttemptKey,
+  previousTargetRegion,
+  stateDirectory,
+) {
   if (record.attemptNumber === 1) {
     return previousAttemptKey === null;
   }
@@ -530,6 +543,7 @@ function persistedPredecessorMatches(record, previousAttemptKey, stateDirectory)
       previous.attemptId === previousAttemptId &&
       previous.recordDigest === record.previousAttemptDigest &&
       previous.attemptNumber === record.attemptNumber - 1 &&
+      previous.targetRegion === previousTargetRegion &&
       previous.chainId === record.chainId &&
       previous.environment === record.environment &&
       previous.backendKeyPrefix === record.backendKeyPrefix &&
@@ -544,7 +558,7 @@ function persistedPredecessorMatches(record, previousAttemptKey, stateDirectory)
 function reserveRegionalAttempt(
   record,
   stateDirectory,
-  { previousAttemptKey = null } = {},
+  { previousAttemptKey = null, previousTargetRegion = null } = {},
 ) {
   assertCurrentRecord(record);
   const { directory, completedPath, lockPath } = regionalStatePaths(
@@ -578,7 +592,14 @@ function reserveRegionalAttempt(
     }
     return { status };
   }
-  if (!persistedPredecessorMatches(record, previousAttemptKey, directory)) {
+  if (
+    !persistedPredecessorMatches(
+      record,
+      previousAttemptKey,
+      previousTargetRegion,
+      directory,
+    )
+  ) {
     if (!releaseRegionalAttemptReservation(reservation)) {
       return { status: "concurrent" };
     }
@@ -708,6 +729,7 @@ export {
   SCHEMA_VERSION,
   REGIONAL_ATTEMPT_CHECKS,
   assertAttemptExecutable,
+  assertFreshRegionalBindings,
   assertRegionalAttemptRecord,
   attemptIdentity,
   canonicalJson,

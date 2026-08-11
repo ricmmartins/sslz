@@ -36,7 +36,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-regional-${{ inputs.environment }}-${{ inputs.regional_attempt_chain }}
+  group: deploy-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:

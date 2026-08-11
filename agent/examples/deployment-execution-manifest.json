@@ -31,6 +31,8 @@
     "cleanupEvidenceDigest": null,
     "safeSameRegionRetry": false,
     "previousAttemptKey": null,
+    "previousTargetRegion": null,
+    "previousBindings": null,
     "retiredPolicyAssignmentNames": [],
     "identityDigest": "sha256:e8212bc1397060710298ba6f0d3fcc0f8abe1058eacbf9eb57ba39602f0b9baa",
     "attemptKey": "a01-eastus2-e8212bc139",

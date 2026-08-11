@@ -119,6 +119,8 @@
         "cleanupEvidenceDigest",
         "safeSameRegionRetry",
         "previousAttemptKey",
+        "previousTargetRegion",
+        "previousBindings",
         "retiredPolicyAssignmentNames",
         "identityDigest",
         "attemptKey",
@@ -146,6 +148,32 @@
         "safeSameRegionRetry": { "type": "boolean" },
         "previousAttemptKey": {
           "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }]
+        },
+        "previousTargetRegion": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "previousBindings": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "regionalEvidenceDigest",
+                "planDigest",
+                "artifactDigest",
+                "manifestDigest",
+                "approvalDigest"
+              ],
+              "properties": {
+                "regionalEvidenceDigest": { "$ref": "#/$defs/digest" },
+                "planDigest": { "$ref": "#/$defs/digest" },
+                "artifactDigest": { "$ref": "#/$defs/digest" },
+                "manifestDigest": { "$ref": "#/$defs/digest" },
+                "approvalDigest": { "$ref": "#/$defs/digest" }
+              }
+            },
+            { "type": "null" }
+          ]
         },
         "retiredPolicyAssignmentNames": {
           "type": "array",

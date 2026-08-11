@@ -2389,6 +2389,45 @@ try {
     "deployment.manifest.binding-mismatch",
   );
 
+  const currentRegionalBindings = {
+    regionalEvidenceDigest: bicepManifest.readinessEvidence.digest,
+    planDigest: bicepManifest.plan.digest,
+    artifactDigest: provenanceHashCanonical(bicepManifest.artifacts),
+  };
+  for (const [reusedLabel, reusedDigest] of Object.entries(
+    currentRegionalBindings,
+  )) {
+    const reusedRegionalBindingManifest = structuredClone(bicepManifest);
+    reusedRegionalBindingManifest.regionalAttempt.attemptNumber = 2;
+    reusedRegionalBindingManifest.regionalAttempt.previousAttemptKey =
+      "a01-eastus-0123456789";
+    reusedRegionalBindingManifest.regionalAttempt.previousTargetRegion =
+      "westus2";
+    reusedRegionalBindingManifest.regionalAttempt.previousBindings = {
+      regionalEvidenceDigest: `sha256:${"0".repeat(64)}`,
+      planDigest: `sha256:${"1".repeat(64)}`,
+      artifactDigest: `sha256:${"2".repeat(64)}`,
+      manifestDigest: `sha256:${"3".repeat(64)}`,
+      approvalDigest: `sha256:${"4".repeat(64)}`,
+      [reusedLabel]: reusedDigest,
+    };
+    reusedRegionalBindingManifest.manifestDigest = manifestDigest(
+      reusedRegionalBindingManifest,
+    );
+    assert.equal(
+      apply(
+        plan,
+        planPath,
+        reusedRegionalBindingManifest,
+        createApproval(reusedRegionalBindingManifest),
+        mockRuntime(),
+        `reused-regional-${reusedLabel}`,
+      ).code,
+      "deployment.regional-attempt.binding-reused",
+      `${reusedLabel} reuse must fail in apply preparation`,
+    );
+  }
+
   const changedManifest = structuredClone(bicepManifest);
   changedManifest.execution.provider = "terraform";
   changedManifest.manifestDigest = manifestDigest(changedManifest);

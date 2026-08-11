@@ -11,6 +11,7 @@ function workflow(name) {
   return readFileSync(resolve(root, `.github/workflows/${name}`), "utf8");
 }
 
+const workflowGroups = [];
 for (const [name, provider] of [
   ["deploy-bicep.yml", "bicep"],
   ["deploy-terraform.yml", "terraform"],
@@ -25,8 +26,11 @@ for (const [name, provider] of [
   assert.match(source, /regional_attempt_number:/);
   assert.match(
     source,
-    /group: deploy-regional-\$\{\{ inputs\.environment \}\}-\$\{\{ inputs\.regional_attempt_chain \}\}/,
+    /group: deploy-\$\{\{ inputs\.environment \}\}/,
   );
+  assert.doesNotMatch(source, /group:.*regional_attempt_chain/);
+  assert.match(source, /cancel-in-progress: false/);
+  workflowGroups.push(source.match(/^\s*group:\s*(.+)$/m)[1].trim());
   assert.match(source, /manifest\.regionalAttempt\?\.chainId/);
   assert.match(source, /manifest\.regionalAttempt\?\.attemptNumber/);
   assert.match(source, /GITHUB_REF.*refs\/heads\/main/);
@@ -38,6 +42,26 @@ for (const [name, provider] of [
   assert.doesNotMatch(source, /\baz deployment sub create\b/);
   assert.doesNotMatch(source, /\bterraform apply\b/);
 }
+
+assert.equal(
+  workflowGroups[0],
+  workflowGroups[1],
+  "Bicep and Terraform must share an environment-wide concurrency group",
+);
+const renderGroup = (template, environment, chain) =>
+  template
+    .replace("${{ inputs.environment }}", environment)
+    .replace("${{ inputs.regional_attempt_chain }}", chain);
+assert.equal(
+  renderGroup(workflowGroups[0], "prod", "chain-a"),
+  renderGroup(workflowGroups[1], "prod", "chain-b"),
+  "provider and chain differences must not weaken environment serialization",
+);
+assert.notEqual(
+  renderGroup(workflowGroups[0], "prod", "chain-a"),
+  renderGroup(workflowGroups[1], "nonprod", "chain-a"),
+  "different environments must retain independent concurrency groups",
+);
 
 const validation = workflow("validate.yml");
 assert.match(validation, /^  pull_request:/m);
