@@ -129,7 +129,9 @@ SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE=/protected/sslz-deployment.pub \
   ./scripts/startup-deployment-integration.sh apply \
   --plan .sslz/generated/my-plan/plan-summary.json \
   --manifest <reviewed-deployment-manifest.json> \
-  --approval <signed-deployment-approval.json>
+  --approval <signed-deployment-approval.json> \
+  --provider bicep \
+  --environment nonprod
 ```
 
 Preview reruns read-only inspection over the exact hashed artifact set and emits an immutable manifest without writing
@@ -142,6 +144,8 @@ check passes. Preview and approval bind the documented owner-protected local rep
 `.sslz/deployment-state` path, including its filesystem identity; preview and apply run on the same protected executor,
 and apply fails closed if that exact store is absent. The signed approval also binds a dedicated notification-recipient
 digest that the approval service must recompute from its protected recipient policy without persisting email addresses.
+The manual GitHub deployment workflows accept only a protected artifact run ID and environment, stage a fixed
+readiness-bound v3 bundle, and invoke this same apply command; they contain no direct provider-specific apply path.
 
 ## Safety boundary
 

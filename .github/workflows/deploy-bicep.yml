@@ -1,189 +1,83 @@
-# OIDC tokens from azure/login@v2 are valid for ~1 hour. Each job performs its
-# own fresh login, so token expiry is not a concern for typical deployments.
-# If a single deployment exceeds 1 hour, split it into smaller deployments or
-# add a second azure/login step before the long-running command.
 name: Deploy Landing Zone (Bicep)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'infra/bicep/**'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'infra/bicep/**'
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: 'Approved target environment'
         required: true
         type: choice
         options:
-          - prod
           - nonprod
+          - prod
+      approval_run_id:
+        description: 'Run ID containing the fixed signed approval bundle'
+        required: true
+        type: string
 
 permissions:
-  id-token: write
   contents: read
-  pull-requests: write
 
 concurrency:
-  group: deploy-bicep-${{ github.ref }}
+  group: sslz-approved-deployment
   cancel-in-progress: false
 
-env:
-  BICEP_DIR: infra/bicep
-
 jobs:
-  validate:
-    name: Validate Bicep (${{ matrix.environment }})
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.environment)) || fromJSON('["prod","nonprod"]') }}
+  approved-deployment:
+    name: Apply approved Bicep baseline (${{ inputs.environment }})
+    if: github.ref == 'refs/heads/main'
+    runs-on:
+      - self-hosted
+      - linux
+      - sslz-deployment
+      - bicep
+      - sslz-${{ inputs.environment }}
+    timeout-minutes: 90
+    environment: ${{ inputs.environment }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    env:
+      SSLZ_APPROVED_BUNDLE_PATH: ${{ runner.temp }}/sslz-approved-deployment
+      SSLZ_DEPLOYMENT_PROVIDER: bicep
+      SSLZ_DEPLOYMENT_ENVIRONMENT: ${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the approved main revision
+        uses: actions/checkout@v4
+        with:
+          clean: false
+          persist-credentials: false
 
-      - name: Azure Login
+      - name: Clear the isolated download directory
+        run: node scripts/stage-approved-deployment-artifacts.mjs clean-bundle
+
+      - name: Download the signed approval bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: sslz-approved-deployment-bicep-${{ inputs.environment }}
+          path: ${{ runner.temp }}/sslz-approved-deployment
+          run-id: ${{ inputs.approval_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Stage only approved deployment artifacts
+        run: node scripts/stage-approved-deployment-artifacts.mjs stage
+
+      - name: Azure login with the protected environment identity
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+          subscription-id: ${{ inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
 
-      - name: Validate Bicep
+      - name: Apply the signed immutable Bicep baseline
         env:
-          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
+          SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE: ${{ vars.SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE }}
         run: |
-          az deployment sub validate \
-            --location "$AZURE_LOCATION" \
-            --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam \
-            --name "sslz-validate-${{ matrix.environment }}"
-
-  what-if:
-    name: What-If (${{ matrix.environment }})
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'pull_request'
-    strategy:
-      matrix:
-        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.environment)) || fromJSON('["prod","nonprod"]') }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-
-      - name: What-If
-        id: whatif
-        env:
-          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
-        run: |
-          az deployment sub what-if \
-            --location "$AZURE_LOCATION" \
-            --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/${{ matrix.environment }}.bicepparam \
-            --name "sslz-whatif-${{ matrix.environment }}" \
-            2>&1 | tee whatif-output.txt
-
-      - name: Post What-If to PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const whatif = fs.readFileSync('whatif-output.txt', 'utf8');
-            const truncated = whatif.length > 60000 ? whatif.substring(0, 60000) + '\n... (truncated)' : whatif;
-
-            // Count resource changes from what-if output
-            const createMatch = whatif.match(/Create:\s*(\d+)/);
-            const modifyMatch = whatif.match(/Modify:\s*(\d+)/);
-            const deleteMatch = whatif.match(/Delete:\s*(\d+)/);
-            const noChanges = whatif.includes('no change');
-            let badge;
-            if (noChanges && !createMatch && !modifyMatch && !deleteMatch) {
-              badge = '`No changes`';
-            } else {
-              const parts = [];
-              if (createMatch) parts.push(`${createMatch[1]} to create`);
-              if (modifyMatch) parts.push(`${modifyMatch[1]} to modify`);
-              if (deleteMatch) parts.push(`${deleteMatch[1]} to delete`);
-              badge = parts.length > 0 ? `\`${parts.join(', ')}\`` : '`See details`';
-            }
-
-            const body = [
-              `### Bicep What-If — \`${{ matrix.environment }}\` ${badge}`,
-              '',
-              '<details>',
-              '<summary>Show What-If Output</summary>',
-              '',
-              '```',
-              truncated,
-              '```',
-              '',
-              '</details>'
-            ].join('\n');
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
-
-  deploy-nonprod:
-    name: Deploy Non-Prod
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.event.inputs.environment == 'nonprod')
-    environment: nonprod
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-
-      - name: Deploy
-        env:
-          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
-        run: |
-          az deployment sub create \
-            --location "$AZURE_LOCATION" \
-            --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/nonprod.bicepparam \
-            --name "lz-nonprod-$(date +%Y%m%d-%H%M%S)"
-
-  deploy-prod:
-    name: Deploy Prod
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.event.inputs.environment == 'prod')
-    environment: prod
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-
-      - name: Deploy
-        env:
-          AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
-        run: |
-          az deployment sub create \
-            --location "$AZURE_LOCATION" \
-            --template-file ${{ env.BICEP_DIR }}/main.bicep \
-            --parameters ${{ env.BICEP_DIR }}/parameters/prod.bicepparam \
-            --name "lz-prod-$(date +%Y%m%d-%H%M%S)"
+          node scripts/startup-deployment-integration.mjs apply \
+            --plan .sslz/generated/workflow/plan-summary.json \
+            --manifest .sslz/approved/deployment-manifest.json \
+            --approval .sslz/approved/deployment-approval.json \
+            --provider bicep \
+            --environment "$SSLZ_DEPLOYMENT_ENVIRONMENT" \
+            --output json

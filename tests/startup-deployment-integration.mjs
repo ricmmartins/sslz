@@ -3107,10 +3107,8 @@ try {
   );
   assert.match(bicepWorkflow, /workflow_dispatch:/);
   assert.match(terraformWorkflow, /workflow_dispatch:/);
-  assert.doesNotMatch(
-    `${bicepWorkflow}\n${terraformWorkflow}`,
-    /startup-deployment-integration/,
-  );
+  assert.match(bicepWorkflow, /startup-deployment-integration\.mjs apply/);
+  assert.match(terraformWorkflow, /startup-deployment-integration\.mjs apply/);
 
   const source = readFileSync(script, "utf8");
   assert.doesNotMatch(

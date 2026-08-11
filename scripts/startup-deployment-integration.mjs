@@ -4443,6 +4443,7 @@ function usage() {
     "  startup-deployment-integration.mjs preview --plan <path> --provider bicep|terraform --environment prod|nonprod",
     "    [--terraform-auth cli|oidc] [--output json|text]",
     "  startup-deployment-integration.mjs apply --plan <path> --manifest <path> --approval <path>",
+    "    --provider bicep|terraform --environment prod|nonprod",
     "    [--output json|text]",
     "",
     "Preview performs read-only IaC inspection and zero writes.",
@@ -4494,8 +4495,15 @@ function parseArguments(args) {
     if (options.manifestPath || options.approvalPath) {
       throw new Error("Preview does not accept manifest or approval artifacts.");
     }
-  } else if (!options.manifestPath || !options.approvalPath) {
-    throw new Error("Apply requires --manifest and --approval.");
+  } else if (
+    !options.manifestPath ||
+    !options.approvalPath ||
+    !options.provider ||
+    !options.environment
+  ) {
+    throw new Error(
+      "Apply requires --manifest, --approval, --provider, and --environment.",
+    );
   }
   if (!["json", "text"].includes(options.output)) {
     throw new Error("--output must be json or text.");
@@ -4602,6 +4610,15 @@ function main() {
       result = previewResult(manifest, evaluatedAt);
     } else {
       const manifest = readJson(options.manifestPath);
+      if (
+        manifest.execution?.provider !== options.provider ||
+        manifest.execution?.environment !== options.environment
+      ) {
+        fail(
+          "deployment.workflow-target.mismatch",
+          "The reviewed manifest does not match the explicitly selected provider and environment.",
+        );
+      }
       const provenancePublicKey =
         manifest.execution?.provider === "terraform"
           ? readTrustedPublicKey(

@@ -279,7 +279,8 @@ The first implementation is complete when it can:
 7. evaluate a primary and optional secondary region without claiming capacity is guaranteed;
 8. produce a reviewable deployment plan;
 9. require explicit approval before any write operation;
-10. leave the existing manual Bicep and Terraform workflows unchanged.
+10. require the Bicep and Terraform deployment workflows to use the same readiness-bound manifest and signed approval
+    chain without a direct apply bypass.
 
 ## Out of scope for the first implementation
 

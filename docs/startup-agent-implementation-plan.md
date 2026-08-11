@@ -295,8 +295,8 @@ deployment.
 
 ## Phase 6: Existing SSLZ deployment integration
 
-**Status:** Implemented as a standalone signed-approval path for one existing primary Bicep or Terraform platform
-baseline. Existing manual workflows remain unchanged.
+**Status:** Implemented as the signed-approval path for one existing primary Bicep or Terraform platform baseline. The
+manual deployment workflows are bound to this path and contain no direct apply command.
 
 **Purpose:** call the current Bicep or Terraform path after checks and approval.
 
@@ -314,9 +314,9 @@ baseline. Existing manual workflows remain unchanged.
 
 **Acceptance:**
 
-- manual and agent paths produce the same platform configuration;
-- existing manual workflows still work without agent files;
-- integration test deploys, validates, and tears down in nonprod;
+- Bicep and Terraform workflows consume the readiness-bound plan, manifest, and signed approval;
+- missing, stale, replayed, target-mismatched, or mutated artifacts fail before deployment;
+- the scheduled integration test remains plan/what-if only;
 - rollback guidance is attached to the result.
 
 ## Phase 7: Hot/Cool deployment
@@ -381,6 +381,6 @@ The agent-assisted path is ready for an initial startup pilot when:
 3. Container Apps is selected by default and AKS requires justification;
 4. every plan shows costs, assumptions, official sources, and unresolved actions;
 5. approval is bound to an immutable plan digest;
-6. manual SSLZ deployment remains unchanged;
-7. nonprod integration tests pass for both Bicep and Terraform;
+6. manual Bicep and Terraform workflows cannot bypass the readiness-bound signed approval chain;
+7. read-only workflow checks and signed deployment fixture tests pass for both Bicep and Terraform;
 8. the pilot begins single-region, with Hot/Cool limited to a reviewed plan until recovery tests pass.

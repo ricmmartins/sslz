@@ -9,9 +9,10 @@ description: "Signed single-use approval for one immutable existing SSLZ platfor
 
 ## Purpose
 
-Phase 6 is a standalone integration over the existing `infra/bicep` and `infra/terraform` roots. It does not modify the
-manual workflows, deploy workload modules, register providers, change roles outside the existing root, or add a second
-region. Only an approved primary `single-region-ready` platform baseline is executable.
+Phase 6 is the only write-capable path used by the Bicep and Terraform deployment workflows over the existing
+`infra/bicep` and `infra/terraform` roots. It does not deploy workload modules, register providers, change roles outside
+the existing root, or add a second region. Only an approved primary `single-region-ready` platform baseline is
+executable.
 
 The versioned contracts are:
 
@@ -122,6 +123,8 @@ SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE=/protected/sslz-deployment-approver.pub
   --plan .sslz/generated/my-plan/plan-summary.json \
   --manifest <reviewed-deployment-manifest.json> \
   --approval <signed-deployment-approval.json> \
+  --provider terraform \
+  --environment prod \
   --output json
 ```
 
@@ -168,6 +171,43 @@ to a fresh directory cannot create a new replay namespace. Preview and apply for
 never creates or silently substitutes the durable store. Atomic single-use records block replay and concurrent use on
 that executor. The state stores only allowlisted hashes, targets, phases, timestamps, and result codes.
 
+## GitHub Actions binding
+
+`deploy-bicep.yml` and `deploy-terraform.yml` are manual-dispatch apply boundaries, not plan generators. They run only
+from `main`, serialize all applies through one concurrency group, and require a protected self-hosted Linux runner with
+the labels `sslz-deployment`, the selected provider, and `sslz-<environment>`. The runner must retain the same
+owner-protected `.sslz/deployment-state` filesystem identity used when the reviewed manifest was prepared.
+
+The dispatch accepts only the environment choice and the run ID of a trusted workflow artifact. It does not accept JSON,
+keys, contact values, attestations, command arguments, paths, subscriptions, regions, or provider names. The fixed
+artifact name is `sslz-approved-deployment-<provider>-<environment>` and its root layout is:
+
+```text
+deployment-manifest.json
+deployment-approval.json
+generated/
+└── workflow/
+    ├── plan-summary.json
+    └── <the manifest-bound generated parameter and preview artifacts>
+```
+
+The reviewed Phase 4 plan must therefore be generated with
+`--output-dir .sslz/generated/workflow`. The artifact staging helper downloads into `RUNNER_TEMP`, rejects symbolic
+links, unexpected root entries, legacy plans, target mismatches, and missing selected files, then replaces only
+`.sslz/generated/workflow` and `.sslz/approved`. It never overlays repository source or removes
+`.sslz/deployment-state`.
+
+Provision these absolute read-only paths through protected GitHub Environment variables:
+
+- `SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE` for both providers;
+- `SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE` for Terraform;
+- `SSLZ_TERRAFORM_EXECUTABLE` for the exact protected Terraform executable used by the reviewed preview.
+
+Azure identity and subscription IDs remain protected environment secrets. GitHub Environment reviewers protect access
+to those settings, but their approval is not the deployment approval: apply still requires the separate valid
+Ed25519-signed artifact and revalidates its readiness evidence, expiry, target, immutable files, trust anchor, replay
+store, and live Azure account immediately before execution.
+
 ## Post-deployment gate
 
 A successful deployment command is not success. Phase 6 checks the expected resource groups, Log Analytics retention
@@ -187,6 +227,6 @@ access for the postchecks and remote Terraform backend. Phase 6 never creates an
 billing or entitlements, registers features or providers, unregisters providers, verifies domains, or runs arbitrary
 commands.
 
-Disable the integration by removing access to `startup-deployment-integration.sh`. The existing
-`deploy-bicep.yml`, `deploy-terraform.yml`, and documented manual commands remain unchanged and usable without any
-agent artifact.
+Disable workflow apply by disabling `deploy-bicep.yml` and `deploy-terraform.yml` or removing protected runner access.
+The workflows have no direct Azure or Terraform apply command and cannot deploy without the readiness-bound v3 plan,
+reviewed manifest, signed approval, trust anchors, and durable replay store.

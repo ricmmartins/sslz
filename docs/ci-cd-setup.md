@@ -7,7 +7,9 @@ description: "Workload Identity Federation, GitHub Actions, and secrets manageme
 
 # CI/CD Setup with GitHub Actions
 
-This guide walks you through setting up GitHub Actions to deploy the landing zone automatically using Workload Identity Federation (WIF). WIF eliminates the need for client secrets — instead, GitHub Actions gets short-lived tokens via OIDC.
+This guide walks you through setting up the readiness-bound manual GitHub Actions deployment path with Workload
+Identity Federation (WIF). WIF eliminates client secrets by issuing short-lived OIDC tokens, while the signed deployment
+approval remains a separate authorization control.
 
 ## Prerequisites
 
@@ -178,7 +180,9 @@ az role assignment create \
 
 ## Step 6: Configure GitHub Repository Secrets (5 min)
 
-In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these as **repository-level** secrets (not environment secrets — the validate/plan jobs don't reference a GitHub environment):
+In your GitHub repository, go to **Settings > Secrets and variables > Actions**. The scheduled read-only integration
+checks can use these repository-level secrets. For write-capable deployment, set the same names as protected
+environment secrets so the selected `prod` or `nonprod` environment controls access:
 
 | Secret Name | Value | Where to Find It |
 |---|---|---|
@@ -189,7 +193,7 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 
 > **Single subscription?** If you only have one subscription, set both `AZURE_SUBSCRIPTION_ID_PROD` and `AZURE_SUBSCRIPTION_ID_NONPROD` to the same value.
 
-Also add these **repository-level variables** (Settings > Secrets and variables > Actions > Variables tab):
+The legacy read-only integration checks use these repository-level variables:
 
 | Variable Name | Value | Used By | Purpose |
 |---|---|---|---|
@@ -200,7 +204,17 @@ Also add these **repository-level variables** (Settings > Secrets and variables 
 | `TF_BACKEND_STORAGE_ACCOUNT` | Storage account name from Step 5 | Terraform only | Remote state backend |
 | `TF_BACKEND_RESOURCE_GROUP` | `rg-terraform-state` | Terraform only | Resource group for state (default: `rg-terraform-state`) |
 
-> **Bicep users:** The Terraform-only variables above have sensible defaults in the workflow, but Bicep gets its values from parameter files instead. See Step 5b below.
+The protected self-hosted deployment runners instead require these **GitHub Environment variables**. Each value is an
+absolute path provisioned on the runner, not key content:
+
+| Variable Name | Provider | Purpose |
+|---|---|---|
+| `SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE` | Bicep + Terraform | Read-only Ed25519 deployment-approval trust anchor |
+| `SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE` | Terraform | Read-only Ed25519 Phase 4 builder trust anchor |
+| `SSLZ_TERRAFORM_EXECUTABLE` | Terraform | Exact non-symlinked Terraform executable used for preview and apply |
+
+Do not store private signing keys, raw approval JSON, billing/support attestations, notification contacts, or Terraform
+credentials in repository variables.
 
 ### Step 6b: Customize Bicep Parameter Files (Bicep only)
 
@@ -211,9 +225,10 @@ If deploying with the Bicep workflow, update the parameter files with your actua
 
 At minimum, update `companyName`, `budgetAlertEmails`, `securityContactEmail`, and `allowedLocations`. Commit and push the changes.
 
-## Step 7: Create GitHub Environments (Optional, Recommended)
+## Step 7: Create GitHub Environments and Protected Runners
 
-GitHub Environments add an approval gate before production deployments.
+GitHub Environments protect the deployment identity and runner settings. They supplement, but never replace, the signed
+deployment approval.
 
 1. Go to **Settings > Environments**
 2. Create **nonprod** environment (no protection rules needed)
@@ -221,16 +236,27 @@ GitHub Environments add an approval gate before production deployments.
    - **Required reviewers:** Add 1-2 team members who must approve production deployments
    - **Deployment branches:** Restrict to `main` only
 
-## Local agent-generated review inputs
+Provision persistent self-hosted Linux runners with these labels:
 
-The startup IaC planner is additive and does not replace either manual deployment workflow. It writes generated
-`.local.bicepparam` and `.auto.tfvars` files only under the ignored `.sslz/generated/` directory:
+- common: `self-hosted`, `linux`, `sslz-deployment`;
+- provider: `bicep` or `terraform`;
+- target: `sslz-prod` or `sslz-nonprod`.
+
+The protected workspace must retain the owner-only `.sslz/deployment-state` directory and its
+`.durable-store.json` marker. Preview and apply for an approval must use the same unchanged filesystem identity.
+The workflows intentionally use `actions/checkout` with `clean: false` so this provisioned store is not deleted; the
+artifact staging helper removes only the transient workflow plan and approval directories.
+
+## Generate the workflow review inputs
+
+Plans intended for the deployment workflows must use the fixed ignored output directory
+`.sslz/generated/workflow`:
 
 ```bash
 ./scripts/startup-iac-plan.sh generate \
   --input <iac-plan-input.json> \
   --provider both \
-  --output-dir .sslz/generated/review
+  --output-dir .sslz/generated/workflow
 ```
 
 Add `--preview` only in an authenticated environment. Bicep uses subscription-scope what-if with incremental-only
@@ -256,15 +282,34 @@ The **Validate IaC** workflow should run automatically on the PR. If you see the
 
 ### Deploy via Workflow Dispatch
 
-The deploy workflows are triggered manually (not on push). To run a deployment:
+The deploy workflows are triggered manually from `main`; pushes and pull requests cannot start apply. Before dispatch,
+the trusted review/approval system must publish a workflow artifact named
+`sslz-approved-deployment-<provider>-<environment>` with exactly:
+
+```text
+deployment-manifest.json
+deployment-approval.json
+generated/
+└── workflow/
+    ├── plan-summary.json
+    └── <manifest-bound generated files>
+```
+
+The bundle contains opaque evidence references and signed digests, not raw support records, personal contact data,
+credentials, or private keys. To run a deployment:
 
 1. Go to **Actions** tab in your GitHub repository
 2. Select **Deploy Bicep** or **Deploy Terraform** from the left sidebar
 3. Click **Run workflow**
-4. Choose the target environment (`prod` or `nonprod`)
-5. Click **Run workflow** to start
+4. Choose the target environment (`prod` or `nonprod`).
+5. Enter the trusted artifact-producing workflow's numeric run ID.
+6. Click **Run workflow** to start.
 
-If you configured GitHub Environments with required reviewers in Step 7, production deployments will wait for approval before the deploy step runs.
+The workflow downloads the fixed artifact into `RUNNER_TEMP`, rejects unexpected files, stages only the approved
+generated paths, then calls `startup-deployment-integration.mjs apply` with fixed arguments. The executor independently
+checks the v3 readiness evidence, freshness, immutable manifest, Ed25519 signature, target, source and parameter digests,
+Terraform provenance/executable when selected, live Azure account, and durable replay state. GitHub Environment review
+alone cannot satisfy these checks.
 
 ## Troubleshooting
 
@@ -314,12 +359,13 @@ separate approval:
 
 See [Approved Provider Remediation](provider-remediation.md). Other providers remain manual prerequisites.
 
-## Optional approved deployment integration
+## Approved deployment integration
 
-The agent-assisted deployment command is additive and is not called by either existing deployment workflow. Provision
-the Ed25519 approval public key as a protected read-only runner file and expose only its absolute path through
-`SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE`. Keep `.sslz/generated/` and `.sslz/deployment-state/` on protected storage
-for the review and apply jobs.
+Both deployment workflows call the approved deployment integration and contain no direct `az deployment ... create`,
+`terraform apply`, provider-registration, or teardown command. Provision the Ed25519 approval public key as a protected
+read-only runner file and expose only its absolute path through
+`SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE`. Keep `.sslz/generated/workflow` and
+`.sslz/deployment-state/` on protected storage for review and apply.
 
 Run Phase 6 preview first, send its nested immutable manifest to the approval system, and apply only the returned signed
 artifact:

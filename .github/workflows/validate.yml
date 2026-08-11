@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'agent/**'
+      - '.github/workflows/**'
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
@@ -14,6 +15,7 @@ on:
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-provider-remediation.*'
       - 'scripts/startup-deployment-integration.*'
+      - 'scripts/stage-approved-deployment-artifacts.mjs'
       - 'scripts/azure-cli-invocation.mjs'
       - 'scripts/terraform-plan-provenance.mjs'
       - 'tests/**'
@@ -21,6 +23,7 @@ on:
     branches: [main]
     paths:
       - 'agent/**'
+      - '.github/workflows/**'
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
@@ -30,6 +33,7 @@ on:
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-provider-remediation.*'
       - 'scripts/startup-deployment-integration.*'
+      - 'scripts/stage-approved-deployment-artifacts.mjs'
       - 'scripts/azure-cli-invocation.mjs'
       - 'scripts/terraform-plan-provenance.mjs'
       - 'tests/**'
@@ -67,6 +71,9 @@ jobs:
 
       - name: Test approved deployment integration
         run: node tests/startup-deployment-integration.mjs
+
+      - name: Test approved deployment workflow hardening
+        run: node tests/startup-deployment-workflows.mjs
 
   validate-bicep:
     name: Validate Bicep
