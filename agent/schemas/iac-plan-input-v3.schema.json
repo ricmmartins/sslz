@@ -15,6 +15,10 @@
         },
         "readinessEvidence": {
           "$ref": "readiness-evidence.schema.json"
+        },
+        "deployment": {
+          "type": "object",
+          "required": ["defenderWorkspacePlacement"]
         }
       }
     }

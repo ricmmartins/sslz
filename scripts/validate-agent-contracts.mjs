@@ -328,6 +328,9 @@ function main() {
   const subscriptionTopologyDecisionSchema = load(
     "agent/schemas/subscription-topology-decision.schema.json",
   );
+  const defenderWorkspacePlacementDecisionSchema = load(
+    "agent/schemas/defender-workspace-placement-decision.schema.json",
+  );
   const coolFoundationBaselineSchema = load(
     "agent/schemas/cool-foundation-baseline.schema.json",
   );
@@ -387,6 +390,9 @@ function main() {
     "agent/examples/terraform-plan-provenance.json",
   );
   const readinessEvidence = load("agent/examples/readiness-evidence.json");
+  const defenderWorkspacePlacementDecision = load(
+    "agent/examples/defender-workspace-placement-decision.json",
+  );
   const coolFoundationBaseline = load(
     "agent/examples/cool-foundation-baseline.json",
   );
@@ -424,6 +430,10 @@ function main() {
   assert.equal(
     subscriptionTopologyDecisionSchema.$id,
     "https://aka.ms/sslz/schemas/subscription-topology-decision.schema.json",
+  );
+  assert.equal(
+    defenderWorkspacePlacementDecisionSchema.$id,
+    "https://aka.ms/sslz/schemas/defender-workspace-placement-decision.schema.json",
   );
   assert.equal(
     iacPlanSummarySchema.$id,
@@ -468,6 +478,10 @@ function main() {
   validateDocument(deploymentApprovalSchema, deploymentApproval);
   validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
   validateDocument(readinessEvidenceSchema, readinessEvidence);
+  validateDocument(
+    defenderWorkspacePlacementDecisionSchema,
+    defenderWorkspacePlacementDecision,
+  );
   validateDocument(coolFoundationBaselineSchema, coolFoundationBaseline);
   validateDocument(
     containerAppsCoolProfileInputSchema,
@@ -493,6 +507,7 @@ function main() {
     deploymentApproval,
     terraformPlanProvenance,
     readinessEvidence,
+    defenderWorkspacePlacementDecision,
     coolFoundationBaseline,
     containerAppsCoolProfileInput,
     profiles,

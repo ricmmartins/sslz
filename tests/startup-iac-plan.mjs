@@ -26,6 +26,11 @@ import {
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
 import { validateDocument } from "../scripts/validate-agent-contracts.mjs";
+import {
+  buildDefenderWorkspaceDecision,
+  digest as defenderWorkspaceDigest,
+  evidenceDigest as defenderEvidenceDigest,
+} from "../scripts/defender-workspace-placement.mjs";
 import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -59,7 +64,13 @@ assert.match(
   /variable "resource_provider_registrations" \{[\s\S]*?default\s+=\s+"legacy"/,
 );
 
-function createInput({ regionalMode = "cool-infrastructure" } = {}) {
+function createInput({
+  regionalMode = "cool-infrastructure",
+  defenderForServers = true,
+  existingWorkspaceId = null,
+  workspaceRegion = null,
+  oneSubscription = false,
+} = {}) {
   const planningInput = structuredClone(regionalInput);
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.failoverOwnerConfirmed =
@@ -84,8 +95,9 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
         },
         {
           name: "nonprod",
-          subscriptionId:
-            planningInput.startupInput.subscriptions.nonprodSubscriptionId,
+          subscriptionId: oneSubscription
+            ? planningInput.startupInput.subscriptions.prodSubscriptionId
+            : planningInput.startupInput.subscriptions.nonprodSubscriptionId,
         },
       ],
     },
@@ -102,7 +114,7 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
       logRetentionInDays: 90,
       logDailyQuotaGb: 5,
       paidPlans: {
-        defenderForServers: true,
+        defenderForServers,
         defenderForContainers: false,
         defenderForDatabases: true,
         defenderForKeyVault: true,
@@ -140,6 +152,83 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
     },
     approval: null,
   };
+  if (existingWorkspaceId) {
+    const effectiveWorkspaceRegion =
+      workspaceRegion ?? regionalPlan.selectedPrimary.region;
+    const observedAt = "2026-08-08T10:00:00Z";
+    const expiresAt = "2026-08-12T13:00:00Z";
+    const evidence = (values) => {
+      const item = { observedAt, expiresAt, ...values };
+      item.evidenceDigest = defenderEvidenceDigest(item);
+      return item;
+    };
+    input.deployment.defenderWorkspacePlacement =
+      buildDefenderWorkspaceDecision({
+        decisionId: `workspace.${input.planId}.prod`,
+        generatedAt: observedAt,
+        expiresAt,
+        planningAt: Date.parse(observedAt),
+        tenantId: input.target.tenantId,
+        subscriptionId:
+          planningInput.startupInput.subscriptions.prodSubscriptionId,
+        targetSubscriptionIds: input.target.environments.map(
+          ({ subscriptionId }) => subscriptionId,
+        ),
+        primaryRegion: regionalPlan.selectedPrimary.region,
+        paidPlans: input.deployment.paidPlans,
+        placement: {
+          mode: "existing",
+          region: effectiveWorkspaceRegion,
+          tenantId: input.target.tenantId,
+          workspaceResourceId: existingWorkspaceId,
+        },
+        policyEvidence: evidence({
+          tenantId: input.target.tenantId,
+          targetSubscriptionIds: input.target.environments.map(
+            ({ subscriptionId }) => subscriptionId,
+          ),
+          allowedLocations: [
+            regionalPlan.selectedPrimary.region,
+            effectiveWorkspaceRegion,
+          ],
+        }),
+        serviceSupportEvidence: evidence({
+          supportedRegions: [
+            regionalPlan.selectedPrimary.region,
+            effectiveWorkspaceRegion,
+          ],
+        }),
+        dataResidencyEvidence: evidence({
+          tenantId: input.target.tenantId,
+          targetSubscriptionIds: input.target.environments.map(
+            ({ subscriptionId }) => subscriptionId,
+          ),
+          allowedRegions: [
+            regionalPlan.selectedPrimary.region,
+            effectiveWorkspaceRegion,
+          ],
+        }),
+        workspaceEvidence: evidence({
+          tenantId: input.target.tenantId,
+          subscriptionId:
+            planningInput.startupInput.subscriptions.prodSubscriptionId,
+          workspaceResourceId: existingWorkspaceId,
+          location: effectiveWorkspaceRegion,
+          provisioningState: "Succeeded",
+        }),
+        centralWorkspaceEvidence: evidence({
+          tenantId: input.target.tenantId,
+          subscriptionId:
+            planningInput.startupInput.subscriptions.prodSubscriptionId,
+          workspaceReferenceDigest: defenderWorkspaceDigest(
+            existingWorkspaceId.toLowerCase(),
+          ),
+          targetSubscriptionIds: input.target.environments
+            .map(({ subscriptionId }) => subscriptionId)
+            .sort(),
+        }),
+      });
+  }
   input.readinessEvidence = buildReadinessEvidence(input);
   return input;
 }
@@ -282,6 +371,168 @@ try {
       (environment) => environment.name === "prod",
     ).subscriptionId,
   );
+  assert.equal(bicepParameters.configureDefenderWorkspace, true);
+  assert.equal(bicepParameters.logAnalyticsWorkspaceLocation, "eastus2");
+  assert.equal(bicepParameters.existingLogAnalyticsWorkspaceId, "");
+
+  const existingWorkspaceId =
+    `/subscriptions/${terraformSubscriptionId}` +
+    "/resourceGroups/rg-shared-monitoring/providers/" +
+    "Microsoft.OperationalInsights/workspaces/law-approved-centralus";
+  const existingPlan = generateIacPlan(
+    createInput({
+      existingWorkspaceId,
+      workspaceRegion: "centralus",
+      oneSubscription: true,
+    }),
+    {
+      providers: ["bicep", "terraform"],
+      outputPath: `${outputRelative}/existing-workspace`,
+      previewFixtures: successFixture,
+    },
+  );
+  const existingBicep = parseBicepParameters(
+    readFileSync(
+      resolve(
+        root,
+        existingPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "bicep" &&
+            artifact.environment === "prod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  const existingTerraform = parseTerraformVariables(
+    readFileSync(
+      resolve(
+        root,
+        existingPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "terraform" &&
+            artifact.environment === "prod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(existingPlan.decisionModel.defenderWorkspace.mode, "existing");
+  assert.equal(
+    existingBicep.existingLogAnalyticsWorkspaceId,
+    existingWorkspaceId.toLowerCase(),
+  );
+  assert.equal(
+    existingTerraform.existing_log_analytics_workspace_id,
+    existingWorkspaceId.toLowerCase(),
+  );
+  assert.equal(existingBicep.configureDefenderWorkspace, true);
+  assert.equal(existingTerraform.configure_defender_workspace, true);
+  assert.equal(existingBicep.logAnalyticsWorkspaceLocation, "centralus");
+  assert.deepEqual(existingBicep.allowedLocations, ["centralus", "eastus2"]);
+  assert.deepEqual(existingTerraform.allowed_locations, [
+    "centralus",
+    "eastus2",
+  ]);
+  const existingNonprodBicep = parseBicepParameters(
+    readFileSync(
+      resolve(
+        root,
+        existingPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "bicep" &&
+            artifact.environment === "nonprod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  const existingNonprodTerraform = parseTerraformVariables(
+    readFileSync(
+      resolve(
+        root,
+        existingPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "terraform" &&
+            artifact.environment === "nonprod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(existingBicep.configureDefenderWorkspace, true);
+  assert.equal(
+    existingBicep.defenderWorkspaceAssociationManagedExternally,
+    false,
+  );
+  assert.equal(existingBicep.defenderWorkspaceSharedSubscription, true);
+  assert.equal(existingNonprodBicep.configureDefenderWorkspace, false);
+  assert.equal(
+    existingNonprodBicep.defenderWorkspaceAssociationManagedExternally,
+    true,
+  );
+  assert.equal(existingNonprodBicep.defenderWorkspaceSharedSubscription, true);
+  assert.equal(existingTerraform.configure_defender_workspace, true);
+  assert.equal(
+    existingTerraform.defender_workspace_association_managed_externally,
+    false,
+  );
+  assert.equal(
+    existingTerraform.defender_workspace_shared_subscription,
+    true,
+  );
+  assert.equal(
+    existingNonprodTerraform.configure_defender_workspace,
+    false,
+  );
+  assert.equal(
+    existingNonprodTerraform.defender_workspace_association_managed_externally,
+    true,
+  );
+  assert.equal(
+    existingNonprodTerraform.defender_workspace_shared_subscription,
+    true,
+  );
+
+  assert.throws(
+    () =>
+      generateIacPlan(createInput({ oneSubscription: true }), {
+        providers: ["bicep", "terraform"],
+        outputPath: `${outputRelative}/shared-subscription-new-workspace`,
+        previewFixtures: successFixture,
+      }),
+    /requires one approved existing Defender workspace/,
+  );
+
+  const disabledPlan = generateIacPlan(
+    createInput({ defenderForServers: false }),
+    {
+      providers: ["bicep", "terraform"],
+      outputPath: `${outputRelative}/defender-disabled`,
+      previewFixtures: successFixture,
+    },
+  );
+  const disabledBicep = parseBicepParameters(
+    readFileSync(
+      resolve(
+        root,
+        disabledPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "bicep" &&
+            artifact.environment === "prod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(disabledPlan.decisionModel.defenderWorkspace.status, "not-required");
+  assert.equal(disabledBicep.configureDefenderWorkspace, false);
+  assert.equal(disabledBicep.existingLogAnalyticsWorkspaceId, "");
   const realContacts = {
     budgetAlertEmails: ["cloud-operations@contoso.example"],
     securityContactEmail: "security-operations@contoso.example",

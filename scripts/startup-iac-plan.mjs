@@ -41,6 +41,10 @@ import {
 } from "./azure-cli-invocation.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
 import { topologyDecisionDigest } from "./subscription-topology.mjs";
+import {
+  defenderWorkspaceDecisionDigest,
+  digest as defenderWorkspaceDigest,
+} from "./defender-workspace-placement.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_ROOT = resolve(root, ".sslz/generated");
@@ -66,6 +70,7 @@ const READINESS_CHECK_IDS = {
   coolCost: "readiness.cost.cool-footprint-provenance",
   region: "readiness.region.evidence-current",
   foundry: "readiness.foundry.deployment-quota-current",
+  defenderWorkspace: "operations.monitoring.destination-valid",
 };
 const READINESS_ERROR_CHECK_IDS = new Map([
   ["readiness.evidence.required", READINESS_CHECK_IDS.preflight],
@@ -119,6 +124,12 @@ const READINESS_ERROR_CHECK_IDS = new Map([
   ["readiness.foundry.evidence-required", READINESS_CHECK_IDS.foundry],
   ["readiness.foundry.blocked", READINESS_CHECK_IDS.foundry],
   ["readiness.foundry.scope-mismatch", READINESS_CHECK_IDS.foundry],
+  ["readiness.defender-workspace.required", READINESS_CHECK_IDS.defenderWorkspace],
+  ["readiness.defender-workspace.blocked", READINESS_CHECK_IDS.defenderWorkspace],
+  ["readiness.defender-workspace.stale", READINESS_CHECK_IDS.defenderWorkspace],
+  ["readiness.defender-workspace.digest-mismatch", READINESS_CHECK_IDS.defenderWorkspace],
+  ["readiness.defender-workspace.scope-mismatch", READINESS_CHECK_IDS.defenderWorkspace],
+  ["readiness.defender-workspace.selection-mismatch", READINESS_CHECK_IDS.defenderWorkspace],
 ]);
 
 function load(relativePath) {
@@ -332,6 +343,100 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
       "readiness.topology.benefit-target-mismatch",
       "Observed benefit evidence points outside the selected deployment target; rerun preflight after support resolves it.",
       READINESS_CHECK_IDS.support,
+    );
+  }
+
+  const workspaceDecision = evidence.codeEvidence.defenderWorkspacePlacement;
+  if (!workspaceDecision) {
+    readinessFail(
+      "readiness.defender-workspace.required",
+      "A deterministic Defender workspace placement decision is required.",
+    );
+  }
+  assertEvidenceCurrent(
+    workspaceDecision,
+    evaluatedAt,
+    "Defender workspace placement decision",
+    "generatedAt",
+    READINESS_CHECK_IDS.defenderWorkspace,
+  );
+  if (
+    defenderWorkspaceDecisionDigest(workspaceDecision) !==
+    workspaceDecision.decisionDigest
+  ) {
+    readinessFail(
+      "readiness.defender-workspace.digest-mismatch",
+      "The Defender workspace placement decision digest does not match its canonical content.",
+    );
+  }
+  if (
+    workspaceDecision.status === "blocked" ||
+    (workspaceDecision.defenderWorkspaceRequired &&
+      workspaceDecision.status !== "ready")
+  ) {
+    readinessFail(
+      "readiness.defender-workspace.blocked",
+      "The Defender workspace placement decision is blocked or ambiguous.",
+    );
+  }
+  if (
+    workspaceDecision.tenantId !== expectedSubject.tenantId ||
+    workspaceDecision.subscriptionId !== expectedSubject.prodSubscriptionId ||
+    workspaceDecision.primaryRegion !== expectedSubject.primaryRegion ||
+    canonicalJson(workspaceDecision.targetSubscriptionIds) !==
+      canonicalJson(
+        [
+          ...new Set([
+            expectedSubject.prodSubscriptionId,
+            expectedSubject.nonprodSubscriptionId,
+          ]),
+        ].sort(),
+      )
+  ) {
+    readinessFail(
+      "readiness.defender-workspace.scope-mismatch",
+      "The Defender workspace decision does not match the selected tenant, production subscription, and primary region.",
+    );
+  }
+  if (workspaceDecision.defenderWorkspaceRequired) {
+    const decisionExpiry = Date.parse(workspaceDecision.expiresAt);
+    const evidenceExpiries = [
+      workspaceDecision.evidence.policyEvidenceExpiresAt,
+      workspaceDecision.evidence.serviceSupportEvidenceExpiresAt,
+      workspaceDecision.evidence.dataResidencyEvidenceExpiresAt,
+      ...(workspaceDecision.placement.mode === "existing"
+        ? [workspaceDecision.evidence.workspaceEvidenceExpiresAt]
+        : []),
+      ...(workspaceDecision.evidence.centralWorkspaceEvidenceDigest
+        ? [workspaceDecision.evidence.centralWorkspaceEvidenceExpiresAt]
+        : []),
+    ];
+    if (
+      evidenceExpiries.some(
+        (value) =>
+          !value ||
+          Date.parse(value) <= evaluatedAt ||
+          Date.parse(value) < decisionExpiry,
+      )
+    ) {
+      readinessFail(
+        "readiness.defender-workspace.stale",
+        "Defender workspace policy, service, residency, or workspace evidence is stale or expires before the decision.",
+      );
+    }
+  }
+  const inputWorkspaceDecision =
+    input.deployment?.defenderWorkspacePlacement ?? null;
+  if (
+    inputWorkspaceDecision &&
+    (inputWorkspaceDecision.decisionId !== workspaceDecision.decisionId ||
+      inputWorkspaceDecision.decisionDigest !== workspaceDecision.decisionDigest ||
+      inputWorkspaceDecision.paidPlanSelectionDigest !==
+        workspaceDecision.paidPlanSelectionDigest)
+  ) {
+    readinessFail(
+      "readiness.defender-workspace.selection-mismatch",
+      "The IaC workspace decision or paid-plan selection differs from readiness evidence.",
     );
   }
 
@@ -675,6 +780,33 @@ function assertSemanticInput(input, evaluatedAt) {
   assertSupportedVersion(input.regionalPlan.schemaVersion, "regional plan schema");
   if (input.schemaVersion === "3.0.0") {
     assertReadinessEvidence(input, evaluatedAt);
+    const workspaceDecision = input.deployment.defenderWorkspacePlacement;
+    const expectedPaidPlanDigest = defenderWorkspaceDigest(
+      Object.fromEntries(
+        Object.entries(input.deployment.paidPlans).sort(([left], [right]) =>
+          left.localeCompare(right),
+        ),
+      ),
+    );
+    const workspaceRequired =
+      input.deployment.paidPlans.defenderForServers === true;
+    if (
+      workspaceDecision.paidPlanSelectionDigest !== expectedPaidPlanDigest ||
+      workspaceDecision.defenderWorkspaceRequired !== workspaceRequired ||
+      canonicalJson(workspaceDecision.requiredByPlans) !==
+        canonicalJson(workspaceRequired ? ["defenderForServers"] : []) ||
+      (workspaceRequired &&
+        (workspaceDecision.status !== "ready" ||
+          !["new", "existing"].includes(workspaceDecision.placement.mode))) ||
+      (!workspaceRequired &&
+        (workspaceDecision.status !== "not-required" ||
+          workspaceDecision.placement.mode !== "disabled"))
+    ) {
+      readinessFail(
+        "readiness.defender-workspace.selection-mismatch",
+        "The Defender workspace requirement does not match the exact paid-plan selection.",
+      );
+    }
   }
 
   if (input.workloadPlan.status !== "ready") {
@@ -774,6 +906,17 @@ function assertSemanticInput(input, evaluatedAt) {
     );
   }
   if (
+    distinctSubscriptionCount === 1 &&
+    input.schemaVersion === "3.0.0" &&
+    input.deployment.defenderWorkspacePlacement.defenderWorkspaceRequired &&
+    input.deployment.defenderWorkspacePlacement.placement.mode !== "existing"
+  ) {
+    readinessFail(
+      "readiness.defender-workspace.scope-mismatch",
+      "A shared prod/nonprod subscription requires one approved existing Defender workspace so only one artifact owns the subscription workspace setting.",
+    );
+  }
+  if (
     input.deployment.logDailyQuotaGb !== -1 &&
     input.deployment.logDailyQuotaGb < 1
   ) {
@@ -840,6 +983,49 @@ function buildDecisionModel(input) {
     ...input.regionalPlan.requiredActions.map(normalizeAction),
     ...input.deployment.proposedActions.map(normalizeAction),
   ].sort(compareCanonical);
+  const workspaceDecision =
+    input.deployment.defenderWorkspacePlacement ?? {
+      decisionId: `workspace.${input.planId}.legacy`,
+      decisionDigest: defenderWorkspaceDigest({
+        planId: input.planId,
+        mode: "new",
+        region: primary.region,
+      }),
+      expiresAt: null,
+      status: "ready",
+      reasonCode: "workspace.explicit-new-compatible",
+      defenderWorkspaceRequired:
+        input.deployment.paidPlans.defenderForServers === true,
+      targetSubscriptionIds: input.target.environments
+        .map(({ subscriptionId }) => subscriptionId.toLowerCase())
+        .sort(),
+      requiredByPlans:
+        input.deployment.paidPlans.defenderForServers === true
+          ? ["defenderForServers"]
+          : [],
+      paidPlanSelectionDigest: defenderWorkspaceDigest(
+        input.deployment.paidPlans,
+      ),
+      placement: {
+        mode: "new",
+        region: primary.region,
+        workspaceReference: null,
+        workspaceReferenceDigest: null,
+        scopeDigest: null,
+      },
+      evidence: {
+        policyEvidenceDigest: null,
+        policyEvidenceExpiresAt: null,
+        serviceSupportEvidenceDigest: null,
+        serviceSupportEvidenceExpiresAt: null,
+        dataResidencyEvidenceDigest: null,
+        dataResidencyEvidenceExpiresAt: null,
+        workspaceEvidenceDigest: null,
+        workspaceEvidenceExpiresAt: null,
+        centralWorkspaceEvidenceDigest: null,
+        centralWorkspaceEvidenceExpiresAt: null,
+      },
+    };
 
   return {
     target: {
@@ -874,6 +1060,15 @@ function buildDecisionModel(input) {
           topologyDecisionExpiresAt:
             input.readinessEvidence.codeEvidence.subscriptionTopology
               .expiresAt,
+          defenderWorkspaceDecisionId:
+           input.readinessEvidence.codeEvidence.defenderWorkspacePlacement
+             .decisionId,
+          defenderWorkspaceDecisionDigest:
+           input.readinessEvidence.codeEvidence.defenderWorkspacePlacement
+             .decisionDigest,
+          defenderWorkspaceDecisionExpiresAt:
+           input.readinessEvidence.codeEvidence.defenderWorkspacePlacement
+             .expiresAt,
         }
       : null,
     regional: {
@@ -901,6 +1096,42 @@ function buildDecisionModel(input) {
         left < right ? -1 : left > right ? 1 : 0,
       ),
     ),
+    defenderWorkspace: {
+      decisionId: workspaceDecision.decisionId,
+      decisionDigest: workspaceDecision.decisionDigest,
+      expiresAt: workspaceDecision.expiresAt,
+      status: workspaceDecision.status,
+      reasonCode: workspaceDecision.reasonCode,
+      required: workspaceDecision.defenderWorkspaceRequired,
+      targetSubscriptionIds: [...workspaceDecision.targetSubscriptionIds],
+      requiredByPlans: [...workspaceDecision.requiredByPlans],
+      paidPlanSelectionDigest: workspaceDecision.paidPlanSelectionDigest,
+      mode: workspaceDecision.placement.mode,
+      region: workspaceDecision.placement.region ?? primary.region,
+      workspaceReference: workspaceDecision.placement.workspaceReference,
+      workspaceReferenceDigest:
+        workspaceDecision.placement.workspaceReferenceDigest,
+      scopeDigest: workspaceDecision.placement.scopeDigest,
+      policyEvidenceDigest: workspaceDecision.evidence.policyEvidenceDigest,
+      policyEvidenceExpiresAt:
+        workspaceDecision.evidence.policyEvidenceExpiresAt,
+      serviceSupportEvidenceDigest:
+        workspaceDecision.evidence.serviceSupportEvidenceDigest,
+      serviceSupportEvidenceExpiresAt:
+        workspaceDecision.evidence.serviceSupportEvidenceExpiresAt,
+      dataResidencyEvidenceDigest:
+        workspaceDecision.evidence.dataResidencyEvidenceDigest,
+      dataResidencyEvidenceExpiresAt:
+        workspaceDecision.evidence.dataResidencyEvidenceExpiresAt,
+      workspaceEvidenceDigest:
+        workspaceDecision.evidence.workspaceEvidenceDigest,
+      workspaceEvidenceExpiresAt:
+        workspaceDecision.evidence.workspaceEvidenceExpiresAt,
+      centralWorkspaceEvidenceDigest:
+        workspaceDecision.evidence.centralWorkspaceEvidenceDigest,
+      centralWorkspaceEvidenceExpiresAt:
+        workspaceDecision.evidence.centralWorkspaceEvidenceExpiresAt,
+    },
     configuration: {
       companyName: input.deployment.companyName,
       budgetStartDate: input.deployment.budgetStartDate,
@@ -1134,6 +1365,20 @@ function parameterValues(
       logDailyQuotaGb: decisionModel.configuration.logDailyQuotaGb,
     };
   }
+  const associationEnvironments = decisionModel.target.environments
+    .filter(
+      (candidate) =>
+        candidate.subscriptionId.toLowerCase() ===
+        environment.subscriptionId.toLowerCase(),
+    )
+    .sort((left, right) => {
+      if (left.name === "prod") return -1;
+      if (right.name === "prod") return 1;
+      return left.name.localeCompare(right.name);
+    });
+  const managesWorkspaceAssociation =
+    decisionModel.defenderWorkspace.required &&
+    associationEnvironments[0]?.name === environment.name;
   return {
     location: regionalTarget.region,
     companyName: decisionModel.configuration.companyName,
@@ -1148,13 +1393,27 @@ function parameterValues(
     enableDefenderForContainers: decisionModel.paidPlans.defenderForContainers,
     enableDefenderForDatabases: decisionModel.paidPlans.defenderForDatabases,
     enableDefenderForKeyVault: decisionModel.paidPlans.defenderForKeyVault,
+    configureDefenderWorkspace: managesWorkspaceAssociation,
+    defenderWorkspaceAssociationManagedExternally:
+      decisionModel.defenderWorkspace.required && !managesWorkspaceAssociation,
+    defenderWorkspaceSharedSubscription: associationEnvironments.length > 1,
+    logAnalyticsWorkspaceLocation: decisionModel.defenderWorkspace.region,
+    existingLogAnalyticsWorkspaceId:
+      decisionModel.defenderWorkspace.mode === "existing"
+        ? decisionModel.defenderWorkspace.workspaceReference
+        : "",
     securityContactEmail: notificationContacts.securityContactEmail,
     budgetStartDate: decisionModel.configuration.budgetStartDate,
     allowedLocations: [
-      decisionModel.regional.primary.region,
-      ...(decisionModel.regional.secondary
-        ? [decisionModel.regional.secondary.region]
-        : []),
+      ...new Set([
+        decisionModel.regional.primary.region,
+        ...(decisionModel.regional.secondary
+          ? [decisionModel.regional.secondary.region]
+          : []),
+        ...(decisionModel.defenderWorkspace.required
+          ? [decisionModel.defenderWorkspace.region]
+          : []),
+      ]),
     ].sort(),
     logRetentionInDays: decisionModel.configuration.logRetentionInDays,
     logDailyQuotaGb: decisionModel.configuration.logDailyQuotaGb,

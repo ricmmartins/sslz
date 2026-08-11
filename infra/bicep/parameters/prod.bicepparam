@@ -19,3 +19,5 @@ param allowedLocations = [
   'eastus2'
   'centralus' // DR region
 ]
+param logAnalyticsWorkspaceLocation = 'eastus2'
+param defenderWorkspaceSharedSubscription = false

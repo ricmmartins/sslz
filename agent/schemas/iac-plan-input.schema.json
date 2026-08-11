@@ -140,6 +140,9 @@
             }
           }
         },
+        "defenderWorkspacePlacement": {
+          "$ref": "defender-workspace-placement-decision.schema.json"
+        },
         "services": {
           "type": "array",
           "minItems": 1,

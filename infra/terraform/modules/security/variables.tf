@@ -2,6 +2,10 @@ variable "security_contact_email" {
   description = "Email address for Defender for Cloud security alerts"
   type        = string
 }
+variable "subscription_id" {
+  description = "Target Azure subscription ID"
+  type        = string
+}
 variable "enable_defender_for_servers" {
   description = "Enable Defender for Servers P2"
   type        = bool

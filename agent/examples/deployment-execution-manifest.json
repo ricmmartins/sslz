@@ -20,6 +20,18 @@
     "topologyDecisionDigest": "sha256:9c1743fbe6581e15b3c860d9af6702590644c4c95991d145a9f1fabe224609a9",
     "topologyDecisionExpiresAt": "2026-08-09T13:00:00Z"
   },
+  "defenderWorkspacePlacement": {
+    "decisionId": "workspace.startup-primary-baseline.nonprod",
+    "decisionDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "status": "ready",
+    "placementMode": "new",
+    "workspaceRegion": "eastus2",
+    "workspaceScopeDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "workspaceReferenceDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "policyEvidenceDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "policyEvidenceFreshness": "current",
+    "paidPlanSelectionDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
   "execution": {
     "operation": "platform-baseline.deploy",
     "provider": "bicep",
