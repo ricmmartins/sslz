@@ -68,10 +68,18 @@
     "readinessEvidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["version", "id", "digest", "expiresAt"],
+      "required": [
+        "version",
+        "id",
+        "digest",
+        "expiresAt",
+        "topologyDecisionId",
+        "topologyDecisionDigest",
+        "topologyDecisionExpiresAt"
+      ],
       "properties": {
         "version": {
-          "const": "2.0.0"
+          "const": "3.0.0"
         },
         "id": {
           "$ref": "#/$defs/reference"
@@ -80,6 +88,16 @@
           "$ref": "#/$defs/digest"
         },
         "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "topologyDecisionId": {
+          "$ref": "#/$defs/reference"
+        },
+        "topologyDecisionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "topologyDecisionExpiresAt": {
           "type": "string",
           "format": "date-time"
         }

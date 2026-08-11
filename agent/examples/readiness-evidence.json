@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.0.0",
+  "schemaVersion": "3.0.0",
   "evidenceId": "readiness.startup-primary-baseline.001",
   "status": "ready",
   "issuedAt": "2026-08-09T10:00:00Z",
@@ -27,6 +27,49 @@
       "expiresAt": "2026-08-09T13:00:00Z",
       "evidenceDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
     },
+    "subscriptionTopology": {
+      "schemaVersion": "1.0.0",
+      "decisionId": "topology.startup-primary-baseline.preflight",
+      "generatedAt": "2026-08-09T10:00:00Z",
+      "expiresAt": "2026-08-09T13:00:00Z",
+      "status": "blocked",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "environments": [
+        {
+          "name": "nonprod",
+          "subscriptionId": "33333333-3333-3333-3333-333333333333"
+        },
+        {
+          "name": "prod",
+          "subscriptionId": "22222222-2222-2222-2222-222222222222"
+        }
+      ],
+      "subscriptionTopology": {
+        "state": "separate-prod-nonprod-subscriptions",
+        "reasonCode": "topology.explicit-prod-nonprod-selected",
+        "selectionMode": "explicit-prod-nonprod",
+        "visibleEnabledSubscriptionCount": 2,
+        "targetSubscriptionCount": 2
+      },
+      "benefitAssociation": {
+        "state": "credits-or-benefit-association-unknown",
+        "reasonCode": "topology.authoritative-confirmation-required",
+        "authoritativeEvidence": false,
+        "targetBillingScopeDigests": [],
+        "observedBenefitScopeDigests": [],
+        "observedBenefitSubscriptionIds": []
+      },
+      "evidence": {
+        "subscriptionInventoryDigest": "sha256:b72fd226071b37389bc5c86edd43636b54ecbfe3c3abcb1c764d5b0dc98c7cfa",
+        "billingEvidenceDigest": "sha256:8cee8b6a5285ec0a2bdc14dd9633185f63633af890046fc280a1a0105d6660f2"
+      },
+      "supportHandoff": {
+        "required": true,
+        "route": "microsoft-for-startups-program-support",
+        "reference": null
+      },
+      "decisionDigest": "sha256:9c1743fbe6581e15b3c860d9af6702590644c4c95991d145a9f1fabe224609a9"
+    },
     "regional": [
       {
         "status": "pass",
@@ -43,14 +86,16 @@
   },
   "humanAttestations": {
     "startupBillingSupport": {
-      "attestationVersion": "1.0.0",
+      "attestationVersion": "2.0.0",
       "status": "confirmed",
       "issuerRole": "role.microsoft-startups-support",
       "reference": "attestation.billing-support.001",
       "subjectScope": "microsoft-for-startups-billing-and-support",
       "attestedAt": "2026-08-09T10:30:00Z",
       "expiresAt": "2026-08-09T13:00:00Z",
-      "evidenceDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+      "evidenceDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "topologyDecisionId": "topology.startup-primary-baseline.preflight",
+      "topologyDecisionDigest": "sha256:9c1743fbe6581e15b3c860d9af6702590644c4c95991d145a9f1fabe224609a9"
     },
     "externalReviews": {
       "security": {
@@ -140,5 +185,5 @@
     "coolFootprintCost": null,
     "recoveryExercise": null
   },
-  "evidenceDigest": "sha256:61a31cb92d1b2e4c6a0c5dba9c9ab2d7e43127ea0a9e7f73da6cb7c52b073303"
+  "evidenceDigest": "sha256:df03e5e3c4303ee4c8566b8cd0601a5c0db7e57f9121f1fd4972d99d58af2ab9"
 }

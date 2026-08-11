@@ -1,0 +1,15 @@
+{
+  "extends": "az-success.json",
+  "benefits": {
+    "value": [
+      {
+        "id": "/subscriptions/44444444-4444-4444-4444-444444444444/resourceGroups/rg-benefits/providers/Microsoft.BillingBenefits/credits/credit-fixture",
+        "properties": {
+          "resourceId": "/subscriptions/44444444-4444-4444-4444-444444444444/resourceGroups/rg-benefits/providers/Microsoft.BillingBenefits/credits/credit-fixture",
+          "billingAccountResourceId": "billing-account-other-fixture",
+          "appliedScopeType": "BillingProfile"
+        }
+      }
+    ]
+  }
+}

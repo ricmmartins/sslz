@@ -17,7 +17,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "2.0.0"
+      "const": "3.0.0"
     },
     "evidenceId": {
       "$ref": "#/$defs/reference"
@@ -97,7 +97,7 @@
     "codeEvidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["preflight", "regional", "foundry"],
+      "required": ["preflight", "subscriptionTopology", "regional", "foundry"],
       "properties": {
         "preflight": {
           "allOf": [
@@ -116,6 +116,9 @@
               }
             }
           ]
+        },
+        "subscriptionTopology": {
+          "$ref": "subscription-topology-decision.schema.json"
         },
         "regional": {
           "type": "array",
@@ -230,10 +233,20 @@
             },
             {
               "type": "object",
-              "required": ["attestationVersion"],
+              "required": [
+                "attestationVersion",
+                "topologyDecisionId",
+                "topologyDecisionDigest"
+              ],
               "properties": {
                 "attestationVersion": {
-                  "const": "1.0.0"
+                  "const": "2.0.0"
+                },
+                "topologyDecisionId": {
+                  "$ref": "#/$defs/reference"
+                },
+                "topologyDecisionDigest": {
+                  "$ref": "#/$defs/digest"
                 },
                 "status": {
                   "enum": ["confirmed", "pending", "rejected"]
@@ -656,6 +669,12 @@
           "type": "string"
         },
         "attestationVersion": {
+          "type": "string"
+        },
+        "topologyDecisionId": {
+          "type": "string"
+        },
+        "topologyDecisionDigest": {
           "type": "string"
         },
         "primaryMonthlyCost": {

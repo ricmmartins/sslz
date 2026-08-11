@@ -736,6 +736,12 @@ function validateReviewedPlan(plan, evaluatedAt) {
       evidenceDigest: plan.readinessEvidence.evidenceDigest,
       issuedAt: plan.readinessEvidence.issuedAt,
       expiresAt: plan.readinessEvidence.expiresAt,
+      topologyDecisionId:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionId,
+      topologyDecisionDigest:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionDigest,
+      topologyDecisionExpiresAt:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     })
   ) {
     fail(
@@ -2437,6 +2443,12 @@ function buildDeploymentManifest(
       id: plan.readinessEvidence.evidenceId,
       digest: plan.readinessEvidence.evidenceDigest,
       expiresAt: plan.readinessEvidence.expiresAt,
+      topologyDecisionId:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionId,
+      topologyDecisionDigest:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionDigest,
+      topologyDecisionExpiresAt:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     },
     execution: {
       operation: "platform-baseline.deploy",
@@ -2649,6 +2661,12 @@ function assertManifestCurrent(
       id: plan.readinessEvidence.evidenceId,
       digest: plan.readinessEvidence.evidenceDigest,
       expiresAt: plan.readinessEvidence.expiresAt,
+      topologyDecisionId:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionId,
+      topologyDecisionDigest:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionDigest,
+      topologyDecisionExpiresAt:
+        plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     },
     execution: {
       operation: "platform-baseline.deploy",
@@ -2835,6 +2853,10 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
     readinessEvidenceId: manifest.readinessEvidence.id,
     readinessEvidenceDigest: manifest.readinessEvidence.digest,
     readinessEvidenceExpiresAt: manifest.readinessEvidence.expiresAt,
+    topologyDecisionId: manifest.readinessEvidence.topologyDecisionId,
+    topologyDecisionDigest: manifest.readinessEvidence.topologyDecisionDigest,
+    topologyDecisionExpiresAt:
+      manifest.readinessEvidence.topologyDecisionExpiresAt,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,

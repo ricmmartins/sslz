@@ -325,6 +325,9 @@ function main() {
   const readinessEvidenceSchema = load(
     "agent/schemas/readiness-evidence.schema.json",
   );
+  const subscriptionTopologyDecisionSchema = load(
+    "agent/schemas/subscription-topology-decision.schema.json",
+  );
   const coolFoundationBaselineSchema = load(
     "agent/schemas/cool-foundation-baseline.schema.json",
   );
@@ -405,6 +408,10 @@ function main() {
   assert.equal(
     readinessEvidenceSchema.$id,
     "https://aka.ms/sslz/schemas/readiness-evidence.schema.json",
+  );
+  assert.equal(
+    subscriptionTopologyDecisionSchema.$id,
+    "https://aka.ms/sslz/schemas/subscription-topology-decision.schema.json",
   );
   assert.equal(
     iacPlanSummarySchema.$id,

@@ -47,6 +47,9 @@ const command = args.join(" ");
 const subscription = args[args.indexOf("--subscription") + 1];
 const environment =
   subscription === fixture.subscriptions.prod.id ? "prod" : "nonprod";
+const subscriptionFromUrl = command.match(
+  /\/subscriptions\/([0-9a-f-]{36})\//i,
+)?.[1]?.toLowerCase();
 
 function fail(key) {
   if (fixture.errors?.[key]) {
@@ -56,7 +59,10 @@ function fail(key) {
 }
 
 let response;
-if (command.startsWith("account show --subscription")) {
+if (command.startsWith("account list")) {
+  fail("subscriptionInventory");
+  response = fixture.subscriptionInventory;
+} else if (command.startsWith("account show --subscription")) {
   response = fixture.subscriptions[environment];
 } else if (command.startsWith("account show")) {
   response = fixture.account;
@@ -86,9 +92,12 @@ if (command.startsWith("account show --subscription")) {
 } else if (command.includes("graph.microsoft.com/v1.0/domains")) {
   fail("domains");
   response = fixture.domains;
-} else if (command.includes("Microsoft.Billing/billingAccounts")) {
-  fail("billing");
-  response = fixture.billing;
+} else if (command.includes("Microsoft.Billing/billingProperty/default")) {
+  fail("billingProperty");
+  response = fixture.billingProperties[subscriptionFromUrl];
+} else if (command.includes("Microsoft.BillingBenefits/credits")) {
+  fail("benefits");
+  response = fixture.benefits;
 } else {
   console.error(`Unsupported mock az command: ${command}`);
   process.exit(2);

@@ -9,7 +9,7 @@ description: "Privacy-preserving evidence bound to IaC and deployment approval"
 
 ## Purpose
 
-[`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json) is the no-write `2.0.0` contract that
+[`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json) is the no-write `3.0.0` contract that
 must accompany an IaC v3 plan. It does not collect evidence, call Azure, confirm a human action, register a provider, or
 deploy anything. It records only supplied status, opaque references, timestamps, bounded measurements, and SHA-256
 digests needed to decide whether a reviewed plan is eligible for approval.
@@ -22,8 +22,9 @@ The contract deliberately separates:
   Bicep/Terraform parity reviews; a failover owner and role reference; measured recovery results; service-specific
   recovery tests; and cool-footprint cost provenance.
 
-Version `2.0.0` adds the mandatory external-review set and is the only readiness version eligible for new Phase 6
-approval. Human attestations are never inferred from planner output. External review items carry an explicit
+Version `3.0.0` adds the mandatory subscription-topology decision and binds billing/support confirmation to its exact
+decision ID and digest. It is the only readiness version eligible for new Phase 6 approval. Human attestations are never
+inferred from planner output. External review items carry an explicit
 `attestationVersion`, issuer role, opaque reference, scope, timestamp, expiry, and digest. `pending`, `rejected`, `unmet`,
 `not-measured`, `fail`, stale, future-dated, or expired evidence blocks readiness.
 
@@ -44,9 +45,11 @@ The validator fails closed unless:
 
 - the evidence subject exactly matches the plan ID, tenant, prod/nonprod subscriptions, selected profile version,
   compute profile, extensions, regional mode, and primary/secondary regions;
+- the embedded topology decision has a valid self-digest, is current, and exactly matches the subject tenant and
+  environment subscriptions;
 - the authoritative preflight passes and every item is current;
-- billing/support is explicitly confirmed and the security, Azure architecture, and Bicep/Terraform parity reviews are
-  explicitly approved;
+- billing/support is explicitly confirmed for the exact topology decision ID and digest, and the security, Azure
+  architecture, and Bicep/Terraform parity reviews are explicitly approved;
 - explicit RTO/RPO targets exist and every selected profile has current measured results at or below those targets;
 - every selected extension has a passing service-specific recovery test;
 - cool infrastructure has a valid `minimum <= maximum` USD range, provenance reference, and exact match to the selected
@@ -58,15 +61,22 @@ The validator fails closed unless:
 Missing values are blockers; the validator does not invent owners, targets, measurements, costs, confirmations, model
 versions, deployments, quota, or capacity.
 
+Billing/support confirmation uses an opaque reference and cannot override observed evidence that benefits are associated
+with another subscription or billing profile. The contract does not contain support transcripts, billing identifiers, or
+documents. Azure Billing Support must resolve billing-account/profile visibility; Microsoft for Startups Program Support
+must resolve startup entitlement or benefit-association questions.
+
 ## Digest and approval chain
 
-The v3 IaC planner validates freshness and scope before generating review artifacts. It places the full sanitized
-artifact in `plan-summary.json`, places its identity/digest/validity window in the canonical decision model, and includes
-that binding in the plan digest. Legacy v1/v2 inputs can still be represented locally, but their approval remains
+The v3 IaC planner validates freshness, topology identity, and scope before generating review artifacts. It places the
+full sanitized artifact in `plan-summary.json`, places the readiness and topology identities/digests/validity windows in
+the canonical decision model, and includes those bindings in the plan digest. Legacy v1/v2 inputs can still be represented
+locally, but their approval remains
 `pending` with `readiness-evidence-required`.
 
 Phase 6 revalidates the full artifact when preparing a Bicep or Terraform preview. The immutable deployment manifest
-copies the evidence version, opaque ID, digest, and expiry. The Ed25519 approval repeats and signs those fields.
+copies the evidence version, opaque ID, digest, expiry, topology decision ID/digest, and exact environment mapping. The
+Ed25519 approval repeats and signs those fields.
 Immediately before execution, the integration revalidates the plan, evidence freshness, manifest digest, approval
 signature, and every binding again. Mutation, omission, stale evidence, replay under another plan ID, target mismatch,
 scope mismatch, and profile/region mismatch fail closed.

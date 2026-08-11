@@ -1,4 +1,7 @@
 import { readinessEvidenceDigest } from "../scripts/startup-iac-plan.mjs";
+import {
+  buildTopologyDecision,
+} from "../scripts/subscription-topology.mjs";
 
 const observedAt = "2026-08-08T10:00:00Z";
 const attestedAt = "2026-08-08T10:30:00Z";
@@ -61,8 +64,32 @@ function buildReadinessEvidence(input) {
     input.workloadPlan.computeProfile,
     ...input.workloadPlan.profileExtensions,
   ];
+  const topologyDecision = buildTopologyDecision({
+    runId: `${input.planId}.preflight`,
+    generatedAt: observedAt,
+    expiresAt,
+    selectionMode:
+      environments.prod === environments.nonprod
+        ? "one-subscription"
+        : "explicit-prod-nonprod",
+    tenantId: input.target.tenantId,
+    environments: input.target.environments,
+    visibleSubscriptions: [
+      ...new Set(input.target.environments.map((item) => item.subscriptionId)),
+    ].map((subscriptionId) => ({
+      id: subscriptionId,
+      tenantId: input.target.tenantId,
+      state: "Enabled",
+    })),
+    subscriptionReadErrors: false,
+    targetTenantMismatch: false,
+    billingProperties: [],
+    billingReadFailed: false,
+    benefits: [],
+    benefitsReadFailed: false,
+  });
   const evidence = {
-    schemaVersion: "2.0.0",
+    schemaVersion: "3.0.0",
     evidenceId: `readiness.${input.planId}.001`,
     status: "ready",
     issuedAt: observedAt,
@@ -86,6 +113,7 @@ function buildReadinessEvidence(input) {
         "preflight.run-ready-001",
         "1",
       ),
+      subscriptionTopology: topologyDecision,
       regional: regions.map(({ role, region }, index) =>
         codeEvidence(
           "pass",
@@ -123,7 +151,11 @@ function buildReadinessEvidence(input) {
         "attestation.billing-support.001",
         "microsoft-for-startups-billing-and-support",
         "6",
-        { attestationVersion: "1.0.0" },
+        {
+          attestationVersion: "2.0.0",
+          topologyDecisionId: topologyDecision.decisionId,
+          topologyDecisionDigest: topologyDecision.decisionDigest,
+        },
       ),
       externalReviews: {
         security: humanAttestation(

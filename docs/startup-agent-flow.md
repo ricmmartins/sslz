@@ -9,7 +9,8 @@ description: "Design proposal for agent-assisted Azure account and SSLZ setup"
 
 ## Status
 
-This document is a design proposal. It does not change the current SSLZ deployment flow.
+Phases 1-7 are implemented as additive wrappers around the existing SSLZ deployment flow. The account topology path
+described below is read-only and does not change Azure.
 
 ## Goal
 
@@ -70,12 +71,12 @@ founder remains responsible for identity proof, credit redemption, and support r
 | Check | Agent action | Automatic change? | Block deployment? |
 |---|---|---:|---:|
 | Azure authentication | Identify signed-in account, tenant, and active subscription | No | Yes |
-| Startup subscription | Identify the sponsorship subscription and its tenant | No | Yes |
+| Startup subscription topology | Inventory enabled subscriptions and evaluate an explicit one-subscription or prod/nonprod mapping | No | Yes |
 | Credit context | Report visible billing profile and credit context when permissions allow | No | Yes if unresolved |
 | Company tenant | Confirm tenant identity and collect the intended company domain | No | Yes |
 | Secondary admin | Confirm a second administrator exists | No | Yes |
 | Custom domain | Confirm the company domain is verified and primary | No | Yes |
-| Subscription selection | Confirm the exact prod and non-prod subscription IDs | No | Yes |
+| Subscription selection | Confirm the exact subscription ID for each environment; both may be the same only in validated one-subscription mode | No | Yes |
 | Tenant consistency | Confirm both subscriptions belong to the intended tenant | No | Yes |
 | Effective permissions | Check the roles required by the selected SSLZ modules | No | Yes |
 | Resource providers | Report missing registrations and propose registration commands | With approval | Yes |
@@ -83,16 +84,31 @@ founder remains responsible for identity proof, credit redemption, and support r
 
 ### Human-only and support actions
 
+The read-only topology decision distinguishes a validated one-subscription startup, an exact prod/nonprod pair, missing
+targets, tenant mismatch, unavailable billing evidence, unknown benefit association, benefits observed elsewhere, and an
+ambiguous multi-subscription inventory. A single visible subscription can be safely mapped to both environments only when
+the user selects it explicitly. If multiple subscriptions are visible, the user must select an explicit prod/nonprod
+mapping.
+
+Billing visibility does not prove that startup credits apply. A current Microsoft support confirmation must bind the
+exact topology decision ID and digest through readiness evidence. Azure Billing Support handles billing account/profile
+visibility. Microsoft for Startups Program Support handles credit activation, entitlement, and benefit-association
+questions. Only an opaque support reference is retained.
+
 The agent must not attempt to:
 
 - redeem startup credits;
+- create a subscription;
 - transfer an entitlement to another account;
+- move credits or benefits between subscriptions;
 - associate subscriptions with another billing profile;
+- change billing associations;
 - create or verify a company DNS domain without approval;
 - create a Global Administrator or subscription Owner assignment without approval;
 - infer that credits apply to a subscription when billing evidence is unavailable.
 
-The result must identify the correct Microsoft support path for credit, entitlement, or billing-profile problems.
+The agent also cannot prove benefit applicability from partial metadata, complete a support case, or make an ambiguous
+multi-subscription choice on the user's behalf. Those conditions remain blocked.
 
 ## Phase 2: Workload discovery
 
@@ -183,6 +199,7 @@ Before deployment, present:
 
 - detected tenant and account context;
 - exact target subscription for each environment;
+- topology decision ID, digest, freshness, and benefit-association status;
 - selected workload profile and rationale;
 - primary and secondary regions;
 - services, SKUs, and paid security plans;
@@ -192,8 +209,8 @@ Before deployment, present:
 - manual and support actions still required;
 - rollback and teardown approach.
 
-Approval applies to a specific plan. Any change to subscription, region, paid plan, privileged role, or resource
-scope invalidates the approval and requires a new plan.
+Approval applies to a specific plan. Any change to the topology decision, subscription mapping, tenant, region, paid plan,
+privileged role, or resource scope invalidates the approval and requires a new plan.
 
 ## Phase 5: Approved provider remediation
 
