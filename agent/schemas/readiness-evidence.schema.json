@@ -97,7 +97,13 @@
     "codeEvidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["preflight", "subscriptionTopology", "regional", "foundry"],
+      "required": [
+        "preflight",
+        "subscriptionTopology",
+        "defenderWorkspacePlacement",
+        "regional",
+        "foundry"
+      ],
       "properties": {
         "preflight": {
           "allOf": [
@@ -119,6 +125,9 @@
         },
         "subscriptionTopology": {
           "$ref": "subscription-topology-decision.schema.json"
+        },
+        "defenderWorkspacePlacement": {
+          "$ref": "defender-workspace-placement-decision.schema.json"
         },
         "regional": {
           "type": "array",

@@ -11,6 +11,7 @@ on:
       - 'scripts/validate-agent-contracts.mjs'
       - 'scripts/startup-preflight.*'
       - 'scripts/subscription-topology.mjs'
+      - 'scripts/defender-workspace-placement.mjs'
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
@@ -31,6 +32,7 @@ on:
       - 'scripts/validate-agent-contracts.mjs'
       - 'scripts/startup-preflight.*'
       - 'scripts/subscription-topology.mjs'
+      - 'scripts/defender-workspace-placement.mjs'
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
@@ -69,6 +71,9 @@ jobs:
 
       - name: Test read-only regional planner
         run: node tests/startup-regional-plan.mjs
+
+      - name: Test Defender workspace placement
+        run: node tests/defender-workspace-placement.mjs
 
       - name: Test local IaC plan generation
         run: node tests/startup-iac-plan.mjs
@@ -137,6 +142,9 @@ jobs:
       - name: Test compiled primary networking profile isolation
         run: az bicep build --file infra/bicep/main.bicep --stdout | node tests/primary-bicep-networking-template.mjs
 
+      - name: Test compiled Defender workspace placement
+        run: node tests/defender-workspace-bicep-template.mjs
+
       - name: Test compiled Container Apps cool profile guards
         run: az bicep build --file infra/bicep/cool-container-apps.bicep --stdout | node tests/cool-container-apps-bicep-template.mjs
 
@@ -191,7 +199,9 @@ jobs:
 
       - name: Terraform Validate — Landing Zone
         working-directory: infra/terraform
-        run: terraform validate
+        run: |
+          terraform validate
+          terraform test
 
       - name: Terraform Init & Validate — Cool Foundation
         working-directory: infra/terraform/cool-foundation

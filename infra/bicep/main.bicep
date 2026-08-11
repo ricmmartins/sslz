@@ -89,6 +89,21 @@ param logRetentionInDays int = 90
 @description('Log Analytics daily ingestion quota in GB (-1 = unlimited)')
 param logDailyQuotaGb int = 5
 
+@description('Explicit effective Log Analytics workspace region. New workspaces must use the selected primary region; approved existing central workspaces may use another allowed region.')
+param logAnalyticsWorkspaceLocation string = location
+
+@description('Approved existing Log Analytics workspace resource ID. Leave empty to create the deterministic regional workspace.')
+param existingLogAnalyticsWorkspaceId string = ''
+
+@description('Bind Defender for Servers to the explicit workspace instead of allowing an Azure default workspace.')
+param configureDefenderWorkspace bool = enableDefenderForServers
+
+@description('The same-subscription prod artifact owns the reviewed Defender workspace association for this environment.')
+param defenderWorkspaceAssociationManagedExternally bool = false
+
+@description('Whether prod and nonprod target the same subscription and must share one approved existing Defender workspace.')
+param defenderWorkspaceSharedSubscription bool = false
+
 @description('Tags applied to all resources. Override to change team name or add custom tags.')
 param tags object = {
   environment: environment
@@ -104,14 +119,64 @@ param tags object = {
 var prefix = '${companyName}-${environment}'
 var rgMonitoring = 'rg-${prefix}-monitoring'
 var rgNetworking = 'rg-${prefix}-networking'
+var useExistingLogAnalyticsWorkspace = !empty(existingLogAnalyticsWorkspaceId)
+var workspaceRegionGuard = contains(allowedLocations, logAnalyticsWorkspaceLocation)
+  ? ''
+  : fail('logAnalyticsWorkspaceLocation must be included in allowedLocations.')
+var primaryRegionPolicyGuard = contains(allowedLocations, location)
+  ? ''
+  : fail('The selected primary location must be included in allowedLocations.')
+var workspacePrimaryGuard = useExistingLogAnalyticsWorkspace || logAnalyticsWorkspaceLocation == location
+  ? ''
+  : fail('A new Log Analytics workspace must use the selected primary location.')
+var workspaceReferenceIsSameSubscription = startsWith(toLower(existingLogAnalyticsWorkspaceId), '/subscriptions/${toLower(subscription().subscriptionId)}/resourcegroups/')
+var workspaceReferenceIsLogAnalytics = contains(toLower(existingLogAnalyticsWorkspaceId), '/providers/microsoft.operationalinsights/workspaces/')
+var workspaceReferenceHasExactSegments = length(split(existingLogAnalyticsWorkspaceId, '/')) == 9 && !empty(last(split(existingLogAnalyticsWorkspaceId, '/')))
+var workspaceReferenceGuard = !useExistingLogAnalyticsWorkspace || (workspaceReferenceIsSameSubscription && workspaceReferenceIsLogAnalytics && workspaceReferenceHasExactSegments)
+  ? ''
+  : fail('existingLogAnalyticsWorkspaceId must be a Log Analytics workspace resource ID in the deployment subscription.')
+var workspaceSelectionValid = enableDefenderForServers
+  ? configureDefenderWorkspace != defenderWorkspaceAssociationManagedExternally
+  : !configureDefenderWorkspace && !defenderWorkspaceAssociationManagedExternally
+var workspaceSelectionGuard = workspaceSelectionValid
+  ? ''
+  : fail('Exactly one Defender workspace association owner is required when Defender for Servers is enabled.')
+var externalWorkspaceReferenceGuard = !defenderWorkspaceAssociationManagedExternally || useExistingLogAnalyticsWorkspace
+  ? ''
+  : fail('An externally managed Defender workspace association requires an approved existing workspace reference.')
+var prodOwnsSharedWorkspace = environment == 'prod' && configureDefenderWorkspace && !defenderWorkspaceAssociationManagedExternally
+var nonprodUsesSharedWorkspace = environment == 'nonprod' && !configureDefenderWorkspace && defenderWorkspaceAssociationManagedExternally
+var sharedEnvironmentRoleValid = prodOwnsSharedWorkspace || nonprodUsesSharedWorkspace
+var sharedWorkspaceOwnershipValid = !enableDefenderForServers || !defenderWorkspaceSharedSubscription
+  ? !defenderWorkspaceAssociationManagedExternally
+  : useExistingLogAnalyticsWorkspace && sharedEnvironmentRoleValid
+var sharedWorkspaceOwnershipGuard = sharedWorkspaceOwnershipValid
+  ? ''
+  : fail('A shared subscription requires one approved existing workspace, prod ownership, and nonprod external management.')
+resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = if (useExistingLogAnalyticsWorkspace) {
+  name: last(split(existingLogAnalyticsWorkspaceId, '/'))
+  scope: resourceGroup(split(existingLogAnalyticsWorkspaceId, '/')[2], split(existingLogAnalyticsWorkspaceId, '/')[4])
+}
+var existingWorkspaceLocationGuard = !useExistingLogAnalyticsWorkspace || toLower(existingLogAnalyticsWorkspace!.location) == toLower(logAnalyticsWorkspaceLocation)
+  ? ''
+  : fail('The existing Log Analytics workspace actual location must match logAnalyticsWorkspaceLocation.')
+var effectiveLogAnalyticsWorkspaceId = useExistingLogAnalyticsWorkspace
+  ? '${existingLogAnalyticsWorkspaceId}${workspaceRegionGuard}${primaryRegionPolicyGuard}${workspacePrimaryGuard}${workspaceReferenceGuard}${workspaceSelectionGuard}${externalWorkspaceReferenceGuard}${sharedWorkspaceOwnershipGuard}${existingWorkspaceLocationGuard}'
+  : logAnalytics!.outputs.workspaceId
+var effectiveLogAnalyticsWorkspaceName = useExistingLogAnalyticsWorkspace
+  ? last(split(existingLogAnalyticsWorkspaceId, '/'))
+  : logAnalytics!.outputs.workspaceName
+var effectiveMonitoringResourceGroup = useExistingLogAnalyticsWorkspace
+  ? split(existingLogAnalyticsWorkspaceId, '/')[4]
+  : rgMonitoring
 
 // ============================================================================
 // Resource Groups
 // ============================================================================
 
-resource rgMonitoringRes 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: rgMonitoring
-  location: location
+resource rgMonitoringRes 'Microsoft.Resources/resourceGroups@2024-03-01' = if (!useExistingLogAnalyticsWorkspace) {
+  name: '${rgMonitoring}${workspaceRegionGuard}${primaryRegionPolicyGuard}${workspacePrimaryGuard}${workspaceReferenceGuard}${workspaceSelectionGuard}${externalWorkspaceReferenceGuard}${sharedWorkspaceOwnershipGuard}'
+  location: logAnalyticsWorkspaceLocation
   tags: tags
 }
 
@@ -125,11 +190,11 @@ resource rgNetworkingRes 'Microsoft.Resources/resourceGroups@2024-03-01' = if (d
 // Monitoring — Log Analytics Workspace
 // ============================================================================
 
-module logAnalytics 'modules/log-analytics.bicep' = {
+module logAnalytics 'modules/log-analytics.bicep' = if (!useExistingLogAnalyticsWorkspace) {
   name: 'deploy-log-analytics-${environment}'
   scope: rgMonitoringRes
   params: {
-    location: location
+    location: logAnalyticsWorkspaceLocation
     workspaceName: 'law-${prefix}'
     retentionInDays: logRetentionInDays
     dailyQuotaGb: logDailyQuotaGb
@@ -166,6 +231,8 @@ module defender 'modules/defender.bicep' = {
     enableDefenderForDatabases: enableDefenderForDatabases
     enableDefenderForKeyVault: enableDefenderForKeyVault
     securityContactEmail: securityContactEmail
+    configureDefenderWorkspace: configureDefenderWorkspace
+    logAnalyticsWorkspaceId: effectiveLogAnalyticsWorkspaceId
   }
 }
 
@@ -190,7 +257,7 @@ module budgets 'modules/budgets.bicep' = {
 resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'diag-activity-log-to-law'
   properties: {
-    workspaceId: logAnalytics.outputs.workspaceId
+    workspaceId: effectiveLogAnalyticsWorkspaceId
     logs: [
       { category: 'Administrative', enabled: true }
       { category: 'Security', enabled: true }
@@ -213,7 +280,7 @@ module policies 'modules/policy-assignments.bicep' = {
   params: {
     location: location
     allowedLocations: allowedLocations
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+    logAnalyticsWorkspaceId: effectiveLogAnalyticsWorkspaceId
   }
 }
 
@@ -222,14 +289,14 @@ module policies 'modules/policy-assignments.bicep' = {
 // ============================================================================
 
 @description('Monitoring resource group name')
-output resourceGroupMonitoring string = rgMonitoring
+output resourceGroupMonitoring string = effectiveMonitoringResourceGroup
 @description('Networking resource group name')
 output resourceGroupNetworking string = deployNetworking ? rgNetworking : ''
 @description('Log Analytics workspace resource ID')
-output logAnalyticsWorkspaceId string = logAnalytics.outputs.workspaceId
+output logAnalyticsWorkspaceId string = effectiveLogAnalyticsWorkspaceId
 @description('Log Analytics workspace name')
-output logAnalyticsWorkspaceName string = logAnalytics.outputs.workspaceName
+output logAnalyticsWorkspaceName string = effectiveLogAnalyticsWorkspaceName
 @description('Virtual network resource ID')
-output vnetId string = deployNetworking ? networking.outputs.vnetId : ''
+output vnetId string = deployNetworking ? networking!.outputs.vnetId : ''
 @description('Virtual network name')
-output vnetName string = deployNetworking ? networking.outputs.vnetName : ''
+output vnetName string = deployNetworking ? networking!.outputs.vnetName : ''

@@ -352,6 +352,13 @@ Redact sensitive values before writing artifacts or logs. A redaction failure ma
 | `security.defender.selection-reviewed` | security | Yes |
 | `operations.monitoring.destination-valid` | operations | Yes |
 
+`operations.monitoring.destination-valid` is fail-closed for Defender workspace placement. A pass requires current
+Allowed Locations, service-support, and data-residency evidence plus either explicit primary-region creation or an
+approved compatible existing workspace reference. Same-subscription cross-region reuse additionally requires current
+central/shared evidence; cross-subscription reuse is unsupported by these roots. Policy and residency evidence must bind
+the exact tenant and target-subscription set. Missing policy evidence, denied or
+unsupported regions, stale evidence, scope mismatch, and ambiguous/default placement are distinct blocking reasons.
+
 ## Example blocked result
 
 ```json

@@ -20,9 +20,23 @@ param enableDefenderForKeyVault bool = true
 @description('Email address for Defender for Cloud security alerts')
 param securityContactEmail string
 
+@description('Create the subscription Defender workspace association.')
+param configureDefenderWorkspace bool
+
+@description('Explicit Log Analytics workspace resource ID for Defender.')
+param logAnalyticsWorkspaceId string
+
 // ============================================================================
 // Defender Plans
 // ============================================================================
+
+resource defenderWorkspace 'Microsoft.Security/workspaceSettings@2017-08-01-preview' = if (configureDefenderWorkspace) {
+  name: 'default'
+  properties: {
+    scope: subscription().id
+    workspaceId: logAnalyticsWorkspaceId
+  }
+}
 
 // CSPM Free — always enabled
 resource defenderCspm 'Microsoft.Security/pricings@2024-01-01' = {

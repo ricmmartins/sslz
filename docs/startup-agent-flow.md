@@ -223,6 +223,11 @@ Before deployment, present:
 - manual and support actions still required;
 - rollback and teardown approach.
 
+When Defender for Servers is selected, Phase 4 also presents a deterministic Log Analytics workspace decision. It blocks
+unless the exact effective region is allowed by current policy, matches the selected primary region for new placement,
+is supported by the service and data-residency plan, or is backed by current scope-bound central/shared workspace
+evidence. Azure default workspace placement is never treated as evidence.
+
 Approval applies to a specific plan. Any change to the topology decision, subscription mapping, tenant, region, paid plan,
 privileged role, or resource scope invalidates the approval and requires a new plan.
 
@@ -257,7 +262,7 @@ Post-deployment platform validation includes:
 - expected resource groups and regional resources;
 - policy assignments and compliance state;
 - Log Analytics and Activity Log forwarding;
-- selected Defender plans and their cost;
+- selected Defender plans, their cost, and the exact approved workspace association;
 - budgets and alert recipients;
 - explicit `workloadDeploymentAllowed: false` until every baseline check passes.
 

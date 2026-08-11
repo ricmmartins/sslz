@@ -11,6 +11,7 @@
     "manifestDigest",
     "plan",
     "readinessEvidence",
+    "defenderWorkspacePlacement",
     "execution",
     "artifacts",
     "preview",
@@ -100,6 +101,84 @@
         "topologyDecisionExpiresAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "defenderWorkspacePlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionId",
+        "decisionDigest",
+        "status",
+        "placementMode",
+        "workspaceRegion",
+        "workspaceScopeDigest",
+        "workspaceReferenceDigest",
+        "policyEvidenceDigest",
+        "policyEvidenceFreshness",
+        "paidPlanSelectionDigest"
+      ],
+      "properties": {
+        "decisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decisionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "status": {
+          "enum": ["ready", "not-required"]
+        },
+        "placementMode": {
+          "enum": ["new", "existing", "central-shared", "disabled"]
+        },
+        "workspaceRegion": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workspaceScopeDigest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workspaceReferenceDigest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policyEvidenceDigest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policyEvidenceFreshness": {
+          "enum": ["current", "not-required"]
+        },
+        "paidPlanSelectionDigest": {
+          "$ref": "#/$defs/digest"
         }
       }
     },

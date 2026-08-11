@@ -20,6 +20,7 @@ The input and output contracts are:
 - [`agent/schemas/iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json) for approval-capable plans with readiness evidence
 - [`agent/schemas/readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
 - [`agent/schemas/subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
+- [`agent/schemas/defender-workspace-placement-decision.schema.json`](../agent/schemas/defender-workspace-placement-decision.schema.json)
 - [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
 - [`agent/schemas/cool-foundation-baseline.schema.json`](../agent/schemas/cool-foundation-baseline.schema.json)
 - [`agent/schemas/cool-foundation-plan.schema.json`](../agent/schemas/cool-foundation-plan.schema.json)
@@ -116,6 +117,8 @@ The planner canonicalizes object keys and computes a SHA-256 digest over all app
 - compute profile and profile extensions;
 - regional mode, primary and optional secondary region, and regional network CIDRs;
 - planned services and paid Defender selections;
+- the Defender workspace decision, effective region, placement mode, scope/reference digests, tenant/subscription-scoped policy evidence
+  digest/expiry, and paid-plan selection digest;
 - deployment and cost assumptions;
 - proposed manual, support, and information actions;
 - explicit Terraform remote-backend coordinates, including the backend subscription.
@@ -130,7 +133,10 @@ approvals are rejected. Phase 5 provider remediation uses a separate single-use 
 Only v3 inputs can carry approval-eligible readiness evidence. The planner validates its self-digest, current freshness,
 embedded topology self-digest and freshness, exact tenant/environment subscription mapping, benefit-target consistency,
 plan/profile/region scope, explicit human confirmations, recovery measurements, service tests, cost provenance, and
-conditional Foundry evidence. Legacy v1/v2 inputs remain representable for compatibility, but their approval is forced to
+conditional Foundry evidence. It also requires an unchanged ready Defender workspace decision whenever Defender for
+Servers is enabled. Generated Bicep and Terraform parameters select the same explicit workspace region or approved
+existing resource ID; neither provider may fall back to a default region. Legacy v1/v2 inputs remain representable for
+compatibility, but their approval is forced to
 `pending` with `readiness-evidence-required`.
 
 Phase 7 readiness additionally requires the cost ceiling, exercise cadence/status, owner role/reference, external

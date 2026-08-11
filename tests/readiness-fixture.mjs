@@ -2,6 +2,10 @@ import { readinessEvidenceDigest } from "../scripts/startup-iac-plan.mjs";
 import {
   buildTopologyDecision,
 } from "../scripts/subscription-topology.mjs";
+import {
+  buildDefenderWorkspaceDecision,
+  evidenceDigest as defenderEvidenceDigest,
+} from "../scripts/defender-workspace-placement.mjs";
 
 const observedAt = "2026-08-08T10:00:00Z";
 const attestedAt = "2026-08-08T10:30:00Z";
@@ -88,6 +92,62 @@ function buildReadinessEvidence(input) {
     benefits: [],
     benefitsReadFailed: false,
   });
+  const defaultPaidPlans = {
+    defenderForServers: true,
+    defenderForContainers: false,
+    defenderForDatabases: true,
+    defenderForKeyVault: true,
+    defenderForResourceManager: true,
+    defenderForStorage: true,
+  };
+  const paidPlans = input.deployment?.paidPlans ?? defaultPaidPlans;
+  const evidenceItem = (values) => {
+    const item = { observedAt, expiresAt, ...values };
+    item.evidenceDigest = defenderEvidenceDigest(item);
+    return item;
+  };
+  const defenderWorkspacePlacement =
+    input.deployment?.defenderWorkspacePlacement ??
+    buildDefenderWorkspaceDecision({
+      decisionId: `workspace.${input.planId}.prod`,
+      generatedAt: observedAt,
+      expiresAt,
+      planningAt: Date.parse(observedAt),
+      tenantId: input.target.tenantId,
+      subscriptionId: environments.prod,
+      targetSubscriptionIds: Object.values(environments),
+      primaryRegion: input.regionalPlan.selectedPrimary.region,
+      paidPlans,
+      placement: {
+        mode: "new",
+        region: input.regionalPlan.selectedPrimary.region,
+      },
+      policyEvidence: evidenceItem({
+        tenantId: input.target.tenantId,
+        targetSubscriptionIds: Object.values(environments),
+        allowedLocations: [
+          input.regionalPlan.selectedPrimary.region,
+          ...(secondary ? [secondary] : []),
+        ],
+      }),
+      serviceSupportEvidence: evidenceItem({
+        supportedRegions: [
+          input.regionalPlan.selectedPrimary.region,
+          ...(secondary ? [secondary] : []),
+        ],
+      }),
+      dataResidencyEvidence: evidenceItem({
+        tenantId: input.target.tenantId,
+        targetSubscriptionIds: Object.values(environments),
+        allowedRegions: [
+          input.regionalPlan.selectedPrimary.region,
+          ...(secondary ? [secondary] : []),
+        ],
+      }),
+    });
+  if (input.deployment && !input.deployment.defenderWorkspacePlacement) {
+    input.deployment.defenderWorkspacePlacement = defenderWorkspacePlacement;
+  }
   const evidence = {
     schemaVersion: "3.0.0",
     evidenceId: `readiness.${input.planId}.001`,
@@ -114,6 +174,7 @@ function buildReadinessEvidence(input) {
         "1",
       ),
       subscriptionTopology: topologyDecision,
+      defenderWorkspacePlacement,
       regional: regions.map(({ role, region }, index) =>
         codeEvidence(
           "pass",

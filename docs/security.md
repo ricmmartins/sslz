@@ -25,6 +25,29 @@ Security that protects you without slowing you down. Every recommendation here i
 | Defender for App Service | No | ~$15/month per instance | Limited value compared to other plans. Revisit later. |
 | Defender for DNS | No | ~$0.70/million queries | Niche. Only if you suspect DNS exfiltration (you don't). |
 
+### Defender workspace placement
+
+Defender for Servers depends on a Log Analytics workspace. SSLZ never accepts the Azure-generated default workspace
+location: the workspace decision must be explicit before IaC is generated. A new workspace is placed in the selected
+primary region only after current Allowed Locations, service-support, and data-residency evidence all permit that region.
+Policy and residency evidence must identify the same tenant and exact target-subscription set as the decision.
+An approved existing workspace can be reused without creating a duplicate; a same-subscription cross-region shared
+workspace additionally requires current central-workspace evidence bound to the same tenant, subscription, target
+subscriptions, and workspace reference digest. Cross-subscription placement is unsupported by these provider roots and
+blocks planning. Missing, stale, ambiguous, mismatched, or unsupported evidence also blocks.
+When prod and nonprod share one subscription, planning requires one approved existing workspace: the prod artifact owns
+the subscription singleton and the nonprod artifact consumes the same digest-bound reference without owning it.
+Generated Bicep and Terraform inputs carry this topology explicitly and reject a new workspace, nonprod ownership, or
+an external-management claim outside that shared-subscription model. Both roots also resolve an existing workspace and
+fail when its actual resource ID or region differs from the declared placement; approved apply repeats that read before
+the first deployment write and additionally requires a successful provisioning state.
+
+Both Bicep and Terraform pass the exact effective workspace resource ID to the subscription-level Defender workspace
+association. Bicep uses the supported `2017-08-01-preview` workspace-settings API. Terraform confines its existing-resource
+overwrite capability to a dedicated provider alias used only by this singleton association, so an Azure-created setting can
+be reconciled without granting overwrite behavior to the rest of the root. Disabling Defender for Servers creates no
+association; an already managed association is retained and requires a separate destructive decision to remove.
+
 ### Secure Score
 
 Don't chase a perfect score. A score of 60-70% with the high-severity items resolved is fine for a startup. Focus on:

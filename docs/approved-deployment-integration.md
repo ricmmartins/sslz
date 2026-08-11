@@ -80,6 +80,10 @@ Preview performs no Azure or local write. It:
    scope outside the existing SSLZ graph;
 6. emits a byte-deterministic immutable manifest inside the sanitized result.
 
+The same validation rechecks the Defender workspace decision and binds its ID/digest, effective region, placement mode,
+scope/reference digest, policy-evidence digest/freshness, and paid-plan selection digest. Missing fields, changed or stale
+evidence, default-region fallback, or a tenant/subscription mismatch fails before execution is accepted.
+
 Raw what-if, Terraform JSON, environment values, contact values, and approval identities are discarded. Only hashes,
 change counts, fixed commands, targets, and schema-defined status are retained. Bicep local modules must resolve inside
 the approved source snapshot; imports, registry/template-spec modules, dynamic file/environment reads, copy loops,
@@ -104,7 +108,8 @@ The approval duplicates and binds the manifest digest, plan identity, readiness 
 topology decision ID/digest/expiry and exact environment mapping, provider, environment, primary region, tenant,
 subscription, exact subscription scope, protected durable-store identity, parameter/source/saved-plan hashes, Terraform
 authentication choice, notification-recipient commitment, unique nonce, and validity window. The window cannot exceed
-24 hours.
+24 hours. It also duplicates every Defender workspace binding from the manifest, so omission or mutation invalidates the
+signature and replay record.
 
 Provision the trusted public-key file outside the repository through the protected runner configuration:
 
@@ -145,8 +150,11 @@ resource operation includes `--subscription`, uses a fixed argument array, and r
   direct-only provider installation configuration, and a case-insensitive allowlist of required environment variables.
   Ambient `TF_CLI_ARGS*`, `TF_VAR_*`, provider reattachment, plugin-cache, and custom CLI configuration values are not
   inherited. Both AzureRM legacy and additive automatic provider registration are disabled and rejected in inspected
-  plans; Phase 5 remains the only approved registration path. The sole provider must reference the exact reviewed
-  `subscription_id` variable, and any resolved resource ID or scope in another subscription is rejected. Every role
+  plans; Phase 5 remains the only approved registration path. The default provider and the tightly scoped Defender
+  workspace alias must reference the exact reviewed `subscription_id` variable; the alias may bind only the singleton
+  workspace association and is the only surface permitted to reconcile an existing remote resource. Terraform's builtin
+  provider may bind only the passing workspace-placement guard. Any resolved resource ID or scope in another subscription
+  is rejected. Every role
   principal must already resolve in the saved plan to the exact policy-assignment managed identity; an unknown principal
   fails closed before approval. CLI and OIDC authentication modes are forced in the sanitized child environment, and
   the live Terraform version and platform are verified before the single-use approval is reserved. It then applies the

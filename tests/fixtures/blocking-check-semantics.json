@@ -150,10 +150,10 @@
     },
     {
       "id": "operations.monitoring.destination-valid",
-      "surface": "workload-planner",
-      "source": "agent/profiles/container-apps.json",
-      "passState": "pass",
-      "blockingStates": ["fail", "unresolved"]
+      "surface": "iac-planner",
+      "source": "scripts/defender-workspace-placement.mjs",
+      "passState": "ready",
+      "blockingStates": ["blocked"]
     },
     {
       "id": "operations.aks-owner.confirmed",

@@ -18,3 +18,5 @@ param allowedLocations = [
   'eastus2'
   'centralus'
 ]
+param logAnalyticsWorkspaceLocation = 'eastus2'
+param defenderWorkspaceSharedSubscription = false

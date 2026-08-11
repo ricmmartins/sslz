@@ -59,6 +59,8 @@ const VERSION = "1.0.0";
 const MAX_APPROVAL_TTL_MS = 24 * 60 * 60 * 1000;
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const LOG_ANALYTICS_WORKSPACE_ID =
+  /^\/subscriptions\/([0-9a-f-]{36})\/resourcegroups\/([^/]+)\/providers\/microsoft\.operationalinsights\/workspaces\/([^/]+)$/i;
 const DIGEST = /^sha256:[0-9a-f]{64}$/;
 const SAFE_COMMAND_TOKEN = /^[A-Za-z0-9._:/={}(),@-]+$/;
 const SIGNING_DOMAIN = "sslz-deployment-approval-v1";
@@ -73,6 +75,14 @@ const BICEP_EXECUTABLE = resolve(
   process.platform === "win32" ? "bicep.exe" : "bicep",
 );
 const EXPECTED_TERRAFORM_RESOURCES = new Map([
+  [
+    "data.azurerm_log_analytics_workspace.existing",
+    "azurerm_log_analytics_workspace",
+  ],
+  [
+    "terraform_data.log_analytics_workspace_placement_guard",
+    "terraform_data",
+  ],
   ["azurerm_consumption_budget_subscription.monthly", "azurerm_consumption_budget_subscription"],
   ["azurerm_monitor_diagnostic_setting.activity_log", "azurerm_monitor_diagnostic_setting"],
   ["azurerm_resource_group.monitoring", "azurerm_resource_group"],
@@ -164,6 +174,7 @@ const EXPECTED_TERRAFORM_RESOURCES = new Map([
     "module.security.azurerm_security_center_subscription_pricing.servers",
     "azurerm_security_center_subscription_pricing",
   ],
+  ["azurerm_security_center_workspace.defender", "azurerm_security_center_workspace"],
   [
     "module.security.azurerm_security_center_subscription_pricing.sql",
     "azurerm_security_center_subscription_pricing",
@@ -215,6 +226,7 @@ const EXPECTED_BICEP_RESOURCE_COUNTS = new Map([
   ["Microsoft.Resources/resourceGroups", 2],
   ["Microsoft.Security/pricings", 9],
   ["Microsoft.Security/securityContacts", 1],
+  ["Microsoft.Security/workspaceSettings", 1],
 ]);
 const EXPECTED_BICEP_ROLE_DEFINITIONS = new Map([
   ["tagContributor", "4a9ae827-6dc8-4573-8ac7-8239d42aa03f"],
@@ -718,6 +730,11 @@ function validateReviewedPlan(plan, evaluatedAt) {
           recoveryTargets: regional.recoveryTargets,
           costAssumptions: plan.decisionModel.costAssumptions.regional,
         },
+        deployment: {
+          paidPlans: plan.decisionModel.paidPlans,
+          defenderWorkspacePlacement:
+            plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement,
+        },
         readinessEvidence: plan.readinessEvidence,
       },
       evaluatedAt,
@@ -742,11 +759,84 @@ function validateReviewedPlan(plan, evaluatedAt) {
         plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionDigest,
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
+      defenderWorkspaceDecisionId:
+        plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement
+          .decisionId,
+      defenderWorkspaceDecisionDigest:
+        plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement
+          .decisionDigest,
+      defenderWorkspaceDecisionExpiresAt:
+        plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement
+          .expiresAt,
     })
   ) {
     fail(
       "deployment.readiness.binding-mismatch",
       "The Phase 4 readiness evidence does not match its canonical plan binding.",
+    );
+  }
+  const readinessWorkspace =
+    plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement;
+  const expectedWorkspace = {
+    decisionId: readinessWorkspace.decisionId,
+    decisionDigest: readinessWorkspace.decisionDigest,
+    expiresAt: readinessWorkspace.expiresAt,
+    status: readinessWorkspace.status,
+    reasonCode: readinessWorkspace.reasonCode,
+    required: readinessWorkspace.defenderWorkspaceRequired,
+    targetSubscriptionIds: [...readinessWorkspace.targetSubscriptionIds],
+    requiredByPlans: [...readinessWorkspace.requiredByPlans],
+    paidPlanSelectionDigest: readinessWorkspace.paidPlanSelectionDigest,
+    mode: readinessWorkspace.placement.mode,
+    region:
+      readinessWorkspace.placement.region ??
+      plan.decisionModel.regional.primary.region,
+    workspaceReference: readinessWorkspace.placement.workspaceReference,
+    workspaceReferenceDigest:
+      readinessWorkspace.placement.workspaceReferenceDigest,
+    scopeDigest: readinessWorkspace.placement.scopeDigest,
+    policyEvidenceDigest: readinessWorkspace.evidence.policyEvidenceDigest,
+    policyEvidenceExpiresAt:
+      readinessWorkspace.evidence.policyEvidenceExpiresAt,
+    serviceSupportEvidenceDigest:
+      readinessWorkspace.evidence.serviceSupportEvidenceDigest,
+    serviceSupportEvidenceExpiresAt:
+      readinessWorkspace.evidence.serviceSupportEvidenceExpiresAt,
+    dataResidencyEvidenceDigest:
+      readinessWorkspace.evidence.dataResidencyEvidenceDigest,
+    dataResidencyEvidenceExpiresAt:
+      readinessWorkspace.evidence.dataResidencyEvidenceExpiresAt,
+    workspaceEvidenceDigest:
+      readinessWorkspace.evidence.workspaceEvidenceDigest,
+    workspaceEvidenceExpiresAt:
+      readinessWorkspace.evidence.workspaceEvidenceExpiresAt,
+    centralWorkspaceEvidenceDigest:
+      readinessWorkspace.evidence.centralWorkspaceEvidenceDigest,
+    centralWorkspaceEvidenceExpiresAt:
+      readinessWorkspace.evidence.centralWorkspaceEvidenceExpiresAt,
+  };
+  if (
+    canonicalJson(plan.decisionModel.defenderWorkspace) !==
+    canonicalJson(expectedWorkspace)
+  ) {
+    fail(
+      "deployment.workspace-binding-mismatch",
+      "The reviewed IaC Defender workspace decision differs from readiness evidence.",
+    );
+  }
+  const targetSubscriptions = new Set(
+    plan.decisionModel.target.environments.map(
+      (environment) => environment.subscriptionId,
+    ),
+  );
+  if (
+    targetSubscriptions.size === 1 &&
+    expectedWorkspace.required &&
+    expectedWorkspace.mode !== "existing"
+  ) {
+    fail(
+      "deployment.workspace-shared-subscription-unsupported",
+      "A shared prod/nonprod subscription requires one approved existing Defender workspace.",
     );
   }
   const planApproval = plan.approval;
@@ -929,6 +1019,50 @@ function accountArguments(subscriptionId) {
     "--output",
     "json",
   ];
+}
+
+function existingWorkspaceArguments(subscriptionId, workspaceResourceId) {
+  return [
+    "monitor",
+    "log-analytics",
+    "workspace",
+    "show",
+    "--ids",
+    workspaceResourceId,
+    "--subscription",
+    subscriptionId,
+    "--query",
+    "{id:id,location:location,provisioningState:provisioningState}",
+    "--output",
+    "json",
+    "--only-show-errors",
+  ];
+}
+
+function assertExistingWorkspaceCurrent(plan, manifest, runner) {
+  const workspace = plan.decisionModel.defenderWorkspace;
+  if (!workspace.required || workspace.mode !== "existing") {
+    return;
+  }
+  const observed = safeJson(
+    runner(
+      "az",
+      existingWorkspaceArguments(
+        manifest.execution.subscriptionId,
+        workspace.workspaceReference,
+      ),
+    ),
+  );
+  if (
+    observed?.id?.toLowerCase() !== workspace.workspaceReference.toLowerCase() ||
+    observed?.location?.toLowerCase() !== workspace.region ||
+    observed?.provisioningState !== "Succeeded"
+  ) {
+    fail(
+      "deployment.workspace.live-mismatch",
+      "The existing Defender workspace reference, region, or provisioning state differs from the reviewed evidence.",
+    );
+  }
 }
 
 function bicepPreviewArguments(selection) {
@@ -1483,9 +1617,55 @@ function summarizeBicepTemplate(document, subscriptionId) {
   };
 }
 
+function expectedAllowedLocations(plan) {
+  const workspace = plan.decisionModel.defenderWorkspace;
+  return [
+    ...new Set([
+      plan.decisionModel.regional.primary.region,
+      ...(plan.decisionModel.regional.secondary
+        ? [plan.decisionModel.regional.secondary.region]
+        : []),
+      ...(workspace.required ? [workspace.region] : []),
+    ]),
+  ].sort();
+}
+
+function managesDefenderWorkspaceAssociation(plan, selection) {
+  if (!plan.decisionModel.defenderWorkspace.required) {
+    return false;
+  }
+  const subscriptionEnvironments = plan.decisionModel.target.environments
+    .filter(
+      (environment) =>
+        environment.subscriptionId.toLowerCase() ===
+        selection.target.subscriptionId.toLowerCase(),
+    )
+    .sort((left, right) => {
+      if (left.name === "prod") return -1;
+      if (right.name === "prod") return 1;
+      return left.name.localeCompare(right.name);
+    });
+  return subscriptionEnvironments[0]?.name === selection.target.name;
+}
+
+function defenderWorkspaceUsesSharedSubscription(plan, selection) {
+  return (
+    plan.decisionModel.target.environments.filter(
+      (environment) =>
+        environment.subscriptionId.toLowerCase() ===
+        selection.target.subscriptionId.toLowerCase(),
+    ).length > 1
+  );
+}
+
 function expectedBicepParameters(plan, selection) {
   const configuration = plan.decisionModel.configuration;
   const paidPlans = plan.decisionModel.paidPlans;
+  const workspace = plan.decisionModel.defenderWorkspace;
+  const managesWorkspaceAssociation = managesDefenderWorkspaceAssociation(
+    plan,
+    selection,
+  );
   return {
     location: selection.artifact.region,
     companyName: configuration.companyName,
@@ -1500,9 +1680,17 @@ function expectedBicepParameters(plan, selection) {
     enableDefenderForContainers: paidPlans.defenderForContainers,
     enableDefenderForDatabases: paidPlans.defenderForDatabases,
     enableDefenderForKeyVault: paidPlans.defenderForKeyVault,
+    configureDefenderWorkspace: managesWorkspaceAssociation,
+    defenderWorkspaceAssociationManagedExternally:
+      workspace.required && !managesWorkspaceAssociation,
+    defenderWorkspaceSharedSubscription:
+      defenderWorkspaceUsesSharedSubscription(plan, selection),
+    logAnalyticsWorkspaceLocation: workspace.region,
+    existingLogAnalyticsWorkspaceId:
+      workspace.mode === "existing" ? workspace.workspaceReference : "",
     securityContactEmail: "security-alerts@example.invalid",
     budgetStartDate: configuration.budgetStartDate,
-    allowedLocations: [selection.artifact.region],
+    allowedLocations: expectedAllowedLocations(plan),
     logRetentionInDays: configuration.logRetentionInDays,
     logDailyQuotaGb: configuration.logDailyQuotaGb,
   };
@@ -1686,6 +1874,11 @@ function summarizeBicepBuild(
 function expectedTerraformVariables(plan, selection) {
   const configuration = plan.decisionModel.configuration;
   const paidPlans = plan.decisionModel.paidPlans;
+  const workspace = plan.decisionModel.defenderWorkspace;
+  const managesWorkspaceAssociation = managesDefenderWorkspaceAssociation(
+    plan,
+    selection,
+  );
   return {
     subscription_id: selection.target.subscriptionId,
     resource_provider_registrations: "none",
@@ -1702,8 +1895,16 @@ function expectedTerraformVariables(plan, selection) {
     enable_defender_for_containers: paidPlans.defenderForContainers,
     enable_defender_for_databases: paidPlans.defenderForDatabases,
     enable_defender_for_key_vault: paidPlans.defenderForKeyVault,
+    configure_defender_workspace: managesWorkspaceAssociation,
+    defender_workspace_association_managed_externally:
+      workspace.required && !managesWorkspaceAssociation,
+    defender_workspace_shared_subscription:
+      defenderWorkspaceUsesSharedSubscription(plan, selection),
+    log_analytics_workspace_location: workspace.region,
+    existing_log_analytics_workspace_id:
+      workspace.mode === "existing" ? workspace.workspaceReference : "",
     budget_start_date: configuration.budgetStartDate,
-    allowed_locations: [selection.artifact.region],
+    allowed_locations: expectedAllowedLocations(plan),
     log_retention_in_days: configuration.logRetentionInDays,
     log_daily_quota_gb: configuration.logDailyQuotaGb,
   };
@@ -1955,12 +2156,16 @@ function assertTerraformResource(
 ) {
   const address = normalizedTerraformAddress(resource.address);
   const expectedType = EXPECTED_TERRAFORM_RESOURCES.get(address);
+  const expectedProvider =
+    resource.type === "terraform_data"
+      ? "terraform.io/builtin/terraform"
+      : "registry.terraform.io/hashicorp/azurerm";
   if (
     typeof resource.address !== "string" ||
     typeof resource.type !== "string" ||
     !configurationAddresses.has(address) ||
     resource.type !== expectedType ||
-    resource.provider_name !== "registry.terraform.io/hashicorp/azurerm"
+    resource.provider_name !== expectedProvider
   ) {
     fail(
       "deployment.preview.terraform-resource",
@@ -2075,23 +2280,49 @@ function summarizeTerraformPreview(execution, plan, selection, terraformPlatform
       "The saved Terraform plan does not contain an inspectable configuration graph.",
     );
   }
-  const providerConfigurations = Object.values(configuration.provider_config);
+  const providerConfigurations = configuration.provider_config;
+  const azurermProvider = providerConfigurations.azurerm;
+  const defenderWorkspaceProvider =
+    providerConfigurations["azurerm.defender_workspace"];
+  const terraformProvider = providerConfigurations.terraform;
   if (
-    providerConfigurations.length !== 1 ||
-    providerConfigurations[0]?.full_name !==
+    Object.keys(providerConfigurations).length !== 3 ||
+    azurermProvider?.full_name !==
       "registry.terraform.io/hashicorp/azurerm" ||
+    defenderWorkspaceProvider?.full_name !==
+      "registry.terraform.io/hashicorp/azurerm" ||
+    defenderWorkspaceProvider?.alias !== "defender_workspace" ||
+    terraformProvider?.full_name !== "terraform.io/builtin/terraform" ||
+    Object.hasOwn(terraformProvider ?? {}, "expressions") ||
     canonicalJson(
-      providerConfigurations[0]?.expressions?.subscription_id,
+      azurermProvider?.expressions?.subscription_id,
     ) !== canonicalJson({ references: ["var.subscription_id"] }) ||
     canonicalJson(
-      providerConfigurations[0]?.expressions
+      azurermProvider?.expressions
         ?.resource_provider_registrations,
     ) !==
       canonicalJson({
         references: ["var.resource_provider_registrations"],
       }) ||
     canonicalJson(
-      providerConfigurations[0]?.expressions
+      azurermProvider?.expressions
+        ?.resource_providers_to_register,
+    ) !==
+      canonicalJson({
+        references: ["var.resource_providers_to_register"],
+      }) ||
+    canonicalJson(
+      defenderWorkspaceProvider?.expressions?.subscription_id,
+    ) !== canonicalJson({ references: ["var.subscription_id"] }) ||
+    canonicalJson(
+      defenderWorkspaceProvider?.expressions
+        ?.resource_provider_registrations,
+    ) !==
+      canonicalJson({
+        references: ["var.resource_provider_registrations"],
+      }) ||
+    canonicalJson(
+      defenderWorkspaceProvider?.expressions
         ?.resource_providers_to_register,
     ) !==
       canonicalJson({
@@ -2135,13 +2366,41 @@ function summarizeTerraformPreview(execution, plan, selection, terraformPlatform
     ) ||
     configuredResources.some(
       (resource) =>
-        resource.provider_config_key !== "azurerm" ||
+        resource.provider_config_key !==
+          (resource.type === "terraform_data"
+            ? "terraform"
+            : resource.type === "azurerm_security_center_workspace"
+              ? "azurerm.defender_workspace"
+              : "azurerm") ||
         typeof resource.address !== "string",
     )
   ) {
     fail(
       "deployment.preview.terraform-resource",
       "The saved Terraform plan contains an unexpected resource or provider binding.",
+    );
+  }
+  const placementGuardCheck = Array.isArray(document.checks)
+    ? document.checks.find(
+        (check) =>
+          check.address?.kind === "resource" &&
+          check.address?.mode === "managed" &&
+          check.address?.type === "terraform_data" &&
+          check.address?.to_display ===
+            "terraform_data.log_analytics_workspace_placement_guard",
+      )
+    : null;
+  if (
+    placementGuardCheck?.status !== "pass" ||
+    !Array.isArray(placementGuardCheck.instances) ||
+    placementGuardCheck.instances.length !== 1 ||
+    placementGuardCheck.instances[0]?.status !== "pass" ||
+    placementGuardCheck.instances[0]?.address?.to_display !==
+      "terraform_data.log_analytics_workspace_placement_guard"
+  ) {
+    fail(
+      "deployment.preview.terraform-placement-guard",
+      "The saved Terraform plan does not contain a passing Defender workspace placement guard.",
     );
   }
   const configurationAddresses = new Set(
@@ -2286,6 +2545,46 @@ function manifestDigest(manifest) {
   return hashCanonical(manifestPayload(manifest));
 }
 
+function defenderWorkspacePlacementBinding(plan) {
+  const workspace = plan.decisionModel.defenderWorkspace;
+  if (!workspace) {
+    fail(
+      "deployment.workspace-binding-missing",
+      "The reviewed IaC plan omits the Defender workspace placement decision.",
+      "Regenerate and review the IaC plan with current workspace placement evidence.",
+    );
+  }
+  if (
+    workspace.required &&
+    (workspace.status !== "ready" ||
+      !workspace.region ||
+      !workspace.scopeDigest ||
+      !workspace.policyEvidenceDigest)
+  ) {
+    fail(
+      "deployment.workspace-binding-invalid",
+      "The reviewed IaC plan does not contain a complete ready Defender workspace placement binding.",
+      "Regenerate the IaC plan after resolving workspace policy, region, scope, and service support checks.",
+    );
+  }
+  return {
+    decisionId: workspace.decisionId,
+    decisionDigest: workspace.decisionDigest,
+    status: workspace.status,
+    placementMode: workspace.mode,
+    workspaceRegion: workspace.required ? workspace.region : null,
+    workspaceScopeDigest: workspace.required ? workspace.scopeDigest : null,
+    workspaceReferenceDigest: workspace.required
+      ? workspace.workspaceReferenceDigest
+      : null,
+    policyEvidenceDigest: workspace.required
+      ? workspace.policyEvidenceDigest
+      : null,
+    policyEvidenceFreshness: workspace.required ? "current" : "not-required",
+    paidPlanSelectionDigest: workspace.paidPlanSelectionDigest,
+  };
+}
+
 function buildDeploymentManifest(
   plan,
   {
@@ -2424,6 +2723,7 @@ function buildDeploymentManifest(
     provider === "terraform"
       ? terraformPreparationArguments(plan, selection, terraformAuthMode)
       : null;
+  const defenderWorkspacePlacement = defenderWorkspacePlacementBinding(plan);
   const manifest = {
     schemaVersion: VERSION,
     manifestVersion: VERSION,
@@ -2450,6 +2750,7 @@ function buildDeploymentManifest(
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     },
+    defenderWorkspacePlacement,
     execution: {
       operation: "platform-baseline.deploy",
       provider,
@@ -2668,6 +2969,7 @@ function assertManifestCurrent(
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     },
+    defenderWorkspacePlacement: defenderWorkspacePlacementBinding(plan),
     execution: {
       operation: "platform-baseline.deploy",
       provider: manifest.execution.provider,
@@ -2735,6 +3037,8 @@ function assertManifestCurrent(
     canonicalJson(manifest.plan) !== canonicalJson(expected.plan) ||
     canonicalJson(manifest.readinessEvidence) !==
       canonicalJson(expected.readinessEvidence) ||
+    canonicalJson(manifest.defenderWorkspacePlacement) !==
+      canonicalJson(expected.defenderWorkspacePlacement) ||
     canonicalJson(manifest.execution) !== canonicalJson(expected.execution) ||
     canonicalJson(manifest.artifacts) !== canonicalJson(expected.artifacts) ||
     manifest.preview.reviewedSummaryDigest !== expected.reviewedSummaryDigest ||
@@ -2857,6 +3161,22 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
     topologyDecisionDigest: manifest.readinessEvidence.topologyDecisionDigest,
     topologyDecisionExpiresAt:
       manifest.readinessEvidence.topologyDecisionExpiresAt,
+    defenderWorkspacePlacementDecisionId:
+      manifest.defenderWorkspacePlacement.decisionId,
+    defenderWorkspacePlacementDecisionDigest:
+      manifest.defenderWorkspacePlacement.decisionDigest,
+    defenderWorkspaceRegion:
+      manifest.defenderWorkspacePlacement.workspaceRegion,
+    defenderWorkspaceScopeDigest:
+      manifest.defenderWorkspacePlacement.workspaceScopeDigest,
+    defenderWorkspaceReferenceDigest:
+      manifest.defenderWorkspacePlacement.workspaceReferenceDigest,
+    defenderWorkspacePolicyEvidenceDigest:
+      manifest.defenderWorkspacePlacement.policyEvidenceDigest,
+    defenderWorkspacePolicyEvidenceFreshness:
+      manifest.defenderWorkspacePlacement.policyEvidenceFreshness,
+    defenderPaidPlanSelectionDigest:
+      manifest.defenderWorkspacePlacement.paidPlanSelectionDigest,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,
@@ -3616,16 +3936,26 @@ function postDeploymentChecks(manifest, runner) {
   const prefix = `${decision.companyName}-${manifest.execution.environment}`;
   const monitoringRg = `rg-${prefix}-monitoring`;
   const networkingRg = `rg-${prefix}-networking`;
-  const workspaceName = `law-${prefix}`;
+  const workspacePlacement = decision.defenderWorkspace;
+  const existingWorkspace =
+    workspacePlacement.mode === "existing"
+      ? workspacePlacement.workspaceReference.match(LOG_ANALYTICS_WORKSPACE_ID)
+      : null;
+  const workspaceSubscriptionId = existingWorkspace?.[1] ?? subscriptionId;
+  const workspaceResourceGroup = existingWorkspace?.[2] ?? monitoringRg;
+  const workspaceName = existingWorkspace?.[3] ?? `law-${prefix}`;
+  const expectedWorkspaceId = existingWorkspace
+    ? workspacePlacement.workspaceReference
+    : `/subscriptions/${subscriptionId}/resourceGroups/${monitoringRg}/providers/Microsoft.OperationalInsights/workspaces/${workspaceName}`;
   const workspace = readResult(runner, [
     "monitor",
     "log-analytics",
     "workspace",
     "show",
     "--subscription",
-    subscriptionId,
+    workspaceSubscriptionId,
     "--resource-group",
-    monitoringRg,
+    workspaceResourceGroup,
     "--workspace-name",
     workspaceName,
     "--query",
@@ -3633,18 +3963,20 @@ function postDeploymentChecks(manifest, runner) {
     "--output",
     "json",
   ]);
-  const monitoringGroup = readResult(runner, [
-    "group",
-    "show",
-    "--subscription",
-    subscriptionId,
-    "--name",
-    monitoringRg,
-    "--query",
-    "{name:name,location:location,provisioningState:properties.provisioningState}",
-    "--output",
-    "json",
-  ]);
+  const monitoringGroup = existingWorkspace
+    ? null
+    : readResult(runner, [
+        "group",
+        "show",
+        "--subscription",
+        subscriptionId,
+        "--name",
+        monitoringRg,
+        "--query",
+        "{name:name,location:location,provisioningState:properties.provisioningState}",
+        "--output",
+        "json",
+      ]);
   const networkingGroup = decision.deployNetworking
     ? readResult(runner, [
         "group",
@@ -3660,23 +3992,23 @@ function postDeploymentChecks(manifest, runner) {
       ])
     : null;
   const expectedResources =
-    monitoringGroup?.name === monitoringRg &&
-    monitoringGroup?.location === manifest.execution.region &&
-    monitoringGroup?.provisioningState === "Succeeded" &&
+    (existingWorkspace ||
+      (monitoringGroup?.name === monitoringRg &&
+        monitoringGroup?.location === manifest.execution.region &&
+        monitoringGroup?.provisioningState === "Succeeded")) &&
     (!decision.deployNetworking ||
       (networkingGroup?.name === networkingRg &&
         networkingGroup?.location === manifest.execution.region &&
         networkingGroup?.provisioningState === "Succeeded"));
   const monitoring =
     workspace?.name === workspaceName &&
-    workspace?.location === manifest.execution.region &&
+    workspace?.location === workspacePlacement.region &&
     workspace?.provisioningState === "Succeeded" &&
-    workspace?.retentionInDays === decision.logRetentionInDays &&
-    workspace?.dailyQuotaGb === decision.logDailyQuotaGb &&
+    (existingWorkspace ||
+      (workspace?.retentionInDays === decision.logRetentionInDays &&
+        workspace?.dailyQuotaGb === decision.logDailyQuotaGb)) &&
     typeof workspace?.id === "string" &&
-    workspace.id.toLowerCase().startsWith(
-      `/subscriptions/${subscriptionId}/resourcegroups/${monitoringRg}/`.toLowerCase(),
-    );
+    workspace.id.toLowerCase() === expectedWorkspaceId.toLowerCase();
   const diagnostics = readResult(runner, [
     "monitor",
     "diagnostic-settings",
@@ -3722,11 +4054,33 @@ function postDeploymentChecks(manifest, runner) {
     ["mcsb-audit", {}],
     [
       "allowed-locations",
-      { listOfAllowedLocations: { value: [manifest.execution.region] } },
+      {
+        listOfAllowedLocations: {
+          value: [
+            ...new Set([
+              manifest.execution.region,
+              ...(workspacePlacement.required
+                ? [workspacePlacement.region]
+                : []),
+            ]),
+          ].sort(),
+        },
+      },
     ],
     [
       "allowed-locations-rg",
-      { listOfAllowedLocations: { value: [manifest.execution.region] } },
+      {
+        listOfAllowedLocations: {
+          value: [
+            ...new Set([
+              manifest.execution.region,
+              ...(workspacePlacement.required
+                ? [workspacePlacement.region]
+                : []),
+            ]),
+          ].sort(),
+        },
+      },
     ],
     ["require-env-tag-rg", { tagName: { value: "environment" } }],
     ["require-team-tag-rg", { tagName: { value: "team" } }],
@@ -3855,6 +4209,26 @@ function postDeploymentChecks(manifest, runner) {
         tier !== "Standard" ||
         defenderMap.get(name)?.subPlan === "DefenderForStorageV2"),
   );
+  const defenderWorkspaceSetting = decision.paidPlans.defenderForServers
+    ? readResult(runner, [
+        "security",
+        "workspace-setting",
+        "show",
+        "--subscription",
+        subscriptionId,
+        "--name",
+        "default",
+        "--query",
+        "{name:name,workspaceId:workspaceId}",
+        "--output",
+        "json",
+      ])
+    : null;
+  const defenderWorkspaceHealthy =
+    !decision.paidPlans.defenderForServers ||
+    (defenderWorkspaceSetting?.name === "default" &&
+      defenderWorkspaceSetting?.workspaceId?.toLowerCase() ===
+        expectedWorkspaceId.toLowerCase());
   const budget = readResult(runner, [
     "consumption",
     "budget",
@@ -3916,7 +4290,8 @@ function postDeploymentChecks(manifest, runner) {
         manifest.preview.terraformAttestation?.notificationContactsDigest) &&
     securityContact?.isEnabled === true &&
     securityContact?.notificationsByRole?.state === "On";
-  const defenderHealthy = defenderPricingHealthy && contactsHealthy;
+  const defenderHealthy =
+    defenderPricingHealthy && defenderWorkspaceHealthy && contactsHealthy;
   const budgetHealthy =
     budget?.name === `budget-${prefix}-monthly` &&
     budget?.amount === decision.monthlyBudgetAmount &&
@@ -4060,6 +4435,7 @@ function withVerificationDecision(manifest, plan) {
       logRetentionInDays: plan.decisionModel.configuration.logRetentionInDays,
       logDailyQuotaGb: plan.decisionModel.configuration.logDailyQuotaGb,
       paidPlans: plan.decisionModel.paidPlans,
+      defenderWorkspace: plan.decisionModel.defenderWorkspace,
     },
   };
 }
@@ -4301,6 +4677,7 @@ function runDeploymentIntegration(
       result.safety.localState = "consumed";
       return validatedResult(result);
     }
+    assertExistingWorkspaceCurrent(plan, manifest, runner);
     approvalWindow(approval, clock(), "deployment.approval");
     updateReservation(reservation, {
       phase: "deployment-started",

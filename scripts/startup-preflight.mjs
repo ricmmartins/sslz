@@ -815,8 +815,8 @@ function evaluate(options) {
     ["quota.workload.headroom", "Workload quota checks require a selected workload and region."],
     ["region.skus.eligible", "SKU eligibility checks require a selected workload and region."],
     ["region.foundry-model.available", "Foundry model availability is not applicable until Foundry is selected."],
-    ["security.defender.selection-reviewed", "Defender plan selection is deferred to workload planning."],
-    ["operations.monitoring.destination-valid", "Monitoring destination validation is deferred to workload planning."],
+    ["security.defender.selection-reviewed", "Defender plan selection is deferred to workload planning and must be digest-bound before IaC generation."],
+    ["operations.monitoring.destination-valid", "Monitoring destination validation is deferred to the fail-closed Defender workspace placement planner; Azure defaults are unsupported."],
   ]) {
     checks.push(makeCheck(id, "skipped", summary, { reason: "Not available in account-only inspect mode." }));
   }

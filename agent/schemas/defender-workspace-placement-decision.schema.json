@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/defender-workspace-placement-decision.schema.json",
+  "title": "SSLZ Defender workspace placement decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "decisionId",
+    "generatedAt",
+    "expiresAt",
+    "status",
+    "reasonCode",
+    "tenantId",
+    "subscriptionId",
+    "targetSubscriptionIds",
+    "primaryRegion",
+    "defenderWorkspaceRequired",
+    "requiredByPlans",
+    "paidPlanSelectionDigest",
+    "placement",
+    "evidence",
+    "decisionDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "decisionId": { "$ref": "#/$defs/reference" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["ready", "blocked", "not-required"] },
+    "reasonCode": {
+      "enum": [
+        "workspace.defender-disabled",
+        "workspace.policy-evidence-missing",
+        "workspace.policy-evidence-stale",
+        "workspace.policy-evidence-scope-mismatch",
+        "workspace.service-evidence-stale",
+        "workspace.residency-evidence-stale",
+        "workspace.residency-evidence-scope-mismatch",
+        "workspace.placement-ambiguous",
+        "workspace.region-denied",
+        "workspace.region-unsupported",
+        "workspace.data-residency-mismatch",
+        "workspace.primary-region-mismatch",
+        "workspace.existing-reference-invalid",
+        "workspace.existing-evidence-missing",
+        "workspace.existing-evidence-stale",
+        "workspace.existing-evidence-mismatch",
+        "workspace.existing-scope-mismatch",
+        "workspace.cross-subscription-unsupported",
+        "workspace.central-evidence-missing",
+        "workspace.central-evidence-stale",
+        "workspace.central-evidence-mismatch",
+        "workspace.decision-expiry-exceeds-evidence",
+        "workspace.explicit-new-compatible",
+        "workspace.existing-compatible",
+        "workspace.existing-central-compatible"
+      ]
+    },
+    "tenantId": { "$ref": "#/$defs/uuid" },
+    "subscriptionId": { "$ref": "#/$defs/uuid" },
+    "targetSubscriptionIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/uuid" }
+    },
+    "primaryRegion": { "$ref": "#/$defs/region" },
+    "defenderWorkspaceRequired": { "type": "boolean" },
+    "requiredByPlans": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "const": "defenderForServers" }
+    },
+    "paidPlanSelectionDigest": { "$ref": "#/$defs/digest" },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "region",
+        "workspaceReference",
+        "workspaceReferenceDigest",
+        "scopeDigest"
+      ],
+      "properties": {
+        "mode": {
+          "enum": ["disabled", "new", "existing", "unsupported-default"]
+        },
+        "region": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/region" }]
+        },
+        "workspaceReference": {
+          "type": ["string", "null"],
+          "maxLength": 512
+        },
+        "workspaceReferenceDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        },
+        "scopeDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyEvidenceDigest",
+        "policyEvidenceExpiresAt",
+        "serviceSupportEvidenceDigest",
+        "serviceSupportEvidenceExpiresAt",
+        "dataResidencyEvidenceDigest",
+        "dataResidencyEvidenceExpiresAt",
+        "workspaceEvidenceDigest",
+        "workspaceEvidenceExpiresAt",
+        "centralWorkspaceEvidenceDigest",
+        "centralWorkspaceEvidenceExpiresAt"
+      ],
+      "properties": {
+        "policyEvidenceDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        },
+        "policyEvidenceExpiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "serviceSupportEvidenceDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        },
+        "serviceSupportEvidenceExpiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "dataResidencyEvidenceDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        },
+        "dataResidencyEvidenceExpiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "workspaceEvidenceDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        },
+        "workspaceEvidenceExpiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "centralWorkspaceEvidenceDigest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        },
+        "centralWorkspaceEvidenceExpiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "decisionDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    }
+  }
+}

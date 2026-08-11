@@ -50,6 +50,10 @@ enable_defender_for_containers = false # set true if running AKS (~$7/vCPU/month
 # enable_defender_for_key_vault = true  # default: true, low cost (~$0.02/10K transactions)
 
 # Restrict deployments to these Azure regions (defaults to [location] if omitted)
+log_analytics_workspace_location = "eastus2"
+# existing_log_analytics_workspace_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-central-security/providers/Microsoft.OperationalInsights/workspaces/law-central"
+# defender_workspace_association_managed_externally = false # true only for the non-owner environment in a shared subscription
+# defender_workspace_shared_subscription = false # true when prod and nonprod use the same subscription
 # allowed_locations = ["eastus2", "centralus"]
 
 # Additional tags merged with defaults (environment, managedBy, project, team)

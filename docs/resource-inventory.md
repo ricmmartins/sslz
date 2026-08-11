@@ -17,7 +17,7 @@ This is the complete inventory of every Azure resource created by the Startup La
 
 | Name Pattern | Azure Resource Type | Purpose | Conditional |
 |---|---|---|---|
-| `rg-{company}-{env}-monitoring` | `Microsoft.Resources/resourceGroups` | Log Analytics workspace and monitoring resources | Always created |
+| `rg-{company}-{env}-monitoring` | `Microsoft.Resources/resourceGroups` | Log Analytics workspace and monitoring resources | Created only when an approved existing workspace is not supplied |
 | `rg-{company}-{env}-networking` | `Microsoft.Resources/resourceGroups` | VNet, subnets, and NSGs | Only when `deployNetworking = true` |
 
 ---
@@ -123,6 +123,9 @@ Each subnet has a dedicated NSG. All NSGs include a **DenyAllInbound** catch-all
 | **Daily quota** | 5 GB (configurable, `-1` = unlimited) |
 | **Resource-only permissions** | Enabled |
 
+The workspace location is explicit and defaults to the selected primary region. Supplying an approved compatible
+workspace resource ID reuses that workspace and suppresses both workspace and monitoring resource-group creation.
+
 ### Activity Log Diagnostic Setting
 
 | Property | Value |
@@ -168,6 +171,10 @@ All plans are `Microsoft.Security/pricings` resources at subscription scope.
 > - Defender for Servers, Databases are enabled by default in prod, disabled in nonprod.
 > - Defender for Containers defaults to disabled; enable via parameter if running AKS.
 > - Defender for Key Vault and ARM are always Standard (low cost).
+
+When Defender for Servers is enabled, `Microsoft.Security/workspaceSettings/default` (Terraform:
+`azurerm_security_center_workspace.default`) explicitly associates the subscription with the effective Log Analytics
+workspace. It is omitted when Defender for Servers is disabled.
 
 ### Security Contact
 

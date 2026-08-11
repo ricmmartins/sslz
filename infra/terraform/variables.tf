@@ -79,6 +79,36 @@ variable "log_daily_quota_gb" {
   default     = 5
 }
 
+variable "log_analytics_workspace_location" {
+  description = "Explicit effective Log Analytics workspace region"
+  type        = string
+  default     = ""
+}
+
+variable "existing_log_analytics_workspace_id" {
+  description = "Approved existing Log Analytics workspace resource ID; empty creates the deterministic regional workspace"
+  type        = string
+  default     = ""
+}
+
+variable "configure_defender_workspace" {
+  description = "Bind Defender for Servers to the explicit workspace"
+  type        = bool
+  default     = null
+}
+
+variable "defender_workspace_association_managed_externally" {
+  description = "Use the approved workspace association owned by another environment artifact in the same subscription"
+  type        = bool
+  default     = false
+}
+
+variable "defender_workspace_shared_subscription" {
+  description = "Whether prod and nonprod share one subscription and must reuse one approved existing Defender workspace"
+  type        = bool
+  default     = false
+}
+
 variable "vnet_address_prefix" {
   description = "VNet address prefix (overrides default per-environment prefix)"
   type        = string
@@ -178,6 +208,15 @@ locals {
 
   # Allowed locations: defaults to [var.location] to match Bicep's [location] behavior
   allowed_locations = length(var.allowed_locations) > 0 ? var.allowed_locations : [var.location]
+
+  log_analytics_workspace_location       = var.log_analytics_workspace_location != "" ? var.log_analytics_workspace_location : var.location
+  create_log_analytics_workspace         = var.existing_log_analytics_workspace_id == ""
+  configure_defender_workspace           = var.configure_defender_workspace != null ? var.configure_defender_workspace : local.enable_defender_for_servers
+  existing_workspace_reference_valid     = can(regex("(?i)^/subscriptions/[0-9a-f-]{36}/resourceGroups/[^/]+/providers/Microsoft\\.OperationalInsights/workspaces/[^/]+$", var.existing_log_analytics_workspace_id))
+  safe_existing_workspace_id             = local.existing_workspace_reference_valid ? var.existing_log_analytics_workspace_id : "/subscriptions/${var.subscription_id}/resourceGroups/invalid/providers/Microsoft.OperationalInsights/workspaces/invalid"
+  effective_log_analytics_workspace_id   = local.create_log_analytics_workspace ? module.log_analytics[0].workspace_id : local.safe_existing_workspace_id
+  effective_log_analytics_workspace_name = local.create_log_analytics_workspace ? module.log_analytics[0].workspace_name : element(reverse(split("/", local.safe_existing_workspace_id)), 0)
+  effective_monitoring_resource_group    = local.create_log_analytics_workspace ? azurerm_resource_group.monitoring[0].name : split("/", local.safe_existing_workspace_id)[4]
 
   vnet_address_prefix = var.vnet_address_prefix != "" ? var.vnet_address_prefix : (var.environment == "prod" ? "10.0.0.0/16" : "10.1.0.0/16")
 

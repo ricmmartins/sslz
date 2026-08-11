@@ -19,6 +19,14 @@
     "topologyDecisionId",
     "topologyDecisionDigest",
     "topologyDecisionExpiresAt",
+    "defenderWorkspacePlacementDecisionId",
+    "defenderWorkspacePlacementDecisionDigest",
+    "defenderWorkspaceRegion",
+    "defenderWorkspaceScopeDigest",
+    "defenderWorkspaceReferenceDigest",
+    "defenderWorkspacePolicyEvidenceDigest",
+    "defenderWorkspacePolicyEvidenceFreshness",
+    "defenderPaidPlanSelectionDigest",
     "operation",
     "provider",
     "environment",
@@ -86,6 +94,60 @@
     "topologyDecisionExpiresAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "defenderWorkspacePlacementDecisionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "defenderWorkspacePlacementDecisionDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "defenderWorkspaceRegion": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspaceScopeDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspaceReferenceDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspacePolicyEvidenceDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspacePolicyEvidenceFreshness": {
+      "enum": ["current", "not-required"]
+    },
+    "defenderPaidPlanSelectionDigest": {
+      "$ref": "#/$defs/digest"
     },
     "operation": {
       "const": "platform-baseline.deploy"
