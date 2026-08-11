@@ -17,6 +17,7 @@ import {
   deriveResume,
   evaluateGates,
   generateCoolFoundationPlan,
+  parseArguments,
   validateCoolFoundationPlan,
   validateStepStateSemantics,
 } from "../scripts/startup-cool-foundation-plan.mjs";
@@ -241,10 +242,14 @@ try {
     resolve(root, "infra/bicep/cool-foundation.bicep"),
     "utf8",
   );
-  const terraformSource = readFileSync(
-    resolve(root, "infra/terraform/cool-foundation/main.tf"),
-    "utf8",
-  );
+  const terraformSource = ["main.tf", "variables.tf"]
+    .map((file) =>
+      readFileSync(
+        resolve(root, "infra/terraform/cool-foundation", file),
+        "utf8",
+      ),
+    )
+    .join("\n");
   for (const source of [bicepSource, terraformSource]) {
     assert.match(source, /monitoring/i);
     assert.match(source, /networking/i);
@@ -253,6 +258,52 @@ try {
       /front\s*door|traffic\s*manager|global.?ingress|failover|postgres|container.?app|kubernetes|aks/i,
     );
   }
+  assert.match(bicepSource, /parseCidr\(primaryVnetAddressPrefix\)/);
+  assert.match(bicepSource, /parseCidr\(secondaryVnetAddressPrefix\)/);
+  assert.match(
+    bicepSource,
+    /primaryNetworkValue <= secondaryBroadcastValue && secondaryNetworkValue <= primaryBroadcastValue/,
+  );
+  assert.match(
+    bicepSource,
+    /fail\('primaryVnetAddressPrefix and secondaryVnetAddressPrefix must not overlap\.'\)/,
+  );
+  assert.match(
+    bicepSource,
+    /vnetAddressPrefix: validatedSecondaryVnetAddressPrefix/,
+  );
+  assert.match(terraformSource, /can\(cidrhost\(var\.primary_vnet_address_prefix, 0\)\)/);
+  assert.match(terraformSource, /can\(cidrhost\(var\.secondary_vnet_address_prefix, 0\)\)/);
+  assert.match(
+    terraformSource,
+    /var\.secondary_vnet_address_prefix != var\.primary_vnet_address_prefix/,
+  );
+
+  assert.deepEqual(
+    parseArguments([
+      "generate",
+      "--plan",
+      ".sslz/generated/my-plan/plan-summary.json",
+      "--baseline",
+      "agent/examples/cool-foundation-baseline.json",
+      "--output-dir",
+      ".sslz/generated/my-plan/cool-foundation",
+    ]),
+    {
+      command: "generate",
+      planPath: ".sslz/generated/my-plan/plan-summary.json",
+      baselinePath: "agent/examples/cool-foundation-baseline.json",
+      outputPath: ".sslz/generated/my-plan/cool-foundation",
+    },
+  );
+  const documentedCommand = readFileSync(
+    resolve(root, "docs/iac-plan-generation.md"),
+    "utf8",
+  );
+  assert.match(
+    documentedCommand,
+    /startup-cool-foundation-plan\.sh generate \\\r?\n  --plan \.sslz\/generated\/my-plan\/plan-summary\.json \\\r?\n  --baseline agent\/examples\/cool-foundation-baseline\.json \\\r?\n  --output-dir \.sslz\/generated\/my-plan\/cool-foundation/,
+  );
 
   const expired = structuredClone(sourcePlan);
   expired.readinessEvidence.expiresAt = "2026-08-09T11:59:59Z";

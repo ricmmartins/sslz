@@ -1024,6 +1024,7 @@ export {
   deriveResume,
   evaluateGates,
   generateCoolFoundationPlan,
+  parseArguments,
   validateCoolFoundationPlan,
   validateStepStateSemantics,
   validateStepTransition,

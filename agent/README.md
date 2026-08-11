@@ -103,6 +103,7 @@ planner does not create a backend or credentials.
 ```bash
 ./scripts/startup-cool-foundation-plan.sh generate \
   --plan .sslz/generated/my-plan/plan-summary.json \
+  --baseline agent/examples/cool-foundation-baseline.json \
   --output-dir .sslz/generated/my-plan/cool-foundation
 ```
 

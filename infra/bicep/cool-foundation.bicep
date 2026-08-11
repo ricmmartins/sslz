@@ -42,6 +42,24 @@ var regionalSuffix = toLower(replace(location, ' ', ''))
 var prefix = '${companyName}-${environment}-cool-${regionalSuffix}'
 var monitoringResourceGroupName = 'rg-${prefix}-monitoring'
 var networkingResourceGroupName = 'rg-${prefix}-networking'
+var primaryRange = parseCidr(primaryVnetAddressPrefix)
+var secondaryRange = parseCidr(secondaryVnetAddressPrefix)
+var primaryNetworkOctets = length(split(primaryRange.network, '.')) == 4
+  ? split(primaryRange.network, '.')
+  : fail('primaryVnetAddressPrefix must be a valid IPv4 CIDR.')
+var primaryBroadcastOctets = split(primaryRange.broadcast, '.')
+var secondaryNetworkOctets = length(split(secondaryRange.network, '.')) == 4
+  ? split(secondaryRange.network, '.')
+  : fail('secondaryVnetAddressPrefix must be a valid IPv4 CIDR.')
+var secondaryBroadcastOctets = split(secondaryRange.broadcast, '.')
+var primaryNetworkValue = int(primaryNetworkOctets[0]) * 16777216 + int(primaryNetworkOctets[1]) * 65536 + int(primaryNetworkOctets[2]) * 256 + int(primaryNetworkOctets[3])
+var primaryBroadcastValue = int(primaryBroadcastOctets[0]) * 16777216 + int(primaryBroadcastOctets[1]) * 65536 + int(primaryBroadcastOctets[2]) * 256 + int(primaryBroadcastOctets[3])
+var secondaryNetworkValue = int(secondaryNetworkOctets[0]) * 16777216 + int(secondaryNetworkOctets[1]) * 65536 + int(secondaryNetworkOctets[2]) * 256 + int(secondaryNetworkOctets[3])
+var secondaryBroadcastValue = int(secondaryBroadcastOctets[0]) * 16777216 + int(secondaryBroadcastOctets[1]) * 65536 + int(secondaryBroadcastOctets[2]) * 256 + int(secondaryBroadcastOctets[3])
+var addressSpacesOverlap = primaryNetworkValue <= secondaryBroadcastValue && secondaryNetworkValue <= primaryBroadcastValue
+var validatedSecondaryVnetAddressPrefix = !addressSpacesOverlap
+  ? secondaryVnetAddressPrefix
+  : fail('primaryVnetAddressPrefix and secondaryVnetAddressPrefix must not overlap.')
 
 resource monitoringResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: monitoringResourceGroupName
@@ -73,7 +91,7 @@ module networking 'modules/networking.bicep' = {
   params: {
     location: location
     vnetName: 'vnet-${prefix}'
-    vnetAddressPrefix: secondaryVnetAddressPrefix
+    vnetAddressPrefix: validatedSecondaryVnetAddressPrefix
     appSubnetDelegation: appSubnetDelegation
     tags: tags
   }

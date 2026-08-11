@@ -124,6 +124,9 @@ jobs:
             exit 1
           fi
 
+      - name: Test compiled cool foundation CIDR guards
+        run: az bicep build --file infra/bicep/cool-foundation.bicep --stdout | node tests/cool-foundation-bicep-template.mjs
+
   validate-terraform:
     name: Validate Terraform
     runs-on: ubuntu-latest

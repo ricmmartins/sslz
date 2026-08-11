@@ -53,6 +53,7 @@ review-only and does not generate a secondary foundation.
 ```bash
 ./scripts/startup-cool-foundation-plan.sh generate \
   --plan .sslz/generated/my-plan/plan-summary.json \
+  --baseline agent/examples/cool-foundation-baseline.json \
   --output-dir .sslz/generated/my-plan/cool-foundation
 ```
 
