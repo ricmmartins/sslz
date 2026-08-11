@@ -132,6 +132,9 @@ jobs:
       - name: Test compiled cool foundation CIDR guards
         run: az bicep build --file infra/bicep/cool-foundation.bicep --stdout | node tests/cool-foundation-bicep-template.mjs
 
+      - name: Test compiled primary networking profile isolation
+        run: az bicep build --file infra/bicep/main.bicep --stdout | node tests/primary-bicep-networking-template.mjs
+
       - name: Test compiled Container Apps cool profile guards
         run: az bicep build --file infra/bicep/cool-container-apps.bicep --stdout | node tests/cool-container-apps-bicep-template.mjs
 
@@ -163,6 +166,10 @@ jobs:
         working-directory: infra/terraform/cool-foundation
         run: tflint --config="${{ github.workspace }}/.tflint.hcl"
 
+      - name: TFLint — Shared Networking Module
+        working-directory: infra/terraform/modules/networking
+        run: tflint --config="${{ github.workspace }}/.tflint.hcl"
+
       - name: TFLint — Container Apps Cool Profile
         working-directory: infra/terraform/cool-container-apps
         run: tflint --config="${{ github.workspace }}/.tflint.hcl"
@@ -186,6 +193,13 @@ jobs:
 
       - name: Terraform Init & Validate — Cool Foundation
         working-directory: infra/terraform/cool-foundation
+        run: |
+          terraform init -backend=false
+          terraform validate
+          terraform test
+
+      - name: Terraform Test — Networking Profile Isolation
+        working-directory: infra/terraform/modules/networking
         run: |
           terraform init -backend=false
           terraform validate

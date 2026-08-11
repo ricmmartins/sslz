@@ -97,14 +97,15 @@ module "log_analytics" {
 }
 
 module "networking" {
-  count                 = var.deploy_networking ? 1 : 0
-  source                = "./modules/networking"
-  location              = var.location
-  resource_group_name   = azurerm_resource_group.networking[0].name
-  vnet_name             = "vnet-${local.prefix}"
-  vnet_address_prefix   = local.vnet_address_prefix
-  app_subnet_delegation = var.app_subnet_delegation
-  tags                  = local.tags
+  count                         = var.deploy_networking ? 1 : 0
+  source                        = "./modules/networking"
+  location                      = var.location
+  resource_group_name           = azurerm_resource_group.networking[0].name
+  vnet_name                     = "vnet-${local.prefix}"
+  vnet_address_prefix           = local.vnet_address_prefix
+  app_subnet_delegation         = var.app_subnet_delegation
+  include_container_apps_subnet = false
+  tags                          = local.tags
 }
 
 # Defender pricing resources (Microsoft.Security/pricings/*) already exist on every

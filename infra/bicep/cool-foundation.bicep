@@ -99,6 +99,7 @@ module networking 'modules/networking.bicep' = {
     vnetName: 'vnet-${prefix}'
     vnetAddressPrefix: validatedSecondaryVnetAddressPrefix
     appSubnetDelegation: appSubnetDelegation
+    includeContainerAppsSubnet: true
     tags: tags
   }
 }

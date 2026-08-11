@@ -1,5 +1,27 @@
 targetScope = 'subscription'
 
+func stripDigits(value string) string => replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(value, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', '')
+func stripHexLetters(value string) string => replace(replace(replace(replace(replace(replace(value, 'a', ''), 'b', ''), 'c', ''), 'd', ''), 'e', ''), 'f', '')
+func stripLettersAG(value string) string => replace(replace(replace(replace(replace(replace(replace(value, 'a', ''), 'b', ''), 'c', ''), 'd', ''), 'e', ''), 'f', ''), 'g', '')
+func stripLettersHN(value string) string => replace(replace(replace(replace(replace(replace(replace(value, 'h', ''), 'i', ''), 'j', ''), 'k', ''), 'l', ''), 'm', ''), 'n', '')
+func stripLettersOU(value string) string => replace(replace(replace(replace(replace(replace(replace(value, 'o', ''), 'p', ''), 'q', ''), 'r', ''), 's', ''), 't', ''), 'u', '')
+func stripLettersVZ(value string) string => replace(replace(replace(replace(replace(value, 'v', ''), 'w', ''), 'x', ''), 'y', ''), 'z', '')
+func stripLowerHex(value string) string => stripHexLetters(stripDigits(value))
+func stripLowerAlphaNumericHyphen(value string) string => replace(stripLettersVZ(stripLettersOU(stripLettersHN(stripLettersAG(stripDigits(value))))), '-', '')
+func stripImagePrefixChars(value string) string => replace(replace(replace(stripLowerAlphaNumericHyphen(value), '.', ''), '_', ''), '/', '')
+func isLowerHexLength(value string, expectedLength int) bool => length(value) == expectedLength && empty(stripLowerHex(value))
+func isKeyVaultHost(host string) bool => endsWith(host, environment().suffixes.keyvaultDns) && host == toLower(host) && length(split(host, '.')) == 4 && !empty(split(host, '.')[0]) && empty(stripLowerAlphaNumericHyphen(split(host, '.')[0]))
+func isSecretName(name string) bool => !empty(name) && empty(stripLowerAlphaNumericHyphen(toLower(name)))
+func isVersionedKeyVaultSecretUri(uri string) bool => length(split(uri, '/')) == 6 ? split(uri, '/')[0] == 'https:' && empty(split(uri, '/')[1]) && isKeyVaultHost(split(uri, '/')[2]) && split(uri, '/')[3] == 'secrets' && isSecretName(split(uri, '/')[4]) && isLowerHexLength(split(uri, '/')[5], 32) : false
+
+@sealed()
+type secretReference = {
+  @minLength(1)
+  name: string
+  keyVaultSecretUri: string
+  identityResourceId: string
+}
+
 @description('Secondary nonproduction Azure region')
 param location string
 
@@ -83,7 +105,8 @@ param cpu string = '0.25'
 param memory string = '0.5Gi'
 
 @description('Key Vault secret references only; values are prohibited')
-param secretReferences array
+@minLength(1)
+param secretReferences secretReference[]
 
 @description('Environment variables bound only to named secret references')
 param secretEnvironmentVariables array
@@ -109,10 +132,11 @@ param tags object = {
   deploymentMode: 'cool-container-apps'
 }
 
-var imageIsImmutable = contains(image, '@sha256:') && !contains(image, ':latest')
+var imageParts = split(image, '@sha256:')
+var imageIsImmutable = length(imageParts) == 2 ? !empty(imageParts[0]) && contains(imageParts[0], '/') && !startsWith(imageParts[0], '/') && !endsWith(imageParts[0], '/') && imageParts[0] == toLower(imageParts[0]) && empty(stripImagePrefixChars(imageParts[0])) && isLowerHexLength(imageParts[1], 64) : false
 var validatedImage = imageIsImmutable
   ? image
-  : fail('image must be an immutable digest reference and cannot use a mutable tag.')
+  : fail('image must end with exactly @sha256: followed by 64 lowercase hexadecimal characters.')
 var scopeIsSecondary = contains(toLower(resourceGroupName), '-nonprod-cool-') && !contains(toLower(resourceGroupName), '-primary')
 var validatedResourceGroupName = scopeIsSecondary
   ? resourceGroupName
@@ -148,9 +172,10 @@ var validatedSubnetResourceId = subnetIsContainerApps
   ? infrastructureSubnetResourceId
   : fail('infrastructureSubnetResourceId must reference the dedicated Container Apps subnet.')
 var identityReferencesMatch = length(filter(secretReferences, secret => secret.identityResourceId != managedIdentityResourceId)) == 0
-var validatedSecretReferences = identityReferencesMatch
+var secretReferencesAreVersioned = length(filter(secretReferences, secret => !isVersionedKeyVaultSecretUri(secret.keyVaultSecretUri))) == 0
+var validatedSecretReferences = identityReferencesMatch && secretReferencesAreVersioned
   ? secretReferences
-  : fail('Every secret reference must use the bound managed identity.')
+  : fail('Every secret must be a versioned Key Vault URI reference using the bound managed identity; secret material is prohibited.')
 var secretNames = map(secretReferences, secret => secret.name)
 var environmentReferencesMatch = length(filter(secretEnvironmentVariables, item => !contains(secretNames, item.secretRef))) == 0
 var validatedSecretEnvironmentVariables = environmentReferencesMatch

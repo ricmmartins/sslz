@@ -19,8 +19,9 @@ assert.equal(
 );
 assert.match(
   template.variables.validatedImage,
-  /image must be an immutable digest reference/,
+  /64 lowercase hexadecimal characters/,
 );
+assert.match(template.variables.imageIsImmutable, /isLowerHexLength.+64/);
 assert.match(
   template.variables.validatedSubnetResourceId,
   /dedicated Container Apps subnet/,
@@ -35,14 +36,33 @@ assert.match(
 );
 assert.match(
   template.variables.validatedSecretReferences,
-  /bound managed identity/,
+  /versioned Key Vault URI reference.+secret material is prohibited/,
+);
+assert.equal(template.definitions.secretReference.additionalProperties, false);
+assert.deepEqual(
+  Object.keys(template.definitions.secretReference.properties),
+  ["name", "keyVaultSecretUri", "identityResourceId"],
+);
+const bicepFunctions = template.functions.find(
+  (item) => item.namespace === "__bicep",
+).members;
+assert.match(
+  bicepFunctions.isLowerHexLength.output.value,
+  /equals\(length\(parameters\('value'\)\), parameters\('expectedLength'\)\).+stripLowerHex/,
+);
+assert.match(
+  bicepFunctions.isVersionedKeyVaultSecretUri.output.value,
+  /equals\(length\(split\(parameters\('uri'\), '\/'\)\), 6\).+https:.+isKeyVaultHost.+secrets.+isLowerHexLength.+32/,
 );
 assert.match(
   template.variables.validatedProbes,
   /Startup, Readiness, and Liveness probe/,
 );
 
-const profileDeployment = template.resources.find(
+const resources = Array.isArray(template.resources)
+  ? template.resources
+  : Object.values(template.resources);
+const profileDeployment = resources.find(
   (resource) =>
     resource.type === "Microsoft.Resources/deployments" &&
     resource.name.includes("represent-cool-container-apps"),
