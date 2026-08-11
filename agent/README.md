@@ -98,6 +98,23 @@ approval-bound decision invalidates a supplied approval. Add `--preview` to run 
 Terraform preview requires the input's explicit `azurerm` remote-backend coordinates and ambient authentication; the
 planner does not create a backend or credentials.
 
+## Prepare a nonproduction cool foundation plan
+
+```bash
+./scripts/startup-cool-foundation-plan.sh generate \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --baseline agent/examples/cool-foundation-baseline.json \
+  --output-dir .sslz/generated/my-plan/cool-foundation
+```
+
+The Phase 7 command validates current readiness evidence and emits deterministic, execution-disabled Bicep and
+Terraform manifests for secondary networking and observability in `nonprod` only. It binds exact source and parameter
+digests, isolated scope and Terraform state, ordered future steps, read-only postchecks, teardown intent, and pending
+approval metadata. It does not authenticate, preview, deploy, register providers, query live billing, synthesize human
+attestations, or add global ingress, workloads, replication, or failover. The example baseline (RTO 240 minutes, RPO 60
+minutes, secondary recurring cost at most 30% of primary, quarterly exercise, and `Platform Operations Owner`) is a
+provisional noncritical planning fixture, not a production promise.
+
 ## Apply one approved provider registration
 
 ```bash
@@ -153,4 +170,5 @@ Azure operations. IaC generation is a separate command with no deployment, remed
 or billing operation. Approved provider remediation is a separate command whose only Azure write is one
 profile-allowlisted resource-provider registration; it cannot call either deployment path. Approved deployment is
 another standalone command and supports only the primary `single-region-ready` platform baseline. It does not deploy a
-workload or secondary region.
+workload or secondary region. `cool-infrastructure` remains a nonproduction planning mode; no Phase 7 manifest is
+accepted by the Phase 6 preview or apply path.

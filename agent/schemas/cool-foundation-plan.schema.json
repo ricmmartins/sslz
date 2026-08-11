@@ -1,0 +1,380 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/cool-foundation-plan.schema.json",
+  "title": "SSLZ cool foundation planning-only plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "generatedBy",
+    "planId",
+    "planDigest",
+    "evaluatedAt",
+    "status",
+    "mode",
+    "environment",
+    "sourcePlan",
+    "baseline",
+    "readinessBinding",
+    "gateResults",
+    "foundation",
+    "manifests",
+    "deploymentStateContract",
+    "approvalBinding",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "plannerVersion": {
+      "const": "1.0.0"
+    },
+    "generatedBy": {
+      "const": "startup-cool-foundation-plan.mjs"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "planDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "evaluatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": ["blocked", "ready-for-review"]
+    },
+    "mode": {
+      "const": "cool-infrastructure"
+    },
+    "environment": {
+      "const": "nonprod"
+    },
+    "sourcePlan": {
+      "type": "object"
+    },
+    "baseline": {
+      "$ref": "cool-foundation-baseline.schema.json"
+    },
+    "readinessBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceId",
+        "evidenceDigest",
+        "issuedAt",
+        "expiresAt",
+        "freshness",
+        "secondaryRegion",
+        "billingSupport",
+        "owner",
+        "recoveryObjectives",
+        "cost",
+        "externalReviews",
+        "recoveryExercise"
+      ],
+      "properties": {
+        "evidenceId": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshness": {
+          "enum": ["current", "expired", "future", "invalid"]
+        },
+        "secondaryRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "billingSupport": {
+          "$ref": "#/$defs/attestationBinding"
+        },
+        "owner": {
+          "type": "object"
+        },
+        "recoveryObjectives": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object"
+          }
+        },
+        "cost": {
+          "type": ["object", "null"]
+        },
+        "externalReviews": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/attestationBinding"
+          }
+        },
+        "recoveryExercise": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/attestationBinding"
+            }
+          ]
+        }
+      }
+    },
+    "gateResults": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidenceReferences", "message"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^cool\\.foundation\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "status": {
+            "enum": ["pass", "blocked"]
+          },
+          "evidenceReferences": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          "message": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "foundation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "secondary", "isolation", "excludedCapabilities"],
+      "properties": {
+        "primary": {
+          "type": "object"
+        },
+        "secondary": {
+          "type": "object"
+        },
+        "isolation": {
+          "type": "object"
+        },
+        "excludedCapabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "global-ingress",
+              "profile-workload",
+              "data-replication",
+              "data-failover",
+              "traffic-failover",
+              "production-execution"
+            ]
+          }
+        }
+      }
+    },
+    "manifests": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "path", "digest"],
+        "properties": {
+          "provider": {
+            "enum": ["bicep", "terraform"]
+          },
+          "path": {
+            "$ref": "#/$defs/generatedPath"
+          },
+          "digest": {
+            "$ref": "#/$defs/digest"
+          }
+        }
+      }
+    },
+    "deploymentStateContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "states",
+        "ordered",
+        "singleActiveStep",
+        "idempotencyRequired",
+        "resumeRequiresArtifactDigestMatch",
+        "partialFailure"
+      ],
+      "properties": {
+        "states": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["pending", "running", "succeeded", "failed", "cleanup-required"]
+          }
+        },
+        "ordered": {
+          "const": true
+        },
+        "singleActiveStep": {
+          "const": true
+        },
+        "idempotencyRequired": {
+          "const": true
+        },
+        "resumeRequiresArtifactDigestMatch": {
+          "const": true
+        },
+        "partialFailure": {
+          "const": "fail-closed"
+        }
+      }
+    },
+    "approvalBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "status",
+        "signingDomain",
+        "planDigest",
+        "readinessEvidenceDigest",
+        "manifestDigests",
+        "requiredReviewReferences",
+        "executionApprovalAccepted"
+      ],
+      "properties": {
+        "required": {
+          "const": true
+        },
+        "status": {
+          "const": "pending"
+        },
+        "signingDomain": {
+          "const": "sslz.cool-foundation.approval.v1"
+        },
+        "planDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "readinessEvidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "manifestDigests": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/digest"
+          }
+        },
+        "requiredReviewReferences": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        },
+        "executionApprovalAccepted": {
+          "const": false
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "azureOperations",
+        "singleExecutableProductionMode",
+        "secondaryPreview",
+        "providerRegistration",
+        "liveBillingQuery",
+        "humanAttestationsSynthesized"
+      ],
+      "properties": {
+        "executionEnabled": {
+          "const": false
+        },
+        "azureOperations": {
+          "const": "none"
+        },
+        "singleExecutableProductionMode": {
+          "const": "single-region-ready"
+        },
+        "secondaryPreview": {
+          "const": "not-run"
+        },
+        "providerRegistration": {
+          "const": false
+        },
+        "liveBillingQuery": {
+          "const": false
+        },
+        "humanAttestationsSynthesized": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "generatedPath": {
+      "type": "string",
+      "pattern": "^\\.sslz/generated/[A-Za-z0-9._/-]+$"
+    },
+    "attestationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reference", "evidenceDigest", "expiresAt"],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

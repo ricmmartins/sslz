@@ -112,8 +112,14 @@ function createInput({ regionalMode = "single-region-ready" } = {}) {
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.failoverOwnerConfirmed =
     regionalMode !== "single-region-ready";
-  planningInput.startupInput.reliability.rtoMinutes = 60;
-  planningInput.startupInput.reliability.rpoMinutes = 15;
+  planningInput.startupInput.reliability.rtoMinutes =
+    regionalMode === "cool-infrastructure" ? 240 : 60;
+  planningInput.startupInput.reliability.rpoMinutes =
+    regionalMode === "cool-infrastructure" ? 60 : 15;
+  if (regionalMode === "cool-infrastructure") {
+    planningInput.regionalRequirements.secondaryBaseline.minimum = 30;
+    planningInput.regionalRequirements.secondaryBaseline.maximum = 60;
+  }
   planningInput.workloadPlan = planWorkload(planningInput.startupInput);
   const regionalPlan = planRegions(planningInput);
   const input = {

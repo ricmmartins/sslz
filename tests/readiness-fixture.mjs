@@ -159,7 +159,13 @@ function buildReadinessEvidence(input) {
         "7",
         {
           ownerReference: "identity.oncall-primary",
-          roleReference: "role.incident-commander",
+          roleReference:
+            input.regionalPlan.requestedRegionalMode === "cool-infrastructure"
+              ? "role.platform-operations-owner"
+              : "role.incident-commander",
+          ...(input.regionalPlan.requestedRegionalMode === "cool-infrastructure"
+            ? { roleDisplayName: "Platform Operations Owner" }
+            : {}),
         },
       ),
       recoveryMeasurements: selectedProfiles.map((profileId, index) =>
@@ -205,6 +211,27 @@ function buildReadinessEvidence(input) {
                 maximum:
                   input.regionalPlan.costAssumptions.secondaryBaseline.maximum,
                 provenanceReference: "pricing.azure-calculator.001",
+                primaryMonthlyCost:
+                  input.regionalPlan.costAssumptions.selectedPrimaryEstimate,
+                ceilingPercent: 30,
+                projectedPercent:
+                  (input.regionalPlan.costAssumptions.secondaryBaseline.maximum /
+                    input.regionalPlan.costAssumptions.selectedPrimaryEstimate) *
+                  100,
+              },
+            )
+          : null,
+      recoveryExercise:
+        input.regionalPlan.requestedRegionalMode === "cool-infrastructure"
+          ? humanAttestation(
+              "pass",
+              "role.recovery-test-authority",
+              "exercise.cool-foundation.001",
+              "cool-foundation-recovery-exercise",
+              "e",
+              {
+                cadence: "quarterly",
+                exerciseReference: "exercise.nonprod-quarterly.001",
               },
             )
           : null,

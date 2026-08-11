@@ -219,6 +219,13 @@
       "blockingStates": ["fail", "not-tested", "stale"]
     },
     {
+      "id": "readiness.recovery.exercise-current",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-tested", "missing", "stale"]
+    },
+    {
       "id": "readiness.cost.cool-footprint-provenance",
       "surface": "readiness",
       "source": "scripts/startup-iac-plan.mjs",
@@ -287,6 +294,104 @@
       "source": "scripts/startup-deployment-integration.mjs",
       "passState": "pass",
       "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "cool.foundation.mode-nonprod-only",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked"]
+    },
+    {
+      "id": "cool.foundation.secondary-region-current",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "expired", "mismatched"]
+    },
+    {
+      "id": "cool.foundation.network-non-overlapping",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "overlap"]
+    },
+    {
+      "id": "cool.foundation.billing-support-confirmed",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.owner-confirmed",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "missing", "stale", "mismatched"]
+    },
+    {
+      "id": "cool.foundation.external-reviews-approved",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.recovery-objectives-met",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["unmet", "not-measured", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.recovery-exercise-passed",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-tested", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.cost-within-ceiling",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["exceeded", "pending", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.artifacts-exact",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mutated", "replayed"]
+    },
+    {
+      "id": "cool.foundation.provider-parity",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["mismatched", "missing-review"]
+    },
+    {
+      "id": "cool.foundation.source-plan-approved",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "expired", "mutated"]
+    },
+    {
+      "id": "cool.foundation.execution-disabled",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["enabled"]
+    },
+    {
+      "id": "cool.foundation.failover-modules-excluded",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["present"]
     }
   ]
 }

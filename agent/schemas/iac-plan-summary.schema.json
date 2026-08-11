@@ -98,6 +98,10 @@
     }
   },
   "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "approval": {
       "type": "object",
       "additionalProperties": false,
@@ -151,7 +155,18 @@
     "artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["provider", "environment", "regionRole", "region", "path", "previewEligible"],
+      "required": [
+        "provider",
+        "environment",
+        "regionRole",
+        "region",
+        "path",
+        "digest",
+        "decisionDigest",
+        "sourcePath",
+        "stateKey",
+        "previewEligible"
+      ],
       "properties": {
         "provider": {
           "enum": ["bicep", "terraform"]
@@ -169,6 +184,24 @@
         "path": {
           "type": "string",
           "pattern": "^\\.sslz/generated/"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "decisionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "sourcePath": {
+          "enum": [
+            "infra/bicep/main.bicep",
+            "infra/terraform",
+            "infra/bicep/cool-foundation.bicep",
+            "infra/terraform/cool-foundation"
+          ]
+        },
+        "stateKey": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z0-9][a-z0-9.-]*\\.tfstate$"
         },
         "previewEligible": {
           "type": "boolean"
@@ -248,6 +281,10 @@
         },
         "planJsonArtifact": {
           "type": ["string", "null"]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
         }
       }
     }

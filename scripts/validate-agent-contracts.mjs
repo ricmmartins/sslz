@@ -110,6 +110,12 @@ function validate(schema, value, path, schemaDirectory) {
     if (schema.minimum !== undefined && value < schema.minimum) {
       fail(path, `minimum value is ${schema.minimum}`);
     }
+    if (
+      schema.exclusiveMinimum !== undefined &&
+      value <= schema.exclusiveMinimum
+    ) {
+      fail(path, `value must be greater than ${schema.exclusiveMinimum}`);
+    }
     if (schema.maximum !== undefined && value > schema.maximum) {
       fail(path, `maximum value is ${schema.maximum}`);
     }
@@ -118,6 +124,9 @@ function validate(schema, value, path, schemaDirectory) {
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) {
       fail(path, `minimum item count is ${schema.minItems}`);
+    }
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) {
+      fail(path, `maximum item count is ${schema.maxItems}`);
     }
     if (schema.uniqueItems) {
       const serialized = value.map((item) => JSON.stringify(item));
@@ -316,6 +325,15 @@ function main() {
   const readinessEvidenceSchema = load(
     "agent/schemas/readiness-evidence.schema.json",
   );
+  const coolFoundationBaselineSchema = load(
+    "agent/schemas/cool-foundation-baseline.schema.json",
+  );
+  const coolFoundationManifestSchema = load(
+    "agent/schemas/cool-foundation-manifest.schema.json",
+  );
+  const coolFoundationPlanSchema = load(
+    "agent/schemas/cool-foundation-plan.schema.json",
+  );
   const iacPlanSummarySchema = load("agent/schemas/iac-plan-summary.schema.json");
   const providerRemediationApprovalSchema = load(
     "agent/schemas/provider-remediation-approval.schema.json",
@@ -357,6 +375,9 @@ function main() {
     "agent/examples/terraform-plan-provenance.json",
   );
   const readinessEvidence = load("agent/examples/readiness-evidence.json");
+  const coolFoundationBaseline = load(
+    "agent/examples/cool-foundation-baseline.json",
+  );
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
     load("agent/profiles/container-apps.json"),
@@ -389,6 +410,18 @@ function main() {
     iacPlanSummarySchema.$id,
     "https://aka.ms/sslz/schemas/iac-plan-summary.schema.json",
   );
+  assert.equal(
+    coolFoundationBaselineSchema.$id,
+    "https://aka.ms/sslz/schemas/cool-foundation-baseline.schema.json",
+  );
+  assert.equal(
+    coolFoundationManifestSchema.$id,
+    "https://aka.ms/sslz/schemas/cool-foundation-manifest.schema.json",
+  );
+  assert.equal(
+    coolFoundationPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/cool-foundation-plan.schema.json",
+  );
   validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
   validateDocument(preflightResultSchema, readyExample);
   validateDocument(preflightResultSchema, blockedExample);
@@ -404,6 +437,7 @@ function main() {
   validateDocument(deploymentApprovalSchema, deploymentApproval);
   validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
   validateDocument(readinessEvidenceSchema, readinessEvidence);
+  validateDocument(coolFoundationBaselineSchema, coolFoundationBaseline);
   assert.equal(
     deploymentResultSchema.$id,
     "https://aka.ms/sslz/schemas/deployment-result.schema.json",
@@ -424,6 +458,7 @@ function main() {
     deploymentApproval,
     terraformPlanProvenance,
     readinessEvidence,
+    coolFoundationBaseline,
     profiles,
   ]);
 

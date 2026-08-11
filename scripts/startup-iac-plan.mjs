@@ -60,6 +60,7 @@ const READINESS_CHECK_IDS = {
   failoverOwner: "readiness.failover.owner-confirmed",
   recoveryObjectives: "readiness.recovery.objectives-measured",
   serviceRecovery: "readiness.recovery.service-tested",
+  recoveryExercise: "readiness.recovery.exercise-current",
   coolCost: "readiness.cost.cool-footprint-provenance",
   region: "readiness.region.evidence-current",
   foundry: "readiness.foundry.deployment-quota-current",
@@ -92,6 +93,14 @@ const READINESS_ERROR_CHECK_IDS = new Map([
   [
     "readiness.recovery.service-test-failed",
     READINESS_CHECK_IDS.serviceRecovery,
+  ],
+  [
+    "readiness.recovery.exercise-required",
+    READINESS_CHECK_IDS.recoveryExercise,
+  ],
+  [
+    "readiness.recovery.exercise-failed",
+    READINESS_CHECK_IDS.recoveryExercise,
   ],
   ["readiness.cost.provenance-required", READINESS_CHECK_IDS.coolCost],
   ["readiness.cost.range-invalid", READINESS_CHECK_IDS.coolCost],
@@ -331,7 +340,9 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
   if (
     owner.status !== "confirmed" ||
     !owner.ownerReference ||
-    !owner.roleReference
+    !owner.roleReference ||
+    (expectedSubject.regionalMode === "cool-infrastructure" &&
+      !owner.roleDisplayName)
   ) {
     readinessFail(
       "readiness.failover.owner-required",
@@ -434,6 +445,7 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
   }
 
   const cost = evidence.humanAttestations.coolFootprintCost;
+  const recoveryExercise = evidence.humanAttestations.recoveryExercise;
   if (expectedSubject.regionalMode === "cool-infrastructure") {
     if (!cost) {
       readinessFail(
@@ -459,20 +471,56 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
       );
     }
     const selectedCost = input.regionalPlan.costAssumptions.secondaryBaseline;
+    const primaryMonthlyCost =
+      input.regionalPlan.costAssumptions.selectedPrimaryEstimate;
+    const projectedPercent =
+      primaryMonthlyCost > 0 ? (selectedCost.maximum / primaryMonthlyCost) * 100 : null;
     if (
       cost.currency !== input.regionalPlan.costAssumptions.currency ||
       cost.minimum !== selectedCost.minimum ||
-      cost.maximum !== selectedCost.maximum
+      cost.maximum !== selectedCost.maximum ||
+      cost.primaryMonthlyCost !== primaryMonthlyCost ||
+      !Number.isFinite(projectedPercent) ||
+      Math.abs(cost.projectedPercent - projectedPercent) > 0.000001
     ) {
       readinessFail(
         "readiness.cost.scope-mismatch",
         "The cool-footprint cost attestation does not match the selected regional plan.",
       );
     }
-  } else if (cost !== null) {
+    if (cost.projectedPercent > cost.ceilingPercent) {
+      readinessFail(
+        "readiness.cost.ceiling-exceeded",
+        "The reviewed cool-footprint maximum exceeds its recurring-cost ceiling.",
+        READINESS_CHECK_IDS.coolCost,
+      );
+    }
+    if (!recoveryExercise) {
+      readinessFail(
+        "readiness.recovery.exercise-required",
+        "Cool-infrastructure readiness requires a current recovery exercise attestation.",
+      );
+    }
+    assertEvidenceCurrent(
+      recoveryExercise,
+      evaluatedAt,
+      "Cool-foundation recovery exercise",
+      "attestedAt",
+      READINESS_CHECK_IDS.recoveryExercise,
+    );
+    if (
+      recoveryExercise.status !== "pass" ||
+      !recoveryExercise.exerciseReference
+    ) {
+      readinessFail(
+        "readiness.recovery.exercise-failed",
+        "The cool-foundation recovery exercise has not passed.",
+      );
+    }
+  } else if (cost !== null || recoveryExercise !== null) {
     readinessFail(
       "readiness.cost.scope-mismatch",
-      "Cool-footprint cost evidence must be omitted when cool-infrastructure is not selected.",
+      "Cool-footprint cost and recovery-exercise evidence must be omitted when cool-infrastructure is not selected.",
     );
   }
 
@@ -988,6 +1036,18 @@ function parameterValues(
   regionalTarget,
   notificationContacts,
 ) {
+  if (regionalTarget.role === "secondary") {
+    return {
+      location: regionalTarget.region,
+      companyName: decisionModel.configuration.companyName,
+      environment: "nonprod",
+      primaryVnetAddressPrefix: decisionModel.regional.primary.vnetCidr,
+      secondaryVnetAddressPrefix: regionalTarget.vnetCidr,
+      appSubnetDelegation: decisionModel.configuration.appSubnetDelegation,
+      logRetentionInDays: decisionModel.configuration.logRetentionInDays,
+      logDailyQuotaGb: decisionModel.configuration.logDailyQuotaGb,
+    };
+  }
   return {
     location: regionalTarget.region,
     companyName: decisionModel.configuration.companyName,
@@ -1015,8 +1075,8 @@ function parameterValues(
   };
 }
 
-function renderBicepParameters(values, parameterPath, previewEligible) {
-  const templatePath = relative(dirname(parameterPath), resolve(root, "infra/bicep/main.bicep"))
+function renderBicepParameters(values, parameterPath, previewEligible, sourcePath) {
+  const templatePath = relative(dirname(parameterPath), resolve(root, sourcePath))
     .split(sep)
     .join("/");
   return [
@@ -1024,7 +1084,7 @@ function renderBicepParameters(values, parameterPath, previewEligible) {
     ...(previewEligible
       ? []
       : [
-          "// Secondary representation only; the current single-region root must not be previewed independently.",
+          "// Secondary foundation representation only; execution is disabled in Phase 7.",
         ]),
     `using '${templatePath}'`,
     "",
@@ -1045,7 +1105,7 @@ function renderTerraformVariables(values, previewEligible) {
     ...(previewEligible
       ? []
       : [
-          "# Secondary representation only; the current single-region root must not be previewed independently.",
+          "# Secondary foundation representation only; execution is disabled in Phase 7.",
         ]),
     ...Object.entries(values).map(
       ([name, value]) => `${terraformName(name)} = ${JSON.stringify(value)}`,
@@ -1068,7 +1128,12 @@ function artifactDefinitions(
   ];
   return providers.flatMap((provider) =>
     decisionModel.target.environments.flatMap((environment) =>
-      regionalTargets.map((regionalTarget) => {
+      regionalTargets
+        .filter(
+          (regionalTarget) =>
+            regionalTarget.role === "primary" || environment.name === "nonprod",
+        )
+        .map((regionalTarget) => {
         const extension =
           provider === "bicep" ? "local.bicepparam" : "auto.tfvars";
         const path = resolve(
@@ -1076,11 +1141,20 @@ function artifactDefinitions(
           provider,
           `${environment.name}-${regionalTarget.role}.${extension}`,
         );
+        const sourcePath =
+          regionalTarget.role === "secondary"
+            ? provider === "bicep"
+              ? "infra/bicep/cool-foundation.bicep"
+              : "infra/terraform/cool-foundation"
+            : provider === "bicep"
+              ? "infra/bicep/main.bicep"
+              : "infra/terraform";
         return {
           provider,
           environment,
           regionalTarget,
           path,
+          sourcePath,
           previewEligible: regionalTarget.role === "primary",
           values: parameterValues(
             decisionModel,
@@ -1089,7 +1163,7 @@ function artifactDefinitions(
             notificationContacts,
           ),
         };
-      }),
+        }),
     ),
   );
 }
@@ -1102,6 +1176,7 @@ function writeParameterArtifacts(definitions) {
             definition.values,
             definition.path,
             definition.previewEligible,
+            definition.sourcePath,
           )
         : renderTerraformVariables({
             subscriptionId: definition.environment.subscriptionId,
@@ -2038,6 +2113,13 @@ function generateIacPlan(
       regionRole: definition.regionalTarget.role,
       region: definition.regionalTarget.region,
       path: relativePath(definition.path),
+      digest: hashBytes(readFileSync(definition.path)),
+      decisionDigest: hashCanonical(definition.values),
+      sourcePath: definition.sourcePath,
+      stateKey:
+        definition.provider === "terraform"
+          ? `${decisionModel.terraformBackend.keyPrefix}-${definition.environment.name}-${definition.regionalTarget.role}.tfstate`
+          : null,
       previewEligible: definition.previewEligible,
     })),
     previews,

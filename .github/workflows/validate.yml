@@ -13,6 +13,7 @@ on:
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
+      - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-provider-remediation.*'
       - 'scripts/startup-deployment-integration.*'
       - 'scripts/azure-cli-invocation.mjs'
@@ -30,6 +31,7 @@ on:
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-iac-plan.*'
+      - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-provider-remediation.*'
       - 'scripts/startup-deployment-integration.*'
       - 'scripts/azure-cli-invocation.mjs'
@@ -69,6 +71,9 @@ jobs:
 
       - name: Test readiness evidence binding
         run: node tests/startup-readiness-evidence.mjs
+
+      - name: Test cool foundation planning
+        run: node tests/startup-cool-foundation-plan.mjs
 
       - name: Test approved provider remediation
         run: node tests/startup-provider-remediation.mjs
@@ -119,6 +124,9 @@ jobs:
             exit 1
           fi
 
+      - name: Test compiled cool foundation CIDR guards
+        run: az bicep build --file infra/bicep/cool-foundation.bicep --stdout | node tests/cool-foundation-bicep-template.mjs
+
   validate-terraform:
     name: Validate Terraform
     runs-on: ubuntu-latest
@@ -143,6 +151,10 @@ jobs:
         working-directory: infra/terraform
         run: tflint --config="${{ github.workspace }}/.tflint.hcl"
 
+      - name: TFLint — Cool Foundation
+        working-directory: infra/terraform/cool-foundation
+        run: tflint --config="${{ github.workspace }}/.tflint.hcl"
+
       - name: TFLint — Examples
         run: |
           for dir in examples/*/terraform; do
@@ -159,6 +171,13 @@ jobs:
       - name: Terraform Validate — Landing Zone
         working-directory: infra/terraform
         run: terraform validate
+
+      - name: Terraform Init & Validate — Cool Foundation
+        working-directory: infra/terraform/cool-foundation
+        run: |
+          terraform init -backend=false
+          terraform validate
+          terraform test
 
       - name: Terraform Init & Validate — Examples
         run: |
