@@ -11,6 +11,7 @@ import {
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
 import { buildReadinessEvidence } from "./readiness-fixture.mjs";
+import { topologyDecisionDigest } from "../scripts/subscription-topology.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const regionalInput = JSON.parse(
@@ -31,8 +32,13 @@ function createInput({
   planId = "readiness-contract-test",
   regionalMode = "cool-infrastructure",
   foundry = false,
+  oneSubscription = false,
 } = {}) {
   const planningInput = structuredClone(regionalInput);
+  if (oneSubscription) {
+    planningInput.startupInput.subscriptions.nonprodSubscriptionId =
+      planningInput.startupInput.subscriptions.prodSubscriptionId;
+  }
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.rtoMinutes = 240;
   planningInput.startupInput.reliability.rpoMinutes = 60;
@@ -118,6 +124,49 @@ expectCode(
     evidence.status = "blocked";
   }),
   "readiness.evidence.blocked",
+);
+expectCode(
+  mutate(valid, (evidence) => {
+    evidence.codeEvidence.subscriptionTopology.environments[0].subscriptionId =
+      "55555555-5555-5555-5555-555555555555";
+    evidence.codeEvidence.subscriptionTopology.decisionDigest =
+      topologyDecisionDigest(evidence.codeEvidence.subscriptionTopology);
+  }),
+  "readiness.topology.scope-mismatch",
+);
+expectCode(
+  mutate(valid, (evidence) => {
+    evidence.codeEvidence.subscriptionTopology.expiresAt =
+      "2026-08-09T11:59:59Z";
+    evidence.codeEvidence.subscriptionTopology.decisionDigest =
+      topologyDecisionDigest(evidence.codeEvidence.subscriptionTopology);
+  }),
+  "readiness.evidence.stale",
+);
+expectCode(
+  mutate(valid, (evidence) => {
+    evidence.codeEvidence.subscriptionTopology.benefitAssociation.state =
+      "benefits-on-different-subscription-or-billing-profile";
+    evidence.codeEvidence.subscriptionTopology.decisionDigest =
+      topologyDecisionDigest(evidence.codeEvidence.subscriptionTopology);
+    evidence.humanAttestations.startupBillingSupport.topologyDecisionDigest =
+      evidence.codeEvidence.subscriptionTopology.decisionDigest;
+  }),
+  "readiness.topology.benefit-target-mismatch",
+);
+expectCode(
+  mutate(valid, (evidence) => {
+    evidence.humanAttestations.startupBillingSupport.topologyDecisionDigest =
+      `sha256:${"f".repeat(64)}`;
+  }),
+  "readiness.support.confirmation-required",
+);
+const missingTopology = mutate(valid, (evidence) => {
+  delete evidence.codeEvidence.subscriptionTopology;
+});
+assert.throws(
+  () => assertReadinessEvidence(missingTopology, evaluatedAt),
+  /missing required property subscriptionTopology/,
 );
 expectCode(
   mutate(valid, (evidence) => {
@@ -272,6 +321,20 @@ const singleRegion = createInput({ regionalMode: "single-region-ready" });
 assert.equal(
   assertReadinessEvidence(singleRegion, evaluatedAt),
   singleRegion.readinessEvidence,
+);
+
+const oneSubscription = createInput({
+  regionalMode: "single-region-ready",
+  oneSubscription: true,
+});
+assert.equal(
+  assertReadinessEvidence(oneSubscription, evaluatedAt),
+  oneSubscription.readinessEvidence,
+);
+assert.equal(
+  oneSubscription.readinessEvidence.codeEvidence.subscriptionTopology
+    .subscriptionTopology.state,
+  "one-subscription-startup",
 );
 assert.equal(singleRegion.readinessEvidence.subject.secondaryRegion, null);
 assert.equal(

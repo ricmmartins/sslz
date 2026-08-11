@@ -11,6 +11,8 @@ description: "Machine-readable contract for agent-assisted SSLZ planning"
 
 The JSON schemas, check catalog, and sanitized examples are implemented under [`agent/`](../agent/).
 [`scripts/startup-preflight.sh`](../scripts/startup-preflight.sh) implements the additive, read-only `inspect` mode.
+It emits the `2.0.0` preflight contract and embeds a versioned
+[`subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json) decision.
 [`scripts/startup-workload-plan.sh`](../scripts/startup-workload-plan.sh) implements the local-only workload profile
 planner defined by
 [`workload-profile-plan.schema.json`](../agent/schemas/workload-profile-plan.schema.json).
@@ -90,6 +92,7 @@ The contract separates:
 | `mode` | enum | Yes | `inspect`, `plan`, or `apply` |
 | `overallStatus` | enum | Yes | `pass`, `warning`, `blocked`, or `error` |
 | `target` | object | Yes | Intended tenant, subscriptions, and regions |
+| `topologyDecision` | object | Yes | Digest-bound subscription, environment, and billing/benefit decision |
 | `checks` | array | Yes | Ordered check results |
 | `actions` | array | Yes | Proposed automatic, manual, or support actions |
 | `deploymentPlan` | object or null | Yes | Reviewable plan, populated only when planning succeeds |
@@ -106,6 +109,49 @@ The contract separates:
 
 Running in `apply` mode does not imply permission to perform every proposed action. Each action has its own approval
 and automation classification.
+
+## Subscription and billing topology
+
+Account inspection accepts one of two explicit local selections:
+
+```bash
+./scripts/startup-preflight.sh inspect \
+  --startup-subscription <subscription-id> \
+  --output json
+
+./scripts/startup-preflight.sh inspect \
+  --prod-subscription <prod-subscription-id> \
+  --nonprod-subscription <nonprod-subscription-id> \
+  --output json
+```
+
+The first form is valid only when exactly one enabled subscription is visible in the active tenant; it deliberately maps
+both `prod` and `nonprod` to that subscription. The second form requires both selected subscriptions to be visible in the
+same intended tenant. The decision classifies:
+
+- `one-subscription-startup`;
+- `separate-prod-nonprod-subscriptions`;
+- `expected-target-subscriptions-missing`;
+- `target-subscription-tenant-mismatch`;
+- `unsupported-ambiguous-multi-subscription`.
+
+Billing evidence is classified separately as unavailable, unknown, associated with another subscription or billing
+profile, or externally confirmed for the exact target. Readable billing metadata is not proof that startup credits apply.
+The read-only preflight therefore never emits `confirmed-for-exact-target`; that state can be established only by current
+external readiness evidence bound to the decision ID and digest. Evidence of a different benefit-backed target is an
+authoritative negative result and cannot be overridden by a generic confirmation.
+
+The topology decision includes the exact tenant and environment-to-subscription mapping, an inventory digest, a billing
+evidence digest, a four-hour expiry, and a canonical decision digest. Raw billing account, billing profile, and invoice
+section identifiers are represented only by SHA-256 digests. Downstream readiness, IaC, manifest, and signed approval
+contracts bind the decision identity, digest, mapping, and expiry. Omission, mutation, stale evidence, replay under another
+plan, or any target mismatch fails closed.
+
+When the visible subscription inventory can safely support a different local selection, the result tells the user to
+rerun with the appropriate explicit mapping. Billing-account or billing-profile visibility problems route to Azure Billing
+Support. Startup credit activation, entitlement, or benefit-association uncertainty routes to Microsoft for Startups
+Program Support. The readiness attestation stores only an opaque support reference; support transcripts and billing
+documents stay in their authoritative systems.
 
 ## Check result
 
@@ -290,12 +336,14 @@ Redact sensitive values before writing artifacts or logs. A redaction failure ma
 |---|---|---:|
 | `account.authentication.active` | account | Yes |
 | `account.subscription.explicit-selection` | account | Yes |
+| `account.subscription.topology-supported` | account | Yes |
 | `account.subscription.tenant-match` | account | Yes |
 | `identity.secondary-admin.present` | identity | Yes |
 | `identity.company-domain.verified` | identity | Yes |
 | `identity.deployment-role.sufficient` | identity | Yes |
 | `billing.startup-credit.context-visible` | billing | Yes |
 | `billing.subscription.credit-association` | billing | Yes |
+| `billing.target-benefit.topology-confirmed` | billing | Yes |
 | `account.provider.required-registrations` | account | Yes |
 | `quota.workload.headroom` | quota | Yes |
 | `region.services.available` | region | Yes |
@@ -308,7 +356,7 @@ Redact sensitive values before writing artifacts or logs. A redaction failure ma
 
 ```json
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "2.0.0",
   "runId": "run-identifier",
   "generatedAt": "2026-08-06T12:00:00Z",
   "mode": "plan",

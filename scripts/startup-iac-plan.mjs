@@ -40,6 +40,7 @@ import {
   sanitizedAzureCliEnvironment,
 } from "./azure-cli-invocation.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
+import { topologyDecisionDigest } from "./subscription-topology.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_ROOT = resolve(root, ".sslz/generated");
@@ -53,6 +54,7 @@ const SAFE_NOTIFICATION_EMAIL =
 const SUPPORTED_PROVIDERS = new Set(["bicep", "terraform"]);
 const READINESS_CHECK_IDS = {
   preflight: "readiness.preflight.authoritative",
+  topology: "readiness.subscription-topology.exact",
   support: "readiness.support.startup-confirmed",
   securityReview: "readiness.review.security-approved",
   architectureReview: "readiness.review.azure-architecture-approved",
@@ -72,6 +74,13 @@ const READINESS_ERROR_CHECK_IDS = new Map([
   ["readiness.evidence.stale", READINESS_CHECK_IDS.preflight],
   ["readiness.evidence.scope-mismatch", READINESS_CHECK_IDS.preflight],
   ["readiness.preflight.blocked", READINESS_CHECK_IDS.preflight],
+  ["readiness.topology.digest-mismatch", READINESS_CHECK_IDS.topology],
+  ["readiness.topology.scope-mismatch", READINESS_CHECK_IDS.topology],
+  ["readiness.topology.unsupported", READINESS_CHECK_IDS.topology],
+  [
+    "readiness.topology.benefit-target-mismatch",
+    READINESS_CHECK_IDS.topology,
+  ],
   ["readiness.support.confirmation-required", READINESS_CHECK_IDS.support],
   ["readiness.review.security-approved", READINESS_CHECK_IDS.securityReview],
   [
@@ -275,6 +284,57 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
     );
   }
 
+  const topology = evidence.codeEvidence.subscriptionTopology;
+  assertEvidenceCurrent(
+    topology,
+    evaluatedAt,
+    "Subscription topology decision",
+    "generatedAt",
+    READINESS_CHECK_IDS.topology,
+  );
+  if (topologyDecisionDigest(topology) !== topology.decisionDigest) {
+    readinessFail(
+      "readiness.topology.digest-mismatch",
+      "The subscription topology decision digest does not match its canonical content.",
+    );
+  }
+  const expectedTopologyEnvironments = input.target.environments
+    .map((environment) => ({
+      name: environment.name,
+      subscriptionId: environment.subscriptionId.toLowerCase(),
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+  if (
+    topology.tenantId !== expectedSubject.tenantId ||
+    canonicalJson(topology.environments) !==
+      canonicalJson(expectedTopologyEnvironments)
+  ) {
+    readinessFail(
+      "readiness.topology.scope-mismatch",
+      "The subscription topology decision does not match the exact tenant and environment mapping.",
+    );
+  }
+  const expectedTopologyState =
+    expectedSubject.prodSubscriptionId === expectedSubject.nonprodSubscriptionId
+      ? "one-subscription-startup"
+      : "separate-prod-nonprod-subscriptions";
+  if (topology.subscriptionTopology.state !== expectedTopologyState) {
+    readinessFail(
+      "readiness.topology.unsupported",
+      "The subscription topology is missing, ambiguous, or inconsistent with the selected environments.",
+    );
+  }
+  if (
+    topology.benefitAssociation.state ===
+    "benefits-on-different-subscription-or-billing-profile"
+  ) {
+    readinessFail(
+      "readiness.topology.benefit-target-mismatch",
+      "Observed benefit evidence points outside the selected deployment target; rerun preflight after support resolves it.",
+      READINESS_CHECK_IDS.support,
+    );
+  }
+
   const support = evidence.humanAttestations.startupBillingSupport;
   assertEvidenceCurrent(
     support,
@@ -284,12 +344,14 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
     READINESS_CHECK_IDS.support,
   );
   if (
-    support.attestationVersion !== "1.0.0" ||
-    support.status !== "confirmed"
+    support.attestationVersion !== "2.0.0" ||
+    support.status !== "confirmed" ||
+    support.topologyDecisionId !== topology.decisionId ||
+    support.topologyDecisionDigest !== topology.decisionDigest
   ) {
     readinessFail(
       "readiness.support.confirmation-required",
-      "An explicit current Microsoft for Startups billing and support confirmation is required.",
+      "An explicit current Microsoft for Startups or Azure Billing confirmation bound to the exact topology decision is required.",
     );
   }
 
@@ -693,8 +755,23 @@ function assertSemanticInput(input, evaluatedAt) {
       secondRange.start <= firstRange.end
     );
   }
-  if (new Set(input.target.environments.map((item) => item.subscriptionId)).size !== 2) {
-    throw new Error("Production and nonproduction subscriptions must be distinct.");
+  const distinctSubscriptionCount = new Set(
+    input.target.environments.map((item) => item.subscriptionId.toLowerCase()),
+  ).size;
+  const topologyState =
+    input.readinessEvidence?.codeEvidence?.subscriptionTopology
+      ?.subscriptionTopology?.state;
+  if (
+    (distinctSubscriptionCount === 1 &&
+      topologyState !== "one-subscription-startup") ||
+    (distinctSubscriptionCount === 2 &&
+      input.schemaVersion === "3.0.0" &&
+      topologyState !== "separate-prod-nonprod-subscriptions") ||
+    (input.schemaVersion !== "3.0.0" && distinctSubscriptionCount !== 2)
+  ) {
+    throw new Error(
+      "Production and nonproduction subscriptions must match the bound topology decision.",
+    );
   }
   if (
     input.deployment.logDailyQuotaGb !== -1 &&
@@ -788,6 +865,15 @@ function buildDecisionModel(input) {
           evidenceDigest: input.readinessEvidence.evidenceDigest,
           issuedAt: input.readinessEvidence.issuedAt,
           expiresAt: input.readinessEvidence.expiresAt,
+          topologyDecisionId:
+            input.readinessEvidence.codeEvidence.subscriptionTopology
+              .decisionId,
+          topologyDecisionDigest:
+            input.readinessEvidence.codeEvidence.subscriptionTopology
+              .decisionDigest,
+          topologyDecisionExpiresAt:
+            input.readinessEvidence.codeEvidence.subscriptionTopology
+              .expiresAt,
         }
       : null,
     regional: {

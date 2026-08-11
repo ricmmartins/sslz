@@ -16,6 +16,9 @@
     "readinessEvidenceId",
     "readinessEvidenceDigest",
     "readinessEvidenceExpiresAt",
+    "topologyDecisionId",
+    "topologyDecisionDigest",
+    "topologyDecisionExpiresAt",
     "operation",
     "provider",
     "environment",
@@ -62,7 +65,7 @@
       "$ref": "#/$defs/digest"
     },
     "readinessEvidenceVersion": {
-      "const": "2.0.0"
+      "const": "3.0.0"
     },
     "readinessEvidenceId": {
       "$ref": "#/$defs/reference"
@@ -71,6 +74,16 @@
       "$ref": "#/$defs/digest"
     },
     "readinessEvidenceExpiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "topologyDecisionId": {
+      "$ref": "#/$defs/reference"
+    },
+    "topologyDecisionDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "topologyDecisionExpiresAt": {
       "type": "string",
       "format": "date-time"
     },

@@ -19,6 +19,7 @@ The versioned contracts are:
 - [`iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json)
 - [`iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json)
 - [`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
+- [`subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
 - [`deployment-execution-manifest.schema.json`](../agent/schemas/deployment-execution-manifest.schema.json)
 - [`deployment-approval.schema.json`](../agent/schemas/deployment-approval.schema.json)
 - [`deployment-result.schema.json`](../agent/schemas/deployment-result.schema.json)
@@ -67,7 +68,7 @@ SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE=/protected/sslz-terraform-builder.pub 
 
 Preview performs no Azure or local write. It:
 
-1. validates the approved Phase 4 plan, readiness artifact digest/scope/freshness, and expiry;
+1. validates the approved Phase 4 plan, readiness artifact and topology decision digests/scopes/freshness, and expiry;
 2. selects exactly one primary provider and environment;
 3. hashes the complete plan artifact, selected parameters, current SSLZ source tree, controlled Terraform CLI
    configuration, and Terraform lock file;
@@ -100,7 +101,7 @@ only `signature`, and is prefixed with `sslz-deployment-approval-v1` plus a NUL 
 the trusted public key's SPKI DER representation.
 
 The approval duplicates and binds the manifest digest, plan identity, readiness evidence version/opaque ID/digest/expiry,
-provider, environment, primary region, tenant,
+topology decision ID/digest/expiry and exact environment mapping, provider, environment, primary region, tenant,
 subscription, exact subscription scope, protected durable-store identity, parameter/source/saved-plan hashes, Terraform
 authentication choice, notification-recipient commitment, unique nonce, and validity window. The window cannot exceed
 24 hours.

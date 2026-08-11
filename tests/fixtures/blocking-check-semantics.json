@@ -23,6 +23,13 @@
       "blockingStates": ["fail", "unknown", "error"]
     },
     {
+      "id": "account.subscription.topology-supported",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
       "id": "identity.secondary-admin.present",
       "surface": "preflight",
       "source": "scripts/startup-preflight.mjs",
@@ -56,6 +63,13 @@
       "source": "scripts/startup-preflight.mjs",
       "passState": "confirmed",
       "blockingStates": ["pending", "rejected", "unknown", "error"]
+    },
+    {
+      "id": "billing.target-benefit.topology-confirmed",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["mismatched", "unknown", "unavailable", "stale"]
     },
     {
       "id": "account.provider.required-registrations",
@@ -168,6 +182,13 @@
       "source": "scripts/startup-iac-plan.mjs",
       "passState": "pass",
       "blockingStates": ["blocked", "stale", "missing"]
+    },
+    {
+      "id": "readiness.subscription-topology.exact",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "exact",
+      "blockingStates": ["missing", "mutated", "stale", "mismatched", "ambiguous"]
     },
     {
       "id": "readiness.support.startup-confirmed",

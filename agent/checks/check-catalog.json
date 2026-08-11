@@ -23,6 +23,13 @@
       "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
     },
     {
+      "id": "account.subscription.topology-supported",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/cli/azure/manage-azure-subscriptions-azure-cli"
+    },
+    {
       "id": "identity.secondary-admin.present",
       "category": "identity",
       "severity": "blocking",
@@ -56,6 +63,13 @@
       "severity": "blocking",
       "automation": "support",
       "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "billing.target-benefit.topology-confirmed",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/other"
     },
     {
       "id": "account.provider.required-registrations",
@@ -168,6 +182,13 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/azure-subscription-service-limits"
+    },
+    {
+      "id": "readiness.subscription-topology.exact",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/startups/other"
     },
     {
       "id": "readiness.support.startup-confirmed",

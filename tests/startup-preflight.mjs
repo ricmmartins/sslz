@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateDocument } from "../scripts/validate-agent-contracts.mjs";
+import { topologyDecisionDigest } from "../scripts/subscription-topology.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const script = resolve(root, "scripts/startup-preflight.mjs");
@@ -16,18 +17,29 @@ const nonprod = "33333333-3333-3333-3333-333333333333";
 const preflightSchema = JSON.parse(
   readFileSync(resolve(root, "agent/schemas/preflight-result.schema.json"), "utf8"),
 );
+const topologySchema = JSON.parse(
+  readFileSync(
+    resolve(root, "agent/schemas/subscription-topology-decision.schema.json"),
+    "utf8",
+  ),
+);
 
-function run(fixture) {
+function run(
+  fixture,
+  subscriptionArguments = [
+    "--prod-subscription",
+    prod,
+    "--nonprod-subscription",
+    nonprod,
+  ],
+) {
   const trace = join(mkdtempSync(join(tmpdir(), "sslz-preflight-")), "az.trace");
   const result = spawnSync(
     process.execPath,
     [
       script,
       "inspect",
-      "--prod-subscription",
-      prod,
-      "--nonprod-subscription",
-      nonprod,
+      ...subscriptionArguments,
       "--output",
       "json",
     ],
@@ -55,6 +67,14 @@ const success = run("az-success.json");
 assert.equal(success.status, 1);
 assert.equal(success.json.overallStatus, "blocked");
 assert.equal(
+  success.json.topologyDecision.subscriptionTopology.state,
+  "separate-prod-nonprod-subscriptions",
+);
+assert.equal(
+  success.json.topologyDecision.benefitAssociation.state,
+  "credits-or-benefit-association-unknown",
+);
+assert.equal(
   success.json.checks.find((check) => check.id === "billing.subscription.credit-association").status,
   "unknown",
 );
@@ -64,6 +84,10 @@ assert.equal(tenantMismatch.status, 1);
 assert.equal(
   tenantMismatch.json.checks.find((check) => check.id === "account.subscription.tenant-match").status,
   "fail",
+);
+assert.equal(
+  tenantMismatch.json.topologyDecision.subscriptionTopology.state,
+  "target-subscription-tenant-mismatch",
 );
 
 const denied = run("az-permission-denied.json");
@@ -93,6 +117,10 @@ assert.equal(
   billingUnavailable.json.checks.find((check) => check.id === "billing.startup-credit.context-visible").status,
   "unknown",
 );
+assert.equal(
+  billingUnavailable.json.topologyDecision.benefitAssociation.state,
+  "billing-evidence-unavailable",
+);
 
 const subscriptionMismatch = run("az-subscription-mismatch.json");
 assert.equal(subscriptionMismatch.status, 1);
@@ -101,6 +129,58 @@ assert.equal(
     (check) => check.id === "account.subscription.explicit-selection",
   ).status,
   "fail",
+);
+assert.equal(
+  subscriptionMismatch.json.topologyDecision.subscriptionTopology.state,
+  "expected-target-subscriptions-missing",
+);
+
+const oneSubscription = run("az-one-subscription.json", [
+  "--startup-subscription",
+  prod,
+]);
+assert.equal(oneSubscription.status, 1);
+assert.equal(
+  oneSubscription.json.topologyDecision.subscriptionTopology.state,
+  "one-subscription-startup",
+);
+assert.deepEqual(
+  oneSubscription.json.topologyDecision.environments.map(
+    (environment) => environment.subscriptionId,
+  ),
+  [prod, prod],
+);
+
+const ambiguous = run("az-ambiguous-subscriptions.json", [
+  "--startup-subscription",
+  prod,
+]);
+assert.equal(
+  ambiguous.json.topologyDecision.subscriptionTopology.state,
+  "unsupported-ambiguous-multi-subscription",
+);
+assert.equal(
+  ambiguous.json.checks.find(
+    (check) => check.id === "account.subscription.topology-supported",
+  ).status,
+  "fail",
+);
+
+const benefitsElsewhere = run("az-benefits-different-subscription.json");
+assert.equal(
+  benefitsElsewhere.json.topologyDecision.benefitAssociation.state,
+  "benefits-on-different-subscription-or-billing-profile",
+);
+assert.equal(
+  benefitsElsewhere.json.checks.find(
+    (check) => check.id === "billing.target-benefit.topology-confirmed",
+  ).status,
+  "fail",
+);
+assert.equal(
+  benefitsElsewhere.json.topologyDecision.benefitAssociation
+    .authoritativeEvidence,
+  true,
 );
 
 const invalidSubscription = spawnSync(
@@ -128,11 +208,23 @@ for (const result of [
   throttled,
   billingUnavailable,
   subscriptionMismatch,
+  oneSubscription,
+  ambiguous,
+  benefitsElsewhere,
 ]) {
   validateDocument(preflightSchema, result.json);
+  validateDocument(topologySchema, result.json.topologyDecision);
+  assert.equal(
+    topologyDecisionDigest(result.json.topologyDecision),
+    result.json.topologyDecision.decisionDigest,
+  );
   assert.doesNotMatch(
     result.trace,
     /\b(create|delete|register|unregister|update|set|assign|remove|apply|deploy)\b/i,
+  );
+  assert.doesNotMatch(
+    result.stdout,
+    /billing-account-fixture|billing-profile-fixture|founder@startup\.example|fixture-secret/,
   );
 }
 

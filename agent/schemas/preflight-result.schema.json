@@ -11,6 +11,7 @@
     "mode",
     "overallStatus",
     "target",
+    "topologyDecision",
     "checks",
     "actions",
     "deploymentPlan",
@@ -19,7 +20,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "runId": {
       "type": "string",
@@ -62,6 +63,9 @@
           "type": ["string", "null"]
         }
       }
+    },
+    "topologyDecision": {
+      "$ref": "subscription-topology-decision.schema.json"
     },
     "checks": {
       "type": "array",

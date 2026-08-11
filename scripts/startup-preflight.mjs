@@ -5,6 +5,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildTopologyDecision } from "./subscription-topology.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(
@@ -32,7 +33,7 @@ function usage(message) {
     console.error(message);
   }
   console.error(
-    "Usage: startup-preflight.sh inspect --prod-subscription <id> --nonprod-subscription <id> [--output json|text]",
+    "Usage: startup-preflight.sh inspect (--startup-subscription <id> | --prod-subscription <id> --nonprod-subscription <id>) [--output json|text]",
   );
   process.exit(2);
 }
@@ -52,6 +53,9 @@ function parseArguments(argv) {
     } else if (argument === "--nonprod-subscription" && value) {
       options.nonprodSubscriptionId = value;
       index += 1;
+    } else if (argument === "--startup-subscription" && value) {
+      options.startupSubscriptionId = value;
+      index += 1;
     } else if (argument === "--output" && value) {
       options.output = value;
       index += 1;
@@ -60,14 +64,29 @@ function parseArguments(argv) {
     }
   }
 
-  if (!options.prodSubscriptionId || !options.nonprodSubscriptionId) {
-    usage("Both subscription IDs are required.");
-  }
+  const hasExplicitPair =
+    options.prodSubscriptionId && options.nonprodSubscriptionId;
   if (
-    !uuidPattern.test(options.prodSubscriptionId) ||
-    !uuidPattern.test(options.nonprodSubscriptionId)
+    (!options.startupSubscriptionId && !hasExplicitPair) ||
+    (options.startupSubscriptionId &&
+      (options.prodSubscriptionId || options.nonprodSubscriptionId))
   ) {
+    usage(
+      "Select either one startup subscription or an explicit prod/nonprod pair.",
+    );
+  }
+  const suppliedIds = options.startupSubscriptionId
+    ? [options.startupSubscriptionId]
+    : [options.prodSubscriptionId, options.nonprodSubscriptionId];
+  if (suppliedIds.some((id) => !uuidPattern.test(id))) {
     usage("Subscription IDs must be canonical UUIDs.");
+  }
+  if (options.startupSubscriptionId) {
+    options.selectionMode = "one-subscription";
+    options.prodSubscriptionId = options.startupSubscriptionId;
+    options.nonprodSubscriptionId = options.startupSubscriptionId;
+  } else {
+    options.selectionMode = "explicit-prod-nonprod";
   }
   options.prodSubscriptionId = options.prodSubscriptionId.toLowerCase();
   options.nonprodSubscriptionId = options.nonprodSubscriptionId.toLowerCase();
@@ -225,6 +244,11 @@ function countBy(items, key, values) {
 function evaluate(options) {
   const checks = [];
   const actions = [];
+  options.runId = process.env.PREFLIGHT_RUN_ID || randomUUID();
+  options.generatedAt =
+    process.env.PREFLIGHT_GENERATED_AT || new Date().toISOString();
+  const generatedAt = Date.parse(options.generatedAt);
+  options.expiresAt = new Date(generatedAt + 4 * 60 * 60 * 1000).toISOString();
   const account = readEvidence(["account", "show", "--output", "json"]);
 
   if (account.error) {
@@ -247,7 +271,25 @@ function evaluate(options) {
         account.error,
       ),
     );
-    return finish(options, null, checks, actions);
+    const topologyDecision = buildTopologyDecision({
+      runId: options.runId,
+      generatedAt: options.generatedAt,
+      expiresAt: options.expiresAt,
+      selectionMode: options.selectionMode,
+      tenantId: null,
+      environments: [
+        { name: "prod", subscriptionId: options.prodSubscriptionId },
+        { name: "nonprod", subscriptionId: options.nonprodSubscriptionId },
+      ],
+      visibleSubscriptions: [],
+      subscriptionReadErrors: true,
+      targetTenantMismatch: false,
+      billingProperties: [],
+      billingReadFailed: true,
+      benefits: [],
+      benefitsReadFailed: true,
+    });
+    return finish(options, null, checks, actions, topologyDecision);
   }
 
   const tenantId = account.value?.tenantId ?? null;
@@ -263,6 +305,13 @@ function evaluate(options) {
       tenantId ? [] : ["account.authenticate-azure-cli"],
     ),
   );
+  const subscriptionInventory = readEvidence([
+    "account",
+    "list",
+    "--all",
+    "--output",
+    "json",
+  ]);
 
   const subscriptions = [
     {
@@ -581,42 +630,184 @@ function evaluate(options) {
     ),
   );
 
-  const billing = readEvidence([
+  const distinctTargetIds = [
+    ...new Set([options.prodSubscriptionId, options.nonprodSubscriptionId]),
+  ];
+  const billingProperties = distinctTargetIds.map((subscriptionId) => ({
+    subscriptionId,
+    evidence: readEvidence([
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.Billing/billingProperty/default?api-version=2024-04-01`,
+    ]),
+  }));
+  const benefits = readEvidence([
     "rest",
     "--method",
     "get",
     "--url",
-    "https://management.azure.com/providers/Microsoft.Billing/billingAccounts?api-version=2024-04-01",
+    "https://management.azure.com/providers/Microsoft.BillingBenefits/credits?api-version=2026-06-01",
   ]);
-  const billingVisible = Array.isArray(billing.value?.value) && billing.value.value.length > 0;
-  const billingAction = "billing.verify-startup-credit-context";
+  const topologyDecision = buildTopologyDecision({
+    runId: options.runId,
+    generatedAt: options.generatedAt,
+    expiresAt: options.expiresAt,
+    selectionMode: options.selectionMode,
+    tenantId,
+    environments: subscriptions.map((item) => ({
+      name: item.environment,
+      subscriptionId: item.id,
+    })),
+    visibleSubscriptions: Array.isArray(subscriptionInventory.value)
+      ? subscriptionInventory.value
+      : [],
+    subscriptionReadErrors:
+      Boolean(subscriptionInventory.error) ||
+      subscriptions.some((item) => item.evidence.error) ||
+      stateFailures.length > 0,
+    targetTenantMismatch: !tenantMatch,
+    billingProperties: billingProperties
+      .map((item) => item.evidence.value)
+      .filter(Boolean),
+    billingReadFailed: billingProperties.some((item) => item.evidence.error),
+    benefits: Array.isArray(benefits.value?.value) ? benefits.value.value : [],
+    benefitsReadFailed: Boolean(benefits.error),
+  });
+  const topologySupported = [
+    "one-subscription-startup",
+    "separate-prod-nonprod-subscriptions",
+  ].includes(topologyDecision.subscriptionTopology.state);
+  const topologyAction = topologySupported
+    ? "account.use-selected-subscription-topology"
+    : topologyDecision.subscriptionTopology.state ===
+        "unsupported-ambiguous-multi-subscription"
+      ? "account.select-explicit-environment-subscriptions"
+      : topologyDecision.subscriptionTopology.state ===
+          "target-subscription-tenant-mismatch"
+        ? "account.select-correct-tenant"
+        : "account.review-subscription-access";
+  checks.push(
+    makeCheck(
+      "account.subscription.topology-supported",
+      topologySupported ? "pass" : "fail",
+      topologySupported
+        ? topologyDecision.subscriptionTopology.state ===
+          "one-subscription-startup"
+          ? "One enabled startup subscription is explicitly mapped to both environments."
+          : "Separate enabled production and nonproduction subscriptions are explicitly mapped."
+        : "The visible subscription inventory does not support the requested environment mapping.",
+      {
+        state: topologyDecision.subscriptionTopology.state,
+        selectionMode: topologyDecision.subscriptionTopology.selectionMode,
+        visibleEnabledSubscriptionCount:
+          topologyDecision.subscriptionTopology.visibleEnabledSubscriptionCount,
+        decisionDigest: topologyDecision.decisionDigest,
+      },
+      [topologyAction],
+    ),
+  );
+  if (topologySupported) {
+    actions.push(
+      makeAction(
+        topologyAction,
+        "information",
+        "Carry this exact tenant, subscription, and environment mapping into workload and IaC planning.",
+        catalogById.get("account.subscription.topology-supported")
+          .documentationUrl,
+        { risk: "low" },
+      ),
+    );
+  } else if (
+    topologyDecision.subscriptionTopology.state ===
+    "unsupported-ambiguous-multi-subscription"
+  ) {
+    actions.push(
+      makeAction(
+        topologyAction,
+        "manual",
+        "Rerun locally with an explicit production and nonproduction subscription mapping.",
+        catalogById.get("account.subscription.topology-supported")
+          .documentationUrl,
+        { risk: "low" },
+      ),
+    );
+  }
+
+  const benefitState = topologyDecision.benefitAssociation.state;
+  const benefitAction =
+    benefitState === "billing-evidence-unavailable"
+      ? "billing.request-billing-scope-confirmation"
+      : "billing.request-startup-benefit-confirmation";
+  const benefitStatus =
+    benefitState === "confirmed-for-exact-target"
+      ? "pass"
+      : benefitState ===
+          "benefits-on-different-subscription-or-billing-profile"
+        ? "fail"
+        : "unknown";
   checks.push(
     makeCheck(
       "billing.startup-credit.context-visible",
-      billingVisible ? "warning" : "unknown",
-      billingVisible
-        ? "Billing context is visible, but startup-credit entitlement still requires explicit confirmation."
-        : "Startup-credit billing context cannot be confirmed from available evidence.",
-      { billingContextVisible: billingVisible },
-      [billingAction],
-      billing.error,
+      benefitState === "billing-evidence-unavailable" ? "unknown" : "warning",
+      benefitState === "billing-evidence-unavailable"
+        ? "Billing evidence is unavailable for one or more exact target scopes."
+        : "Billing evidence is visible, but it does not by itself prove startup-credit applicability.",
+      {
+        billingEvidenceAvailable:
+          benefitState !== "billing-evidence-unavailable",
+        billingEvidenceDigest:
+          topologyDecision.evidence.billingEvidenceDigest,
+      },
+      [benefitAction],
+      billingProperties.find((item) => item.evidence.error)?.evidence.error ??
+        benefits.error,
     ),
     makeCheck(
       "billing.subscription.credit-association",
-      "unknown",
-      "The preflight cannot prove that startup credits apply to both target subscriptions.",
-      { reason: "Credit entitlement and subscription association require authoritative billing or program confirmation." },
-      [billingAction],
-      billing.error,
+      benefitStatus,
+      benefitState ===
+      "benefits-on-different-subscription-or-billing-profile"
+        ? "Available benefit evidence points to a different subscription or billing profile than the workload target."
+        : benefitState === "confirmed-for-exact-target"
+          ? "Authoritative evidence confirms the exact target mapping."
+          : "The preflight cannot prove that startup credits or benefits apply to the exact target mapping.",
+      {
+        state: benefitState,
+        authoritativeEvidence:
+          topologyDecision.benefitAssociation.authoritativeEvidence,
+        decisionDigest: topologyDecision.decisionDigest,
+      },
+      [benefitAction],
+      benefits.error,
+    ),
+    makeCheck(
+      "billing.target-benefit.topology-confirmed",
+      benefitStatus,
+      benefitStatus === "fail"
+        ? "Deployment would target outside the observed benefits-backed scope."
+        : benefitStatus === "pass"
+          ? "The exact environment mapping is benefits-backed."
+          : "External confirmation must bind benefits to the exact topology decision.",
+      {
+        state: benefitState,
+        topologyDecisionId: topologyDecision.decisionId,
+        topologyDecisionDigest: topologyDecision.decisionDigest,
+      },
+      [benefitAction],
     ),
   );
   actions.push(
     makeAction(
-      billingAction,
+      benefitAction,
       "support",
-      "Confirm the startup-credit entitlement and its association with both target subscriptions.",
-      catalogById.get("billing.subscription.credit-association").documentationUrl,
-      { risk: "medium" },
+      benefitState === "billing-evidence-unavailable"
+        ? "Ask Azure Billing Support to confirm the billing account and profile for the exact target subscriptions."
+        : "Ask Microsoft for Startups Program Support to confirm benefit association for the exact topology decision.",
+      catalogById.get("billing.target-benefit.topology-confirmed")
+        .documentationUrl,
+      { risk: "high" },
     ),
   );
 
@@ -630,10 +821,10 @@ function evaluate(options) {
     checks.push(makeCheck(id, "skipped", summary, { reason: "Not available in account-only inspect mode." }));
   }
 
-  return finish(options, tenantId, checks, actions);
+  return finish(options, tenantId, checks, actions, topologyDecision);
 }
 
-function finish(options, tenantId, checks, actions) {
+function finish(options, tenantId, checks, actions, topologyDecision) {
   const blockingUnresolved = checks.some(
     (check) =>
       check.severity === "blocking" &&
@@ -648,9 +839,9 @@ function finish(options, tenantId, checks, actions) {
         ? "warning"
         : "pass";
   return {
-    schemaVersion: "1.0.0",
-    runId: process.env.PREFLIGHT_RUN_ID || randomUUID(),
-    generatedAt: process.env.PREFLIGHT_GENERATED_AT || new Date().toISOString(),
+    schemaVersion: "2.0.0",
+    runId: options.runId,
+    generatedAt: options.generatedAt,
     mode: options.mode,
     overallStatus,
     target: {
@@ -660,6 +851,7 @@ function finish(options, tenantId, checks, actions) {
       primaryRegion: null,
       secondaryRegion: null,
     },
+    topologyDecision,
     checks,
     actions,
     deploymentPlan: null,
