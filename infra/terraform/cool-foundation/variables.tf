@@ -59,8 +59,8 @@ variable "primary_vnet_address_prefix" {
   description = "Primary VNet CIDR retained for isolation review"
   type        = string
   validation {
-    condition     = can(cidrhost(var.primary_vnet_address_prefix, 0))
-    error_message = "primary_vnet_address_prefix must be a valid CIDR."
+    condition     = can(cidrnetmask(var.primary_vnet_address_prefix))
+    error_message = "primary_vnet_address_prefix must be a valid IPv4 CIDR."
   }
 }
 
@@ -69,10 +69,10 @@ variable "secondary_vnet_address_prefix" {
   type        = string
   validation {
     condition = (
-      can(cidrhost(var.secondary_vnet_address_prefix, 0)) &&
+      can(cidrnetmask(var.secondary_vnet_address_prefix)) &&
       var.secondary_vnet_address_prefix != var.primary_vnet_address_prefix
     )
-    error_message = "secondary_vnet_address_prefix must be valid and differ from the primary CIDR."
+    error_message = "secondary_vnet_address_prefix must be a valid IPv4 CIDR and differ from the primary CIDR."
   }
 }
 

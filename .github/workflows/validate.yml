@@ -177,6 +177,7 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate
+          terraform test
 
       - name: Terraform Init & Validate — Examples
         run: |

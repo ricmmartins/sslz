@@ -19,8 +19,16 @@ assert.match(
   /fail\('primaryVnetAddressPrefix must be a valid IPv4 CIDR\.'\)/,
 );
 assert.match(
+  variables.primaryBroadcastOctets,
+  /^\[if\(.+split\(variables\('primaryRange'\)\.broadcast, '\.'\).+fail\('primaryVnetAddressPrefix must be a valid IPv4 CIDR\.'\)\)\]$/,
+);
+assert.match(
   variables.secondaryNetworkOctets,
   /fail\('secondaryVnetAddressPrefix must be a valid IPv4 CIDR\.'\)/,
+);
+assert.match(
+  variables.secondaryBroadcastOctets,
+  /^\[if\(.+split\(variables\('secondaryRange'\)\.broadcast, '\.'\).+fail\('secondaryVnetAddressPrefix must be a valid IPv4 CIDR\.'\)\)\]$/,
 );
 assert.match(variables.addressSpacesOverlap, /lessOrEquals/);
 assert.match(variables.addressSpacesOverlap, /primaryNetworkValue/);

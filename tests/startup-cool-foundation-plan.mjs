@@ -272,11 +272,18 @@ try {
     bicepSource,
     /vnetAddressPrefix: validatedSecondaryVnetAddressPrefix/,
   );
-  assert.match(terraformSource, /can\(cidrhost\(var\.primary_vnet_address_prefix, 0\)\)/);
-  assert.match(terraformSource, /can\(cidrhost\(var\.secondary_vnet_address_prefix, 0\)\)/);
+  assert.match(terraformSource, /can\(cidrnetmask\(var\.primary_vnet_address_prefix\)\)/);
+  assert.match(terraformSource, /can\(cidrnetmask\(var\.secondary_vnet_address_prefix\)\)/);
   assert.match(
     terraformSource,
     /var\.secondary_vnet_address_prefix != var\.primary_vnet_address_prefix/,
+  );
+  assert.match(terraformSource, /primary_network_value <= local\.secondary_broadcast_value/);
+  assert.match(terraformSource, /secondary_network_value <= local\.primary_broadcast_value/);
+  assert.match(terraformSource, /condition\s+= !local\.address_spaces_overlap/);
+  assert.match(
+    terraformSource,
+    /primary_vnet_address_prefix and secondary_vnet_address_prefix must not overlap\./,
   );
 
   assert.deepEqual(

@@ -44,14 +44,20 @@ var monitoringResourceGroupName = 'rg-${prefix}-monitoring'
 var networkingResourceGroupName = 'rg-${prefix}-networking'
 var primaryRange = parseCidr(primaryVnetAddressPrefix)
 var secondaryRange = parseCidr(secondaryVnetAddressPrefix)
-var primaryNetworkOctets = length(split(primaryRange.network, '.')) == 4
+var primaryRangeIsIpv4 = length(split(primaryRange.network, '.')) == 4
+var secondaryRangeIsIpv4 = length(split(secondaryRange.network, '.')) == 4
+var primaryNetworkOctets = primaryRangeIsIpv4
   ? split(primaryRange.network, '.')
   : fail('primaryVnetAddressPrefix must be a valid IPv4 CIDR.')
-var primaryBroadcastOctets = split(primaryRange.broadcast, '.')
-var secondaryNetworkOctets = length(split(secondaryRange.network, '.')) == 4
+var primaryBroadcastOctets = primaryRangeIsIpv4
+  ? split(primaryRange.broadcast, '.')
+  : fail('primaryVnetAddressPrefix must be a valid IPv4 CIDR.')
+var secondaryNetworkOctets = secondaryRangeIsIpv4
   ? split(secondaryRange.network, '.')
   : fail('secondaryVnetAddressPrefix must be a valid IPv4 CIDR.')
-var secondaryBroadcastOctets = split(secondaryRange.broadcast, '.')
+var secondaryBroadcastOctets = secondaryRangeIsIpv4
+  ? split(secondaryRange.broadcast, '.')
+  : fail('secondaryVnetAddressPrefix must be a valid IPv4 CIDR.')
 var primaryNetworkValue = int(primaryNetworkOctets[0]) * 16777216 + int(primaryNetworkOctets[1]) * 65536 + int(primaryNetworkOctets[2]) * 256 + int(primaryNetworkOctets[3])
 var primaryBroadcastValue = int(primaryBroadcastOctets[0]) * 16777216 + int(primaryBroadcastOctets[1]) * 65536 + int(primaryBroadcastOctets[2]) * 256 + int(primaryBroadcastOctets[3])
 var secondaryNetworkValue = int(secondaryNetworkOctets[0]) * 16777216 + int(secondaryNetworkOctets[1]) * 65536 + int(secondaryNetworkOctets[2]) * 256 + int(secondaryNetworkOctets[3])
