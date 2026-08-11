@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "2.0.0",
   "evidenceId": "readiness.startup-primary-baseline.001",
   "status": "ready",
   "issuedAt": "2026-08-09T10:00:00Z",
@@ -43,6 +43,7 @@
   },
   "humanAttestations": {
     "startupBillingSupport": {
+      "attestationVersion": "1.0.0",
       "status": "confirmed",
       "issuerRole": "role.microsoft-startups-support",
       "reference": "attestation.billing-support.001",
@@ -50,6 +51,38 @@
       "attestedAt": "2026-08-09T10:30:00Z",
       "expiresAt": "2026-08-09T13:00:00Z",
       "evidenceDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "externalReviews": {
+      "security": {
+        "attestationVersion": "1.0.0",
+        "status": "approved",
+        "issuerRole": "role.security-reviewer",
+        "reference": "review.security.001",
+        "subjectScope": "sslz-security-review",
+        "attestedAt": "2026-08-09T10:30:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "azureArchitecture": {
+        "attestationVersion": "1.0.0",
+        "status": "approved",
+        "issuerRole": "role.azure-architecture-reviewer",
+        "reference": "review.azure-architecture.001",
+        "subjectScope": "azure-architecture-review",
+        "attestedAt": "2026-08-09T10:30:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "iacParity": {
+        "attestationVersion": "1.0.0",
+        "status": "approved",
+        "issuerRole": "role.iac-parity-reviewer",
+        "reference": "review.iac-parity.001",
+        "subjectScope": "bicep-terraform-parity-review",
+        "attestedAt": "2026-08-09T10:30:00Z",
+        "expiresAt": "2026-08-09T13:00:00Z",
+        "evidenceDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
     },
     "failoverOwner": {
       "status": "confirmed",
@@ -106,5 +139,5 @@
     ],
     "coolFootprintCost": null
   },
-  "evidenceDigest": "sha256:9091e6b706b755656cb29e628a6ee78f827a0a3ffb77e0f50045af3b1c675691"
+  "evidenceDigest": "sha256:6ad411cbb29c501268725ac70c80bb60c4eea86c7592b1a02cfc09837726bf3e"
 }

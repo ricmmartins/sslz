@@ -91,6 +91,14 @@ function expectCode(input, code) {
   );
 }
 
+function expectCodeAndCheckId(input, code, checkId) {
+  assert.throws(
+    () => assertReadinessEvidence(input, evaluatedAt),
+    (error) => error?.code === code && error?.checkId === checkId,
+    `${code} should identify ${checkId}`,
+  );
+}
+
 const valid = createInput();
 assert.equal(assertReadinessEvidence(valid, evaluatedAt), valid.readinessEvidence);
 assert.match(valid.readinessEvidence.evidenceDigest, /^sha256:[0-9a-f]{64}$/);
@@ -120,6 +128,26 @@ expectCode(
     evidence.humanAttestations.startupBillingSupport.status = "pending";
   }),
   "readiness.support.confirmation-required",
+);
+for (const [review, code] of [
+  ["security", "readiness.review.security-approved"],
+  ["azureArchitecture", "readiness.review.azure-architecture-approved"],
+  ["iacParity", "readiness.review.iac-parity-approved"],
+]) {
+  expectCode(
+    mutate(valid, (evidence) => {
+      evidence.humanAttestations.externalReviews[review].status = "pending";
+    }),
+    code,
+  );
+}
+expectCodeAndCheckId(
+  mutate(valid, (evidence) => {
+    evidence.humanAttestations.externalReviews.security.expiresAt =
+      "2026-08-09T11:59:59Z";
+  }),
+  "readiness.evidence.stale",
+  "readiness.review.security-approved",
 );
 
 const missingOwnerRole = mutate(valid, (evidence) => {

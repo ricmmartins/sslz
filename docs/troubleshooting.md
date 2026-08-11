@@ -109,7 +109,7 @@ was already consumed locally, deployment failed, or a required platform check di
 2. Confirm the protected `SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE` and exact tenant/subscription.
 3. For Terraform, confirm the reviewed saved `.tfplan`, remote backend, Terraform version/platform, and lock file still
    match.
-4. Correct or roll back the platform through the existing IaC path.
+4. Correct or roll back the platform through a newly reviewed and signed Phase 6 IaC path.
 5. Generate a new Phase 4 preview, Phase 6 manifest, and signed approval. Never reuse consumed state.
 
 Workload deployment remains blocked when any post-deployment check fails. See

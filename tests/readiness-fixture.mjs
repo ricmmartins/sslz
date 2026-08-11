@@ -62,7 +62,7 @@ function buildReadinessEvidence(input) {
     ...input.workloadPlan.profileExtensions,
   ];
   const evidence = {
-    schemaVersion: "1.0.0",
+    schemaVersion: "2.0.0",
     evidenceId: `readiness.${input.planId}.001`,
     status: "ready",
     issuedAt: observedAt,
@@ -123,7 +123,34 @@ function buildReadinessEvidence(input) {
         "attestation.billing-support.001",
         "microsoft-for-startups-billing-and-support",
         "6",
+        { attestationVersion: "1.0.0" },
       ),
+      externalReviews: {
+        security: humanAttestation(
+          "approved",
+          "role.security-reviewer",
+          "review.security.001",
+          "sslz-security-review",
+          "8",
+          { attestationVersion: "1.0.0" },
+        ),
+        azureArchitecture: humanAttestation(
+          "approved",
+          "role.azure-architecture-reviewer",
+          "review.azure-architecture.001",
+          "azure-architecture-review",
+          "9",
+          { attestationVersion: "1.0.0" },
+        ),
+        iacParity: humanAttestation(
+          "approved",
+          "role.iac-parity-reviewer",
+          "review.iac-parity.001",
+          "bicep-terraform-parity-review",
+          "0",
+          { attestationVersion: "1.0.0" },
+        ),
+      },
       failoverOwner: humanAttestation(
         "confirmed",
         "role.platform-governance",

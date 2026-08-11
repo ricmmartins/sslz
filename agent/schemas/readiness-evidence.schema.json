@@ -17,7 +17,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "evidenceId": {
       "$ref": "#/$defs/reference"
@@ -215,6 +215,7 @@
       "additionalProperties": false,
       "required": [
         "startupBillingSupport",
+        "externalReviews",
         "failoverOwner",
         "recoveryMeasurements",
         "serviceRecoveryTests",
@@ -228,7 +229,11 @@
             },
             {
               "type": "object",
+              "required": ["attestationVersion"],
               "properties": {
+                "attestationVersion": {
+                  "const": "1.0.0"
+                },
                 "status": {
                   "enum": ["confirmed", "pending", "rejected"]
                 },
@@ -238,6 +243,62 @@
               }
             }
           ]
+        },
+        "externalReviews": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "security",
+            "azureArchitecture",
+            "iacParity"
+          ],
+          "properties": {
+            "security": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/reviewAttestation"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "subjectScope": {
+                      "const": "sslz-security-review"
+                    }
+                  }
+                }
+              ]
+            },
+            "azureArchitecture": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/reviewAttestation"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "subjectScope": {
+                      "const": "azure-architecture-review"
+                    }
+                  }
+                }
+              ]
+            },
+            "iacParity": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/reviewAttestation"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "subjectScope": {
+                      "const": "bicep-terraform-parity-review"
+                    }
+                  }
+                }
+              ]
+            }
+          }
         },
         "failoverOwner": {
           "allOf": [
@@ -536,8 +597,36 @@
         },
         "provenanceReference": {
           "type": "string"
+        },
+        "attestationVersion": {
+          "type": "string"
         }
       }
+    },
+    "reviewAttestation": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/humanAttestation"
+        },
+        {
+          "type": "object",
+          "required": [
+            "attestationVersion"
+          ],
+          "properties": {
+            "attestationVersion": {
+              "const": "1.0.0"
+            },
+            "status": {
+              "enum": [
+                "approved",
+                "pending",
+                "rejected"
+              ]
+            }
+          }
+        }
+      ]
     }
   }
 }

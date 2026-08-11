@@ -9,7 +9,7 @@ description: "Privacy-preserving evidence bound to IaC and deployment approval"
 
 ## Purpose
 
-[`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json) is the no-write `1.0.0` contract that
+[`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json) is the no-write `2.0.0` contract that
 must accompany an IaC v3 plan. It does not collect evidence, call Azure, confirm a human action, register a provider, or
 deploy anything. It records only supplied status, opaque references, timestamps, bounded measurements, and SHA-256
 digests needed to decide whether a reviewed plan is eligible for approval.
@@ -18,11 +18,14 @@ The contract deliberately separates:
 
 - `codeEvidence`: authoritative preflight, primary/secondary regional observations, and selected Foundry
   model-version/deployment/quota observations;
-- `humanAttestations`: Microsoft for Startups billing/support confirmation, a failover owner and role reference,
-  measured recovery results, service-specific recovery tests, and cool-footprint cost provenance.
+- `humanAttestations`: Microsoft for Startups billing/support confirmation; explicit security, Azure architecture, and
+  Bicep/Terraform parity reviews; a failover owner and role reference; measured recovery results; service-specific
+  recovery tests; and cool-footprint cost provenance.
 
-Human attestations are never inferred from planner output. `pending`, `rejected`, `unmet`, `not-measured`, `fail`, stale,
-future-dated, or expired evidence blocks readiness.
+Version `2.0.0` adds the mandatory external-review set and is the only readiness version eligible for new Phase 6
+approval. Human attestations are never inferred from planner output. External review items carry an explicit
+`attestationVersion`, issuer role, opaque reference, scope, timestamp, expiry, and digest. `pending`, `rejected`, `unmet`,
+`not-measured`, `fail`, stale, future-dated, or expired evidence blocks readiness.
 
 ## Privacy and evidence references
 
@@ -42,7 +45,8 @@ The validator fails closed unless:
 - the evidence subject exactly matches the plan ID, tenant, prod/nonprod subscriptions, selected profile version,
   compute profile, extensions, regional mode, and primary/secondary regions;
 - the authoritative preflight passes and every item is current;
-- billing/support and failover-owner attestations are explicitly confirmed;
+- billing/support is explicitly confirmed and the security, Azure architecture, and Bicep/Terraform parity reviews are
+  explicitly approved;
 - explicit RTO/RPO targets exist and every selected profile has current measured results at or below those targets;
 - every selected extension has a passing service-specific recovery test;
 - cool infrastructure has a valid `minimum <= maximum` USD range, provenance reference, and exact match to the selected
