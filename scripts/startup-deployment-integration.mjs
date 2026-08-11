@@ -51,6 +51,16 @@ import {
   verifyTerraformProvenance,
 } from "./terraform-plan-provenance.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
+import {
+  attemptIdentity,
+  completeRegionalAttemptReservation,
+  createRegionalAttempt,
+  recordAttemptFailure,
+  recordAttemptStarted,
+  recordAttemptSuccess,
+  releaseRegionalAttemptReservation,
+  reserveRegionalAttempt,
+} from "./regional-attempt.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_ROOT = resolve(root, ".sslz/generated");
@@ -1065,7 +1075,105 @@ function assertExistingWorkspaceCurrent(plan, manifest, runner) {
   }
 }
 
-function bicepPreviewArguments(selection) {
+function regionalAttemptBinding(plan, selection) {
+  const attempt = plan.decisionModel.regionalAttempt;
+  if (!attempt || attempt.targetRegion !== selection.artifact.region) {
+    fail(
+      "deployment.regional-attempt.missing",
+      "The selected deployment is not bound to a current regional attempt.",
+    );
+  }
+  const identity = attemptIdentity({
+    chainId: attempt.chainId,
+    planId: plan.planId,
+    originalRegion: attempt.originalRegion,
+    targetRegion: attempt.targetRegion,
+    attemptNumber: attempt.attemptNumber,
+    provider: selection.artifact.provider,
+    environment: selection.target.name,
+    backendKeyPrefix: plan.decisionModel.terraformBackend.keyPrefix,
+    planDigest: plan.planDigest,
+  });
+  return {
+    schemaVersion: attempt.schemaVersion,
+    chainId: attempt.chainId,
+    attemptId: `${attempt.chainId}-${identity.attemptKey}`,
+    attemptNumber: attempt.attemptNumber,
+    previousAttemptDigest:
+      attempt.previousAttemptDigests[selection.target.name],
+    originalRegion: attempt.originalRegion,
+    targetRegion: attempt.targetRegion,
+    cleanupEvidenceDigest:
+      attempt.cleanupEvidenceDigests[selection.target.name],
+    safeSameRegionRetry: attempt.safeSameRegionRetry,
+    previousAttemptKey: attempt.previousAttemptKeys[selection.target.name],
+    retiredPolicyAssignmentNames:
+      attempt.retiredPolicyAssignmentNames[selection.target.name],
+    identityDigest: identity.identityDigest,
+    attemptKey: identity.attemptKey,
+    resourceSuffix: identity.resourceSuffix,
+    deploymentName: identity.deploymentName,
+    previewDeploymentName: identity.previewDeploymentName,
+    stateKey:
+      attempt.attemptNumber === 1
+        ? `${plan.decisionModel.terraformBackend.keyPrefix}-${selection.target.name}-primary.tfstate`
+        : identity.stateKey,
+    workspaceName: identity.workspaceName,
+    artifactRoot: identity.artifactRoot,
+    policyIdentityLifecycle: identity.policyIdentityLifecycle,
+  };
+}
+
+function deploymentRegionalAttemptRecord(manifest, approval, occurredAt) {
+  const attempt = manifest.regionalAttempt;
+  const stateSuffix =
+    `-${manifest.execution.environment}-primary.tfstate`;
+  if (!attempt.stateKey.endsWith(stateSuffix)) {
+    fail(
+      "deployment.regional-attempt.state-mismatch",
+      "The regional attempt state key does not match its environment and identity.",
+    );
+  }
+  const record = createRegionalAttempt({
+    chainId: attempt.chainId,
+    planId: manifest.plan.id,
+    originalRegion: attempt.originalRegion,
+    targetRegion: attempt.targetRegion,
+    attemptNumber: attempt.attemptNumber,
+    provider: manifest.execution.provider,
+    environment: manifest.execution.environment,
+    backendKeyPrefix: attempt.stateKey.slice(0, -stateSuffix.length),
+    regionalEvidenceDigest: manifest.readinessEvidence.digest,
+    planDigest: manifest.plan.digest,
+    artifactDigest: hashCanonical(manifest.artifacts),
+    manifestDigest: manifest.manifestDigest,
+    approvalDigest: approvalArtifactDigest(approval),
+    previousAttemptDigest: attempt.previousAttemptDigest,
+    createdAt: new Date(occurredAt).toISOString(),
+  });
+  if (
+    record.attemptId !== attempt.attemptId ||
+    record.identities.identityDigest !== attempt.identityDigest ||
+    record.identities.attemptKey !== attempt.attemptKey ||
+    record.identities.resourceSuffix !== attempt.resourceSuffix ||
+    record.identities.deploymentName !== attempt.deploymentName ||
+    record.identities.previewDeploymentName !== attempt.previewDeploymentName ||
+    record.identities.stateKey !== attempt.stateKey ||
+    record.identities.workspaceName !== attempt.workspaceName ||
+    record.identities.artifactRoot !== attempt.artifactRoot ||
+    canonicalJson(record.identities.policyIdentityLifecycle) !==
+      canonicalJson(attempt.policyIdentityLifecycle)
+  ) {
+    fail(
+      "deployment.regional-attempt.binding-mismatch",
+      "The regional attempt ledger identity does not match the reviewed manifest.",
+    );
+  }
+  return record;
+}
+
+function bicepPreviewArguments(plan, selection) {
+  const attempt = regionalAttemptBinding(plan, selection);
   return [
     "deployment",
     "sub",
@@ -1079,7 +1187,9 @@ function bicepPreviewArguments(selection) {
     "--parameters",
     selection.artifact.path,
     "--name",
-    `sslz-preview-${selection.target.name}-${selection.artifact.region}`,
+    attempt.attemptNumber === 1
+      ? `sslz-preview-${selection.target.name}-${selection.artifact.region}`
+      : attempt.previewDeploymentName,
     "--result-format",
     "ResourceIdOnly",
     "--output",
@@ -1099,6 +1209,7 @@ function bicepBuildParametersArguments(parameterPath, bicepPath) {
 }
 
 function bicepDeploymentArguments(plan, selection) {
+  const attempt = regionalAttemptBinding(plan, selection);
   return [
     "deployment",
     "sub",
@@ -1112,7 +1223,9 @@ function bicepDeploymentArguments(plan, selection) {
     "--parameters",
     selection.artifact.path,
     "--name",
-    `sslz-${selection.target.name}-${plan.planDigest.slice(7, 19)}`,
+    attempt.attemptNumber === 1
+      ? `sslz-${selection.target.name}-${plan.planDigest.slice(7, 19)}`
+      : attempt.deploymentName,
     "--output",
     "none",
   ];
@@ -1120,12 +1233,13 @@ function bicepDeploymentArguments(plan, selection) {
 
 function terraformBackendArguments(plan, selection, authMode) {
   const backend = plan.decisionModel.terraformBackend;
+  const attempt = regionalAttemptBinding(plan, selection);
   return [
     `-backend-config=subscription_id=${backend.subscriptionId}`,
     `-backend-config=resource_group_name=${backend.resourceGroupName}`,
     `-backend-config=storage_account_name=${backend.storageAccountName}`,
     `-backend-config=container_name=${backend.containerName}`,
-    `-backend-config=key=${backend.keyPrefix}-${selection.target.name}-primary.tfstate`,
+    `-backend-config=key=${attempt.stateKey}`,
     `-backend-config=use_oidc=${authMode === "oidc"}`,
     `-backend-config=use_cli=${authMode === "cli"}`,
     "-backend-config=use_azuread_auth=true",
@@ -1666,6 +1780,7 @@ function expectedBicepParameters(plan, selection) {
     plan,
     selection,
   );
+  const attempt = regionalAttemptBinding(plan, selection);
   return {
     location: selection.artifact.region,
     companyName: configuration.companyName,
@@ -1693,6 +1808,12 @@ function expectedBicepParameters(plan, selection) {
     allowedLocations: expectedAllowedLocations(plan),
     logRetentionInDays: configuration.logRetentionInDays,
     logDailyQuotaGb: configuration.logDailyQuotaGb,
+    ...(attempt.attemptNumber > 1
+      ? {
+          regionalAttemptSuffix: attempt.resourceSuffix,
+          policyAssignmentPrefix: `${attempt.attemptKey}-`,
+        }
+      : {}),
   };
 }
 
@@ -1879,6 +2000,7 @@ function expectedTerraformVariables(plan, selection) {
     plan,
     selection,
   );
+  const attempt = regionalAttemptBinding(plan, selection);
   return {
     subscription_id: selection.target.subscriptionId,
     resource_provider_registrations: "none",
@@ -1907,6 +2029,12 @@ function expectedTerraformVariables(plan, selection) {
     allowed_locations: expectedAllowedLocations(plan),
     log_retention_in_days: configuration.logRetentionInDays,
     log_daily_quota_gb: configuration.logDailyQuotaGb,
+    ...(attempt.attemptNumber > 1
+      ? {
+          regional_attempt_suffix: attempt.resourceSuffix,
+          policy_assignment_prefix: `${attempt.attemptKey}-`,
+        }
+      : {}),
   };
 }
 
@@ -2652,20 +2780,24 @@ function buildDeploymentManifest(
       : null;
   const previewExecution =
     provider === "bicep"
-      ? runner("az", bicepPreviewArguments(selection))
+      ? runner("az", bicepPreviewArguments(plan, selection))
       : {
           status: 0,
           stdout: JSON.stringify(planJsonArtifact.document),
           stderr: "",
         };
+  const regionalAttempt = regionalAttemptBinding(plan, selection);
+  const resourcePrefix =
+    `${plan.decisionModel.configuration.companyName}-` +
+    `${selection.target.name}${regionalAttempt.resourceSuffix}`;
   const freshPreview =
     provider === "bicep"
       ? summarizeBicepPreview(
           previewExecution,
           selection.target.subscriptionId,
           new Set([
-            `rg-${plan.decisionModel.configuration.companyName}-${selection.target.name}-monitoring`.toLowerCase(),
-            `rg-${plan.decisionModel.configuration.companyName}-${selection.target.name}-networking`.toLowerCase(),
+            `rg-${resourcePrefix}-monitoring`.toLowerCase(),
+            `rg-${resourcePrefix}-networking`.toLowerCase(),
           ]),
         )
       : summarizeTerraformPreview(
@@ -2750,6 +2882,7 @@ function buildDeploymentManifest(
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     },
+    regionalAttempt: regionalAttemptBinding(plan, selection),
     defenderWorkspacePlacement,
     execution: {
       operation: "platform-baseline.deploy",
@@ -2969,6 +3102,7 @@ function assertManifestCurrent(
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
     },
+    regionalAttempt: regionalAttemptBinding(plan, selection),
     defenderWorkspacePlacement: defenderWorkspacePlacementBinding(plan),
     execution: {
       operation: "platform-baseline.deploy",
@@ -3037,6 +3171,8 @@ function assertManifestCurrent(
     canonicalJson(manifest.plan) !== canonicalJson(expected.plan) ||
     canonicalJson(manifest.readinessEvidence) !==
       canonicalJson(expected.readinessEvidence) ||
+    canonicalJson(manifest.regionalAttempt) !==
+      canonicalJson(expected.regionalAttempt) ||
     canonicalJson(manifest.defenderWorkspacePlacement) !==
       canonicalJson(expected.defenderWorkspacePlacement) ||
     canonicalJson(manifest.execution) !== canonicalJson(expected.execution) ||
@@ -3153,6 +3289,12 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
     planVersion: manifest.plan.version,
     planId: manifest.plan.id,
     planDigest: manifest.plan.digest,
+    regionalAttemptId: manifest.regionalAttempt.attemptId,
+    regionalAttemptDigest: hashCanonical(manifest.regionalAttempt),
+    regionalAttemptNumber: manifest.regionalAttempt.attemptNumber,
+    originalRegion: manifest.regionalAttempt.originalRegion,
+    targetRegion: manifest.regionalAttempt.targetRegion,
+    regionalStateKey: manifest.regionalAttempt.stateKey,
     readinessEvidenceVersion: manifest.readinessEvidence.version,
     readinessEvidenceId: manifest.readinessEvidence.id,
     readinessEvidenceDigest: manifest.readinessEvidence.digest,
@@ -3661,6 +3803,11 @@ function reserveApproval(approval, manifest, evaluatedAt, directory) {
     artifactDigest,
     manifestDigest: manifest.manifestDigest,
     planDigest: manifest.plan.digest,
+    regionalAttemptId: manifest.regionalAttempt.attemptId,
+    regionalAttemptNumber: manifest.regionalAttempt.attemptNumber,
+    originalRegion: manifest.regionalAttempt.originalRegion,
+    targetRegion: manifest.regionalAttempt.targetRegion,
+    regionalStateKey: manifest.regionalAttempt.stateKey,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,
@@ -3933,7 +4080,9 @@ function expectedNetworkTopology(decision, subscriptionId, resourceGroupName) {
 function postDeploymentChecks(manifest, runner) {
   const subscriptionId = manifest.execution.subscriptionId;
   const decision = manifest.planDecision;
-  const prefix = `${decision.companyName}-${manifest.execution.environment}`;
+  const prefix =
+    `${decision.companyName}-${manifest.execution.environment}` +
+    manifest.regionalAttempt.resourceSuffix;
   const monitoringRg = `rg-${prefix}-monitoring`;
   const networkingRg = `rg-${prefix}-networking`;
   const workspacePlacement = decision.defenderWorkspace;
@@ -4050,10 +4199,15 @@ function postDeploymentChecks(manifest, runner) {
   const policyMap = new Map(
     Array.isArray(policies) ? policies.map((item) => [item.name, item]) : [],
   );
+  const policyPrefix =
+    manifest.regionalAttempt.attemptNumber === 1
+      ? ""
+      : `${manifest.regionalAttempt.attemptKey}-`;
+  const expectedPolicyNames = POLICY_NAMES.map((name) => `${policyPrefix}${name}`);
   const expectedPolicyParameters = new Map([
-    ["mcsb-audit", {}],
+    [`${policyPrefix}mcsb-audit`, {}],
     [
-      "allowed-locations",
+      `${policyPrefix}allowed-locations`,
       {
         listOfAllowedLocations: {
           value: [
@@ -4068,7 +4222,7 @@ function postDeploymentChecks(manifest, runner) {
       },
     ],
     [
-      "allowed-locations-rg",
+      `${policyPrefix}allowed-locations-rg`,
       {
         listOfAllowedLocations: {
           value: [
@@ -4082,30 +4236,30 @@ function postDeploymentChecks(manifest, runner) {
         },
       },
     ],
-    ["require-env-tag-rg", { tagName: { value: "environment" } }],
-    ["require-team-tag-rg", { tagName: { value: "team" } }],
-    ["inherit-env-tag", { tagName: { value: "environment" } }],
-    ["inherit-team-tag", { tagName: { value: "team" } }],
+    [`${policyPrefix}require-env-tag-rg`, { tagName: { value: "environment" } }],
+    [`${policyPrefix}require-team-tag-rg`, { tagName: { value: "team" } }],
+    [`${policyPrefix}inherit-env-tag`, { tagName: { value: "environment" } }],
+    [`${policyPrefix}inherit-team-tag`, { tagName: { value: "team" } }],
     [
-      "activity-log-diag",
+      `${policyPrefix}activity-log-diag`,
       { logAnalytics: { value: workspace?.id } },
     ],
   ]);
   const expectedRoleAssignments = [
     {
-      assignment: "inherit-env-tag",
+      assignment: `${policyPrefix}inherit-env-tag`,
       role: EXPECTED_BICEP_ROLE_DEFINITIONS.get("tagContributor"),
     },
     {
-      assignment: "inherit-team-tag",
+      assignment: `${policyPrefix}inherit-team-tag`,
       role: EXPECTED_BICEP_ROLE_DEFINITIONS.get("tagContributor"),
     },
     {
-      assignment: "activity-log-diag",
+      assignment: `${policyPrefix}activity-log-diag`,
       role: EXPECTED_BICEP_ROLE_DEFINITIONS.get("logAnalyticsContributor"),
     },
     {
-      assignment: "activity-log-diag",
+      assignment: `${policyPrefix}activity-log-diag`,
       role: EXPECTED_BICEP_ROLE_DEFINITIONS.get("monitoringContributor"),
     },
   ];
@@ -4152,20 +4306,28 @@ function postDeploymentChecks(manifest, runner) {
     !expectedPrincipalIds.has(undefined) &&
     canonicalJson(actualRoleTuples) === canonicalJson(expectedRoleTuples);
   const policyHealthy =
-    canonicalJson([...policyMap.keys()].filter((name) => POLICY_NAMES.includes(name)).sort()) ===
-      canonicalJson(POLICY_NAMES) &&
-    POLICY_NAMES.every(
+    manifest.regionalAttempt.retiredPolicyAssignmentNames.every(
+      (name) => !policyMap.has(name),
+    ) &&
+    canonicalJson(
+      [...policyMap.keys()]
+        .filter((name) => expectedPolicyNames.includes(name))
+        .sort(),
+    ) === canonicalJson(expectedPolicyNames) &&
+    expectedPolicyNames.every(
       (name) =>
         policyMap.get(name)?.scope?.toLowerCase() ===
           `/subscriptions/${subscriptionId}`.toLowerCase() &&
         policyMap.get(name)?.enforcementMode === "Default" &&
         policyMap.get(name)?.policyDefinitionId?.toLowerCase() ===
-          EXPECTED_POLICY_DEFINITIONS.get(name) &&
+          EXPECTED_POLICY_DEFINITIONS.get(name.slice(policyPrefix.length)) &&
         canonicalJson(policyMap.get(name)?.parameters ?? {}) ===
           canonicalJson(expectedPolicyParameters.get(name)) &&
-        (!["activity-log-diag", "inherit-env-tag", "inherit-team-tag"].includes(
-          name,
-        ) ||
+        (![
+          `${policyPrefix}activity-log-diag`,
+          `${policyPrefix}inherit-env-tag`,
+          `${policyPrefix}inherit-team-tag`,
+        ].includes(name) ||
           policyMap.get(name)?.location === manifest.execution.region),
     ) &&
     rolesHealthy;
@@ -4481,12 +4643,15 @@ function runDeploymentIntegration(
     runner = defaultRunner,
     provenancePublicKey = null,
     statePath = ".sslz/deployment-state",
+    regionalStatePath = null,
     maximumValidationAttempts = 3,
     sleep = defaultSleep,
   } = {},
 ) {
   const result = baseResult(mode, evaluatedAt);
   let reservation = null;
+  let regionalReservation = null;
+  let activeRegionalAttempt = null;
   let snapshot = null;
   let terraformRuntimeDirectory = null;
   let selection = null;
@@ -4679,6 +4844,71 @@ function runDeploymentIntegration(
     }
     assertExistingWorkspaceCurrent(plan, manifest, runner);
     approvalWindow(approval, clock(), "deployment.approval");
+    const plannedRegionalAttempt = deploymentRegionalAttemptRecord(
+      manifest,
+      approval,
+      clock(),
+    );
+    regionalReservation = reserveRegionalAttempt(
+      plannedRegionalAttempt,
+      regionalStatePath ?? resolve(stateStore.directory, "regional-attempts"),
+      { previousAttemptKey: manifest.regionalAttempt.previousAttemptKey },
+    );
+    if (regionalReservation.status === "replayed") {
+      completeReservation(
+        reservation,
+        "failed",
+        "regional-attempt-replayed",
+        "deployment.regional-attempt.replayed",
+        false,
+        clock(),
+      );
+      result.status = "error";
+      result.code = "deployment.regional-attempt.replayed";
+      result.message =
+        "The regional deployment attempt has already completed on this executor.";
+      result.approval.consumed = true;
+      result.safety.localState = "consumed";
+      return validatedResult(result);
+    }
+    if (regionalReservation.status === "concurrent") {
+      completeReservation(
+        reservation,
+        "failed",
+        "regional-attempt-concurrent",
+        "deployment.regional-attempt.concurrent",
+        false,
+        clock(),
+      );
+      result.status = "error";
+      result.code = "deployment.regional-attempt.concurrent";
+      result.message =
+        "Another deployment in this regional attempt chain is already running.";
+      result.approval.consumed = true;
+      result.safety.localState = "consumed";
+      return validatedResult(result);
+    }
+    if (regionalReservation.status === "predecessor-mismatch") {
+      completeReservation(
+        reservation,
+        "failed",
+        "regional-predecessor-mismatch",
+        "deployment.regional-attempt.predecessor-mismatch",
+        false,
+        clock(),
+      );
+      result.status = "error";
+      result.code = "deployment.regional-attempt.predecessor-mismatch";
+      result.message =
+        "The persisted predecessor attempt is missing, nonterminal, or differs from the reviewed cleanup chain.";
+      result.approval.consumed = true;
+      result.safety.localState = "consumed";
+      return validatedResult(result);
+    }
+    activeRegionalAttempt = recordAttemptStarted(
+      plannedRegionalAttempt,
+      new Date(clock()).toISOString(),
+    );
     updateReservation(reservation, {
       phase: "deployment-started",
       code: "deployment.started",
@@ -4698,6 +4928,20 @@ function runDeploymentIntegration(
         : {},
     );
     if (deployment.status !== 0) {
+      activeRegionalAttempt = recordAttemptFailure(activeRegionalAttempt, {
+        code: "deployment.execution.failed",
+        summary: "The reviewed platform deployment command failed.",
+        diagnostics: {
+          status: deployment.status,
+          stderr: deployment.stderr ?? "",
+          stdout: deployment.stdout ?? "",
+        },
+        occurredAt: new Date(clock()).toISOString(),
+      });
+      const regionalFailureRecorded = completeRegionalAttemptReservation(
+        regionalReservation,
+        activeRegionalAttempt,
+      );
       completeReservation(
         reservation,
         "failed",
@@ -4709,7 +4953,10 @@ function runDeploymentIntegration(
       result.status = "error";
       result.code = "deployment.execution.failed";
       result.message =
-        "The exact reviewed platform deployment failed; no workload deployment was attempted.";
+        "The exact reviewed platform deployment failed; no workload deployment was attempted." +
+        (regionalFailureRecorded
+          ? ""
+          : " The cleanup-required ledger could not be finalized; the chain remains blocked.");
       result.approval.consumed = true;
       result.safety.localState = "consumed";
       result.rollback.required = true;
@@ -4737,6 +4984,19 @@ function runDeploymentIntegration(
     result.approval.consumed = true;
     result.safety.localState = "consumed";
     if (!verification.healthy) {
+      activeRegionalAttempt = recordAttemptFailure(activeRegionalAttempt, {
+        code: "deployment.validation.failed",
+        summary: "The deployment completed but post-deployment validation failed.",
+        diagnostics: {
+          checks: verification.checks,
+          attempts: verification.attempts,
+        },
+        occurredAt: new Date(clock()).toISOString(),
+      });
+      const regionalFailureRecorded = completeRegionalAttemptReservation(
+        regionalReservation,
+        activeRegionalAttempt,
+      );
       completeReservation(
         reservation,
         "failed",
@@ -4748,7 +5008,36 @@ function runDeploymentIntegration(
       result.status = "error";
       result.code = "deployment.validation.failed";
       result.message =
-        "The platform deployment completed, but the baseline is unhealthy; workload deployment is blocked.";
+        "The platform deployment completed, but the baseline is unhealthy; workload deployment is blocked." +
+        (regionalFailureRecorded
+          ? ""
+          : " The cleanup-required ledger could not be finalized; the chain remains blocked.");
+      result.rollback.required = true;
+      result.rollback.guidanceCode = "deployment.rollback.review-required";
+      return validatedResult(result);
+    }
+    activeRegionalAttempt = recordAttemptSuccess(
+      activeRegionalAttempt,
+      new Date(clock()).toISOString(),
+    );
+    const regionalSuccessRecorded = completeRegionalAttemptReservation(
+      regionalReservation,
+      activeRegionalAttempt,
+    );
+    if (!regionalSuccessRecorded) {
+      completeReservation(
+        reservation,
+        "failed",
+        "regional-attempt-finalization-failed",
+        "deployment.regional-attempt.finalization-failed",
+        false,
+        clock(),
+      );
+      result.status = "error";
+      result.code = "deployment.regional-attempt.finalization-failed";
+      result.message =
+        "The deployment passed validation, but durable regional-attempt finalization failed; workload deployment remains blocked.";
+      result.verification.workloadDeploymentAllowed = false;
       result.rollback.required = true;
       result.rollback.guidanceCode = "deployment.rollback.review-required";
       return validatedResult(result);
@@ -4775,6 +5064,21 @@ function runDeploymentIntegration(
       error instanceof DeploymentError
         ? error.message
         : "The plan, manifest, approval, or trusted key input is malformed.";
+    if (
+      regionalReservation?.status === "reserved" &&
+      activeRegionalAttempt?.status === "started"
+    ) {
+      activeRegionalAttempt = recordAttemptFailure(activeRegionalAttempt, {
+        code,
+        summary: message,
+        diagnostics: { code },
+        occurredAt: new Date(clock()).toISOString(),
+      });
+      completeRegionalAttemptReservation(
+        regionalReservation,
+        activeRegionalAttempt,
+      );
+    }
     if (reservation?.status === "reserved") {
       completeReservation(
         reservation,
@@ -4802,6 +5106,14 @@ function runDeploymentIntegration(
     }
     if (reservation?.status === "reserved") {
       releaseReservation(reservation);
+    }
+    if (
+      regionalReservation &&
+      ["reserved", "finalizing", "release-failed"].includes(
+        regionalReservation.status,
+      )
+    ) {
+      releaseRegionalAttemptReservation(regionalReservation);
     }
   }
 }

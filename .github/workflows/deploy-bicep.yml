@@ -22,13 +22,21 @@ on:
         description: 'Protected runner path to the signed Phase 6 approval'
         required: true
         type: string
+      regional_attempt_chain:
+        description: 'Regional attempt chain bound by the reviewed manifest'
+        required: true
+        type: string
+      regional_attempt_number:
+        description: 'Regional attempt number bound by the reviewed manifest'
+        required: true
+        type: number
 
 permissions:
   id-token: write
   contents: read
 
 concurrency:
-  group: deploy-bicep-${{ inputs.environment }}
+  group: deploy-regional-${{ inputs.environment }}-${{ inputs.regional_attempt_chain }}
   cancel-in-progress: false
 
 jobs:
@@ -42,6 +50,8 @@ jobs:
       APPROVAL_PATH: ${{ inputs.approval_path }}
       EXPECTED_ENVIRONMENT: ${{ inputs.environment }}
       EXPECTED_PROVIDER: bicep
+      EXPECTED_ATTEMPT_CHAIN: ${{ inputs.regional_attempt_chain }}
+      EXPECTED_ATTEMPT_NUMBER: ${{ inputs.regional_attempt_number }}
       SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE: ${{ vars.SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE }}
     steps:
       - uses: actions/checkout@v4
@@ -61,8 +71,10 @@ jobs:
             import { readFileSync } from "node:fs";
             const manifest = JSON.parse(readFileSync(process.env.MANIFEST_PATH, "utf8"));
             if (manifest.execution?.provider !== process.env.EXPECTED_PROVIDER ||
-                manifest.execution?.environment !== process.env.EXPECTED_ENVIRONMENT) {
-              throw new Error("The reviewed manifest does not match this provider and environment dispatch.");
+                manifest.execution?.environment !== process.env.EXPECTED_ENVIRONMENT ||
+                manifest.regionalAttempt?.chainId !== process.env.EXPECTED_ATTEMPT_CHAIN ||
+                manifest.regionalAttempt?.attemptNumber !== Number(process.env.EXPECTED_ATTEMPT_NUMBER)) {
+              throw new Error("The reviewed manifest does not match this provider, environment, and regional attempt dispatch.");
             }
           '
 

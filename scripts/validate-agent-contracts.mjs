@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
+import { loadRegionalAttempt } from "./regional-attempt.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -365,6 +366,9 @@ function main() {
   const deploymentResultSchema = load(
     "agent/schemas/deployment-result.schema.json",
   );
+  const regionalAttemptSchema = load(
+    "agent/schemas/regional-attempt.schema.json",
+  );
   const terraformPlanProvenanceSchema = load(
     "agent/schemas/terraform-plan-provenance.schema.json",
   );
@@ -386,6 +390,7 @@ function main() {
     "agent/examples/deployment-execution-manifest.json",
   );
   const deploymentApproval = load("agent/examples/deployment-approval.json");
+  const regionalAttempt = load("agent/examples/regional-attempt.json");
   const terraformPlanProvenance = load(
     "agent/examples/terraform-plan-provenance.json",
   );
@@ -476,6 +481,8 @@ function main() {
     deploymentExecutionManifest,
   );
   validateDocument(deploymentApprovalSchema, deploymentApproval);
+  validateDocument(regionalAttemptSchema, regionalAttempt);
+  loadRegionalAttempt(resolve(root, "agent/examples/regional-attempt.json"));
   validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
   validateDocument(readinessEvidenceSchema, readinessEvidence);
   validateDocument(
@@ -505,6 +512,7 @@ function main() {
     providerRegistrationDryRun,
     deploymentExecutionManifest,
     deploymentApproval,
+    regionalAttempt,
     terraformPlanProvenance,
     readinessEvidence,
     defenderWorkspacePlacementDecision,

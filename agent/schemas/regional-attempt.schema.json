@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/regional-attempt.schema.json",
+  "title": "SSLZ regional deployment attempt ledger record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "chainId",
+    "planId",
+    "backendKeyPrefix",
+    "attemptId",
+    "attemptNumber",
+    "previousAttemptDigest",
+    "originalRegion",
+    "targetRegion",
+    "alternateRegion",
+    "provider",
+    "environment",
+    "status",
+    "bindings",
+    "identities",
+    "writeStarted",
+    "cleanup",
+    "failureEvidence",
+    "events",
+    "createdAt",
+    "updatedAt",
+    "recordDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "chainId": { "$ref": "#/$defs/identifier" },
+    "planId": { "$ref": "#/$defs/identifier" },
+    "backendKeyPrefix": { "$ref": "#/$defs/identifier" },
+    "attemptId": { "$ref": "#/$defs/identifier" },
+    "attemptNumber": { "type": "integer", "minimum": 1, "maximum": 99 },
+    "previousAttemptDigest": {
+      "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+    },
+    "originalRegion": { "$ref": "#/$defs/region" },
+    "targetRegion": { "$ref": "#/$defs/region" },
+    "alternateRegion": {
+      "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+    },
+    "provider": { "enum": ["bicep", "terraform"] },
+    "environment": { "enum": ["prod", "nonprod"] },
+    "status": {
+      "enum": [
+        "planned",
+        "started",
+        "failed",
+        "cleanup-required",
+        "cleaned",
+        "replanned",
+        "succeeded"
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regionalEvidenceDigest",
+        "planDigest",
+        "artifactDigest",
+        "manifestDigest",
+        "approvalDigest"
+      ],
+      "properties": {
+        "regionalEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "planDigest": { "$ref": "#/$defs/digest" },
+        "artifactDigest": { "$ref": "#/$defs/digest" },
+        "manifestDigest": { "$ref": "#/$defs/digest" },
+        "approvalDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "identities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identityDigest",
+        "attemptKey",
+        "resourceSuffix",
+        "deploymentName",
+        "previewDeploymentName",
+        "nestedDeploymentNames",
+        "policyAssignmentNames",
+        "policyIdentityLifecycle",
+        "stateKey",
+        "workspaceName",
+        "artifactRoot"
+      ],
+      "properties": {
+        "identityDigest": { "$ref": "#/$defs/digest" },
+        "attemptKey": { "$ref": "#/$defs/identifier" },
+        "resourceSuffix": {
+          "type": "string",
+          "pattern": "^(?:|-a[0-9]{2}-[a-z0-9]+-[0-9a-f]{10})$"
+        },
+        "deploymentName": { "$ref": "#/$defs/identifier" },
+        "previewDeploymentName": { "$ref": "#/$defs/identifier" },
+        "nestedDeploymentNames": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["logAnalytics", "networking", "defender", "budgets", "policies"],
+          "properties": {
+            "logAnalytics": { "$ref": "#/$defs/identifier" },
+            "networking": { "$ref": "#/$defs/identifier" },
+            "defender": { "$ref": "#/$defs/identifier" },
+            "budgets": { "$ref": "#/$defs/identifier" },
+            "policies": { "$ref": "#/$defs/identifier" }
+          }
+        },
+        "policyAssignmentNames": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mcsb",
+            "allowedLocations",
+            "allowedLocationsResourceGroups",
+            "requireEnvironmentTag",
+            "requireTeamTag",
+            "inheritEnvironmentTag",
+            "inheritTeamTag",
+            "activityLogDiagnostics"
+          ],
+          "properties": {
+            "mcsb": { "$ref": "#/$defs/identifier" },
+            "allowedLocations": { "$ref": "#/$defs/identifier" },
+            "allowedLocationsResourceGroups": { "$ref": "#/$defs/identifier" },
+            "requireEnvironmentTag": { "$ref": "#/$defs/identifier" },
+            "requireTeamTag": { "$ref": "#/$defs/identifier" },
+            "inheritEnvironmentTag": { "$ref": "#/$defs/identifier" },
+            "inheritTeamTag": { "$ref": "#/$defs/identifier" },
+            "activityLogDiagnostics": { "$ref": "#/$defs/identifier" }
+          }
+        },
+        "policyIdentityLifecycle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "locationBound", "mode", "reuseAcrossChangedRegion"],
+          "properties": {
+            "type": { "const": "SystemAssigned" },
+            "locationBound": { "const": true },
+            "mode": { "const": "cleanup-and-recreate" },
+            "reuseAcrossChangedRegion": { "const": false }
+          }
+        },
+        "stateKey": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]*\\.tfstate$"
+        },
+        "workspaceName": { "$ref": "#/$defs/identifier" },
+        "artifactRoot": {
+          "type": "string",
+          "pattern": "^\\.sslz/generated/[a-z0-9][a-z0-9./-]*$"
+        }
+      }
+    },
+    "writeStarted": { "type": "boolean" },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "status", "evidenceDigest", "completedAt", "summary"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "status": { "enum": ["not-required", "pending", "failed", "succeeded"] },
+        "evidenceDigest": { "$ref": "#/$defs/nullableDigest" },
+        "completedAt": {
+          "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
+        },
+        "summary": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 300 },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "failureEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "code",
+          "summary",
+          "occurredAt",
+          "diagnosticDigest",
+          "sanitized",
+          "sensitiveValuesRetained",
+          "evidenceDigest"
+        ],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1 },
+          "code": { "$ref": "#/$defs/code" },
+          "summary": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "occurredAt": { "type": "string", "format": "date-time" },
+          "diagnosticDigest": { "$ref": "#/$defs/digest" },
+          "sanitized": { "const": true },
+          "sensitiveValuesRetained": { "const": false },
+          "evidenceDigest": { "$ref": "#/$defs/digest" }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sequence", "status", "occurredAt", "evidenceDigest"],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1 },
+          "status": {
+            "enum": [
+              "planned",
+              "started",
+              "failed",
+              "cleanup-required",
+              "cleaned",
+              "replanned",
+              "succeeded"
+            ]
+          },
+          "occurredAt": { "type": "string", "format": "date-time" },
+          "evidenceDigest": { "$ref": "#/$defs/nullableDigest" }
+        }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "recordDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableDigest": {
+      "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    }
+  }
+}

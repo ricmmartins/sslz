@@ -21,6 +21,14 @@ for (const [name, provider] of [
   assert.match(source, /runs-on: \[self-hosted, sslz-deployment\]/);
   assert.match(source, /uses: actions\/checkout@v4\r?\n        with:\r?\n[\s\S]*?clean: false/);
   assert.match(source, /environment: \$\{\{ inputs\.environment \}\}/);
+  assert.match(source, /regional_attempt_chain:/);
+  assert.match(source, /regional_attempt_number:/);
+  assert.match(
+    source,
+    /group: deploy-regional-\$\{\{ inputs\.environment \}\}-\$\{\{ inputs\.regional_attempt_chain \}\}/,
+  );
+  assert.match(source, /manifest\.regionalAttempt\?\.chainId/);
+  assert.match(source, /manifest\.regionalAttempt\?\.attemptNumber/);
   assert.match(source, /GITHUB_REF.*refs\/heads\/main/);
   assert.match(source, new RegExp(`EXPECTED_PROVIDER: ${provider}`));
   assert.match(source, /startup-deployment-integration\.sh apply/);

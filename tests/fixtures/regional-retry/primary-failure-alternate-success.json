@@ -1,0 +1,16 @@
+{
+  "chainId": "startup-primary",
+  "planId": "startup-primary-baseline",
+  "provider": "bicep",
+  "environment": "nonprod",
+  "backendKeyPrefix": "startup-primary",
+  "originalRegion": "eastus2",
+  "alternateRegion": "centralus",
+  "timestamps": {
+    "planned": "2026-08-11T12:00:00Z",
+    "started": "2026-08-11T12:05:00Z",
+    "failed": "2026-08-11T12:06:00Z",
+    "cleaned": "2026-08-11T12:15:00Z",
+    "replanned": "2026-08-11T12:20:00Z"
+  }
+}

@@ -34,6 +34,12 @@ targetScope = 'subscription'
 @description('Primary Azure region for all resources')
 param location string
 
+@description('Deterministic suffix for a regional retry attempt; empty preserves first-attempt names')
+param regionalAttemptSuffix string = ''
+
+@description('Deterministic prefix for retry-owned policy assignments; empty preserves first-attempt names')
+param policyAssignmentPrefix string = ''
+
 @description('Company name used for naming resources (2-10 lowercase alphanumeric characters). Must be ≤ 10 characters — keep this short if using `azd env new`.')
 @minLength(2)
 @maxLength(10)
@@ -116,7 +122,7 @@ param tags object = {
 // Variables
 // ============================================================================
 
-var prefix = '${companyName}-${environment}'
+var prefix = '${companyName}-${environment}${regionalAttemptSuffix}'
 var rgMonitoring = 'rg-${prefix}-monitoring'
 var rgNetworking = 'rg-${prefix}-networking'
 var useExistingLogAnalyticsWorkspace = !empty(existingLogAnalyticsWorkspaceId)
@@ -191,7 +197,7 @@ resource rgNetworkingRes 'Microsoft.Resources/resourceGroups@2024-03-01' = if (d
 // ============================================================================
 
 module logAnalytics 'modules/log-analytics.bicep' = if (!useExistingLogAnalyticsWorkspace) {
-  name: 'deploy-log-analytics-${environment}'
+  name: 'deploy-log-analytics-${environment}${regionalAttemptSuffix}'
   scope: rgMonitoringRes
   params: {
     location: logAnalyticsWorkspaceLocation
@@ -207,7 +213,7 @@ module logAnalytics 'modules/log-analytics.bicep' = if (!useExistingLogAnalytics
 // ============================================================================
 
 module networking 'modules/networking.bicep' = if (deployNetworking) {
-  name: 'deploy-networking-${environment}'
+  name: 'deploy-networking-${environment}${regionalAttemptSuffix}'
   scope: rgNetworkingRes
   params: {
     location: location
@@ -224,7 +230,7 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
 // ============================================================================
 
 module defender 'modules/defender.bicep' = {
-  name: 'deploy-defender-${environment}'
+  name: 'deploy-defender-${environment}${regionalAttemptSuffix}'
   params: {
     enableDefenderForServers: enableDefenderForServers
     enableDefenderForContainers: enableDefenderForContainers
@@ -241,7 +247,7 @@ module defender 'modules/defender.bicep' = {
 // ============================================================================
 
 module budgets 'modules/budgets.bicep' = {
-  name: 'deploy-budgets-${environment}'
+  name: 'deploy-budgets-${environment}${regionalAttemptSuffix}'
   params: {
     budgetName: 'budget-${prefix}-monthly'
     amount: monthlyBudgetAmount
@@ -276,9 +282,10 @@ resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-previ
 // ============================================================================
 
 module policies 'modules/policy-assignments.bicep' = {
-  name: 'deploy-policies-${environment}'
+  name: 'deploy-policies-${environment}${regionalAttemptSuffix}'
   params: {
     location: location
+    policyAssignmentPrefix: policyAssignmentPrefix
     allowedLocations: allowedLocations
     logAnalyticsWorkspaceId: effectiveLogAnalyticsWorkspaceId
   }

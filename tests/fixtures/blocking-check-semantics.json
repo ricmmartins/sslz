@@ -532,6 +532,27 @@
       "source": "scripts/startup-container-apps-cool-plan.mjs",
       "passState": "pass",
       "blockingStates": ["present"]
+    },
+    {
+      "id": "regional.retry.binding-current",
+      "surface": "regional-attempt-ledger",
+      "source": "scripts/regional-attempt.mjs",
+      "passState": "current",
+      "blockingStates": ["missing", "stale", "mismatched", "replayed"]
+    },
+    {
+      "id": "regional.retry.cleanup-complete",
+      "surface": "regional-attempt-ledger",
+      "source": "scripts/regional-attempt.mjs",
+      "passState": "succeeded",
+      "blockingStates": ["required", "pending", "failed"]
+    },
+    {
+      "id": "regional.retry.provider-parity",
+      "surface": "regional-attempt-ledger",
+      "source": "scripts/regional-attempt.mjs",
+      "passState": "matched",
+      "blockingStates": ["missing", "mismatched"]
     }
   ]
 }

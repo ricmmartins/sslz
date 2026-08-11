@@ -332,7 +332,7 @@ separate approval:
 
 ```bash
 ./scripts/startup-provider-remediation.sh dry-run \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --action provider.register.prod.microsoft-app
 ```
 
@@ -350,7 +350,7 @@ artifact:
 
 ```bash
 ./scripts/startup-deployment-integration.sh preview \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --provider terraform \
   --environment nonprod \
   --terraform-auth oidc
