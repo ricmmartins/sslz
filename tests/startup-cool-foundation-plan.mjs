@@ -255,9 +255,10 @@ try {
     assert.match(source, /networking/i);
     assert.doesNotMatch(
       source,
-      /front\s*door|traffic\s*manager|global.?ingress|failover|postgres|container.?app|kubernetes|aks/i,
+      /front\s*door|traffic\s*manager|global.?ingress|failover|postgres|Microsoft\.App\/(managedEnvironments|containerApps)|kubernetes|aks/i,
     );
   }
+  assert.match(bicepSource, /output containerAppsSubnetId string/);
   assert.match(bicepSource, /parseCidr\(primaryVnetAddressPrefix\)/);
   assert.match(bicepSource, /parseCidr\(secondaryVnetAddressPrefix\)/);
   assert.match(

@@ -392,6 +392,125 @@
       "source": "scripts/startup-cool-foundation-plan.mjs",
       "passState": "pass",
       "blockingStates": ["present"]
+    },
+    {
+      "id": "cool.container-apps.mode-nonprod-only",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "production"]
+    },
+    {
+      "id": "cool.container-apps.foundation-bound",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "mutated", "replayed"]
+    },
+    {
+      "id": "cool.container-apps.attestations-current",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "stale", "future", "invalid"]
+    },
+    {
+      "id": "cool.container-apps.image-immutable",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["mutable", "unapproved"]
+    },
+    {
+      "id": "cool.container-apps.secrets-reference-only",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["material-present", "unversioned", "unresolved"]
+    },
+    {
+      "id": "cool.container-apps.identity-rbac-scoped",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["principal-mismatch", "role-mismatch", "scope-mismatch"]
+    },
+    {
+      "id": "cool.container-apps.network-profile-matched",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["region-mismatch", "profile-mismatch", "overlap"]
+    },
+    {
+      "id": "cool.container-apps.health-probes-approved",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mismatched", "unhealthy"]
+    },
+    {
+      "id": "cool.container-apps.configuration-parity",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "mismatched"]
+    },
+    {
+      "id": "cool.container-apps.observability-bound",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "workspace-mismatch", "category-missing"]
+    },
+    {
+      "id": "cool.container-apps.cost-within-ceiling",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "exceeded", "scale-mismatch"]
+    },
+    {
+      "id": "cool.container-apps.recovery-objectives-matched",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["rto-mismatch", "rpo-mismatch", "cadence-mismatch", "owner-mismatch"]
+    },
+    {
+      "id": "cool.container-apps.measured-recovery-met",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["not-measured", "unmet", "stale"]
+    },
+    {
+      "id": "cool.container-apps.artifacts-exact",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mutated", "replayed"]
+    },
+    {
+      "id": "cool.container-apps.provider-parity",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mismatched"]
+    },
+    {
+      "id": "cool.container-apps.execution-disabled",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["enabled"]
+    },
+    {
+      "id": "cool.container-apps.failover-capabilities-excluded",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["present"]
     }
   ]
 }

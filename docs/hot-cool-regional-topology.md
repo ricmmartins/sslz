@@ -74,11 +74,13 @@ but it does not replace per-service availability and recovery validation.
 | Mode | Secondary baseline | Application compute | Data | Traffic |
 |---|---|---|---|---|
 | `single-region-ready` | Validated regional plan | Not deployed | Backup or service default | Primary only |
-| `cool-infrastructure` | Nonprod foundation plan only | Not deployed | Not configured | Not configured |
+| `cool-infrastructure` | Nonprod foundation plan | Profile representation optional, never executed | Not configured | Not configured |
 | `warm-workload` | Baseline deployed | Minimum healthy scale | Online replica | Manual or automatic |
 
 `single-region-ready` is the only currently executable production option. Phase 7 uses `cool-infrastructure` only to
 prepare a guarded, nonproduction secondary networking and observability foundation; execution remains disabled.
+The additive `cool-container-apps` profile can now represent an internal minimum footprint for validation, but it has no
+executor and does not change this mode's production or traffic boundary.
 `warm-workload` requires later service-specific modules and recovery tests.
 
 ## Baseline in each region
@@ -210,6 +212,12 @@ review, cost, recovery-objective, exercise, and exact artifact-digest evidence. 
 workload, data recovery, health, traffic, and rollback semantics. A separate, explicit execution change must then
 review the deployment boundary; until that happens, Phase 6 continues to reject every secondary or
 `cool-infrastructure` preview/apply request.
+
+The first Container Apps profile increment binds immutable image digests, single-revision configuration, versioned Key
+Vault references, managed identity and exact RBAC scope, a dedicated nondelegated `/23` subnet, scale-to-zero or one-idle
+cost assumptions, all three health probe types, configuration parity, workspace diagnostics, rollback, and cleanup.
+Its checked-in measured-recovery result is intentionally `not-measured`; it cannot become review-ready from targets or
+attestations alone and never constitutes evidence of end-to-end recovery.
 
 ## Official guidance
 

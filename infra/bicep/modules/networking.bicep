@@ -47,6 +47,10 @@ var subnets = {
     name: 'snet-shared'
     addressPrefix: '${baseOctet}.${secondOctet}.24.0/24'    // 10.x.24.0/24
   }
+  containerApps: {
+    name: 'snet-container-apps'
+    addressPrefix: '${baseOctet}.${secondOctet}.32.0/23'    // 10.x.32.0/23
+  }
 }
 
 // ============================================================================
@@ -197,6 +201,55 @@ resource nsgShared 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
   }
 }
 
+resource nsgContainerApps 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: 'nsg-${subnets.containerApps.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAzureLoadBalancerInbound'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'AllowVNetInbound'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'VirtualNetwork'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
 // ============================================================================
 // VNet with Subnets
 // ============================================================================
@@ -246,6 +299,13 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
           networkSecurityGroup: { id: nsgShared.id }
         }
       }
+      {
+        name: subnets.containerApps.name
+        properties: {
+          addressPrefix: subnets.containerApps.addressPrefix
+          networkSecurityGroup: { id: nsgContainerApps.id }
+        }
+      }
     ]
   }
 }
@@ -260,3 +320,4 @@ output aksSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnet
 output appSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.app.name)
 output dataSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.data.name)
 output sharedSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.shared.name)
+output containerAppsSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.containerApps.name)

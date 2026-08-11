@@ -1,0 +1,596 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/container-apps-cool-profile-input.schema.json",
+  "title": "SSLZ nonproduction Container Apps cool profile input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "classification",
+    "profileId",
+    "environment",
+    "foundationBinding",
+    "configuration",
+    "attestations",
+    "recovery",
+    "cost",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "classification": {
+      "const": "provisional-noncritical-nonprod-planning-example"
+    },
+    "profileId": {
+      "const": "container-apps"
+    },
+    "environment": {
+      "const": "nonprod"
+    },
+    "foundationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planId",
+        "planDigest",
+        "readinessEvidenceDigest",
+        "subscriptionId",
+        "secondaryRegion",
+        "primaryScope",
+        "secondaryScope",
+        "primaryVnetCidr",
+        "secondaryVnetCidr",
+        "vnetResourceId",
+        "infrastructureSubnetResourceId",
+        "logAnalyticsWorkspaceResourceId",
+        "terraformStateKey"
+      ],
+      "properties": {
+        "planId": {
+          "$ref": "#/$defs/id"
+        },
+        "planDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "readinessEvidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "subscriptionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "secondaryRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "primaryScope": {
+          "$ref": "#/$defs/resourceId"
+        },
+        "secondaryScope": {
+          "$ref": "#/$defs/resourceId"
+        },
+        "primaryVnetCidr": {
+          "$ref": "#/$defs/cidr"
+        },
+        "secondaryVnetCidr": {
+          "$ref": "#/$defs/cidr"
+        },
+        "vnetResourceId": {
+          "$ref": "#/$defs/resourceId"
+        },
+        "infrastructureSubnetResourceId": {
+          "$ref": "#/$defs/resourceId"
+        },
+        "logAnalyticsWorkspaceResourceId": {
+          "$ref": "#/$defs/resourceId"
+        },
+        "terraformStateKey": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+-nonprod-secondary-container-apps\\.tfstate$"
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resourceGroupName",
+        "managedEnvironmentName",
+        "containerAppName",
+        "revisionMode",
+        "image",
+        "targetPort",
+        "transport",
+        "ingressExternal",
+        "minReplicas",
+        "maxReplicas",
+        "cpu",
+        "memory",
+        "managedIdentity",
+        "keyVault",
+        "secretReferences",
+        "secretEnvironmentVariables",
+        "roleAssignments",
+        "probes",
+        "observability"
+      ],
+      "properties": {
+        "resourceGroupName": {
+          "type": "string",
+          "pattern": "^rg-[a-z0-9-]+-nonprod-cool-[a-z0-9]+-container-apps$"
+        },
+        "managedEnvironmentName": {
+          "$ref": "#/$defs/name"
+        },
+        "containerAppName": {
+          "$ref": "#/$defs/name"
+        },
+        "revisionMode": {
+          "const": "Single"
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^[a-z0-9.-]+/[a-z0-9._/-]+@sha256:[0-9a-f]{64}$"
+        },
+        "targetPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "transport": {
+          "enum": ["auto", "http", "http2", "tcp"]
+        },
+        "ingressExternal": {
+          "const": false
+        },
+        "minReplicas": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "cpu": {
+          "enum": [0.25, 0.5, 0.75, 1]
+        },
+        "memory": {
+          "enum": ["0.5Gi", "1Gi", "1.5Gi", "2Gi"]
+        },
+        "managedIdentity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "resourceId", "principalId"],
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/name"
+            },
+            "resourceId": {
+              "$ref": "#/$defs/resourceId"
+            },
+            "principalId": {
+              "$ref": "#/$defs/uuid"
+            }
+          }
+        },
+        "keyVault": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["resourceId", "subscriptionId", "resourceGroupName", "name"],
+          "properties": {
+            "resourceId": {
+              "$ref": "#/$defs/resourceId"
+            },
+            "subscriptionId": {
+              "$ref": "#/$defs/uuid"
+            },
+            "resourceGroupName": {
+              "$ref": "#/$defs/name"
+            },
+            "name": {
+              "$ref": "#/$defs/name"
+            }
+          }
+        },
+        "secretReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "keyVaultSecretUri", "identityResourceId"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{1,31}$"
+              },
+              "keyVaultSecretUri": {
+                "type": "string",
+                "pattern": "^https://[a-z0-9-]+\\.vault\\.azure\\.net/secrets/[A-Za-z0-9-]+/[0-9a-f]{32}$"
+              },
+              "identityResourceId": {
+                "$ref": "#/$defs/resourceId"
+              }
+            }
+          }
+        },
+        "secretEnvironmentVariables": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "secretRef"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]{1,63}$"
+              },
+              "secretRef": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{1,31}$"
+              }
+            }
+          }
+        },
+        "roleAssignments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["principalId", "roleDefinitionId", "scope"],
+            "properties": {
+              "principalId": {
+                "$ref": "#/$defs/uuid"
+              },
+              "roleDefinitionId": {
+                "$ref": "#/$defs/roleDefinitionId"
+              },
+              "scope": {
+                "$ref": "#/$defs/resourceId"
+              }
+            }
+          }
+        },
+        "probes": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "transport",
+              "path",
+              "port",
+              "initialDelaySeconds",
+              "intervalSeconds",
+              "timeoutSeconds",
+              "failureThreshold"
+            ],
+            "properties": {
+              "type": {
+                "enum": ["Startup", "Readiness", "Liveness"]
+              },
+              "transport": {
+                "const": "HTTP"
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^/[A-Za-z0-9/_-]*$"
+              },
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "initialDelaySeconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 120
+              },
+              "intervalSeconds": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 60
+              },
+              "timeoutSeconds": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "failureThreshold": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              }
+            }
+          }
+        },
+        "observability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["diagnosticSettingName", "logAnalyticsWorkspaceResourceId", "requiredLogCategories"],
+          "properties": {
+            "diagnosticSettingName": {
+              "$ref": "#/$defs/name"
+            },
+            "logAnalyticsWorkspaceResourceId": {
+              "$ref": "#/$defs/resourceId"
+            },
+            "requiredLogCategories": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "enum": ["ContainerAppConsoleLogs", "ContainerAppSystemLogs"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "attestations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issuedAt",
+        "expiresAt",
+        "image",
+        "configurationParity",
+        "identityRbac",
+        "networking",
+        "health",
+        "observability"
+      ],
+      "properties": {
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "image": {
+          "$ref": "#/$defs/attestation"
+        },
+        "configurationParity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reference", "evidenceDigest", "primaryDigest", "secondaryDigest"],
+          "properties": {
+            "status": {
+              "enum": ["approved", "pending", "rejected"]
+            },
+            "reference": {
+              "$ref": "#/$defs/reference"
+            },
+            "evidenceDigest": {
+              "$ref": "#/$defs/digest"
+            },
+            "primaryDigest": {
+              "$ref": "#/$defs/digest"
+            },
+            "secondaryDigest": {
+              "$ref": "#/$defs/digest"
+            }
+          }
+        },
+        "identityRbac": {
+          "$ref": "#/$defs/attestation"
+        },
+        "networking": {
+          "$ref": "#/$defs/attestation"
+        },
+        "health": {
+          "$ref": "#/$defs/attestation"
+        },
+        "observability": {
+          "$ref": "#/$defs/attestation"
+        }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetRtoMinutes",
+        "targetRpoMinutes",
+        "exerciseCadence",
+        "accountableRoleReference",
+        "measuredResult"
+      ],
+      "properties": {
+        "targetRtoMinutes": {
+          "const": 240
+        },
+        "targetRpoMinutes": {
+          "const": 60
+        },
+        "exerciseCadence": {
+          "const": "quarterly"
+        },
+        "accountableRoleReference": {
+          "const": "Platform Operations Owner"
+        },
+        "measuredResult": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reference", "evidenceDigest", "measuredAt", "measuredRtoMinutes", "measuredRpoMinutes"],
+          "properties": {
+            "status": {
+              "enum": ["not-measured", "met", "unmet"]
+            },
+            "reference": {
+              "$ref": "#/$defs/reference"
+            },
+            "evidenceDigest": {
+              "$ref": "#/$defs/digest"
+            },
+            "measuredAt": {
+              "type": ["string", "null"],
+              "format": "date-time"
+            },
+            "measuredRtoMinutes": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            },
+            "measuredRpoMinutes": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reference",
+        "evidenceDigest",
+        "currency",
+        "primaryMonthlyCost",
+        "projectedMonthlyCost",
+        "ceilingPercent",
+        "minimumScaleAssumption"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["confirmed", "pending", "rejected"]
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "primaryMonthlyCost": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "projectedMonthlyCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ceilingPercent": {
+          "const": 30
+        },
+        "minimumScaleAssumption": {
+          "enum": ["scale-to-zero", "one-idle-replica"]
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "azureOperations",
+        "providerRegistration",
+        "productionExecution",
+        "globalIngress",
+        "dnsCutover",
+        "dataReplication",
+        "dataFailover"
+      ],
+      "properties": {
+        "executionEnabled": {
+          "const": false
+        },
+        "azureOperations": {
+          "const": "none"
+        },
+        "providerRegistration": {
+          "const": false
+        },
+        "productionExecution": {
+          "const": false
+        },
+        "globalIngress": {
+          "const": false
+        },
+        "dnsCutover": {
+          "const": false
+        },
+        "dataReplication": {
+          "const": false
+        },
+        "dataFailover": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,62}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "cidr": {
+      "type": "string",
+      "pattern": "^\\d{1,3}(?:\\.\\d{1,3}){3}/\\d{1,2}$"
+    },
+    "resourceId": {
+      "type": "string",
+      "pattern": "^/subscriptions/[0-9a-f-]+/resourceGroups/[A-Za-z0-9._()-]+/providers/[A-Za-z0-9.]+/[A-Za-z0-9._()/-]+$"
+    },
+    "roleDefinitionId": {
+      "type": "string",
+      "pattern": "^/subscriptions/[0-9a-f-]+/providers/Microsoft\\.Authorization/roleDefinitions/[0-9a-f-]{36}$"
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reference", "evidenceDigest"],
+      "properties": {
+        "status": {
+          "enum": ["approved", "confirmed", "pass", "pending", "rejected", "fail"]
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    }
+  }
+}
