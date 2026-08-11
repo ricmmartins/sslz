@@ -12,6 +12,20 @@ description: "Design proposal for agent-assisted Azure account and SSLZ setup"
 Phases 1-7 are implemented as additive wrappers around the existing SSLZ deployment flow. The account topology path
 described below is read-only and does not change Azure.
 
+## Acceptance-gap context
+
+The one-subscription and billing-benefit scenario was observed while the existing SSLZ baseline was exercised through a
+generic agent interaction. That interaction did not intentionally invoke the startup preflight, workload, regional,
+readiness, IaC, or signed-approval commands. It is therefore an acceptance-gap hardening input for the agent-aware flow,
+not evidence that those commands regressed.
+
+Before this hardening, the agent-aware flow already provided deterministic checks, catalog-driven blockers, current
+readiness evidence, canonical plan digests, immutable deployment manifests, signed single-use approvals, replay
+resistance, and live tenant/subscription validation. The genuine gaps were narrower: Phase 1 required a separate
+prod/nonprod pair, did not publish a versioned subscription/billing topology decision, and could not bind an external
+benefit-association confirmation to that exact decision. The topology contract and bindings below close only those gaps;
+they do not replace or duplicate the existing workload, regional, IaC, or deployment controls.
+
 ## Goal
 
 Help an early-stage startup move from redeemed Azure credits to a reviewed SSLZ deployment plan without requiring
