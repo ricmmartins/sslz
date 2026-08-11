@@ -177,6 +177,27 @@
       "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
     },
     {
+      "id": "readiness.review.security-approved",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/security/"
+    },
+    {
+      "id": "readiness.review.azure-architecture-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/architect-role/"
+    },
+    {
+      "id": "readiness.review.iac-parity-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
       "id": "readiness.failover.owner-confirmed",
       "category": "operations",
       "severity": "blocking",

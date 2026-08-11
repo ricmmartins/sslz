@@ -71,7 +71,7 @@
       "required": ["version", "id", "digest", "expiresAt"],
       "properties": {
         "version": {
-          "const": "1.0.0"
+          "const": "2.0.0"
         },
         "id": {
           "$ref": "#/$defs/reference"

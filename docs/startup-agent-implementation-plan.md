@@ -295,8 +295,8 @@ deployment.
 
 ## Phase 6: Existing SSLZ deployment integration
 
-**Status:** Implemented as a standalone signed-approval path for one existing primary Bicep or Terraform platform
-baseline. Existing manual workflows remain unchanged.
+**Status:** Implemented as the signed-approval path for one existing primary Bicep or Terraform platform baseline.
+Provider deployment workflows are dispatch-only Phase 6 wrappers; PR and push workflows remain validation-only.
 
 **Purpose:** call the current Bicep or Terraform path after checks and approval.
 
@@ -315,7 +315,7 @@ baseline. Existing manual workflows remain unchanged.
 **Acceptance:**
 
 - manual and agent paths produce the same platform configuration;
-- existing manual workflows still work without agent files;
+- deployment workflows fail closed without the readiness-bound Phase 4 plan, reviewed manifest, and signed approval;
 - integration test deploys, validates, and tears down in nonprod;
 - rollback guidance is attached to the result.
 

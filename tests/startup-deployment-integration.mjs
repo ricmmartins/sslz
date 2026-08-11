@@ -2009,7 +2009,7 @@ try {
     planVersion: "2.0.0",
     planId: "other-plan",
     planDigest: `sha256:${"c".repeat(64)}`,
-    readinessEvidenceVersion: "2.0.0",
+    readinessEvidenceVersion: "9.0.0",
     readinessEvidenceId: "readiness.other-plan.001",
     readinessEvidenceDigest: `sha256:${"9".repeat(64)}`,
     readinessEvidenceExpiresAt: "2026-08-09T11:59:59Z",
@@ -3107,10 +3107,15 @@ try {
   );
   assert.match(bicepWorkflow, /workflow_dispatch:/);
   assert.match(terraformWorkflow, /workflow_dispatch:/);
-  assert.doesNotMatch(
-    `${bicepWorkflow}\n${terraformWorkflow}`,
-    /startup-deployment-integration/,
-  );
+  for (const workflow of [bicepWorkflow, terraformWorkflow]) {
+    assert.match(workflow, /startup-deployment-integration\.sh apply/);
+    assert.match(workflow, /--manifest "\$MANIFEST_PATH"/);
+    assert.match(workflow, /--approval "\$APPROVAL_PATH"/);
+    assert.match(workflow, /runs-on: \[self-hosted, sslz-deployment\]/);
+    assert.doesNotMatch(workflow, /^  (?:push|pull_request|schedule):/m);
+    assert.doesNotMatch(workflow, /\baz deployment sub create\b/);
+    assert.doesNotMatch(workflow, /\bterraform apply\b/);
+  }
 
   const source = readFileSync(script, "utf8");
   assert.doesNotMatch(

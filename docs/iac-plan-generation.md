@@ -9,9 +9,9 @@ description: "Digest-bound local Bicep and Terraform review inputs"
 
 ## Purpose
 
-Phase 4 converts a ready workload profile and eligible regional recommendation into reviewable inputs for the
-existing SSLZ Bicep and Terraform roots. It does not add workload modules, change the manual deployment workflows, or
-run an Azure or Terraform write operation.
+Phase 4 converts a ready workload profile and eligible regional recommendation into reviewable inputs for the existing
+SSLZ Bicep and Terraform roots. It does not add workload modules or run an Azure or Terraform write operation. The
+dispatch-only deployment workflows consume Phase 4 output only through the signed Phase 6 integration.
 
 The input and output contracts are:
 

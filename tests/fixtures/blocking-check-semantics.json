@@ -1,0 +1,292 @@
+{
+  "schemaVersion": "1.0.0",
+  "checks": [
+    {
+      "id": "account.authentication.active",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "account.subscription.explicit-selection",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "account.subscription.tenant-match",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "identity.secondary-admin.present",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "identity.company-domain.verified",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "identity.deployment-role.sufficient",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "billing.startup-credit.context-visible",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "unknown", "error"]
+    },
+    {
+      "id": "billing.subscription.credit-association",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "unknown", "error"]
+    },
+    {
+      "id": "account.provider.required-registrations",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "quota.workload.headroom",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.services.available",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.policy.allowed-locations",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.availability-zones.supported",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.skus.eligible",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "capacity.workload.available",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.foundry-model.available",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.data-residency.compatible",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "network.regional-address-space.non-overlapping",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "security.defender.selection-reviewed",
+      "surface": "workload-planner",
+      "source": "agent/profiles/container-apps.json",
+      "passState": "reviewed",
+      "blockingStates": ["pending", "rejected"]
+    },
+    {
+      "id": "operations.monitoring.destination-valid",
+      "surface": "workload-planner",
+      "source": "agent/profiles/container-apps.json",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "operations.aks-owner.confirmed",
+      "surface": "workload-planner",
+      "source": "agent/profiles/aks.json",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected"]
+    },
+    {
+      "id": "workload.managed-model-fit.reviewed",
+      "surface": "workload-planner",
+      "source": "agent/profiles/foundry.json",
+      "passState": "reviewed",
+      "blockingStates": ["pending", "rejected"]
+    },
+    {
+      "id": "workload.profile.requirements-supported",
+      "surface": "workload-planner",
+      "source": "scripts/startup-workload-plan.mjs",
+      "passState": "supported",
+      "blockingStates": ["unsupported", "unresolved"]
+    },
+    {
+      "id": "readiness.preflight.authoritative",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "stale", "missing"]
+    },
+    {
+      "id": "readiness.support.startup-confirmed",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.review.security-approved",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "approved",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.review.azure-architecture-approved",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "approved",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.review.iac-parity-approved",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "approved",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.failover.owner-confirmed",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "readiness.recovery.objectives-measured",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "met",
+      "blockingStates": ["unmet", "not-measured", "stale"]
+    },
+    {
+      "id": "readiness.recovery.service-tested",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-tested", "stale"]
+    },
+    {
+      "id": "readiness.cost.cool-footprint-provenance",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "readiness.region.evidence-current",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "missing", "stale"]
+    },
+    {
+      "id": "readiness.foundry.deployment-quota-current",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "missing", "stale"]
+    },
+    {
+      "id": "deployment.platform.expected-resources",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.monitoring",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.activity-log-forwarding",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.policy",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.defender",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.budget",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.networking",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    }
+  ]
+}

@@ -9,9 +9,10 @@ description: "Signed single-use approval for one immutable existing SSLZ platfor
 
 ## Purpose
 
-Phase 6 is a standalone integration over the existing `infra/bicep` and `infra/terraform` roots. It does not modify the
-manual workflows, deploy workload modules, register providers, change roles outside the existing root, or add a second
-region. Only an approved primary `single-region-ready` platform baseline is executable.
+Phase 6 is the only landing-zone write path exposed by `deploy-bicep.yml` and `deploy-terraform.yml`. Both workflows are
+manual-dispatch-only wrappers over the existing `infra/bicep` and `infra/terraform` roots and require protected
+self-hosted runners. Phase 6 does not deploy workload modules, register providers, change roles outside the existing
+root, or add a second region. Only an approved primary `single-region-ready` platform baseline is executable.
 
 The versioned contracts are:
 
@@ -180,6 +181,10 @@ approval, records a rollback-review code, and performs no workload deployment or
 sanitized result, correct the platform or revert the existing IaC, then create a new Phase 4 plan, manifest, and
 approval.
 
+The repository's separate integration-test apply is limited to a dedicated disposable subscription and
+`integration-nonprod` environment. Its Terraform destroy step runs after every started apply, including partial apply
+failure. Cleanup is reported separately and never replaces the original apply diagnostic.
+
 ## Privilege and rollback boundaries
 
 Grant only the permissions already required by the selected SSLZ root at the exact target subscription, plus read
@@ -187,6 +192,6 @@ access for the postchecks and remote Terraform backend. Phase 6 never creates an
 billing or entitlements, registers features or providers, unregisters providers, verifies domains, or runs arbitrary
 commands.
 
-Disable the integration by removing access to `startup-deployment-integration.sh`. The existing
-`deploy-bicep.yml`, `deploy-terraform.yml`, and documented manual commands remain unchanged and usable without any
-agent artifact.
+Disable deployment by removing the `sslz-deployment` runner label or access to
+`startup-deployment-integration.sh`. There is no direct workflow fallback: a new write requires a current Phase 4 v3
+plan, readiness evidence, reviewed immutable manifest, and matching signed single-use approval.

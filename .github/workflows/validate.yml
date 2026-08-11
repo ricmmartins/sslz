@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'agent/**'
+      - '.github/workflows/**'
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
@@ -21,6 +22,7 @@ on:
     branches: [main]
     paths:
       - 'agent/**'
+      - '.github/workflows/**'
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
@@ -46,6 +48,12 @@ jobs:
 
       - name: Validate schemas, catalog, and examples
         run: node scripts/validate-agent-contracts.mjs
+
+      - name: Test blocking-check catalog coverage
+        run: node tests/blocking-check-catalog.mjs
+
+      - name: Test deployment workflow gates
+        run: node tests/deployment-workflow-gates.mjs
 
       - name: Test read-only startup preflight
         run: node tests/startup-preflight.mjs

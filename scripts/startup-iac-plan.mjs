@@ -51,6 +51,57 @@ const PLACEHOLDER_SECURITY_CONTACT = "security-alerts@example.invalid";
 const SAFE_NOTIFICATION_EMAIL =
   /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
 const SUPPORTED_PROVIDERS = new Set(["bicep", "terraform"]);
+const READINESS_CHECK_IDS = {
+  preflight: "readiness.preflight.authoritative",
+  support: "readiness.support.startup-confirmed",
+  securityReview: "readiness.review.security-approved",
+  architectureReview: "readiness.review.azure-architecture-approved",
+  parityReview: "readiness.review.iac-parity-approved",
+  failoverOwner: "readiness.failover.owner-confirmed",
+  recoveryObjectives: "readiness.recovery.objectives-measured",
+  serviceRecovery: "readiness.recovery.service-tested",
+  coolCost: "readiness.cost.cool-footprint-provenance",
+  region: "readiness.region.evidence-current",
+  foundry: "readiness.foundry.deployment-quota-current",
+};
+const READINESS_ERROR_CHECK_IDS = new Map([
+  ["readiness.evidence.required", READINESS_CHECK_IDS.preflight],
+  ["readiness.evidence.blocked", READINESS_CHECK_IDS.preflight],
+  ["readiness.evidence.digest-mismatch", READINESS_CHECK_IDS.preflight],
+  ["readiness.evidence.stale", READINESS_CHECK_IDS.preflight],
+  ["readiness.evidence.scope-mismatch", READINESS_CHECK_IDS.preflight],
+  ["readiness.preflight.blocked", READINESS_CHECK_IDS.preflight],
+  ["readiness.support.confirmation-required", READINESS_CHECK_IDS.support],
+  ["readiness.review.security-approved", READINESS_CHECK_IDS.securityReview],
+  [
+    "readiness.review.azure-architecture-approved",
+    READINESS_CHECK_IDS.architectureReview,
+  ],
+  ["readiness.review.iac-parity-approved", READINESS_CHECK_IDS.parityReview],
+  ["readiness.failover.owner-required", READINESS_CHECK_IDS.failoverOwner],
+  [
+    "readiness.recovery.measurement-required",
+    READINESS_CHECK_IDS.recoveryObjectives,
+  ],
+  ["readiness.recovery.target-required", READINESS_CHECK_IDS.recoveryObjectives],
+  ["readiness.recovery.objective-unmet", READINESS_CHECK_IDS.recoveryObjectives],
+  [
+    "readiness.recovery.service-test-required",
+    READINESS_CHECK_IDS.serviceRecovery,
+  ],
+  [
+    "readiness.recovery.service-test-failed",
+    READINESS_CHECK_IDS.serviceRecovery,
+  ],
+  ["readiness.cost.provenance-required", READINESS_CHECK_IDS.coolCost],
+  ["readiness.cost.range-invalid", READINESS_CHECK_IDS.coolCost],
+  ["readiness.cost.scope-mismatch", READINESS_CHECK_IDS.coolCost],
+  ["readiness.region.scope-mismatch", READINESS_CHECK_IDS.region],
+  ["readiness.region.blocked", READINESS_CHECK_IDS.region],
+  ["readiness.foundry.evidence-required", READINESS_CHECK_IDS.foundry],
+  ["readiness.foundry.blocked", READINESS_CHECK_IDS.foundry],
+  ["readiness.foundry.scope-mismatch", READINESS_CHECK_IDS.foundry],
+]);
 
 function load(relativePath) {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8"));
@@ -64,9 +115,10 @@ const readinessEvidenceSchema = load(
 );
 
 class ReadinessEvidenceError extends Error {
-  constructor(code, message) {
+  constructor(code, message, checkId) {
     super(message);
     this.code = code;
+    this.checkId = checkId ?? READINESS_ERROR_CHECK_IDS.get(code) ?? code;
   }
 }
 
@@ -110,11 +162,17 @@ function readinessEvidenceDigest(evidence) {
     .digest("hex")}`;
 }
 
-function readinessFail(code, message) {
-  throw new ReadinessEvidenceError(code, message);
+function readinessFail(code, message, checkId) {
+  throw new ReadinessEvidenceError(code, message, checkId);
 }
 
-function assertEvidenceCurrent(item, evaluatedAt, label, timestampField) {
+function assertEvidenceCurrent(
+  item,
+  evaluatedAt,
+  label,
+  timestampField,
+  checkId = READINESS_CHECK_IDS.preflight,
+) {
   const observedAt = Date.parse(item[timestampField]);
   const expiresAt = Date.parse(item.expiresAt);
   if (
@@ -127,6 +185,7 @@ function assertEvidenceCurrent(item, evaluatedAt, label, timestampField) {
     readinessFail(
       "readiness.evidence.stale",
       `${label} is future-dated, stale, expired, or has an invalid freshness window.`,
+      checkId,
     );
   }
 }
@@ -213,16 +272,62 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
     evaluatedAt,
     "Microsoft for Startups billing and support confirmation",
     "attestedAt",
+    READINESS_CHECK_IDS.support,
   );
-  if (support.status !== "confirmed") {
+  if (
+    support.attestationVersion !== "1.0.0" ||
+    support.status !== "confirmed"
+  ) {
     readinessFail(
       "readiness.support.confirmation-required",
       "An explicit current Microsoft for Startups billing and support confirmation is required.",
     );
   }
 
+  const reviewGates = [
+    {
+      evidence: evidence.humanAttestations.externalReviews.security,
+      label: "Security review",
+      code: "readiness.review.security-approved",
+    },
+    {
+      evidence: evidence.humanAttestations.externalReviews.azureArchitecture,
+      label: "Azure architecture review",
+      code: "readiness.review.azure-architecture-approved",
+    },
+    {
+      evidence: evidence.humanAttestations.externalReviews.iacParity,
+      label: "Bicep/Terraform parity review",
+      code: "readiness.review.iac-parity-approved",
+    },
+  ];
+  for (const review of reviewGates) {
+    assertEvidenceCurrent(
+      review.evidence,
+      evaluatedAt,
+      review.label,
+      "attestedAt",
+      READINESS_ERROR_CHECK_IDS.get(review.code),
+    );
+    if (
+      review.evidence.attestationVersion !== "1.0.0" ||
+      review.evidence.status !== "approved"
+    ) {
+      readinessFail(
+        review.code,
+        `${review.label} requires an explicit current approved attestation reference.`,
+      );
+    }
+  }
+
   const owner = evidence.humanAttestations.failoverOwner;
-  assertEvidenceCurrent(owner, evaluatedAt, "Failover owner attestation", "attestedAt");
+  assertEvidenceCurrent(
+    owner,
+    evaluatedAt,
+    "Failover owner attestation",
+    "attestedAt",
+    READINESS_CHECK_IDS.failoverOwner,
+  );
   if (
     owner.status !== "confirmed" ||
     !owner.ownerReference ||
@@ -260,6 +365,7 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
       evaluatedAt,
       `Recovery measurement for ${measurement.profileId}`,
       "attestedAt",
+      READINESS_CHECK_IDS.recoveryObjectives,
     );
     if (
       measurement.status !== "met" ||
@@ -289,6 +395,7 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
       evaluatedAt,
       `Recovery test for ${test.profileExtension}`,
       "attestedAt",
+      READINESS_CHECK_IDS.serviceRecovery,
     );
     if (test.status !== "pass") {
       readinessFail(
@@ -316,6 +423,7 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
       evaluatedAt,
       `${item.role} regional evidence`,
       "observedAt",
+      READINESS_CHECK_IDS.region,
     );
     if (item.status !== "pass") {
       readinessFail(
@@ -333,7 +441,13 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
         "Cool-infrastructure readiness requires a current cost range and provenance reference.",
       );
     }
-    assertEvidenceCurrent(cost, evaluatedAt, "Cool-footprint cost attestation", "attestedAt");
+    assertEvidenceCurrent(
+      cost,
+      evaluatedAt,
+      "Cool-footprint cost attestation",
+      "attestedAt",
+      READINESS_CHECK_IDS.coolCost,
+    );
     if (
       cost.status !== "confirmed" ||
       !cost.provenanceReference ||
@@ -377,6 +491,7 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
         evaluatedAt,
         `${item.role} Foundry evidence`,
         "observedAt",
+        READINESS_CHECK_IDS.foundry,
       );
       if (
         item.status !== "pass" ||

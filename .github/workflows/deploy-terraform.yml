@@ -1,267 +1,86 @@
-# PREREQUISITE: Configure a remote backend in infra/terraform/main.tf before
-# using this workflow. Without a remote backend, Terraform state is lost between
-# runs and apply will attempt to recreate all resources.
-#
-# OIDC tokens from azure/login@v2 are valid for ~1 hour. Each job performs its
-# own fresh login, so token expiry is not a concern for typical deployments.
 name: Deploy Landing Zone (Terraform)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'infra/terraform/**'
-      - '!infra/terraform/.terraform.lock.hcl'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'infra/terraform/**'
-      - '!infra/terraform/.terraform.lock.hcl'
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: 'GitHub Environment and approved target'
         required: true
         type: choice
         options:
-          - prod
           - nonprod
+          - prod
+      plan_path:
+        description: 'Protected runner path to the approved Phase 4 plan'
+        required: true
+        type: string
+      manifest_path:
+        description: 'Protected runner path to the reviewed Phase 6 manifest'
+        required: true
+        type: string
+      approval_path:
+        description: 'Protected runner path to the signed Phase 6 approval'
+        required: true
+        type: string
 
 permissions:
   id-token: write
   contents: read
-  pull-requests: write
 
 concurrency:
-  group: deploy-terraform-${{ github.ref }}
+  group: deploy-terraform-${{ inputs.environment }}
   cancel-in-progress: false
 
-env:
-  TF_DIR: infra/terraform
-  ARM_USE_OIDC: true
-
 jobs:
-  plan:
-    name: Terraform Plan (${{ matrix.environment }})
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.environment)) || fromJSON('["nonprod","prod"]') }}
+  apply-approved-baseline:
+    name: Apply approved Terraform baseline
+    runs-on: [self-hosted, sslz-deployment]
+    environment: ${{ inputs.environment }}
+    env:
+      PLAN_PATH: ${{ inputs.plan_path }}
+      MANIFEST_PATH: ${{ inputs.manifest_path }}
+      APPROVAL_PATH: ${{ inputs.approval_path }}
+      EXPECTED_ENVIRONMENT: ${{ inputs.environment }}
+      EXPECTED_PROVIDER: terraform
+      SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE: ${{ vars.SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE }}
+      SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE: ${{ vars.SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE }}
+      SSLZ_TERRAFORM_EXECUTABLE: ${{ vars.SSLZ_TERRAFORM_EXECUTABLE }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "~> 1.9"
+          # Phase 6 binds the fixed protected replay store beneath this checkout.
+          clean: false
+
+      - name: Enforce protected dispatch context
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Approved deployments must be dispatched from main."
+            exit 1
+          fi
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const manifest = JSON.parse(readFileSync(process.env.MANIFEST_PATH, "utf8"));
+            if (manifest.execution?.provider !== process.env.EXPECTED_PROVIDER ||
+                manifest.execution?.environment !== process.env.EXPECTED_ENVIRONMENT) {
+              throw new Error("The reviewed manifest does not match this provider and environment dispatch.");
+            }
+          '
 
       - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+          subscription-id: ${{ inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
 
-      - name: Terraform Init
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+      - name: Apply signed Phase 6 approval
+        shell: bash
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            # PRs validate a read-only, state-independent plan when the shared
-            # backend is unavailable to the pull-request runner.
-            sed -i '/^  backend "azurerm" {$/,/^  }$/d' main.tf
-            terraform init -backend=false
-          else
-            terraform init \
-              -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
-              -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
-              -backend-config="key=landing-zone-${{ matrix.environment }}.tfstate"
-          fi
-
-      - name: Set Terraform variables
-        run: |
-          echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
-          # Convert comma-separated emails to HCL list format
-          RAW_EMAILS="${{ vars.BUDGET_ALERT_EMAILS }}"
-          if [ -n "$RAW_EMAILS" ]; then
-            HCL_LIST=$(echo "$RAW_EMAILS" | sed 's/[[:space:]]*,[[:space:]]*/","/g; s/^/["/; s/$/"]/')
-            echo "TF_VAR_budget_alert_emails=$HCL_LIST" >> "$GITHUB_ENV"
-          fi
-
-      - name: Terraform Plan
-        id: plan
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ matrix.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-          TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
-          COMPANY_NAME: ${{ vars.COMPANY_NAME || 'mycompany' }}
-          ENVIRONMENT: ${{ matrix.environment }}
-        run: |
-          set -o pipefail
-          terraform plan \
-            -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
-            -var="environment=${ENVIRONMENT}" \
-            -var="company_name=${COMPANY_NAME}" \
-            -var="resource_provider_registrations=${{ github.event_name == 'pull_request' && 'none' || 'legacy' }}" \
-            -no-color \
-            -out=tfplan-${ENVIRONMENT} 2>&1 | tee plan-output.txt
-
-      - name: Post Plan to PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const plan = fs.readFileSync('${{ env.TF_DIR }}/plan-output.txt', 'utf8');
-            const truncated = plan.length > 60000 ? plan.substring(0, 60000) + '\n... (truncated)' : plan;
-
-            // Extract resource summary from plan output
-            const summaryMatch = plan.match(/Plan: (\d+ to add, \d+ to change, \d+ to destroy)/);
-            const noChanges = plan.includes('No changes.');
-            const badge = noChanges ? '`No changes`' : (summaryMatch ? `\`${summaryMatch[1]}\`` : '`See details`');
-
-            const body = [
-              `### Terraform Plan — \`${{ matrix.environment }}\` ${badge}`,
-              '',
-              '<details>',
-              '<summary>Show Plan Output</summary>',
-              '',
-              '```',
-              truncated,
-              '```',
-              '',
-              '</details>'
-            ].join('\n');
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
-
-      - name: Upload Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-${{ matrix.environment }}
-          path: ${{ env.TF_DIR }}/tfplan-${{ matrix.environment }}
-
-  apply-nonprod:
-    name: Apply Non-Prod
-    runs-on: ubuntu-latest
-    needs: plan
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.event.inputs.environment == 'nonprod')
-    environment: nonprod
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.9"
-
-      - name: Download Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-nonprod
-          path: ${{ env.TF_DIR }}
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-
-      - name: Terraform Init
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-        run: |
-          terraform init \
-            -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
-            -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
-            -backend-config="key=landing-zone-nonprod.tfstate"
-
-      - name: Terraform Apply
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
-        run: terraform apply tfplan-nonprod
-
-  # Prod re-plans before applying to avoid stale plan artifacts. The nonprod
-  # apply may change subscription-level state (Defender, Policy) that the
-  # parallel plan job could not have predicted.
-  apply-prod:
-    name: Apply Prod
-    runs-on: ubuntu-latest
-    needs: plan
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.event.inputs.environment == 'prod')
-    environment: prod
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.9"
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-
-      - name: Terraform Init
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-        run: |
-          terraform init \
-            -backend-config="storage_account_name=${{ vars.TF_BACKEND_STORAGE_ACCOUNT }}" \
-            -backend-config="resource_group_name=${{ vars.TF_BACKEND_RESOURCE_GROUP || 'rg-terraform-state' }}" \
-            -backend-config="key=landing-zone-prod.tfstate"
-
-      - name: Set Terraform variables
-        run: |
-          echo "TF_VAR_budget_start_date=$(date -u +%Y-%m-01T00:00:00Z)" >> "$GITHUB_ENV"
-          RAW_EMAILS="${{ vars.BUDGET_ALERT_EMAILS }}"
-          if [ -n "$RAW_EMAILS" ]; then
-            HCL_LIST=$(echo "$RAW_EMAILS" | sed 's/[[:space:]]*,[[:space:]]*/","/g; s/^/["/; s/$/"]/')
-            echo "TF_VAR_budget_alert_emails=$HCL_LIST" >> "$GITHUB_ENV"
-          fi
-
-      - name: Terraform Plan (fresh)
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-          TF_VAR_security_contact_email: ${{ vars.SECURITY_CONTACT_EMAIL || 'security@example.com' }}
-          COMPANY_NAME: ${{ vars.COMPANY_NAME || 'mycompany' }}
-        run: |
-          terraform plan \
-            -var="subscription_id=${ARM_SUBSCRIPTION_ID}" \
-            -var="environment=prod" \
-            -var="company_name=${COMPANY_NAME}" \
-            -out=tfplan-prod
-
-      - name: Terraform Apply
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-        run: terraform apply tfplan-prod
+          set -euo pipefail
+          ./scripts/startup-deployment-integration.sh apply \
+            --plan "$PLAN_PATH" \
+            --manifest "$MANIFEST_PATH" \
+            --approval "$APPROVAL_PATH" \
+            --output text
