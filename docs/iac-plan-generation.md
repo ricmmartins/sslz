@@ -23,6 +23,9 @@ The input and output contracts are:
 - [`agent/schemas/cool-foundation-baseline.schema.json`](../agent/schemas/cool-foundation-baseline.schema.json)
 - [`agent/schemas/cool-foundation-plan.schema.json`](../agent/schemas/cool-foundation-plan.schema.json)
 - [`agent/schemas/cool-foundation-manifest.schema.json`](../agent/schemas/cool-foundation-manifest.schema.json)
+- [`agent/schemas/container-apps-cool-profile-input.schema.json`](../agent/schemas/container-apps-cool-profile-input.schema.json)
+- [`agent/schemas/container-apps-cool-profile-plan.schema.json`](../agent/schemas/container-apps-cool-profile-plan.schema.json)
+- [`agent/schemas/container-apps-cool-profile-manifest.schema.json`](../agent/schemas/container-apps-cool-profile-manifest.schema.json)
 - [`agent/schemas/terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
 
 ## Generate review inputs
@@ -44,7 +47,8 @@ The output directory must be `.sslz/generated` or one of its descendants. The co
 Only primary files are generated for `single-region-ready`. A reviewed `cool-infrastructure` recommendation generates
 the primary representations plus nonproduction secondary parameters targeting dedicated Bicep and Terraform roots.
 Those roots model only collision-safe networking and observability, use a nonoverlapping VNet CIDR, distinct regional
-resource groups, deterministic names, and an isolated Terraform backend key. They do not include subscription-global
+resource groups, deterministic names, a dedicated nondelegated Container Apps `/23` subnet, and an isolated Terraform
+backend key. They do not include subscription-global
 policy, budgets, Defender settings, global ingress, workloads, replication, or failover. `warm-workload` remains
 review-only and does not generate a secondary foundation.
 
@@ -66,6 +70,27 @@ keys, retry/resume rules, read-only postchecks, teardown intent, and fail-closed
 The example baseline is provisional for noncritical nonproduction evidence only: 240-minute RTO, 60-minute RPO, a
 secondary recurring-cost ceiling of 30% of primary, quarterly recovery exercises, and accountable role
 `Platform Operations Owner`. These values are planning defaults, not production commitments or completed attestations.
+
+## Generate the execution-disabled Container Apps profile
+
+```bash
+./scripts/startup-container-apps-cool-plan.sh generate \
+  --foundation-plan .sslz/generated/my-plan/cool-foundation/cool-foundation-plan.json \
+  --profile-input agent/examples/container-apps-cool-profile-input.json \
+  --output-dir .sslz/generated/my-plan/cool-container-apps
+```
+
+The profile planner accepts only an exact nonproduction cool foundation whose gates and artifact digests still pass. It
+then produces provider-equivalent Bicep and Terraform parameter artifacts, source and decision digests, and durable
+execution-disabled manifests. Direct validation rejects mutable image tags, secret values, unversioned Key Vault
+references, wrong identity or RBAC scope, primary scope/state reuse, overlapping address spaces, wrong profile subnet,
+incomplete probes, external ingress, and production/global/data failover settings.
+
+The minimum footprint is one internal Container Apps environment on a dedicated nondelegated `/23` subnet and one
+single-revision app pinned to an image digest. It may scale to zero or retain one idle replica; that assumption must match
+the reviewed cost evidence. Startup, readiness, and liveness probes, workspace diagnostics, configuration parity, scoped
+identity access, rollback, cleanup, and recovery measurements are blocking. The checked-in example intentionally retains
+`not-measured`, null RTO, and null RPO placeholders, which cannot auto-pass.
 
 Generated files use nonpersonal `example.invalid` contact placeholders unless a protected contacts file is supplied.
 For deployable previews, create an owner-only JSON file outside the repository:
@@ -108,6 +133,10 @@ approval is forced to `pending` with `readiness-evidence-required`.
 Phase 7 readiness additionally requires the cost ceiling, exercise cadence/status, owner role/reference, external
 reviews, and billing/support confirmation. The generated approval binding remains pending and cannot authorize
 execution.
+
+The Container Apps increment adds another pending approval binding but still exposes no executor. Even a
+`ready-for-review` profile cannot deploy, change traffic or DNS, register providers, replicate data, or claim end-to-end
+recovery.
 
 ## Read-only previews
 

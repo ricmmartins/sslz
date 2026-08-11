@@ -50,5 +50,35 @@ assert.equal(
   networkingDeployment.properties.parameters.vnetAddressPrefix.value,
   "[variables('validatedSecondaryVnetAddressPrefix')]",
 );
+assert.equal(
+  networkingDeployment.properties.parameters.includeContainerAppsSubnet.value,
+  true,
+);
+
+const containerAppsNsg =
+  networkingDeployment.properties.template.resources.find(
+    (resource) =>
+      resource.type === "Microsoft.Network/networkSecurityGroups" &&
+      resource.name.includes("containerApps"),
+  );
+assert(
+  containerAppsNsg,
+  "Compiled foundation must contain the Container Apps subnet NSG.",
+);
+assert.match(
+  networkingDeployment.properties.template.variables.subnets,
+  /includeContainerAppsSubnet/,
+);
+const containerAppsRules =
+  containerAppsNsg.properties.securityRules.map((rule) => rule.name);
+assert.deepEqual(containerAppsRules, [
+  "AllowAzureLoadBalancerInbound",
+  "AllowVNetInbound",
+  "DenyAllInbound",
+]);
+assert.equal(
+  containerAppsNsg.condition,
+  "[parameters('includeContainerAppsSubnet')]",
+);
 
 console.log("Compiled cool foundation Bicep validation contract passed.");

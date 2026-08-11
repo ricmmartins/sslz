@@ -15,6 +15,9 @@ param vnetAddressPrefix string
 @description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
 param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
 
+@description('Include the dedicated nonproduction Container Apps cool-profile subnet')
+param includeContainerAppsSubnet bool = false
+
 @description('Resource tags')
 param tags object
 
@@ -30,7 +33,7 @@ var secondOctet = split(vnetAddressPrefix, '.')[1]
   If AKS subnet is /20 starting at x.y.0.0/20, it covers x.y.0.0 - x.y.15.255.
   Therefore, app/data/shared must start at x.y.16.0+ to avoid overlap.
 */
-var subnets = {
+var baseSubnets = {
   aks: {
     name: 'snet-aks'
     addressPrefix: '${baseOctet}.${secondOctet}.0.0/20'     // 10.x.0.0/20
@@ -48,6 +51,12 @@ var subnets = {
     addressPrefix: '${baseOctet}.${secondOctet}.24.0/24'    // 10.x.24.0/24
   }
 }
+var subnets = union(baseSubnets, includeContainerAppsSubnet ? {
+  containerApps: {
+    name: 'snet-container-apps'
+    addressPrefix: '${baseOctet}.${secondOctet}.32.0/23'    // 10.x.32.0/23
+  }
+} : {})
 
 // ============================================================================
 // NSGs — One per subnet, deny-all-inbound by default
@@ -197,6 +206,55 @@ resource nsgShared 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
   }
 }
 
+resource nsgContainerApps 'Microsoft.Network/networkSecurityGroups@2024-01-01' = if (includeContainerAppsSubnet) {
+  name: 'nsg-${subnets.containerApps.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAzureLoadBalancerInbound'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'AllowVNetInbound'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'VirtualNetwork'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
 // ============================================================================
 // VNet with Subnets
 // ============================================================================
@@ -209,7 +267,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
     addressSpace: {
       addressPrefixes: [vnetAddressPrefix]
     }
-    subnets: [
+    subnets: concat([
       {
         name: subnets.aks.name
         properties: {
@@ -246,7 +304,15 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
           networkSecurityGroup: { id: nsgShared.id }
         }
       }
-    ]
+    ], includeContainerAppsSubnet ? [
+      {
+        name: subnets.containerApps.name
+        properties: {
+          addressPrefix: subnets.containerApps.addressPrefix
+          networkSecurityGroup: { id: nsgContainerApps.id }
+        }
+      }
+    ] : [])
   }
 }
 
@@ -260,3 +326,6 @@ output aksSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnet
 output appSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.app.name)
 output dataSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.data.name)
 output sharedSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.shared.name)
+output containerAppsSubnetId string = includeContainerAppsSubnet
+  ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.containerApps.name)
+  : ''

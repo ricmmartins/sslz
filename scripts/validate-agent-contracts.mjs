@@ -334,6 +334,15 @@ function main() {
   const coolFoundationPlanSchema = load(
     "agent/schemas/cool-foundation-plan.schema.json",
   );
+  const containerAppsCoolProfileInputSchema = load(
+    "agent/schemas/container-apps-cool-profile-input.schema.json",
+  );
+  const containerAppsCoolProfileManifestSchema = load(
+    "agent/schemas/container-apps-cool-profile-manifest.schema.json",
+  );
+  const containerAppsCoolProfilePlanSchema = load(
+    "agent/schemas/container-apps-cool-profile-plan.schema.json",
+  );
   const iacPlanSummarySchema = load("agent/schemas/iac-plan-summary.schema.json");
   const providerRemediationApprovalSchema = load(
     "agent/schemas/provider-remediation-approval.schema.json",
@@ -377,6 +386,9 @@ function main() {
   const readinessEvidence = load("agent/examples/readiness-evidence.json");
   const coolFoundationBaseline = load(
     "agent/examples/cool-foundation-baseline.json",
+  );
+  const containerAppsCoolProfileInput = load(
+    "agent/examples/container-apps-cool-profile-input.json",
   );
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
@@ -422,6 +434,18 @@ function main() {
     coolFoundationPlanSchema.$id,
     "https://aka.ms/sslz/schemas/cool-foundation-plan.schema.json",
   );
+  assert.equal(
+    containerAppsCoolProfileInputSchema.$id,
+    "https://aka.ms/sslz/schemas/container-apps-cool-profile-input.schema.json",
+  );
+  assert.equal(
+    containerAppsCoolProfileManifestSchema.$id,
+    "https://aka.ms/sslz/schemas/container-apps-cool-profile-manifest.schema.json",
+  );
+  assert.equal(
+    containerAppsCoolProfilePlanSchema.$id,
+    "https://aka.ms/sslz/schemas/container-apps-cool-profile-plan.schema.json",
+  );
   validateDocument(deploymentPlanSchema, readyExample.deploymentPlan);
   validateDocument(preflightResultSchema, readyExample);
   validateDocument(preflightResultSchema, blockedExample);
@@ -438,6 +462,10 @@ function main() {
   validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
   validateDocument(readinessEvidenceSchema, readinessEvidence);
   validateDocument(coolFoundationBaselineSchema, coolFoundationBaseline);
+  validateDocument(
+    containerAppsCoolProfileInputSchema,
+    containerAppsCoolProfileInput,
+  );
   assert.equal(
     deploymentResultSchema.$id,
     "https://aka.ms/sslz/schemas/deployment-result.schema.json",
@@ -459,6 +487,7 @@ function main() {
     terraformPlanProvenance,
     readinessEvidence,
     coolFoundationBaseline,
+    containerAppsCoolProfileInput,
     profiles,
   ]);
 

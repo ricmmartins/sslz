@@ -27,3 +27,8 @@ output "shared_subnet_id" {
   description = "Shared subnet resource ID"
   value       = azurerm_subnet.shared.id
 }
+
+output "container_apps_subnet_id" {
+  description = "Dedicated nondelegated /23 Container Apps infrastructure subnet resource ID"
+  value       = var.include_container_apps_subnet ? azurerm_subnet.container_apps[0].id : null
+}

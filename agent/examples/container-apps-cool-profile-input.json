@@ -1,0 +1,176 @@
+{
+  "schemaVersion": "1.0.0",
+  "classification": "provisional-noncritical-nonprod-planning-example",
+  "profileId": "container-apps",
+  "environment": "nonprod",
+  "foundationBinding": {
+    "planId": "example-cool-foundation",
+    "planDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "readinessEvidenceDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "subscriptionId": "33333333-3333-3333-3333-333333333333",
+    "secondaryRegion": "westus2",
+    "primaryScope": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-primary/providers/Microsoft.Resources/deployments/primary",
+    "secondaryScope": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-container-apps/providers/Microsoft.Resources/deployments/profile",
+    "primaryVnetCidr": "10.0.0.0/16",
+    "secondaryVnetCidr": "10.1.0.0/16",
+    "vnetResourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-networking/providers/Microsoft.Network/virtualNetworks/vnet-contoso-nonprod-cool-westus2",
+    "infrastructureSubnetResourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-networking/providers/Microsoft.Network/virtualNetworks/vnet-contoso-nonprod-cool-westus2/subnets/snet-container-apps",
+    "logAnalyticsWorkspaceResourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-monitoring/providers/Microsoft.OperationalInsights/workspaces/law-contoso-nonprod-cool-westus2",
+    "terraformStateKey": "example-nonprod-secondary-container-apps.tfstate"
+  },
+  "configuration": {
+    "resourceGroupName": "rg-contoso-nonprod-cool-westus2-container-apps",
+    "managedEnvironmentName": "cae-contoso-nonprod-cool-westus2",
+    "containerAppName": "ca-contoso-nonprod-cool-westus2",
+    "revisionMode": "Single",
+    "image": "contoso.azurecr.io/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "targetPort": 8080,
+    "transport": "auto",
+    "ingressExternal": false,
+    "minReplicas": 0,
+    "maxReplicas": 1,
+    "cpu": 0.25,
+    "memory": "0.5Gi",
+    "managedIdentity": {
+      "name": "id-contoso-nonprod-cool-westus2",
+      "resourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-container-apps/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-contoso-nonprod-cool-westus2",
+      "principalId": "44444444-4444-4444-4444-444444444444"
+    },
+    "keyVault": {
+      "resourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-security/providers/Microsoft.KeyVault/vaults/kv-contoso-nonprod",
+      "subscriptionId": "33333333-3333-3333-3333-333333333333",
+      "resourceGroupName": "rg-contoso-nonprod-security",
+      "name": "kv-contoso-nonprod"
+    },
+    "secretReferences": [
+      {
+        "name": "database-url",
+        "keyVaultSecretUri": "https://kv-contoso-nonprod.vault.azure.net/secrets/database-url/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "identityResourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-container-apps/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-contoso-nonprod-cool-westus2"
+      }
+    ],
+    "secretEnvironmentVariables": [
+      {
+        "name": "DATABASE_URL",
+        "secretRef": "database-url"
+      }
+    ],
+    "roleAssignments": [
+      {
+        "principalId": "44444444-4444-4444-4444-444444444444",
+        "roleDefinitionId": "/subscriptions/33333333-3333-3333-3333-333333333333/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6",
+        "scope": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-security/providers/Microsoft.KeyVault/vaults/kv-contoso-nonprod"
+      }
+    ],
+    "probes": [
+      {
+        "type": "Startup",
+        "transport": "HTTP",
+        "path": "/startup",
+        "port": 8080,
+        "initialDelaySeconds": 5,
+        "intervalSeconds": 10,
+        "timeoutSeconds": 5,
+        "failureThreshold": 6
+      },
+      {
+        "type": "Readiness",
+        "transport": "HTTP",
+        "path": "/ready",
+        "port": 8080,
+        "initialDelaySeconds": 0,
+        "intervalSeconds": 10,
+        "timeoutSeconds": 5,
+        "failureThreshold": 3
+      },
+      {
+        "type": "Liveness",
+        "transport": "HTTP",
+        "path": "/health",
+        "port": 8080,
+        "initialDelaySeconds": 10,
+        "intervalSeconds": 20,
+        "timeoutSeconds": 5,
+        "failureThreshold": 3
+      }
+    ],
+    "observability": {
+      "diagnosticSettingName": "diag-container-apps",
+      "logAnalyticsWorkspaceResourceId": "/subscriptions/33333333-3333-3333-3333-333333333333/resourceGroups/rg-contoso-nonprod-cool-westus2-monitoring/providers/Microsoft.OperationalInsights/workspaces/law-contoso-nonprod-cool-westus2",
+      "requiredLogCategories": [
+        "ContainerAppConsoleLogs",
+        "ContainerAppSystemLogs"
+      ]
+    }
+  },
+  "attestations": {
+    "issuedAt": "2026-08-09T10:00:00Z",
+    "expiresAt": "2026-08-10T10:00:00Z",
+    "image": {
+      "status": "approved",
+      "reference": "review.container-image.001",
+      "evidenceDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "configurationParity": {
+      "status": "approved",
+      "reference": "review.configuration-parity.001",
+      "evidenceDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "primaryDigest": "sha256:88d185849f6ccd6e9537226aebbb6fb1816cde0f80a4bbbcd7698fe4f4c0205d",
+      "secondaryDigest": "sha256:88d185849f6ccd6e9537226aebbb6fb1816cde0f80a4bbbcd7698fe4f4c0205d"
+    },
+    "identityRbac": {
+      "status": "approved",
+      "reference": "review.identity-rbac.001",
+      "evidenceDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+    },
+    "networking": {
+      "status": "approved",
+      "reference": "review.networking.001",
+      "evidenceDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+    },
+    "health": {
+      "status": "pass",
+      "reference": "exercise.health-probes.001",
+      "evidenceDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+    },
+    "observability": {
+      "status": "confirmed",
+      "reference": "review.observability.001",
+      "evidenceDigest": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+    }
+  },
+  "recovery": {
+    "targetRtoMinutes": 240,
+    "targetRpoMinutes": 60,
+    "exerciseCadence": "quarterly",
+    "accountableRoleReference": "Platform Operations Owner",
+    "measuredResult": {
+      "status": "not-measured",
+      "reference": "measurement.container-apps.placeholder",
+      "evidenceDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measuredAt": null,
+      "measuredRtoMinutes": null,
+      "measuredRpoMinutes": null
+    }
+  },
+  "cost": {
+    "status": "confirmed",
+    "reference": "estimate.container-apps-cool.001",
+    "evidenceDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "currency": "USD",
+    "primaryMonthlyCost": 200,
+    "projectedMonthlyCost": 30,
+    "ceilingPercent": 30,
+    "minimumScaleAssumption": "scale-to-zero"
+  },
+  "safety": {
+    "executionEnabled": false,
+    "azureOperations": "none",
+    "providerRegistration": false,
+    "productionExecution": false,
+    "globalIngress": false,
+    "dnsCutover": false,
+    "dataReplication": false,
+    "dataFailover": false
+  }
+}

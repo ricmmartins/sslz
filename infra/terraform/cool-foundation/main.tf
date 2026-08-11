@@ -88,11 +88,12 @@ module "log_analytics" {
 }
 
 module "networking" {
-  source                = "../modules/networking"
-  location              = var.location
-  resource_group_name   = azurerm_resource_group.networking.name
-  vnet_name             = "vnet-${local.prefix}"
-  vnet_address_prefix   = var.secondary_vnet_address_prefix
-  app_subnet_delegation = var.app_subnet_delegation
-  tags                  = local.tags
+  source                        = "../modules/networking"
+  location                      = var.location
+  resource_group_name           = azurerm_resource_group.networking.name
+  vnet_name                     = "vnet-${local.prefix}"
+  vnet_address_prefix           = var.secondary_vnet_address_prefix
+  app_subnet_delegation         = var.app_subnet_delegation
+  include_container_apps_subnet = true
+  tags                          = local.tags
 }

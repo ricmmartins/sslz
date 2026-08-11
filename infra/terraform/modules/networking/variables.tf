@@ -19,6 +19,11 @@ variable "app_subnet_delegation" {
   type        = string
   default     = "Microsoft.Web/serverFarms"
 }
+variable "include_container_apps_subnet" {
+  description = "Include the dedicated nonproduction Container Apps cool-profile subnet"
+  type        = bool
+  default     = false
+}
 variable "tags" {
   description = "Resource tags"
   type        = map(string)

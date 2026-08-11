@@ -27,3 +27,8 @@ output "vnet_id" {
   description = "Secondary virtual network"
   value       = module.networking.vnet_id
 }
+
+output "container_apps_subnet_id" {
+  description = "Dedicated nondelegated /23 subnet for the secondary Container Apps environment"
+  value       = module.networking.container_apps_subnet_id
+}

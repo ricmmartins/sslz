@@ -149,6 +149,7 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
     vnetName: 'vnet-${prefix}'
     vnetAddressPrefix: vnetAddressPrefix
     appSubnetDelegation: appSubnetDelegation
+    includeContainerAppsSubnet: false
     tags: tags
   }
 }

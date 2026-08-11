@@ -19,6 +19,8 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
 | `schemas/readiness-evidence.schema.json` | Versioned code evidence and external/human attestations |
 | `schemas/iac-plan-summary.schema.json` | Sanitized parameter, preview, digest, and approval summary |
+| `schemas/cool-foundation-*.schema.json` | Execution-disabled nonproduction cool foundation contracts |
+| `schemas/container-apps-cool-profile-*.schema.json` | Execution-disabled Container Apps cool profile input, plan, and manifest contracts |
 | `schemas/terraform-plan-provenance.schema.json` | Signed atomic-build provenance for one Terraform saved plan |
 | `schemas/provider-remediation-approval.schema.json` | Single-use approval bound to one reviewed provider action |
 | `schemas/provider-remediation-result.schema.json` | Sanitized dry-run and apply audit result |
@@ -38,6 +40,8 @@ node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
+node tests/startup-cool-foundation-plan.mjs
+node tests/startup-container-apps-cool-plan.mjs
 node tests/startup-provider-remediation.mjs
 node tests/startup-deployment-integration.mjs
 ```
@@ -114,6 +118,25 @@ approval metadata. It does not authenticate, preview, deploy, register providers
 attestations, or add global ingress, workloads, replication, or failover. The example baseline (RTO 240 minutes, RPO 60
 minutes, secondary recurring cost at most 30% of primary, quarterly exercise, and `Platform Operations Owner`) is a
 provisional noncritical planning fixture, not a production promise.
+
+## Plan the nonproduction Container Apps cool profile
+
+```bash
+./scripts/startup-container-apps-cool-plan.sh generate \
+  --foundation-plan .sslz/generated/my-plan/cool-foundation/cool-foundation-plan.json \
+  --profile-input agent/examples/container-apps-cool-profile-input.json \
+  --output-dir .sslz/generated/my-plan/cool-container-apps
+```
+
+This additive local planner binds an exact review-ready foundation to provider-equivalent Bicep and Terraform inputs for
+one internal Container Apps environment and digest-pinned app. It represents a dedicated nondelegated `/23` subnet,
+single-revision settings, versioned Key Vault references, user-assigned identity and scoped RBAC, minimum scale, startup/
+readiness/liveness probes, configuration parity, diagnostics, rollback, cleanup, and durable resume semantics.
+
+The checked-in profile input deliberately uses a `not-measured` recovery placeholder, so it remains blocked until an
+explicit current exercise records measured RTO and RPO within the provisional targets. The planner has no preview, apply,
+provider-registration, workflow-write, production, global-ingress, DNS, replication, or data-failover path, and it never
+claims end-to-end recovery.
 
 ## Apply one approved provider registration
 

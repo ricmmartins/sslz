@@ -99,6 +99,7 @@ module networking 'modules/networking.bicep' = {
     vnetName: 'vnet-${prefix}'
     vnetAddressPrefix: validatedSecondaryVnetAddressPrefix
     appSubnetDelegation: appSubnetDelegation
+    includeContainerAppsSubnet: true
     tags: tags
   }
 }
@@ -115,3 +116,5 @@ output resourceGroupNetworking string = networkingResourceGroup.name
 output logAnalyticsWorkspaceId string = logAnalytics.outputs.workspaceId
 @description('Secondary virtual network')
 output vnetId string = networking.outputs.vnetId
+@description('Dedicated nondelegated /23 subnet for the secondary Container Apps environment')
+output containerAppsSubnetId string = networking.outputs.containerAppsSubnetId

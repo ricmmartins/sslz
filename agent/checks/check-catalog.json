@@ -392,6 +392,125 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "cool.container-apps.mode-nonprod-only",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/environments"
+    },
+    {
+      "id": "cool.container-apps.foundation-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/overview"
+    },
+    {
+      "id": "cool.container-apps.attestations-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "cool.container-apps.image-immutable",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-image-lock"
+    },
+    {
+      "id": "cool.container-apps.secrets-reference-only",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/manage-secrets"
+    },
+    {
+      "id": "cool.container-apps.identity-rbac-scoped",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/managed-identity"
+    },
+    {
+      "id": "cool.container-apps.network-profile-matched",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/custom-virtual-networks"
+    },
+    {
+      "id": "cool.container-apps.health-probes-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/health-probes"
+    },
+    {
+      "id": "cool.container-apps.configuration-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/revisions"
+    },
+    {
+      "id": "cool.container-apps.observability-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/log-monitoring"
+    },
+    {
+      "id": "cool.container-apps.cost-within-ceiling",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/billing"
+    },
+    {
+      "id": "cool.container-apps.recovery-objectives-matched",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "cool.container-apps.measured-recovery-met",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "cool.container-apps.artifacts-exact",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "cool.container-apps.provider-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/developer/terraform/overview"
+    },
+    {
+      "id": "cool.container-apps.execution-disabled",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deploy-what-if"
+    },
+    {
+      "id": "cool.container-apps.failover-capabilities-excluded",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
     }
   ]
 }

@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.5.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -16,7 +18,7 @@ locals {
   # - DATA:  /22  (netnum 5)   -> 10.x.20.0/22
   # - SHARED /24  (netnum 24)  -> 10.x.24.0/24
 
-  subnets = {
+  subnets = merge({
     aks = {
       name           = "snet-aks"
       address_prefix = cidrsubnet(var.vnet_address_prefix, 4, 0)
@@ -33,7 +35,12 @@ locals {
       name           = "snet-shared"
       address_prefix = cidrsubnet(var.vnet_address_prefix, 8, 24)
     }
-  }
+    }, var.include_container_apps_subnet ? {
+    container_apps = {
+      name           = "snet-container-apps"
+      address_prefix = cidrsubnet(var.vnet_address_prefix, 7, 16)
+    }
+  } : {})
 }
 
 # ==============================================================================
@@ -163,6 +170,50 @@ resource "azurerm_network_security_group" "shared" {
   }
 }
 
+resource "azurerm_network_security_group" "container_apps" {
+  count               = var.include_container_apps_subnet ? 1 : 0
+  name                = "nsg-snet-container-apps"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+
+  security_rule {
+    name                       = "AllowAzureLoadBalancerInbound"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_address_prefix      = "AzureLoadBalancer"
+    source_port_range          = "*"
+    destination_address_prefix = "*"
+    destination_port_range     = "*"
+  }
+
+  security_rule {
+    name                       = "AllowVNetInbound"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_address_prefix      = "VirtualNetwork"
+    source_port_range          = "*"
+    destination_address_prefix = "VirtualNetwork"
+    destination_port_range     = "*"
+  }
+
+  security_rule {
+    name                       = "DenyAllInbound"
+    priority                   = 4096
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_address_prefix      = "*"
+    source_port_range          = "*"
+    destination_address_prefix = "*"
+    destination_port_range     = "*"
+  }
+}
+
 # ==============================================================================
 # VNet + Subnets
 # ==============================================================================
@@ -227,4 +278,18 @@ resource "azurerm_subnet" "shared" {
 resource "azurerm_subnet_network_security_group_association" "shared" {
   subnet_id                 = azurerm_subnet.shared.id
   network_security_group_id = azurerm_network_security_group.shared.id
+}
+
+resource "azurerm_subnet" "container_apps" {
+  count                = var.include_container_apps_subnet ? 1 : 0
+  name                 = local.subnets.container_apps.name
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = [local.subnets.container_apps.address_prefix]
+}
+
+resource "azurerm_subnet_network_security_group_association" "container_apps" {
+  count                     = var.include_container_apps_subnet ? 1 : 0
+  subnet_id                 = azurerm_subnet.container_apps[0].id
+  network_security_group_id = azurerm_network_security_group.container_apps[0].id
 }
