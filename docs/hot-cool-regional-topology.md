@@ -74,11 +74,12 @@ but it does not replace per-service availability and recovery validation.
 | Mode | Secondary baseline | Application compute | Data | Traffic |
 |---|---|---|---|---|
 | `single-region-ready` | Validated regional plan | Not deployed | Backup or service default | Primary only |
-| `cool-infrastructure` | Baseline deployed | Scale zero, minimum, or ready | Backup or replica | Manual |
+| `cool-infrastructure` | Nonprod foundation plan only | Not deployed | Not configured | Not configured |
 | `warm-workload` | Baseline deployed | Minimum healthy scale | Online replica | Manual or automatic |
 
-`single-region-ready` is the default preparation option. `cool-infrastructure` is the intended first Hot/Cool
-implementation. `warm-workload` requires service-specific modules and recovery tests.
+`single-region-ready` is the only currently executable production option. Phase 7 uses `cool-infrastructure` only to
+prepare a guarded, nonproduction secondary networking and observability foundation; execution remains disabled.
+`warm-workload` requires later service-specific modules and recovery tests.
 
 ## Baseline in each region
 
@@ -190,21 +191,25 @@ plan must state the measured result rather than the intended target.
 - apply budgets and ownership tags to secondary-region resources;
 - remove a secondary footprint that no one tests or owns.
 
-## Initial implementation boundary
+## Phase 7 foundation boundary
 
-The first implementation should:
+The guarded Phase 7 increment:
 
-1. collect regional requirements and recovery targets;
-2. evaluate two regions;
-3. validate service, model, SKU, quota, capacity, policy, and address-space compatibility from supplied evidence;
-4. produce a sanitized Hot/Cool plan and cost assumptions;
-5. stop before generating IaC, parameter files, or deploying the secondary region.
+1. binds the selected secondary region and current Phase 3/4 readiness evidence;
+2. models non-overlapping secondary networking and observability in dedicated Bicep and Terraform roots;
+3. isolates scope, naming, address space, and Terraform state;
+4. generates deterministic, execution-disabled manifests with ordered steps, postchecks, and teardown intent;
+5. stops before preview, provider registration, deployment, global ingress, workload/data replication, or failover.
 
-Deployment follows only after the plan and service-specific recovery approach are reviewed.
+The provisional example baseline is for noncritical nonproduction planning only: RTO 240 minutes, RPO 60 minutes,
+secondary recurring cost no more than 30% of primary, quarterly recovery exercise, and accountable role
+`Platform Operations Owner`. It is not a production promise and does not satisfy human attestations automatically.
 
-The separate [IaC plan generation](iac-plan-generation.md) phase can turn a reviewed recommendation into distinct
-primary and secondary local parameter representations. It does not change this evaluator's read-only behavior and
-does not deploy either region.
+Profile-specific PRs may proceed only after the foundation plan has current region, billing/support, owner, external
+review, cost, recovery-objective, exercise, and exact artifact-digest evidence. Those PRs must add and test their own
+workload, data recovery, health, traffic, and rollback semantics. A separate, explicit execution change must then
+review the deployment boundary; until that happens, Phase 6 continues to reject every secondary or
+`cool-infrastructure` preview/apply request.
 
 ## Official guidance
 

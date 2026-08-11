@@ -64,8 +64,10 @@ function createInput({ regionalMode = "cool-infrastructure" } = {}) {
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.failoverOwnerConfirmed =
     regionalMode !== "single-region-ready";
-  planningInput.startupInput.reliability.rtoMinutes = 60;
-  planningInput.startupInput.reliability.rpoMinutes = 15;
+  planningInput.startupInput.reliability.rtoMinutes = 240;
+  planningInput.startupInput.reliability.rpoMinutes = 60;
+  planningInput.regionalRequirements.secondaryBaseline.minimum = 30;
+  planningInput.regionalRequirements.secondaryBaseline.maximum = 60;
   planningInput.workloadPlan = planWorkload(planningInput.startupInput);
   const regionalPlan = planRegions(planningInput);
 
@@ -225,8 +227,8 @@ try {
   });
   validateDocument(summarySchema, first);
   assert.match(first.planDigest, /^sha256:[0-9a-f]{64}$/);
-  assert.equal(first.artifacts.length, 8);
-  assert.equal(first.previews.length, 8);
+  assert.equal(first.artifacts.length, 6);
+  assert.equal(first.previews.length, 6);
   assert(
     first.previews
       .filter((preview) => preview.regionRole === "primary")

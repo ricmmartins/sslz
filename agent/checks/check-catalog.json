@@ -219,6 +219,13 @@
       "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
     },
     {
+      "id": "readiness.recovery.exercise-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
       "id": "readiness.cost.cool-footprint-provenance",
       "category": "billing",
       "severity": "blocking",
@@ -287,6 +294,104 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/manage-virtual-network"
+    },
+    {
+      "id": "cool.foundation.mode-nonprod-only",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "cool.foundation.secondary-region-current",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "cool.foundation.network-non-overlapping",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq"
+    },
+    {
+      "id": "cool.foundation.billing-support-confirmed",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "cool.foundation.owner-confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "cool.foundation.external-reviews-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/architect-role/"
+    },
+    {
+      "id": "cool.foundation.recovery-objectives-met",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "cool.foundation.recovery-exercise-passed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "cool.foundation.cost-within-ceiling",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cost-management-billing/costs/pricing-calculator"
+    },
+    {
+      "id": "cool.foundation.artifacts-exact",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "cool.foundation.provider-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "cool.foundation.source-plan-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deployment-what-if"
+    },
+    {
+      "id": "cool.foundation.execution-disabled",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deployment-what-if"
+    },
+    {
+      "id": "cool.foundation.failover-modules-excluded",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
     }
   ]
 }

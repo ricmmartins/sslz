@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "classification": "provisional-noncritical-nonprod-planning-default",
+  "environment": "nonprod",
+  "targetRtoMinutes": 240,
+  "targetRpoMinutes": 60,
+  "secondaryRecurringCostCeilingPercent": 30,
+  "recoveryExerciseCadence": "quarterly",
+  "accountableRoleReference": "Platform Operations Owner"
+}

@@ -20,6 +20,9 @@ The input and output contracts are:
 - [`agent/schemas/iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json) for approval-capable plans with readiness evidence
 - [`agent/schemas/readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
 - [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
+- [`agent/schemas/cool-foundation-baseline.schema.json`](../agent/schemas/cool-foundation-baseline.schema.json)
+- [`agent/schemas/cool-foundation-plan.schema.json`](../agent/schemas/cool-foundation-plan.schema.json)
+- [`agent/schemas/cool-foundation-manifest.schema.json`](../agent/schemas/cool-foundation-manifest.schema.json)
 - [`agent/schemas/terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
 
 ## Generate review inputs
@@ -38,11 +41,30 @@ The output directory must be `.sslz/generated` or one of its descendants. The co
 - `plan-summary.json`, containing the canonical decisions, artifact paths, preview classification, digest, and
   approval state.
 
-Only primary files are generated for `single-region-ready`. A reviewed `cool-infrastructure` or `warm-workload`
-recommendation generates distinct primary and secondary representations with the recommended region and nonoverlapping
-VNet CIDR. Secondary files remain representation-only because the existing roots also contain subscription-global
-resources and do not yet provide collision-free multi-region naming. The planner never previews a secondary file as
-an independent root or state.
+Only primary files are generated for `single-region-ready`. A reviewed `cool-infrastructure` recommendation generates
+the primary representations plus nonproduction secondary parameters targeting dedicated Bicep and Terraform roots.
+Those roots model only collision-safe networking and observability, use a nonoverlapping VNet CIDR, distinct regional
+resource groups, deterministic names, and an isolated Terraform backend key. They do not include subscription-global
+policy, budgets, Defender settings, global ingress, workloads, replication, or failover. `warm-workload` remains
+review-only and does not generate a secondary foundation.
+
+## Generate the execution-disabled Phase 7 plan
+
+```bash
+./scripts/startup-cool-foundation-plan.sh generate \
+  --plan .sslz/generated/my-plan/plan-summary.json \
+  --output-dir .sslz/generated/my-plan/cool-foundation
+```
+
+This local command validates the selected secondary region, evidence freshness, owner role/reference, measured and
+target RTO/RPO, cost ceiling and provenance, external reviews, recovery exercise, billing/support confirmation, and
+exact artifact/source digests. Missing human or billing evidence always blocks; it is never inferred. The output binds
+provider-equivalent decisions to two execution-disabled manifests with ordered step states, deterministic idempotency
+keys, retry/resume rules, read-only postchecks, teardown intent, and fail-closed cleanup handling.
+
+The example baseline is provisional for noncritical nonproduction evidence only: 240-minute RTO, 60-minute RPO, a
+secondary recurring-cost ceiling of 30% of primary, quarterly recovery exercises, and accountable role
+`Platform Operations Owner`. These values are planning defaults, not production commitments or completed attestations.
 
 Generated files use nonpersonal `example.invalid` contact placeholders unless a protected contacts file is supplied.
 For deployable previews, create an owner-only JSON file outside the repository:
@@ -81,6 +103,10 @@ Only v3 inputs can carry approval-eligible readiness evidence. The planner valid
 exact tenant/subscription/plan/profile/region scope, explicit human confirmations, recovery measurements, service tests,
 cost provenance, and conditional Foundry evidence. Legacy v1/v2 inputs remain representable for compatibility, but their
 approval is forced to `pending` with `readiness-evidence-required`.
+
+Phase 7 readiness additionally requires the cost ceiling, exercise cadence/status, owner role/reference, external
+reviews, and billing/support confirmation. The generated approval binding remains pending and cannot authorize
+execution.
 
 ## Read-only previews
 

@@ -34,8 +34,10 @@ function createInput({
 } = {}) {
   const planningInput = structuredClone(regionalInput);
   planningInput.startupInput.reliability.regionalMode = regionalMode;
-  planningInput.startupInput.reliability.rtoMinutes = 60;
-  planningInput.startupInput.reliability.rpoMinutes = 15;
+  planningInput.startupInput.reliability.rtoMinutes = 240;
+  planningInput.startupInput.reliability.rpoMinutes = 60;
+  planningInput.regionalRequirements.secondaryBaseline.minimum = 30;
+  planningInput.regionalRequirements.secondaryBaseline.maximum = 60;
   planningInput.startupInput.reliability.failoverOwnerConfirmed = true;
   planningInput.startupInput.workload.usesFoundryModels = foundry;
   planningInput.startupInput.workload.managedModelFit = foundry ? "yes" : "unknown";
@@ -119,6 +121,18 @@ expectCode(
 );
 expectCode(
   mutate(valid, (evidence) => {
+    evidence.humanAttestations.coolFootprintCost.ceilingPercent = 20;
+  }),
+  "readiness.cost.ceiling-exceeded",
+);
+expectCode(
+  mutate(valid, (evidence) => {
+    evidence.humanAttestations.recoveryExercise.status = "not-tested";
+  }),
+  "readiness.recovery.exercise-failed",
+);
+expectCode(
+  mutate(valid, (evidence) => {
     evidence.codeEvidence.preflight.status = "blocked";
   }),
   "readiness.preflight.blocked",
@@ -166,7 +180,7 @@ expectCode(missingTargets, "readiness.recovery.target-required");
 
 expectCode(
   mutate(valid, (evidence) => {
-    evidence.humanAttestations.recoveryMeasurements[0].measuredRtoMinutes = 61;
+    evidence.humanAttestations.recoveryMeasurements[0].measuredRtoMinutes = 241;
   }),
   "readiness.recovery.objective-unmet",
 );
@@ -262,6 +276,10 @@ assert.equal(
 assert.equal(singleRegion.readinessEvidence.subject.secondaryRegion, null);
 assert.equal(
   singleRegion.readinessEvidence.humanAttestations.coolFootprintCost,
+  null,
+);
+assert.equal(
+  singleRegion.readinessEvidence.humanAttestations.recoveryExercise,
   null,
 );
 

@@ -219,7 +219,8 @@
         "failoverOwner",
         "recoveryMeasurements",
         "serviceRecoveryTests",
-        "coolFootprintCost"
+        "coolFootprintCost",
+        "recoveryExercise"
       ],
       "properties": {
         "startupBillingSupport": {
@@ -320,6 +321,11 @@
                 },
                 "roleReference": {
                   "$ref": "#/$defs/reference"
+                },
+                "roleDisplayName": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 80
                 }
               }
             }
@@ -416,7 +422,10 @@
                     "currency",
                     "minimum",
                     "maximum",
-                    "provenanceReference"
+                    "provenanceReference",
+                    "primaryMonthlyCost",
+                    "ceilingPercent",
+                    "projectedPercent"
                   ],
                   "properties": {
                     "status": {
@@ -437,6 +446,51 @@
                       "minimum": 0
                     },
                     "provenanceReference": {
+                      "$ref": "#/$defs/reference"
+                    },
+                    "primaryMonthlyCost": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "ceilingPercent": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100
+                    },
+                    "projectedPercent": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "recoveryExercise": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/humanAttestation"
+                },
+                {
+                  "type": "object",
+                  "required": ["cadence", "exerciseReference"],
+                  "properties": {
+                    "status": {
+                      "enum": ["pass", "fail", "not-tested"]
+                    },
+                    "subjectScope": {
+                      "const": "cool-foundation-recovery-exercise"
+                    },
+                    "cadence": {
+                      "enum": ["monthly", "quarterly", "semiannual", "annual"]
+                    },
+                    "exerciseReference": {
                       "$ref": "#/$defs/reference"
                     }
                   }
@@ -568,6 +622,9 @@
         "roleReference": {
           "type": "string"
         },
+        "roleDisplayName": {
+          "type": "string"
+        },
         "profileId": {
           "type": "string"
         },
@@ -599,6 +656,21 @@
           "type": "string"
         },
         "attestationVersion": {
+          "type": "string"
+        },
+        "primaryMonthlyCost": {
+          "type": "number"
+        },
+        "ceilingPercent": {
+          "type": "number"
+        },
+        "projectedPercent": {
+          "type": "number"
+        },
+        "cadence": {
+          "type": "string"
+        },
+        "exerciseReference": {
           "type": "string"
         }
       }

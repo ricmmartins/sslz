@@ -137,7 +137,8 @@
         "profileExtension": "postgresql"
       }
     ],
-    "coolFootprintCost": null
+    "coolFootprintCost": null,
+    "recoveryExercise": null
   },
-  "evidenceDigest": "sha256:6ad411cbb29c501268725ac70c80bb60c4eea86c7592b1a02cfc09837726bf3e"
+  "evidenceDigest": "sha256:61a31cb92d1b2e4c6a0c5dba9c9ab2d7e43127ea0a9e7f73da6cb7c52b073303"
 }
