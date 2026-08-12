@@ -298,21 +298,35 @@ function locatePlanSummary(artifactPath) {
 
 function deploymentPreviewRunner(executable, args, target) {
   if (executable === "bicep") {
-    const bicepExecutable = resolve(
-      homedir(),
-      ".azure",
-      "bin",
-      process.platform === "win32" ? "bicep.exe" : "bicep",
+    if (process.platform === "win32") {
+      return spawnSync(resolve(homedir(), ".azure", "bin", "bicep.exe"), args, {
+        cwd: root,
+        encoding: "utf8",
+        env: process.env,
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+        shell: false,
+        maxBuffer: 16 * 1024 * 1024,
+      });
+    }
+    const [command, parameterPath, ...remainingArgs] = args;
+    const templateArgumentIndex = remainingArgs.indexOf("--bicep-file");
+    if (templateArgumentIndex !== -1) {
+      remainingArgs.splice(templateArgumentIndex, 2);
+    }
+    return spawnSync(
+      "az",
+      ["bicep", command, "--file", parameterPath, ...remainingArgs],
+      {
+        cwd: root,
+        encoding: "utf8",
+        env: process.env,
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+        shell: false,
+        maxBuffer: 16 * 1024 * 1024,
+      },
     );
-    return spawnSync(bicepExecutable, args, {
-      cwd: root,
-      encoding: "utf8",
-      env: process.env,
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true,
-      shell: false,
-      maxBuffer: 16 * 1024 * 1024,
-    });
   }
   if (
     executable === "az" &&
