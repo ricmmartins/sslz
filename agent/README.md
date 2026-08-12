@@ -17,6 +17,9 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/postgresql-source-assessment.schema.json` | Non-secret PostgreSQL source inventory and operational evidence |
 | `schemas/postgresql-migration-plan-input.schema.json` | Read-only PostgreSQL migration assessment and target evidence input |
 | `schemas/postgresql-migration-plan.schema.json` | Deterministic execution-disabled PostgreSQL migration plan |
+| `schemas/postgresql-rehearsal-evidence.schema.json` | Expiry-bounded rehearsal, validation, cutover-readiness, rollback-readiness, and replay-lineage evidence |
+| `schemas/postgresql-rehearsal-lineage.schema.json` | Read-only accepted evidence-set lineage for deterministic replay rejection |
+| `schemas/postgresql-rehearsal-plan.schema.json` | Deterministic execution-disabled PostgreSQL rehearsal and validation plan |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
@@ -55,6 +58,7 @@ node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-postgresql-migration-plan.mjs
+node tests/startup-postgresql-rehearsal-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
 node tests/startup-cool-foundation-plan.mjs

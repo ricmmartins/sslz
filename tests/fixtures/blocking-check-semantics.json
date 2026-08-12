@@ -275,6 +275,104 @@
       "blockingStates": ["fail", "unresolved"]
     },
     {
+      "id": "rehearsal.postgresql.contracts-bound",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.evidence-current",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.replay-protected",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.target-bound",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.model-prechecks-complete",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.initial-load-evidenced",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.catch-up-permitted",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.schema-compatible",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.row-counts-within-bound",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.data-verification-complete",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.cutover-ready",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.rollback-ready",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.source-of-truth-safe",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.output-sanitized",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
       "id": "region.foundry-model.available",
       "surface": "regional-planner",
       "source": "scripts/startup-regional-plan.mjs",

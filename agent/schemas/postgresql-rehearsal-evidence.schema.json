@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-rehearsal-evidence.schema.json",
+  "title": "SSLZ PostgreSQL rehearsal evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "rehearsalId",
+    "evidenceSetId",
+    "observedAt",
+    "expiresAt",
+    "maxEvidenceAgeHours",
+    "environmentReference",
+    "evidenceReferences",
+    "bindings",
+    "transition",
+    "replayProtection",
+    "prechecks",
+    "initialLoad",
+    "catchUp",
+    "validation",
+    "cutoverReadiness",
+    "rollbackReadiness",
+    "sourceOfTruth",
+    "redaction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "rehearsalId": { "$ref": "#/$defs/reference" },
+    "evidenceSetId": { "$ref": "#/$defs/reference" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "maxEvidenceAgeHours": { "type": "integer", "minimum": 1, "maximum": 168 },
+    "environmentReference": { "$ref": "#/$defs/reference" },
+    "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "migrationPlanDigest",
+        "migrationIdentityDigest",
+        "targetRegion",
+        "targetEngine",
+        "targetPostgresqlDecisionDigest",
+        "targetPostgresqlSelectedEvidenceDigest",
+        "targetMigrationEvidenceDigest",
+        "strategy",
+        "scopeDigest",
+        "validationPlanDigest",
+        "rollbackPlanDigest",
+        "acceptedLineageDigest"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "migrationPlanDigest": { "$ref": "#/$defs/digest" },
+        "migrationIdentityDigest": { "$ref": "#/$defs/digest" },
+        "targetRegion": { "$ref": "#/$defs/region" },
+        "targetEngine": { "$ref": "#/$defs/engine" },
+        "targetPostgresqlDecisionDigest": { "$ref": "#/$defs/digest" },
+        "targetPostgresqlSelectedEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "targetMigrationEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "strategy": {
+          "enum": ["offline-dump-restore", "online-logical-replication"]
+        },
+        "scopeDigest": { "$ref": "#/$defs/digest" },
+        "validationPlanDigest": { "$ref": "#/$defs/digest" },
+        "rollbackPlanDigest": { "$ref": "#/$defs/digest" },
+        "acceptedLineageDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "requested"],
+      "properties": {
+        "from": { "const": "rehearse" },
+        "requested": { "const": "cutover-ready" }
+      }
+    },
+    "replayProtection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attemptOrdinal", "priorEvidenceSetIds"],
+      "properties": {
+        "attemptOrdinal": { "type": "integer", "minimum": 1 },
+        "priorEvidenceSetIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    },
+    "prechecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modelPrepared",
+        "schemaCompatibilityReviewed",
+        "requiredTransformationsReviewed",
+        "unsupportedObjectsResolved",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "modelPrepared": { "type": "boolean" },
+        "schemaCompatibilityReviewed": { "type": "boolean" },
+        "requiredTransformationsReviewed": { "type": "boolean" },
+        "unsupportedObjectsResolved": { "type": "boolean" },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    },
+    "initialLoad": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completed",
+        "method",
+        "snapshotReference",
+        "loadArtifactReference",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "completed": { "type": "boolean" },
+        "method": {
+          "enum": ["offline-dump-restore", "consistent-snapshot"]
+        },
+        "snapshotReference": { "$ref": "#/$defs/reference" },
+        "loadArtifactReference": { "$ref": "#/$defs/reference" },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    },
+    "catchUp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "explicitlyPermitted",
+        "completed",
+        "maxLagSeconds",
+        "finalLagSeconds",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "mode": { "enum": ["not-applicable", "logical-replication"] },
+        "explicitlyPermitted": { "type": "boolean" },
+        "completed": { "type": "boolean" },
+        "maxLagSeconds": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "finalLagSeconds": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "evidenceReferences": { "$ref": "#/$defs/references" }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaCompatibilityPassed",
+        "objectCounts",
+        "rowCounts",
+        "dataVerification",
+        "applicationSmokeTestsPassed",
+        "applicationSmokeTestReferences",
+        "queryReferences",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "schemaCompatibilityPassed": { "type": "boolean" },
+        "objectCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "target"],
+          "properties": {
+            "source": { "type": "integer", "minimum": 0 },
+            "target": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rowCounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tableReference",
+              "sourceRows",
+              "targetRows",
+              "allowedDifferenceRows"
+            ],
+            "properties": {
+              "tableReference": { "$ref": "#/$defs/reference" },
+              "sourceRows": { "type": "integer", "minimum": 0 },
+              "targetRows": { "type": "integer", "minimum": 0 },
+              "allowedDifferenceRows": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "dataVerification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "method",
+            "passed",
+            "coveragePercent",
+            "sampleRows",
+            "riskAcceptanceReference",
+            "evidenceReferences"
+          ],
+          "properties": {
+            "method": {
+              "enum": [
+                "checksums",
+                "chunked-checksums",
+                "bounded-sampling"
+              ]
+            },
+            "passed": { "type": "boolean" },
+            "coveragePercent": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 100
+            },
+            "sampleRows": { "type": "integer", "minimum": 0 },
+            "riskAcceptanceReference": {
+              "oneOf": [
+                { "$ref": "#/$defs/reference" },
+                { "type": "null" }
+              ]
+            },
+            "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+          }
+        },
+        "applicationSmokeTestsPassed": { "type": "boolean" },
+        "applicationSmokeTestReferences": {
+          "$ref": "#/$defs/nonEmptyReferences"
+        },
+        "queryReferences": { "$ref": "#/$defs/nonEmptyReferences" },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    },
+    "cutoverReadiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writeFreezeRehearsed",
+        "connectionDrainRehearsed",
+        "dnsChangeReviewed",
+        "applicationChangeReviewed",
+        "validationOwnerConfirmed",
+        "cutoverOwnerConfirmed",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "writeFreezeRehearsed": { "type": "boolean" },
+        "connectionDrainRehearsed": { "type": "boolean" },
+        "dnsChangeReviewed": { "type": "boolean" },
+        "applicationChangeReviewed": { "type": "boolean" },
+        "validationOwnerConfirmed": { "type": "boolean" },
+        "cutoverOwnerConfirmed": { "type": "boolean" },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    },
+    "rollbackReadiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRetained",
+        "failbackRehearsed",
+        "rollbackWindowConfirmed",
+        "rollbackOwnerConfirmed",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "sourceRetained": { "type": "boolean" },
+        "failbackRehearsed": { "type": "boolean" },
+        "rollbackWindowConfirmed": { "type": "boolean" },
+        "rollbackOwnerConfirmed": { "type": "boolean" },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    },
+    "sourceOfTruth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "dualWritesObserved",
+        "transferAuthorized",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "owner": { "enum": ["source", "target", "ambiguous"] },
+        "dualWritesObserved": { "type": "boolean" },
+        "transferAuthorized": { "type": "boolean" },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sanitized"],
+      "properties": {
+        "sanitized": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "references": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "nonEmptyReferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "major", "minor"],
+      "properties": {
+        "family": { "const": "postgresql" },
+        "major": { "type": "integer", "minimum": 11, "maximum": 99 },
+        "minor": { "type": "integer", "minimum": 0, "maximum": 99 }
+      }
+    }
+  }
+}

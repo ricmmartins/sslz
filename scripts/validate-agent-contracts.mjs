@@ -356,6 +356,15 @@ function main() {
   const postgresqlMigrationPlanSchema = load(
     "agent/schemas/postgresql-migration-plan.schema.json",
   );
+  const postgresqlRehearsalEvidenceSchema = load(
+    "agent/schemas/postgresql-rehearsal-evidence.schema.json",
+  );
+  const postgresqlRehearsalLineageSchema = load(
+    "agent/schemas/postgresql-rehearsal-lineage.schema.json",
+  );
+  const postgresqlRehearsalPlanSchema = load(
+    "agent/schemas/postgresql-rehearsal-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -433,6 +442,12 @@ function main() {
   const postgresqlMigrationPlanInput = load(
     "agent/examples/postgresql-migration-plan-input.json",
   );
+  const postgresqlRehearsalEvidence = load(
+    "agent/examples/postgresql-rehearsal-evidence.json",
+  );
+  const postgresqlRehearsalLineage = load(
+    "agent/examples/postgresql-rehearsal-lineage.json",
+  );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
   const providerRegistrationApproval = load(
@@ -495,6 +510,18 @@ function main() {
   assert.equal(
     postgresqlMigrationPlanSchema.$id,
     "https://aka.ms/sslz/schemas/postgresql-migration-plan.schema.json",
+  );
+  validateDocument(
+    postgresqlRehearsalEvidenceSchema,
+    postgresqlRehearsalEvidence,
+  );
+  validateDocument(
+    postgresqlRehearsalLineageSchema,
+    postgresqlRehearsalLineage,
+  );
+  assert.equal(
+    postgresqlRehearsalPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/postgresql-rehearsal-plan.schema.json",
   );
   assert.equal(
     iacPlanInputSchema.$id,
@@ -615,6 +642,8 @@ function main() {
     regionalPlanningInput,
     postgresqlRegionalPlanInput,
     postgresqlMigrationPlanInput,
+    postgresqlRehearsalEvidence,
+    postgresqlRehearsalLineage,
     readyExample,
     blockedExample,
     providerRegistrationApproval,
