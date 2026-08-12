@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-execution-lineage.schema.json",
+  "title": "SSLZ PostgreSQL migration execution lineage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "lineageId",
+    "observedAt",
+    "expiresAt",
+    "environmentReference",
+    "targetReference",
+    "currentOrdinal",
+    "currentState",
+    "acceptedExecutions",
+    "consumedNonces"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "lineageId": { "$ref": "#/$defs/reference" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "environmentReference": { "$ref": "#/$defs/reference" },
+    "targetReference": { "$ref": "#/$defs/reference" },
+    "currentOrdinal": { "type": "integer", "minimum": 0 },
+    "currentState": {
+      "enum": ["rehearsal-reviewed", "execution-planned", "completed", "rolled-back"]
+    },
+    "acceptedExecutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "executionId",
+          "attemptOrdinal",
+          "idempotencyKey",
+          "planDigest",
+          "predecessorState",
+          "successorState",
+          "consumedNonces"
+        ],
+        "properties": {
+          "executionId": { "$ref": "#/$defs/reference" },
+          "attemptOrdinal": { "type": "integer", "minimum": 1 },
+          "idempotencyKey": { "$ref": "#/$defs/reference" },
+          "planDigest": { "$ref": "#/$defs/digest" },
+          "predecessorState": {
+            "const": "rehearsal-reviewed"
+          },
+          "successorState": {
+            "enum": ["execution-planned", "completed", "rolled-back", "rehearsal-reviewed"]
+          },
+          "consumedNonces": {
+            "type": "array",
+            "minItems": 15,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/reference" }
+          }
+        }
+      }
+    },
+    "consumedNonces": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

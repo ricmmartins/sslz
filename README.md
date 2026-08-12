@@ -19,8 +19,8 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 ## Agent-aware journey on `main`
 
 The current `main` branch includes the additive agent-aware founder journey: account/topology preflight, workload and
-regional planning, PostgreSQL fallback, explicit Defender workspace placement, provider remediation, IaC review,
-readiness-bound approval, regional retry, and AKS ingress/postcheck contracts. Run its package-free synthetic
+regional planning, PostgreSQL fallback plus approval-bound migration orchestration planning, explicit Defender workspace
+placement, provider remediation, IaC review, readiness-bound approval, regional retry, and AKS ingress/postcheck contracts. Run its package-free synthetic
 end-to-end validation with:
 
 ```bash

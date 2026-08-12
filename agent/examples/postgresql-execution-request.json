@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "executionId": "execution.orders.attempt-1",
+  "attemptOrdinal": 1,
+  "requestedAt": "2026-08-12T12:39:30Z",
+  "environmentReference": "environment.production.orders",
+  "sourceReference": "source.postgresql.orders.primary",
+  "targetReference": "target.postgresql.orders.flexible",
+  "strategy": "offline-dump-restore",
+  "idempotencyKey": "idempotency.execution.orders.attempt-1",
+  "predecessorState": "rehearsal-reviewed",
+  "successorState": "execution-planned",
+  "stageAuthorities": [
+    {
+      "stage": "rehearsal-execution",
+      "authorityReference": "authority.stage.rehearsal-execution",
+      "requiredCapabilities": ["rehearsal-execute"]
+    },
+    {
+      "stage": "initial-load",
+      "authorityReference": "authority.stage.initial-load",
+      "requiredCapabilities": ["initial-load-write"]
+    },
+    {
+      "stage": "cdc-catch-up",
+      "authorityReference": "authority.stage.cdc-catch-up",
+      "requiredCapabilities": []
+    },
+    {
+      "stage": "write-freeze-connection-drain",
+      "authorityReference": "authority.stage.write-freeze-connection-drain",
+      "requiredCapabilities": ["connection-drain", "write-freeze"]
+    },
+    {
+      "stage": "cutover-readiness",
+      "authorityReference": "authority.stage.cutover-readiness",
+      "requiredCapabilities": ["cutover-readiness-declare"]
+    },
+    {
+      "stage": "source-of-truth-transfer",
+      "authorityReference": "authority.stage.source-of-truth-transfer",
+      "requiredCapabilities": ["source-authority-transfer"]
+    },
+    {
+      "stage": "rollback",
+      "authorityReference": "authority.stage.rollback",
+      "requiredCapabilities": ["rollback-initiate"]
+    },
+    {
+      "stage": "failback",
+      "authorityReference": "authority.stage.failback",
+      "requiredCapabilities": ["failback-initiate"]
+    }
+  ]
+}

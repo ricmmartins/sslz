@@ -20,6 +20,7 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/postgresql-rehearsal-evidence.schema.json` | Expiry-bounded rehearsal, validation, cutover-readiness, rollback-readiness, and replay-lineage evidence |
 | `schemas/postgresql-rehearsal-lineage.schema.json` | Read-only accepted evidence-set lineage for deterministic replay rejection |
 | `schemas/postgresql-rehearsal-plan.schema.json` | Deterministic execution-disabled PostgreSQL rehearsal and validation plan |
+| `schemas/postgresql-execution-*.schema.json` | Approval-bound live-evidence, trust, lineage, stage-approval, request, and deterministic no-operation orchestration contracts |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
@@ -59,6 +60,7 @@ node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
 node tests/startup-postgresql-migration-plan.mjs
 node tests/startup-postgresql-rehearsal-plan.mjs
+node tests/startup-postgresql-execution-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
 node tests/startup-cool-foundation-plan.mjs
@@ -224,3 +226,8 @@ profile-allowlisted resource-provider registration; it cannot call either deploy
 another standalone command and supports only the primary `single-region-ready` platform baseline. It does not deploy a
 workload or secondary region. `cool-infrastructure` remains a nonproduction planning mode; no Phase 7 manifest is
 accepted by the Phase 6 preview or apply path.
+
+The PostgreSQL execution planner is a separate local JSON contract evaluator. It verifies protected digests, Ed25519
+signatures, single-use nonces, exact stage authority and capability boundaries, freshness, target/environment matching,
+and monotonic lineage, then emits descriptions and rollback boundaries only. Even an eligible plan performs no source,
+target, cloud, IaC, network, DNS, database, dump/restore, replication, cutover, rollback, failback, state, or file write.

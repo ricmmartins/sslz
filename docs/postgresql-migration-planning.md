@@ -125,6 +125,73 @@ require current live-owner confirmation.
 This additive planning contract does not affect Bicep or Terraform parameters, resources, previews, or apply surfaces, so
 no IaC parity change is required.
 
+## Approval-bound execution contract
+
+The next increment models the future write-capable migration path without implementing one. It consumes the exact source
+assessment, migration input and plan, rehearsal evidence and report, a current execution lineage, independently signed
+live-condition attestations, eight separately signed stage approvals, and a protected trust manifest:
+
+```bash
+node scripts/startup-postgresql-execution-plan.mjs plan \
+  --source-assessment <source-assessment.json> \
+  --migration-plan-input <migration-plan-input.json> \
+  --migration-plan <migration-plan.json> \
+  --rehearsal-evidence <rehearsal-evidence.json> \
+  --rehearsal-plan <rehearsal-plan.json> \
+  --execution-request <execution-request.json> \
+  --live-evidence <live-evidence.json> \
+  --approvals <stage-approvals.json> \
+  --current-lineage <execution-lineage.json> \
+  --trust-manifest <protected-trust-manifest.json> \
+  --trusted-trust-manifest-digest <out-of-band-protected-manifest-digest> \
+  --as-of <trusted-evaluation-time> \
+  --trusted-evaluation-time-digest <out-of-band-protected-time-digest> \
+  --output json
+```
+
+The evaluator reads local JSON and writes sanitized JSON to standard output only. Exit status is `0` when the complete
+execution contract is satisfied, `1` when a check blocks or requires current evidence, and `2` for invalid, secret-bearing,
+endpoint-bearing, or incomplete input. An eligible result is not an execution result: `executionPerformed` and every
+operation field remain false or `none`, and no command text is generated.
+
+The normalized evaluation time must match a separately supplied protected digest; a caller cannot make expired evidence
+current merely by changing `--as-of`. Approvals must postdate the request, rehearsal/live evidence, and the protected
+current-lineage snapshot, and must remain current at that trusted evaluation time.
+
+| Contract | Purpose |
+|---|---|
+| `postgresql-execution-request.schema.json` | Exact environment, source, target, strategy, idempotency identity, lineage transition, and eight distinct stage authorities |
+| `postgresql-execution-evidence.schema.json` | Separately signed live source catalog, target/region/capacity, secret-reference metadata, private connectivity, DNS/application, recovery/window/owner, provider/IaC, and optional online-replication evidence |
+| `postgresql-execution-approval.schema.json` | Separate signed approvals for rehearsal execution, initial load, CDC/catch-up, write freeze and connection drain, cutover readiness, source-of-truth transfer, rollback, and failback |
+| `postgresql-execution-lineage.schema.json` | Current environment/target state, monotonic attempt history, idempotency identities, and consumed nonces |
+| `postgresql-execution-trust.schema.json` | Independently protected artifact, attestation, and approval digests plus stage- or evidence-restricted Ed25519 public keys; the complete manifest is pinned by a separately supplied protected digest |
+| `postgresql-execution-plan.schema.json` | Deterministic checks, eligibility, sanitized planned actions, explicit rollback boundaries, unapplied lineage transition, and no-operation safety boundary |
+
+Offline dump/restore is the first-class path. Its CDC authority must still issue a separate signed `not-applicable`
+decision with no granted CDC capability; omission or reuse cannot be substituted by another approval. Online logical
+replication is accepted only when the bound migration and rehearsal plans both selected it and a separate restricted
+signer attests current CDC permission, logical-replication readiness, and replica-identity review.
+
+Every attestation signs the complete evidence-envelope binding digest. Every approval binds the exact request (including
+its timestamp), source assessment, migration plan, rehearsal report, live-evidence bundle, current lineage, environment,
+target, strategy, strategy-specific predecessor/successor state and branch, idempotency identity, rollback boundary,
+action digest, and exact capability digest. The evaluator also confirms the public key is actually Ed25519 rather than
+trusting an algorithm label. It rejects stale artifact reuse, mismatched environment or target, partial or duplicate approval sets,
+out-of-order stages, replayed nonces, non-monotonic lineage, approval substitution, capability widening, strategy downgrade,
+invalid signatures, modified signed claims, and omitted evidence.
+
+The files under `agent/examples/postgresql-execution-*.json` are sanitized schema specimens whose zero digests and placeholder
+signatures are deliberately non-operational. The test suite generates ephemeral Ed25519 identities in memory and covers
+positive offline and online planning plus stale, partial, tampered, replayed, duplicated, omitted, widened, downgraded, and
+out-of-order cases without persisting private signing material.
+
+Accepted lineage entries represent atomic execution-attempt outcomes. A later attempt is permitted only after the prior
+attempt's protected lineage outcome has returned to `rehearsal-reviewed`; ordinals, execution IDs, idempotency keys, and
+nonces must still advance without gaps or reuse.
+
+This contract adds no Bicep or Terraform parameter, resource, preview, apply, or state surface. Provider/IaC readiness is
+an opaque signed evidence binding only, so existing Bicep and Terraform remain intentionally unchanged.
+
 ## Identity and invalidation
 
 The migration identity binds the source assessment digest and freshness, selected PostgreSQL decision/evidence digests,
