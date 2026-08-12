@@ -918,10 +918,10 @@ function bicepCompiledTemplate() {
       activityLogDiag: resource("Microsoft.Insights/diagnosticSettings"),
       logAnalytics: scopedNested(
         [resource("Microsoft.OperationalInsights/workspaces")],
-        "[variables('rgMonitoring')]",
+        "[format('{0}{1}{2}{3}{4}{5}{6}{7}', variables('rgMonitoring'), variables('workspaceRegionGuard'), variables('primaryRegionPolicyGuard'), variables('workspacePrimaryGuard'), variables('workspaceReferenceGuard'), variables('workspaceSelectionGuard'), variables('externalWorkspaceReferenceGuard'), variables('sharedWorkspaceOwnershipGuard'))]",
       ),
       networking: scopedNested([
-        ...Array.from({ length: 4 }, () =>
+        ...Array.from({ length: 5 }, () =>
           resource("Microsoft.Network/networkSecurityGroups"),
         ),
         resource("Microsoft.Network/virtualNetworks"),
@@ -965,6 +965,7 @@ function bicepCompiledTemplate() {
     },
     outputs: Object.fromEntries(
       [
+        "aksIngressNsgRules",
         "logAnalyticsWorkspaceId",
         "logAnalyticsWorkspaceName",
         "resourceGroupMonitoring",
@@ -981,8 +982,10 @@ function bicepCompiledTemplate() {
   template.resources.networking.properties.template.outputs =
     Object.fromEntries(
       [
+        "aksIngressNsgRules",
         "aksSubnetId",
         "appSubnetId",
+        "containerAppsSubnetId",
         "dataSubnetId",
         "sharedSubnetId",
         "vnetId",
@@ -1850,6 +1853,18 @@ try {
         }).runner,
       }),
     /unexpected deployment outputs/,
+  );
+  assert.throws(
+      () =>
+        buildDeploymentManifest(plan, {
+          provider: "bicep",
+          environment: "prod",
+          planPath,
+          evaluatedAt,
+          stateStoreResolver: () => ({ storeId: "not-a-stable-identity" }),
+          runner: mockRuntime().runner,
+        }),
+      (error) => error.code === "deployment.state.identity-unavailable",
   );
   assert.equal(bicepManifest.safety.previewWrites, 0);
   assert.equal(bicepManifest.safety.bicepMode, "Incremental");

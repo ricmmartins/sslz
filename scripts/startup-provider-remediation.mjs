@@ -301,19 +301,20 @@ function validateReviewedAction(plan, actionId) {
   const environments = Array.isArray(target?.environments)
     ? target.environments
     : [];
-  const targetEnvironment = environments.find(
+  const targetEnvironments = environments.filter(
     (environment) => environment.subscriptionId === action.subscriptionId,
   );
-  if (!targetEnvironment) {
+  if (targetEnvironments.length === 0) {
     fail(
       "remediation.target.subscription",
       "The provider-registration subscription is not an exact reviewed target.",
     );
   }
-  const expectedId = `provider.register.${targetEnvironment.name}.${action.namespace
-    .toLowerCase()
-    .replaceAll(".", "-")}`;
-  if (action.id !== expectedId) {
+  const namespaceSlug = action.namespace.toLowerCase().replaceAll(".", "-");
+  const expectedIds = targetEnvironments.map(
+    ({ name }) => `provider.register.${name}.${namespaceSlug}`,
+  );
+  if (!expectedIds.includes(action.id)) {
     fail(
       "remediation.action.id-mismatch",
       "The provider-registration action identifier does not match its exact target.",

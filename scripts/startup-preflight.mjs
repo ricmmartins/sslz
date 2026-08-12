@@ -12,8 +12,7 @@ const catalog = JSON.parse(
   readFileSync(resolve(root, "agent/checks/check-catalog.json"), "utf8"),
 );
 const catalogById = new Map(catalog.checks.map((check) => [check.id, check]));
-const requiredProviders = [
-  "Microsoft.App",
+const baselineProviders = [
   "Microsoft.Authorization",
   "Microsoft.Insights",
   "Microsoft.KeyVault",
@@ -21,6 +20,14 @@ const requiredProviders = [
   "Microsoft.OperationalInsights",
   "Microsoft.Resources",
 ];
+const workloadProfiles = new Map(
+  ["container-apps", "aks", "postgresql", "foundry", "gpu"].map((profileId) => {
+    const profile = JSON.parse(
+      readFileSync(resolve(root, `agent/profiles/${profileId}.json`), "utf8"),
+    );
+    return [profile.id, profile];
+  }),
+);
 const sufficientRoles = new Set(["Owner", "Contributor"]);
 const uuidPattern =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -33,7 +40,7 @@ function usage(message) {
     console.error(message);
   }
   console.error(
-    "Usage: startup-preflight.sh inspect (--startup-subscription <id> | --prod-subscription <id> --nonprod-subscription <id>) [--output json|text]",
+    "Usage: startup-preflight.sh inspect (--startup-subscription <id> | --prod-subscription <id> --nonprod-subscription <id>) [--profile <id>]... [--output json|text]",
   );
   process.exit(2);
 }
@@ -43,7 +50,7 @@ function parseArguments(argv) {
     usage("Only inspect mode is supported.");
   }
 
-  const options = { mode: "inspect", output: "text" };
+  const options = { mode: "inspect", output: "text", profiles: [] };
   for (let index = 1; index < argv.length; index += 1) {
     const argument = argv[index];
     const value = argv[index + 1];
@@ -58,6 +65,9 @@ function parseArguments(argv) {
       index += 1;
     } else if (argument === "--output" && value) {
       options.output = value;
+      index += 1;
+    } else if (argument === "--profile" && value) {
+      options.profiles.push(value);
       index += 1;
     } else {
       usage(`Unsupported or incomplete argument: ${argument}`);
@@ -93,6 +103,24 @@ function parseArguments(argv) {
   if (!["json", "text"].includes(options.output)) {
     usage("--output must be json or text.");
   }
+  options.profiles =
+    options.profiles.length > 0
+      ? [...new Set(options.profiles)].sort()
+      : ["container-apps"];
+  const unknownProfiles = options.profiles.filter(
+    (profileId) => !workloadProfiles.has(profileId),
+  );
+  if (unknownProfiles.length > 0) {
+    usage(`Unsupported workload profile: ${unknownProfiles.join(", ")}.`);
+  }
+  options.requiredProviders = [
+    ...new Set([
+      ...baselineProviders,
+      ...options.profiles.flatMap(
+        (profileId) => workloadProfiles.get(profileId).providerNamespaces,
+      ),
+    ]),
+  ].sort();
   return options;
 }
 
@@ -512,11 +540,30 @@ function evaluate(options) {
         provider.registrationState,
       ]),
     );
-    return requiredProviders
+    return options.requiredProviders
       .filter((provider) => states.get(provider) !== "Registered")
       .map((provider) => ({ environment: item.environment, namespace: provider }));
   });
-  const providerActionIds = missingProviders.map(
+  const remediationProviders = missingProviders.filter((provider, index, items) => {
+    const subscriptionId =
+      provider.environment === "prod"
+        ? options.prodSubscriptionId
+        : options.nonprodSubscriptionId;
+    return (
+      index ===
+      items.findIndex((candidate) => {
+        const candidateSubscriptionId =
+          candidate.environment === "prod"
+            ? options.prodSubscriptionId
+            : options.nonprodSubscriptionId;
+        return (
+          candidateSubscriptionId === subscriptionId &&
+          candidate.namespace === provider.namespace
+        );
+      })
+    );
+  });
+  const providerActionIds = remediationProviders.map(
     (provider) =>
       `provider.register.${provider.environment}.${provider.namespace
         .toLowerCase()
@@ -531,7 +578,11 @@ function evaluate(options) {
         : missingProviders.length
           ? "One or more required resource providers are not registered."
           : "Required resource providers are registered in both subscriptions.",
-      { missingProviders },
+      {
+        selectedProfiles: options.profiles,
+        requiredProviders: options.requiredProviders,
+        missingProviders,
+      },
       providerFailure ? ["account.review-provider-access"] : providerActionIds,
       providerFailure?.evidence.error,
     ),
@@ -546,7 +597,7 @@ function evaluate(options) {
       ),
     );
   }
-  missingProviders.forEach((provider, index) => {
+  remediationProviders.forEach((provider, index) => {
     const subscriptionId =
       provider.environment === "prod"
         ? options.prodSubscriptionId

@@ -74,11 +74,18 @@ if (command.startsWith("account list")) {
   response = fixture.policies[environment];
 } else if (command.startsWith("provider list")) {
   fail("providers");
-  const missingApp =
-    fixture.providers[environment] === "missing-microsoft-app";
+  const missingNamespace = {
+    "missing-microsoft-app": "Microsoft.App",
+    "missing-microsoft-container-service": "Microsoft.ContainerService",
+    "missing-microsoft-cognitive-services": "Microsoft.CognitiveServices",
+    "missing-microsoft-dbfor-postgresql": "Microsoft.DBforPostgreSQL"
+  }[fixture.providers[environment]];
   response = [
     "Microsoft.App",
     "Microsoft.Authorization",
+    "Microsoft.CognitiveServices",
+    "Microsoft.ContainerService",
+    "Microsoft.DBforPostgreSQL",
     "Microsoft.Insights",
     "Microsoft.KeyVault",
     "Microsoft.Network",
@@ -87,7 +94,7 @@ if (command.startsWith("account list")) {
   ].map((namespace) => ({
     namespace,
     registrationState:
-      missingApp && namespace === "Microsoft.App" ? "NotRegistered" : "Registered"
+      missingNamespace === namespace ? "NotRegistered" : "Registered"
   }));
 } else if (command.includes("graph.microsoft.com/v1.0/domains")) {
   fail("domains");

@@ -26,6 +26,13 @@ const REGIONAL_ATTEMPT_CHECKS = Object.freeze({
   providerParity: "regional.retry.provider-parity",
 });
 
+function regionalCheckError(message, checkId) {
+  const error = new Error(message);
+  error.code = checkId;
+  error.checkId = checkId;
+  return error;
+}
+
 function canonicalJson(value) {
   if (Array.isArray(value)) {
     return `[${value.map(canonicalJson).join(",")}]`;
@@ -433,7 +440,10 @@ function assertFreshRegionalBindings(
   for (const [label, digest] of Object.entries(freshBindings)) {
     assertDigest(digest, label);
     if (changedRegion && digest === previousBindings[label]) {
-      throw new Error(`Changed-region retry cannot reuse the prior ${label}.`);
+      throw regionalCheckError(
+        `Changed-region retry cannot reuse the prior ${label}.`,
+        REGIONAL_ATTEMPT_CHECKS.bindingCurrent,
+      );
     }
   }
 }
@@ -443,7 +453,10 @@ function replanRegionalAttempt(previous, input) {
   const targetRegion = normalizeRegion(input.targetRegion, "targetRegion");
   const changedRegion = targetRegion !== previous.targetRegion;
   if (previous.cleanup.required && previous.cleanup.status !== "succeeded") {
-    throw new Error("Cleanup failure or pending cleanup blocks regional replan.");
+    throw regionalCheckError(
+      "Cleanup failure or pending cleanup blocks regional replan.",
+      REGIONAL_ATTEMPT_CHECKS.cleanupComplete,
+    );
   }
   if (!["failed", "cleaned"].includes(previous.status)) {
     throw new Error("A concurrent, successful, or active regional attempt blocks replan.");

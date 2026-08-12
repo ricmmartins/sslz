@@ -12,6 +12,18 @@ description: "Design proposal for agent-assisted Azure account and SSLZ setup"
 Phases 1-7 are implemented as additive wrappers around the existing SSLZ deployment flow. The account topology path
 described below is read-only and does not change Azure.
 
+The canonical current-`main` validation command is:
+
+```bash
+node scripts/validate-greenfield-journey.mjs
+```
+
+It runs the complete synthetic founder journey through production contracts with deterministic mocks, including
+fail-closed negative journeys and a separately signed synthetic observed AKS acceptance. It performs no Azure writes or
+live-tenant reads. It requires Node.js and the local Bicep CLI installed by `az bicep install`, but no npm install or
+project dependency restore. Tagged releases expose only the capabilities documented in their tag; direct
+Bicep/Terraform usage remains the baseline deployment workflow rather than an implicit agent run.
+
 ## Acceptance-gap context
 
 The one-subscription and billing-benefit scenario was observed while the existing SSLZ baseline was exercised through a
@@ -123,6 +135,10 @@ The agent must not attempt to:
 
 The agent also cannot prove benefit applicability from partial metadata, complete a support case, or make an ambiguous
 multi-subscription choice on the user's behalf. Those conditions remain blocked.
+
+Preflight derives provider checks from repeatable `--profile` selections. The default remains `container-apps` for
+backward compatibility; an AKS plan explicitly supplies `--profile aks`, which adds
+`Microsoft.ContainerService` to the inspected namespaces without blocking non-AKS journeys.
 
 ## Phase 2: Workload discovery
 

@@ -87,7 +87,11 @@ assert.throws(
       ...bindings(1),
       createdAt: fixture.timestamps.replanned,
     }),
-  /Cleanup failure or pending cleanup/,
+  (error) => {
+    assert.equal(error.code, "regional.retry.cleanup-complete");
+    assert.equal(error.checkId, "regional.retry.cleanup-complete");
+    return /Cleanup failure or pending cleanup/.test(error.message);
+  },
 );
 
 const cleanupFailed = recordCleanupOutcome(failed, {
@@ -106,7 +110,11 @@ assert.throws(
       ...bindings(1),
       createdAt: fixture.timestamps.replanned,
     }),
-  /Cleanup failure or pending cleanup/,
+  (error) => {
+    assert.equal(error.code, "regional.retry.cleanup-complete");
+    assert.equal(error.checkId, "regional.retry.cleanup-complete");
+    return /Cleanup failure or pending cleanup/.test(error.message);
+  },
 );
 
 const cleaned = recordCleanupOutcome(failed, {
@@ -166,7 +174,11 @@ for (const key of Object.keys(bindings())) {
         [key]: bindings()[key],
         createdAt: fixture.timestamps.replanned,
       }),
-    new RegExp(`cannot reuse the prior ${key}`),
+    (error) => {
+      assert.equal(error.code, "regional.retry.binding-current");
+      assert.equal(error.checkId, "regional.retry.binding-current");
+      return new RegExp(`cannot reuse the prior ${key}`).test(error.message);
+    },
   );
 }
 
