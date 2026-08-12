@@ -13,6 +13,7 @@ on:
       - 'scripts/subscription-topology.mjs'
       - 'scripts/defender-workspace-placement.mjs'
       - 'scripts/startup-workload-plan.*'
+      - 'scripts/aks-ingress-contract.mjs'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-postgresql-plan.*'
       - 'scripts/startup-iac-plan.*'
@@ -36,6 +37,7 @@ on:
       - 'scripts/subscription-topology.mjs'
       - 'scripts/defender-workspace-placement.mjs'
       - 'scripts/startup-workload-plan.*'
+      - 'scripts/aks-ingress-contract.mjs'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-postgresql-plan.*'
       - 'scripts/startup-iac-plan.*'
@@ -72,6 +74,9 @@ jobs:
 
       - name: Test read-only workload planner
         run: node tests/startup-workload-plan.mjs
+
+      - name: Test AKS ingress decision and postcheck contracts
+        run: node tests/aks-ingress-contract.mjs
 
       - name: Test read-only regional planner
         run: node tests/startup-regional-plan.mjs

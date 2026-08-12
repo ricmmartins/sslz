@@ -23,7 +23,8 @@
       "incidentOwnerConfirmed": true,
       "usesDocker": true,
       "kubernetesRequirements": [],
-      "managedModelFit": "unknown"
+      "managedModelFit": "unknown",
+      "aksIngress": null
     },
     "reliability": {
       "dataResidency": "United States",
@@ -54,6 +55,7 @@
     "status": "ready",
     "computeProfile": "container-apps",
     "profileExtensions": ["postgresql"],
+    "aksIngress": null,
     "rationale": [
       {
         "decision": "container-apps",

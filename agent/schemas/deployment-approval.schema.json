@@ -35,6 +35,9 @@
     "defenderWorkspacePolicyEvidenceDigest",
     "defenderWorkspacePolicyEvidenceFreshness",
     "defenderPaidPlanSelectionDigest",
+    "aksIngressMode",
+    "aksIngressDecisionDigest",
+    "aksIngressPostcheckDigest",
     "operation",
     "provider",
     "environment",
@@ -191,6 +194,21 @@
     },
     "defenderPaidPlanSelectionDigest": {
       "$ref": "#/$defs/digest"
+    },
+    "aksIngressMode": {
+      "enum": ["not-applicable", "private", "public-azure-load-balancer"]
+    },
+    "aksIngressDecisionDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "aksIngressPostcheckDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
     },
     "operation": {
       "const": "platform-baseline.deploy"

@@ -109,6 +109,16 @@
         },
         "managedModelFit": {
           "enum": ["yes", "no", "unknown"]
+        },
+        "aksIngress": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "aks-ingress-decision.schema.json"
+            }
+          ]
         }
       }
     },

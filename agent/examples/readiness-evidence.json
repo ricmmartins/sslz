@@ -16,7 +16,9 @@
     ],
     "regionalMode": "single-region-ready",
     "primaryRegion": "eastus2",
-    "secondaryRegion": null
+    "secondaryRegion": null,
+    "aksIngressMode": "not-applicable",
+    "aksIngressDecisionDigest": null
   },
   "codeEvidence": {
     "preflight": {
@@ -224,5 +226,5 @@
     "coolFootprintCost": null,
     "recoveryExercise": null
   },
-  "evidenceDigest": "sha256:c83e3794da5b6d235616d2ba98f8cc3095041c5523b4dcf34ef9ca6f2753dc7d"
+  "evidenceDigest": "sha256:ce96ac5312af6d200d03af710007cf42946273fc1322b0825e71dc254b3bbf4f"
 }

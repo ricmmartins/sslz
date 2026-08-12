@@ -19,6 +19,8 @@ The input and output contracts are:
 - [`agent/schemas/iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json) for Phase 6-capable plans with an exact backend subscription
 - [`agent/schemas/iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json) for approval-capable plans with readiness evidence
 - [`agent/schemas/readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
+- [`agent/schemas/aks-ingress-decision.schema.json`](../agent/schemas/aks-ingress-decision.schema.json)
+- [`agent/schemas/aks-ingress-postcheck.schema.json`](../agent/schemas/aks-ingress-postcheck.schema.json)
 - [`agent/schemas/subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
 - [`agent/schemas/defender-workspace-placement-decision.schema.json`](../agent/schemas/defender-workspace-placement-decision.schema.json)
 - [`agent/schemas/postgresql-regional-plan-input.schema.json`](../agent/schemas/postgresql-regional-plan-input.schema.json)
@@ -158,6 +160,8 @@ The planner canonicalizes object keys and computes a SHA-256 digest over all app
 - deployment and cost assumptions;
 - proposed manual, support, and information actions;
 - explicit Terraform remote-backend coordinates, including the backend subscription.
+- the explicit AKS ingress mode, exact service/frontend/NodePort/probe/source-prefix mapping, generated NSG priorities,
+  decision digest, and deterministic postcheck placeholders when AKS is selected.
 - the readiness evidence version, opaque artifact ID, canonical digest, issue time, and expiry.
 - the topology decision ID, digest, expiry, tenant, and exact environment-to-subscription mapping.
 - the full PostgreSQL regional decision, selected evidence digest, exact fallback rationale, provider-equivalent planning
@@ -180,6 +184,11 @@ compatibility, but their approval is forced to
 PostgreSQL currently has no deployable resource in either IaC root. Its Bicep and Terraform values are semantically
 equivalent decision parameters validated as direct input and bound into readiness, plan, manifest, and approval digests.
 They do not add a server resource, reserve capacity, register a provider, or expand the execution boundary.
+
+AKS ingress is deployable only through the existing primary networking roots. Private mode emits no public rules. Public
+Azure Load Balancer mode emits only the exact health-probe and data-path rules bound by the decision. Both providers
+produce the same ordered rule semantics and expose them as a primary-template output. Missing evidence blocks later
+acceptance or recovery, but planning retains explicit `not-observed` placeholders and never claims live connectivity.
 
 Phase 7 readiness additionally requires the cost ceiling, exercise cadence/status, owner role/reference, external
 reviews, and billing/support confirmation. The generated approval binding remains pending and cannot authorize

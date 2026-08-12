@@ -19,6 +19,8 @@ The versioned contracts are:
 - [`iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json)
 - [`iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json)
 - [`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
+- [`aks-ingress-decision.schema.json`](../agent/schemas/aks-ingress-decision.schema.json)
+- [`aks-ingress-postcheck.schema.json`](../agent/schemas/aks-ingress-postcheck.schema.json)
 - [`subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
 - [`deployment-execution-manifest.schema.json`](../agent/schemas/deployment-execution-manifest.schema.json)
 - [`deployment-approval.schema.json`](../agent/schemas/deployment-approval.schema.json)
@@ -111,6 +113,12 @@ subscription, exact subscription scope, protected durable-store identity, parame
 authentication choice, notification-recipient commitment, unique nonce, and validity window. The window cannot exceed
 24 hours. It also duplicates every Defender workspace binding from the manifest, so omission or mutation invalidates the
 signature and replay record.
+
+For AKS plans, the manifest and signed approval also duplicate the ingress mode, normalized decision digest, and expected
+postcheck digest. Omission, mutation, mode switching, or replay against a different ingress mapping fails before any
+write. Planning postchecks contain only `not-observed` placeholders. Acceptance or recovery requires fresh supplied
+health and TCP/HTTP reachability evidence with timestamps and an opaque reference; deployment output alone is not a live
+connectivity claim.
 
 The approval also binds the regional attempt ID, attempt digest and number, original and target regions, and reviewed
 Terraform state key. Switching regions therefore invalidates the prior manifest and approval even if every other target

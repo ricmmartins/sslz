@@ -57,6 +57,7 @@ The profiles assume:
 | What are the target RTO and RPO? | Selects single-region or Hot/Cool readiness |
 | What monthly platform budget is acceptable? | Prevents unsuitable services and standby scale |
 | Who owns production incidents? | Determines whether the operational burden is supportable |
+| Is AKS ingress private or a public Azure Load Balancer? | Prevents generic AKS selection from silently creating public exposure |
 
 ## Decision order
 
@@ -111,6 +112,8 @@ applications and horizontal scaling without cluster operations.
 - application workloads run on user node pools;
 - system and user workloads are separated;
 - production workloads use multiple replicas, disruption budgets, and topology spread constraints.
+- ingress is explicitly `private` (`ClusterIP`) or `public-azure-load-balancer` (one exact frontend-to-NodePort path);
+- public client source prefixes, the Azure Load Balancer probe, and existing NSG priorities are reviewed before planning.
 
 **Startup limits:**
 
@@ -121,6 +124,11 @@ applications and horizontal scaling without cluster operations.
 
 If the founder cannot name an owner for AKS operations, the agent returns to the Container Apps profile or stops for
 manual architecture review.
+
+The planner also stops when ingress is omitted, a public service is requested under private mode, an arbitrary NodePort
+range is supplied, or the exact probe/source/priority constraints cannot be proven. The normalized ingress decision and
+its planning-only postcheck placeholders are copied unchanged into regional planning, IaC parameters, readiness, the
+deployment manifest, and the signed approval.
 
 ## Profile: Foundry application
 

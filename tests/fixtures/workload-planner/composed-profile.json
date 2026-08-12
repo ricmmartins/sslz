@@ -8,7 +8,18 @@
       "usesFoundryModels": true,
       "requiresCustomerManagedGpu": true,
       "managedModelFit": "no",
-      "incidentOwnerConfirmed": true
+      "incidentOwnerConfirmed": true,
+      "aksIngress": {
+        "mode": "private",
+        "serviceType": "ClusterIP",
+        "frontendExposure": "private",
+        "protocol": "Tcp",
+        "frontendPort": null,
+        "backendNodePort": null,
+        "healthProbe": { "sourcePrefix": null, "port": null },
+        "dataSourcePrefixes": [],
+        "reservedNsgPriorities": []
+      }
     }
   },
   "expected": {

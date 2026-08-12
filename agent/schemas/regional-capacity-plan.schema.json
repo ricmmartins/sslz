@@ -40,7 +40,7 @@
     "workloadSelection": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["computeProfile", "profileExtensions"],
+      "required": ["computeProfile", "profileExtensions", "aksIngress"],
       "properties": {
         "computeProfile": {
           "enum": ["container-apps", "aks"]
@@ -51,6 +51,16 @@
           "items": {
             "enum": ["postgresql", "foundry", "gpu"]
           }
+        },
+        "aksIngress": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
         }
       }
     },

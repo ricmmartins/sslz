@@ -10,6 +10,7 @@
     "status",
     "computeProfile",
     "profileExtensions",
+    "aksIngress",
     "rationale",
     "assumptions",
     "requiredChecks",
@@ -38,6 +39,16 @@
       "items": {
         "enum": ["postgresql", "foundry", "gpu"]
       }
+    },
+    "aksIngress": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object"
+        }
+      ]
     },
     "rationale": {
       "type": "array",

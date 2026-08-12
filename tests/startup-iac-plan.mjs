@@ -62,6 +62,9 @@ const failureFixture = JSON.parse(
     "utf8",
   ),
 );
+const publicAksIngress = JSON.parse(
+  readFileSync(resolve(root, "agent/examples/aks-ingress-public.json"), "utf8"),
+);
 const outputRelative = `.sslz/generated/tests-${process.pid}`;
 const outputPath = resolve(root, outputRelative);
 const terraformVariables = readFileSync(
@@ -79,8 +82,17 @@ function createInput({
   existingWorkspaceId = null,
   workspaceRegion = null,
   oneSubscription = false,
+  aksIngress = null,
 } = {}) {
   const planningInput = structuredClone(regionalInput);
+  if (aksIngress) {
+    planningInput.startupInput.workload.requiresKubernetes = true;
+    planningInput.startupInput.workload.kubernetesRequirements = ["operator"];
+    planningInput.startupInput.workload.incidentOwnerConfirmed = true;
+    planningInput.startupInput.workload.aksIngress =
+      structuredClone(aksIngress);
+    planningInput.regionalRequirements.computeSku = "Standard_D4s_v5";
+  }
   planningInput.startupInput.reliability.regionalMode = regionalMode;
   planningInput.startupInput.reliability.failoverOwnerConfirmed =
     regionalMode !== "single-region-ready";
@@ -342,6 +354,35 @@ try {
   assert.equal(
     first.decisionModel.postgresql.decisionDigest,
     input.postgresqlPlan.decisionDigest,
+  );
+
+  const publicAksInput = createInput({
+    regionalMode: "single-region-ready",
+    aksIngress: publicAksIngress,
+  });
+  const publicAksModel = buildDecisionModel(publicAksInput);
+  assert.equal(publicAksModel.profile.computeProfile, "aks");
+  assert.equal(
+    publicAksModel.profile.aksIngress.mode,
+    "public-azure-load-balancer",
+  );
+  assert.deepEqual(
+    {
+      mode: publicAksModel.configuration.aksIngressMode,
+      frontendPort: publicAksModel.configuration.aksIngressFrontendPort,
+      backendNodePort:
+        publicAksModel.configuration.aksIngressBackendNodePort,
+      probe:
+        publicAksModel.configuration.aksIngressHealthProbeSourcePrefix,
+      sources: publicAksModel.configuration.aksIngressSourcePrefixes,
+    },
+    {
+      mode: "public-azure-load-balancer",
+      frontendPort: 80,
+      backendNodePort: 30080,
+      probe: "AzureLoadBalancer",
+      sources: ["Internet"],
+    },
   );
 
   const omittedPostgresql = structuredClone(input);

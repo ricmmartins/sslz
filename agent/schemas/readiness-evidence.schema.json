@@ -46,7 +46,9 @@
         "profileExtensions",
         "regionalMode",
         "primaryRegion",
-        "secondaryRegion"
+        "secondaryRegion",
+        "aksIngressMode",
+        "aksIngressDecisionDigest"
       ],
       "properties": {
         "planId": {
@@ -89,6 +91,19 @@
             },
             {
               "$ref": "#/$defs/region"
+            }
+          ]
+        },
+        "aksIngressMode": {
+          "enum": ["not-applicable", "private", "public-azure-load-balancer"]
+        },
+        "aksIngressDecisionDigest": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
             }
           ]
         }

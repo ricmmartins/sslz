@@ -32,3 +32,8 @@ output "container_apps_subnet_id" {
   description = "Dedicated nondelegated /23 Container Apps infrastructure subnet resource ID"
   value       = var.include_container_apps_subnet ? azurerm_subnet.container_apps[0].id : null
 }
+
+output "aks_ingress_nsg_rules" {
+  description = "Deterministic AKS ingress NSG rules"
+  value       = local.aks_security_rules
+}

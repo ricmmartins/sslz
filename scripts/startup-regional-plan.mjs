@@ -753,6 +753,7 @@ function planRegions(input) {
     workloadSelection: {
       computeProfile: input.workloadPlan.computeProfile,
       profileExtensions: [...input.workloadPlan.profileExtensions],
+      aksIngress: structuredClone(input.workloadPlan.aksIngress),
     },
     status,
     requestedRegionalMode,

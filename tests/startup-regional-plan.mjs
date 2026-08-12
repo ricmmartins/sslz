@@ -168,6 +168,7 @@ for (const fixtureFile of fixtureFiles) {
   assert.deepEqual(first.workloadSelection, {
     computeProfile: input.workloadPlan.computeProfile,
     profileExtensions: input.workloadPlan.profileExtensions,
+    aksIngress: input.workloadPlan.aksIngress,
   });
   assert.equal(first.iacGenerated, false);
   assert.equal(first.azureOperations, "none");

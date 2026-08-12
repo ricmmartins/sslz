@@ -41,6 +41,119 @@ locals {
       address_prefix = cidrsubnet(var.vnet_address_prefix, 7, 16)
     }
   } : {})
+
+  aks_public_ingress       = var.aks_ingress_mode == "public-azure-load-balancer"
+  aks_private_ingress      = var.aks_ingress_mode == "private"
+  aks_generated_priorities = local.aks_public_ingress ? [100, 110, 120, 4096] : [120, 4096]
+  aks_reserved_priorities_valid = (
+    length(distinct(var.aks_ingress_reserved_nsg_priorities)) == length(var.aks_ingress_reserved_nsg_priorities) &&
+    alltrue([
+      for priority in var.aks_ingress_reserved_nsg_priorities :
+      priority == floor(priority) && priority >= 100 && priority <= 4096
+    ])
+  )
+  aks_priority_collision = length(setintersection(
+    toset(local.aks_generated_priorities),
+    toset(var.aks_ingress_reserved_nsg_priorities),
+  )) > 0
+  aks_ingress_shape_valid = var.aks_ingress_mode == "not-applicable" ? (
+    var.aks_ingress_frontend_port == 0 &&
+    var.aks_ingress_backend_node_port == 0 &&
+    var.aks_ingress_health_probe_source_prefix == "" &&
+    length(var.aks_ingress_source_prefixes) == 0
+    ) : local.aks_private_ingress ? (
+    var.aks_ingress_frontend_port == 0 &&
+    var.aks_ingress_backend_node_port == 0 &&
+    var.aks_ingress_health_probe_source_prefix == "" &&
+    length(var.aks_ingress_source_prefixes) == 0
+    ) : (
+    contains([80, 443], var.aks_ingress_frontend_port) &&
+    var.aks_ingress_backend_node_port == floor(var.aks_ingress_backend_node_port) &&
+    var.aks_ingress_backend_node_port >= 30000 &&
+    var.aks_ingress_backend_node_port <= 32767 &&
+    var.aks_ingress_health_probe_source_prefix == "AzureLoadBalancer" &&
+    length(distinct(var.aks_ingress_source_prefixes)) == length(var.aks_ingress_source_prefixes) &&
+    alltrue([
+      for prefix in var.aks_ingress_source_prefixes :
+      prefix == "Internet" || (
+        can(regex("^((25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})\\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})/(3[0-2]|[12]?[0-9])$", prefix)) &&
+        can(cidrhost(prefix, 0))
+      )
+    ]) &&
+    length(var.aks_ingress_source_prefixes) > 0
+  )
+  aks_legacy_rules = [
+    {
+      name                    = "AllowAzureLoadBalancerInbound"
+      priority                = 110
+      protocol                = "*"
+      source_address_prefixes = ["AzureLoadBalancer"]
+      destination_port_range  = "*"
+    },
+    {
+      name                    = "AllowVNetInbound"
+      priority                = 120
+      protocol                = "*"
+      source_address_prefixes = ["VirtualNetwork"]
+      destination_port_range  = "*"
+    },
+    {
+      name                    = "DenyAllInbound"
+      priority                = 4096
+      protocol                = "*"
+      source_address_prefixes = ["*"]
+      destination_port_range  = "*"
+    },
+  ]
+  aks_private_rules = [
+    {
+      name                    = "AllowVNetInbound"
+      priority                = 120
+      protocol                = "*"
+      source_address_prefixes = ["VirtualNetwork"]
+      destination_port_range  = "*"
+    },
+    {
+      name                    = "DenyAllInbound"
+      priority                = 4096
+      protocol                = "*"
+      source_address_prefixes = ["*"]
+      destination_port_range  = "*"
+    },
+  ]
+  aks_public_rules = [
+    {
+      name                    = "AllowAzureLoadBalancerHealthProbe"
+      priority                = 100
+      protocol                = "Tcp"
+      source_address_prefixes = ["AzureLoadBalancer"]
+      destination_port_range  = tostring(var.aks_ingress_backend_node_port)
+    },
+    {
+      name                    = "AllowApprovedPublicIngress"
+      priority                = 110
+      protocol                = "Tcp"
+      source_address_prefixes = sort(var.aks_ingress_source_prefixes)
+      destination_port_range  = tostring(var.aks_ingress_backend_node_port)
+    },
+    {
+      name                    = "AllowVNetInbound"
+      priority                = 120
+      protocol                = "*"
+      source_address_prefixes = ["VirtualNetwork"]
+      destination_port_range  = "*"
+    },
+    {
+      name                    = "DenyAllInbound"
+      priority                = 4096
+      protocol                = "*"
+      source_address_prefixes = ["*"]
+      destination_port_range  = "*"
+    },
+  ]
+  aks_security_rules = var.aks_ingress_mode == "not-applicable" ? local.aks_legacy_rules : (
+    local.aks_private_ingress ? local.aks_private_rules : local.aks_public_rules
+  )
 }
 
 # ==============================================================================
@@ -52,40 +165,31 @@ resource "azurerm_network_security_group" "aks" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  security_rule {
-    name                       = "AllowAzureLoadBalancerInbound"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_address_prefix      = "AzureLoadBalancer"
-    source_port_range          = "*"
-    destination_address_prefix = "*"
-    destination_port_range     = "*"
+  dynamic "security_rule" {
+    for_each = { for rule in local.aks_security_rules : rule.name => rule }
+    content {
+      name                       = security_rule.value.name
+      priority                   = security_rule.value.priority
+      direction                  = "Inbound"
+      access                     = security_rule.value.name == "DenyAllInbound" ? "Deny" : "Allow"
+      protocol                   = security_rule.value.protocol
+      source_address_prefix      = length(security_rule.value.source_address_prefixes) == 1 ? one(security_rule.value.source_address_prefixes) : null
+      source_address_prefixes    = length(security_rule.value.source_address_prefixes) > 1 ? security_rule.value.source_address_prefixes : null
+      source_port_range          = "*"
+      destination_address_prefix = security_rule.value.name == "AllowVNetInbound" ? "VirtualNetwork" : "*"
+      destination_port_range     = security_rule.value.destination_port_range
+    }
   }
 
-  security_rule {
-    name                       = "AllowVNetInbound"
-    priority                   = 120
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-    destination_address_prefix = "VirtualNetwork"
-    destination_port_range     = "*"
-  }
-
-  security_rule {
-    name                       = "DenyAllInbound"
-    priority                   = 4096
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_address_prefix      = "*"
-    source_port_range          = "*"
-    destination_address_prefix = "*"
-    destination_port_range     = "*"
+  lifecycle {
+    precondition {
+      condition     = local.aks_ingress_shape_valid
+      error_message = "AKS ingress must use the supported private or exact public Azure Load Balancer contract."
+    }
+    precondition {
+      condition     = local.aks_reserved_priorities_valid && !local.aks_priority_collision
+      error_message = "AKS ingress NSG priorities conflict with an existing reserved rule."
+    }
   }
 }
 

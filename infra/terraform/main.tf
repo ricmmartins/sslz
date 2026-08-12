@@ -180,15 +180,21 @@ module "log_analytics" {
 }
 
 module "networking" {
-  count                         = var.deploy_networking ? 1 : 0
-  source                        = "./modules/networking"
-  location                      = var.location
-  resource_group_name           = azurerm_resource_group.networking[0].name
-  vnet_name                     = "vnet-${local.prefix}"
-  vnet_address_prefix           = local.vnet_address_prefix
-  app_subnet_delegation         = var.app_subnet_delegation
-  include_container_apps_subnet = false
-  tags                          = local.tags
+  count                                  = var.deploy_networking ? 1 : 0
+  source                                 = "./modules/networking"
+  location                               = var.location
+  resource_group_name                    = azurerm_resource_group.networking[0].name
+  vnet_name                              = "vnet-${local.prefix}"
+  vnet_address_prefix                    = local.vnet_address_prefix
+  app_subnet_delegation                  = var.app_subnet_delegation
+  aks_ingress_mode                       = var.aks_ingress_mode
+  aks_ingress_frontend_port              = var.aks_ingress_frontend_port
+  aks_ingress_backend_node_port          = var.aks_ingress_backend_node_port
+  aks_ingress_health_probe_source_prefix = var.aks_ingress_health_probe_source_prefix
+  aks_ingress_source_prefixes            = var.aks_ingress_source_prefixes
+  aks_ingress_reserved_nsg_priorities    = var.aks_ingress_reserved_nsg_priorities
+  include_container_apps_subnet          = false
+  tags                                   = local.tags
 }
 
 # Defender pricing resources (Microsoft.Security/pricings/*) already exist on every

@@ -27,6 +27,7 @@ import {
   manifestDigest,
   runDeploymentIntegration,
   sanitizedTerraformEnvironment,
+  validateApprovedAksIngressPostcheck,
 } from "../scripts/startup-deployment-integration.mjs";
 import { sanitizedAzureCliEnvironment } from "../scripts/azure-cli-invocation.mjs";
 import {
@@ -99,6 +100,9 @@ const resultSchema = JSON.parse(
 const regionalAttemptSchema = JSON.parse(
   readFileSync(resolve(root, "agent/schemas/regional-attempt.schema.json"), "utf8"),
 );
+const publicAksIngress = JSON.parse(
+  readFileSync(resolve(root, "agent/examples/aks-ingress-public.json"), "utf8"),
+);
 
 const { publicKey, privateKey } = generateKeyPairSync("ed25519");
 const publicKeyPem = publicKey.export({ type: "spki", format: "pem" });
@@ -120,6 +124,7 @@ function createInput({
   existingWorkspaceId = null,
   workspaceRegion = null,
   oneSubscription = false,
+  aksIngress = null,
 } = {}) {
   const planningInput = structuredClone(regionalInput);
   planningInput.startupInput.reliability.regionalMode = regionalMode;
@@ -132,6 +137,12 @@ function createInput({
   if (regionalMode === "cool-infrastructure") {
     planningInput.regionalRequirements.secondaryBaseline.minimum = 30;
     planningInput.regionalRequirements.secondaryBaseline.maximum = 60;
+  }
+  if (aksIngress) {
+    planningInput.startupInput.workload.requiresKubernetes = true;
+    planningInput.startupInput.workload.kubernetesRequirements = ["operator"];
+    planningInput.startupInput.workload.aksIngress = structuredClone(aksIngress);
+    planningInput.regionalRequirements.computeSku = "Standard_D4s_v5";
   }
   planningInput.workloadPlan = planWorkload(planningInput.startupInput);
   const regionalPlan = planRegions(planningInput);
@@ -187,6 +198,12 @@ function createInput({
     },
     approval: null,
   };
+  if (aksIngress) {
+    input.deployment.services[0] = {
+      type: "Microsoft.ContainerService/managedClusters",
+      purpose: "application compute",
+    };
+  }
   if (existingWorkspaceId) {
     const effectiveWorkspaceRegion =
       workspaceRegion ?? regionalPlan.selectedPrimary.region;
@@ -494,6 +511,12 @@ function terraformVariables(environment = "prod") {
     deploy_networking: { value: true },
     vnet_address_prefix: { value: "10.20.0.0/16" },
     app_subnet_delegation: { value: "Microsoft.App/environments" },
+    aks_ingress_mode: { value: "not-applicable" },
+    aks_ingress_frontend_port: { value: 0 },
+    aks_ingress_backend_node_port: { value: 0 },
+    aks_ingress_health_probe_source_prefix: { value: "" },
+    aks_ingress_source_prefixes: { value: [] },
+    aks_ingress_reserved_nsg_priorities: { value: [] },
     enable_defender_for_servers: { value: true },
     enable_defender_for_containers: { value: false },
     enable_defender_for_databases: { value: true },
@@ -975,7 +998,16 @@ function bicepCompiledParameters(
   workspaceRegion = "eastus2",
   associationManagedExternally = false,
   sharedSubscription = false,
+  aksIngress = null,
 ) {
+  const ingress = aksIngress ?? {
+    mode: "not-applicable",
+    frontendPort: 0,
+    backendNodePort: 0,
+    healthProbe: { sourcePrefix: "" },
+    dataSourcePrefixes: [],
+    reservedNsgPriorities: [],
+  };
   return {
     $schema:
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
@@ -989,7 +1021,15 @@ function bicepCompiledParameters(
         budgetAlertEmails: ["budget-alerts@example.invalid"],
         deployNetworking: true,
         vnetAddressPrefix: "10.20.0.0/16",
-        appSubnetDelegation: "Microsoft.App/environments",
+        appSubnetDelegation: aksIngress
+          ? "Microsoft.Web/serverFarms"
+          : "Microsoft.App/environments",
+        aksIngressMode: ingress.mode,
+        aksIngressFrontendPort: ingress.frontendPort,
+        aksIngressBackendNodePort: ingress.backendNodePort,
+        aksIngressHealthProbeSourcePrefix: ingress.healthProbe.sourcePrefix,
+        aksIngressSourcePrefixes: ingress.dataSourcePrefixes,
+        aksIngressReservedNsgPriorities: ingress.reservedNsgPriorities,
         enableDefenderForServers: true,
         enableDefenderForContainers: false,
         enableDefenderForDatabases: true,
@@ -1026,6 +1066,7 @@ function mockRuntime({
   workspaceId = null,
   workspaceRegion = "eastus2",
   observedWorkspaceRegion = workspaceRegion,
+  aksIngress = null,
   workspaceRetentionInDays = 90,
   workspaceDailyQuotaGb = 5,
 } = {}) {
@@ -1082,6 +1123,7 @@ function mockRuntime({
               workspaceRegion,
               associationManagedExternally,
               workspaceId !== null,
+              aksIngress,
             ),
           ),
           templateJson: JSON.stringify(template),
@@ -1594,6 +1636,9 @@ function createApproval(manifest, overrides = {}, signingKey = privateKey) {
       manifest.defenderWorkspacePlacement.policyEvidenceFreshness,
     defenderPaidPlanSelectionDigest:
       manifest.defenderWorkspacePlacement.paidPlanSelectionDigest,
+    aksIngressMode: manifest.aksIngress.mode,
+    aksIngressDecisionDigest: manifest.aksIngress.decisionDigest,
+    aksIngressPostcheckDigest: manifest.aksIngress.postcheckDigest,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,
@@ -1720,6 +1765,55 @@ try {
     runner: previewRuntime.runner,
   });
   validateDocument(manifestSchema, bicepManifest);
+  const { plan: aksPlan, planPath: aksPlanPath } = writeReviewedPlan(
+    createInput({ aksIngress: publicAksIngress }),
+    "aks-ingress-postcheck",
+  );
+  const aksManifest = buildDeploymentManifest(aksPlan, {
+    provider: "bicep",
+    environment: "prod",
+    planPath: aksPlanPath,
+    evaluatedAt,
+    runner: mockRuntime({ aksIngress: publicAksIngress }).runner,
+  });
+  const aksApproval = createApproval(aksManifest);
+  const observedAksPostcheck = {
+    ...aksPlan.decisionModel.profile.aksIngress.postcheck,
+    observedHealthState: "healthy",
+    observedReachability: "reachable",
+    observedAt: "2026-08-09T11:55:00Z",
+    expiresAt: "2026-08-09T12:10:00Z",
+    evidenceReference: "synthetic.postcheck.public.signed.001",
+    liveConnectivityClaimed: true,
+  };
+  assert.equal(
+    validateApprovedAksIngressPostcheck({
+      postcheck: observedAksPostcheck,
+      purpose: "acceptance",
+      expectedDecision: publicAksIngress,
+      manifest: aksManifest,
+      approval: aksApproval,
+      publicKey: publicKeyPem,
+      evaluatedAt,
+    }).status,
+    "accepted",
+  );
+  assert.throws(
+    () =>
+      validateApprovedAksIngressPostcheck({
+        postcheck: observedAksPostcheck,
+        purpose: "acceptance",
+        expectedDecision: publicAksIngress,
+        manifest: aksManifest,
+        approval: {
+          ...aksApproval,
+          aksIngressPostcheckDigest: `sha256:${"0".repeat(64)}`,
+        },
+        publicKey: publicKeyPem,
+        evaluatedAt,
+      }),
+    (error) => error.code === "deployment.approval.signature-invalid",
+  );
   assert.throws(
     () =>
       buildDeploymentManifest(plan, {
@@ -2285,6 +2379,9 @@ try {
     defenderWorkspacePolicyEvidenceDigest: `sha256:${"4".repeat(64)}`,
     defenderWorkspacePolicyEvidenceFreshness: "not-required",
     defenderPaidPlanSelectionDigest: `sha256:${"3".repeat(64)}`,
+    aksIngressMode: "private",
+    aksIngressDecisionDigest: `sha256:${"6".repeat(64)}`,
+    aksIngressPostcheckDigest: `sha256:${"5".repeat(64)}`,
     operation: "platform-baseline.other",
     provider: "terraform",
     environment: "nonprod",
@@ -2362,6 +2459,20 @@ try {
     "deployment.approval.malformed",
   );
 
+  const omittedApprovalIngress = { ...approval };
+  delete omittedApprovalIngress.aksIngressPostcheckDigest;
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      bicepManifest,
+      omittedApprovalIngress,
+      mockRuntime(),
+      "approval-aks-ingress-omitted",
+    ).code,
+    "deployment.approval.malformed",
+  );
+
   const omittedManifestEvidence = structuredClone(bicepManifest);
   delete omittedManifestEvidence.readinessEvidence;
   assert.equal(
@@ -2388,6 +2499,41 @@ try {
       "manifest-workspace-omitted",
     ).code,
     "deployment.input.malformed",
+  );
+
+  const omittedManifestIngress = structuredClone(bicepManifest);
+  delete omittedManifestIngress.aksIngress;
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      omittedManifestIngress,
+      approval,
+      mockRuntime(),
+      "manifest-aks-ingress-omitted",
+    ).code,
+    "deployment.input.malformed",
+  );
+
+  const changedIngressManifest = structuredClone(bicepManifest);
+  changedIngressManifest.aksIngress = {
+    mode: "private",
+    decisionDigest: `sha256:${"6".repeat(64)}`,
+    postcheckDigest: `sha256:${"5".repeat(64)}`,
+  };
+  changedIngressManifest.manifestDigest = manifestDigest(
+    changedIngressManifest,
+  );
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      changedIngressManifest,
+      createApproval(changedIngressManifest),
+      mockRuntime(),
+      "manifest-aks-ingress-mutated",
+    ).code,
+    "deployment.manifest.binding-mismatch",
   );
 
   const changedWorkspaceManifest = structuredClone(bicepManifest);

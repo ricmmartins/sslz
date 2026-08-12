@@ -11,6 +11,8 @@
     "region.services.available",
     "region.skus.eligible",
     "operations.aks-owner.confirmed",
+    "network.aks-ingress.decision-explicit",
+    "network.aks-ingress.provider-parity",
     "security.defender.selection-reviewed",
     "operations.monitoring.destination-valid"
   ],

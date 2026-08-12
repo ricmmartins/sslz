@@ -184,6 +184,27 @@
       "blockingStates": ["fail", "unresolved"]
     },
     {
+      "id": "network.aks-ingress.decision-explicit",
+      "surface": "workload-planner",
+      "source": "scripts/startup-workload-plan.mjs",
+      "passState": "explicit",
+      "blockingStates": ["missing", "unsupported", "mismatched"]
+    },
+    {
+      "id": "network.aks-ingress.provider-parity",
+      "surface": "workload-profile",
+      "source": "agent/profiles/aks.json",
+      "passState": "equivalent",
+      "blockingStates": ["mismatch", "unproven"]
+    },
+    {
+      "id": "network.aks-ingress.postcheck-current",
+      "surface": "postcheck-contract",
+      "source": "scripts/aks-ingress-contract.mjs",
+      "passState": "current",
+      "blockingStates": ["missing", "stale", "mismatched", "not-observed"]
+    },
+    {
       "id": "security.defender.selection-reviewed",
       "surface": "workload-planner",
       "source": "agent/profiles/container-apps.json",
