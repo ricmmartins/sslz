@@ -16,8 +16,8 @@ digests needed to decide whether a reviewed plan is eligible for approval.
 
 The contract deliberately separates:
 
-- `codeEvidence`: authoritative preflight, primary/secondary regional observations, and selected Foundry
-  model-version/deployment/quota observations;
+- `codeEvidence`: authoritative preflight, primary/secondary regional observations, selected Foundry
+  model-version/deployment/quota observations, and the selected PostgreSQL regional decision/evidence binding;
 - `humanAttestations`: Microsoft for Startups billing/support confirmation; explicit security, Azure architecture, and
   Bicep/Terraform parity reviews; a failover owner and role reference; measured recovery results; service-specific
   recovery tests; and cool-footprint cost provenance.
@@ -56,7 +56,9 @@ The validator fails closed unless:
   regional plan;
 - primary and required secondary evidence match their selected roles and regions;
 - Foundry selections include current model reference, model version, deployment type, and sufficient quota in every
-  selected region.
+  selected region;
+- a selected PostgreSQL profile includes a current canonical decision for the exact primary region, eligible selected
+  evidence, exact fallback rationale, provider-equivalent parameters, and the `planning-only`/no-Azure-operation boundary.
 
 Missing values are blockers; the validator does not invent owners, targets, measurements, costs, confirmations, model
 versions, deployments, quota, or capacity.
@@ -70,16 +72,18 @@ must resolve startup entitlement or benefit-association questions.
 
 The v3 IaC planner validates freshness, topology identity, and scope before generating review artifacts. It places the
 full sanitized artifact in `plan-summary.json`, places the readiness and topology identities/digests/validity windows in
-the canonical decision model, and includes those bindings in the plan digest. Legacy v1/v2 inputs can still be represented
+the canonical decision model, and includes those bindings in the plan digest. For PostgreSQL it also binds the full
+decision, selected evidence digest, fallback rationale, and provider-parameter digest. Legacy v1/v2 inputs can still be represented
 locally, but their approval remains
 `pending` with `readiness-evidence-required`.
 
 Phase 6 revalidates the full artifact when preparing a Bicep or Terraform preview. The immutable deployment manifest
 copies the evidence version, opaque ID, digest, expiry, topology decision ID/digest, and exact environment mapping. The
-Ed25519 approval repeats and signs those fields.
+manifest also copies the PostgreSQL decision and selected-evidence digests when that profile is selected. The Ed25519
+approval repeats and signs those fields.
 Immediately before execution, the integration revalidates the plan, evidence freshness, manifest digest, approval
 signature, and every binding again. Mutation, omission, stale evidence, replay under another plan ID, target mismatch,
-scope mismatch, and profile/region mismatch fail closed.
+scope mismatch, profile/region mismatch, or changing PostgreSQL fallback after approval fail closed.
 
 This does not expand the execution boundary: only the existing primary `single-region-ready` platform baseline is
 executable, and no secondary region or workload deployment is added.

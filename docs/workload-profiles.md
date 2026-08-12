@@ -144,6 +144,25 @@ guarantee the same model, version, deployment type, or capacity.
 
 Use Azure Database for PostgreSQL when the workload needs relational data and PostgreSQL compatibility.
 
+PostgreSQL selection uses the separate dependency-free regional planner:
+
+```bash
+node scripts/startup-postgresql-plan.mjs plan \
+  --input agent/examples/postgresql-regional-plan-input.json \
+  --output json
+```
+
+Candidate evidence is point-in-time and region-specific. It records service availability, exact edition/tier/SKU,
+engine major and minor version, extensions, zone support, quota eligibility, capacity state, residency, estimated monthly
+cost, and source observation/expiry. Unsupported edition or version, extension mismatch, insufficient quota, unavailable
+capacity, unknown or stale capacity, policy denial, residency rejection, unsupported recovery targets, and cost-ceiling
+breaches remain distinct blocking reasons.
+
+Every candidate also emits an auditable runtime result for each PostgreSQL catalog check: edition/version, extensions,
+quota, capacity, recovery, and Bicep/Terraform parameter parity. A fallback can be selected only when all six results pass;
+stale evidence produces unresolved evidence-backed checks, and readiness revalidates the exact check set before IaC
+planning.
+
 **Nonprod default:**
 
 - Burstable compute when supported by the workload;
@@ -161,6 +180,15 @@ Use Azure Database for PostgreSQL when the workload needs relational data and Po
 
 Cross-region recovery requires an explicit data plan. A secondary application environment without replicated or
 restorable data is not a recovery solution.
+
+When the requested region is ineligible, the planner ranks only exact eligible alternatives. It never lowers the engine
+version, changes tier or SKU, drops an extension or feature, weakens zone/RTO/RPO requirements, exceeds the cost ceiling,
+or claims that point-in-time availability is reserved capacity. No eligible alternate means `blocked`, not a best-effort
+downgrade.
+
+The current repository has no reviewed PostgreSQL Flexible Server Bicep or Terraform deployment module. The planner
+therefore emits provider-equivalent planning parameters and immutable evidence bindings only. `deploymentBoundary` is
+`planning-only`, `azureOperations` is `none`, and neither provider artifact creates a PostgreSQL server.
 
 ## Profile: Customer-managed GPU
 

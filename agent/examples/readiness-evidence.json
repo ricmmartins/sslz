@@ -120,6 +120,7 @@
         "region": "eastus2"
       }
     ],
+    "postgresql": null,
     "foundry": []
   },
   "humanAttestations": {
@@ -223,5 +224,5 @@
     "coolFootprintCost": null,
     "recoveryExercise": null
   },
-  "evidenceDigest": "sha256:7ffe342d4e51ac26a459f660283fda7a345464d96b894803daa0d45636420311"
+  "evidenceDigest": "sha256:c83e3794da5b6d235616d2ba98f8cc3095041c5523b4dcf34ef9ca6f2753dc7d"
 }

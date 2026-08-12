@@ -102,6 +102,7 @@
         "subscriptionTopology",
         "defenderWorkspacePlacement",
         "regional",
+        "postgresql",
         "foundry"
       ],
       "properties": {
@@ -158,6 +159,53 @@
               }
             ]
           }
+        },
+        "postgresql": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "issuer",
+                "reference",
+                "observedAt",
+                "expiresAt",
+                "evidenceDigest",
+                "decisionDigest",
+                "selectedEvidenceDigest",
+                "targetRegion",
+                "selectedRegion",
+                "fallbackRequired",
+                "fallbackRationale",
+                "providerParametersDigest",
+                "deploymentBoundary"
+              ],
+              "properties": {
+                "status": { "const": "pass" },
+                "issuer": { "const": "startup-postgresql-plan.mjs" },
+                "reference": { "$ref": "#/$defs/reference" },
+                "observedAt": { "type": "string", "format": "date-time" },
+                "expiresAt": { "type": "string", "format": "date-time" },
+                "evidenceDigest": { "$ref": "#/$defs/digest" },
+                "decisionDigest": { "$ref": "#/$defs/digest" },
+                "selectedEvidenceDigest": { "$ref": "#/$defs/digest" },
+                "targetRegion": { "$ref": "#/$defs/region" },
+                "selectedRegion": { "$ref": "#/$defs/region" },
+                "fallbackRequired": { "type": "boolean" },
+                "fallbackRationale": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "$ref": "#/$defs/reference" }
+                },
+                "providerParametersDigest": { "$ref": "#/$defs/digest" },
+                "deploymentBoundary": { "const": "planning-only" }
+              }
+            }
+          ]
         },
         "foundry": {
           "type": "array",

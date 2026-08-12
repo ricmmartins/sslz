@@ -125,9 +125,18 @@ clusters, Hot/Cool AKS is not ready.
 
 - Use zone-redundant high availability for zone failures when required and supported.
 - Select cross-region read replicas or geo-restore based on RTO, RPO, cost, and service support.
+- Validate service availability, exact edition/tier/SKU, engine major/minor version, required extensions, zones, quota,
+  capacity, residency, policy, recovery targets, and cost independently in every candidate region.
+- Treat unsupported edition/version, quota shortage, unavailable capacity, policy denial, and transient or stale unknowns
+  as different fail-closed outcomes.
 - Document connection-endpoint changes during failover.
 - Test promotion or restore before claiming regional readiness.
 - Account for replication lag and possible data loss in the stated RPO.
+
+PostgreSQL fallback is deterministic and exact: it may change region only to a candidate satisfying every requested
+constraint. It must not silently downgrade version, tier, SKU, extension, feature, zone, RTO, or RPO, and point-in-time
+capacity evidence is never a reservation. The current implementation is planning-only because this repository has no
+reviewed PostgreSQL deployment module.
 
 ### Foundry
 
@@ -153,6 +162,11 @@ Capacity checks report a point-in-time observation, not a reservation. The plan 
 
 Do not continuously retry a capacity failure without bounded backoff. Classify the result and offer the approved
 alternative.
+
+For PostgreSQL, changing from the requested region to a ranked alternate is a new regional attempt. It requires fresh
+target-specific evidence and, if the failed attempt started writes, successful cleanup evidence. The new attempt receives
+new names and artifacts and must produce a new plan digest, preview or saved plan, execution manifest, and signed approval.
+Prior regional evidence, plan, artifact, manifest, approval, or state identity cannot be reused.
 
 ## Failover plan
 

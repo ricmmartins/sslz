@@ -316,6 +316,12 @@ function main() {
   const regionalPlanningInputSchema = load(
     "agent/schemas/regional-planning-input.schema.json",
   );
+  const postgresqlRegionalPlanInputSchema = load(
+    "agent/schemas/postgresql-regional-plan-input.schema.json",
+  );
+  const postgresqlRegionalPlanSchema = load(
+    "agent/schemas/postgresql-regional-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -378,6 +384,9 @@ function main() {
   const regionalPlanningInput = load(
     "agent/examples/regional-planning-input.json",
   );
+  const postgresqlRegionalPlanInput = load(
+    "agent/examples/postgresql-regional-plan-input.json",
+  );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
   const providerRegistrationApproval = load(
@@ -416,6 +425,14 @@ function main() {
   validateDocument(startupInputSchema, startupInput);
   validateDocument(workloadProfilePlanSchema, workloadProfilePlan);
   validateDocument(regionalPlanningInputSchema, regionalPlanningInput);
+  validateDocument(
+    postgresqlRegionalPlanInputSchema,
+    postgresqlRegionalPlanInput,
+  );
+  assert.equal(
+    postgresqlRegionalPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/postgresql-regional-plan.schema.json",
+  );
   assert.equal(
     iacPlanInputSchema.$id,
     "https://aka.ms/sslz/schemas/iac-plan-input.schema.json",
@@ -506,6 +523,7 @@ function main() {
     startupInput,
     workloadProfilePlan,
     regionalPlanningInput,
+    postgresqlRegionalPlanInput,
     readyExample,
     blockedExample,
     providerRegistrationApproval,

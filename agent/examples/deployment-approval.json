@@ -19,6 +19,8 @@
   "topologyDecisionId": "topology.startup-primary-baseline.preflight",
   "topologyDecisionDigest": "sha256:9c1743fbe6581e15b3c860d9af6702590644c4c95991d145a9f1fabe224609a9",
   "topologyDecisionExpiresAt": "2026-08-09T13:00:00Z",
+  "postgresqlDecisionDigest": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+  "postgresqlSelectedEvidenceDigest": "sha256:1313131313131313131313131313131313131313131313131313131313131313",
   "defenderWorkspacePlacementDecisionId": "workspace.startup-primary-baseline.nonprod",
   "defenderWorkspacePlacementDecisionDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
   "defenderWorkspaceRegion": "eastus2",

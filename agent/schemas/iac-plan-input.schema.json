@@ -55,6 +55,9 @@
     "regionalPlan": {
       "$ref": "regional-capacity-plan.schema.json"
     },
+    "postgresqlPlan": {
+      "$ref": "postgresql-regional-plan.schema.json"
+    },
     "readinessEvidence": {
       "$ref": "readiness-evidence.schema.json"
     },

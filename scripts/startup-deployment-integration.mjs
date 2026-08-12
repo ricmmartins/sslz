@@ -773,6 +773,7 @@ function validateReviewedPlan(plan, evaluatedAt) {
           recoveryTargets: regional.recoveryTargets,
           costAssumptions: plan.decisionModel.costAssumptions.regional,
         },
+        postgresqlPlan: plan.decisionModel.postgresql,
         deployment: {
           paidPlans: plan.decisionModel.paidPlans,
           defenderWorkspacePlacement:
@@ -811,6 +812,11 @@ function validateReviewedPlan(plan, evaluatedAt) {
       defenderWorkspaceDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement
           .expiresAt,
+      postgresqlDecisionDigest:
+        plan.readinessEvidence.codeEvidence.postgresql?.decisionDigest ?? null,
+      postgresqlSelectedEvidenceDigest:
+        plan.readinessEvidence.codeEvidence.postgresql
+          ?.selectedEvidenceDigest ?? null,
     })
   ) {
     fail(
@@ -2918,6 +2924,11 @@ function buildDeploymentManifest(
         plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionDigest,
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
+      postgresqlDecisionDigest:
+        plan.readinessEvidence.codeEvidence.postgresql?.decisionDigest ?? null,
+      postgresqlSelectedEvidenceDigest:
+        plan.readinessEvidence.codeEvidence.postgresql
+          ?.selectedEvidenceDigest ?? null,
     },
     regionalAttempt: regionalAttemptBinding(plan, selection),
     defenderWorkspacePlacement,
@@ -3140,6 +3151,11 @@ function assertManifestCurrent(
         plan.readinessEvidence.codeEvidence.subscriptionTopology.decisionDigest,
       topologyDecisionExpiresAt:
         plan.readinessEvidence.codeEvidence.subscriptionTopology.expiresAt,
+      postgresqlDecisionDigest:
+        plan.readinessEvidence.codeEvidence.postgresql?.decisionDigest ?? null,
+      postgresqlSelectedEvidenceDigest:
+        plan.readinessEvidence.codeEvidence.postgresql
+          ?.selectedEvidenceDigest ?? null,
     },
     regionalAttempt: regionalAttemptBinding(plan, selection),
     defenderWorkspacePlacement: defenderWorkspacePlacementBinding(plan),
@@ -3342,6 +3358,10 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
     topologyDecisionDigest: manifest.readinessEvidence.topologyDecisionDigest,
     topologyDecisionExpiresAt:
       manifest.readinessEvidence.topologyDecisionExpiresAt,
+    postgresqlDecisionDigest:
+      manifest.readinessEvidence.postgresqlDecisionDigest,
+    postgresqlSelectedEvidenceDigest:
+      manifest.readinessEvidence.postgresqlSelectedEvidenceDigest,
     defenderWorkspacePlacementDecisionId:
       manifest.defenderWorkspacePlacement.decisionId,
     defenderWorkspacePlacementDecisionDigest:

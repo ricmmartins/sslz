@@ -121,6 +121,48 @@
       "blockingStates": ["fail", "unresolved"]
     },
     {
+      "id": "region.postgresql.edition-version-supported",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.postgresql.extensions-supported",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "quota.postgresql.eligible",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "capacity.postgresql.available",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.postgresql.recovery-supported",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "workload.postgresql.provider-parity",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
       "id": "region.foundry-model.available",
       "surface": "regional-planner",
       "source": "scripts/startup-regional-plan.mjs",
