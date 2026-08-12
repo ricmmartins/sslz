@@ -17,6 +17,7 @@ on:
       - 'scripts/aks-ingress-contract.mjs'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-postgresql-plan.*'
+      - 'scripts/startup-postgresql-migration-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -42,6 +43,7 @@ on:
       - 'scripts/aks-ingress-contract.mjs'
       - 'scripts/startup-regional-plan.*'
       - 'scripts/startup-postgresql-plan.*'
+      - 'scripts/startup-postgresql-migration-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -85,6 +87,9 @@ jobs:
 
       - name: Test deterministic PostgreSQL regional fallback
         run: node tests/startup-postgresql-plan.mjs
+
+      - name: Test read-only PostgreSQL migration planning
+        run: node tests/startup-postgresql-migration-plan.mjs
 
       - name: Test Defender workspace placement
         run: node tests/defender-workspace-placement.mjs

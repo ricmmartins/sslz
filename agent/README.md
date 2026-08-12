@@ -14,6 +14,9 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/workload-profile-plan.schema.json` | Read-only workload profile selection |
 | `schemas/regional-planning-input.schema.json` | Timestamped, supplied regional evidence |
 | `schemas/regional-capacity-plan.schema.json` | Read-only regional and capacity recommendation |
+| `schemas/postgresql-source-assessment.schema.json` | Non-secret PostgreSQL source inventory and operational evidence |
+| `schemas/postgresql-migration-plan-input.schema.json` | Read-only PostgreSQL migration assessment and target evidence input |
+| `schemas/postgresql-migration-plan.schema.json` | Deterministic execution-disabled PostgreSQL migration plan |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
@@ -51,6 +54,7 @@ node scripts/validate-agent-contracts.mjs
 node tests/startup-preflight.mjs
 node tests/startup-workload-plan.mjs
 node tests/startup-regional-plan.mjs
+node tests/startup-postgresql-migration-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
 node tests/startup-cool-foundation-plan.mjs

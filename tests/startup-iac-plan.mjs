@@ -16,7 +16,7 @@ import {
   assertArtifactDestinationsAvailable,
   buildDecisionModel,
   canonicalJson,
-  generateIacPlan,
+  generateIacPlan as generateIacPlanRuntime,
   planDigest,
   readinessEvidenceDigest,
   sanitizedTerraformEnvironment as sanitizedPlannerTerraformEnvironment,
@@ -43,6 +43,15 @@ import {
 import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const fixtureEvaluatedAt = Date.parse("2026-08-09T12:00:00Z");
+
+function generateIacPlan(input, options = {}) {
+  return generateIacPlanRuntime(input, {
+    evaluatedAt: fixtureEvaluatedAt,
+    ...options,
+  });
+}
+
 const script = resolve(root, "scripts/startup-iac-plan.mjs");
 const summarySchema = JSON.parse(
   readFileSync(resolve(root, "agent/schemas/iac-plan-summary.schema.json"), "utf8"),
@@ -1429,7 +1438,7 @@ try {
     {
       cwd: root,
       encoding: "utf8",
-      input: JSON.stringify(input),
+      input: JSON.stringify(legacyInput),
     },
   );
   assert.equal(cli.status, 0, cli.stderr);

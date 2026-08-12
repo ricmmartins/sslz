@@ -8,6 +8,10 @@ import {
   POSTGRESQL_CHECK_ORDER,
   planPostgresql,
 } from "../scripts/startup-postgresql-plan.mjs";
+import {
+  POSTGRESQL_MIGRATION_CHECK_ORDER,
+  planPostgresqlMigration,
+} from "../scripts/startup-postgresql-migration-plan.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(
@@ -32,6 +36,27 @@ const postgresqlRuntimeIds = new Set(
     candidate.checks.map(({ id }) => id),
   ),
 );
+const postgresqlMigrationInput = JSON.parse(
+  readFileSync(
+    resolve(root, "agent/examples/postgresql-migration-plan-input.json"),
+    "utf8",
+  ),
+);
+const postgresqlMigrationScenarios = JSON.parse(
+  readFileSync(
+    resolve(
+      root,
+      "tests/fixtures/postgresql-migration-planner/scenarios.json",
+    ),
+    "utf8",
+  ),
+);
+const postgresqlMigrationPlan = planPostgresqlMigration(
+  postgresqlMigrationInput,
+);
+const postgresqlMigrationRuntimeIds = new Set(
+  postgresqlMigrationPlan.checks.map(({ id }) => id),
+);
 assert.deepEqual(
   postgresqlPlan.requiredChecks,
   POSTGRESQL_CHECK_ORDER,
@@ -44,6 +69,45 @@ for (const candidate of postgresqlPlan.candidates) {
     `${candidate.region}: PostgreSQL runtime checks must exactly cover the catalog IDs`,
   );
 }
+assert.deepEqual(
+  postgresqlMigrationPlan.requiredChecks,
+  POSTGRESQL_MIGRATION_CHECK_ORDER,
+  "PostgreSQL migration required checks must be emitted by the runtime planner",
+);
+assert.deepEqual(
+  postgresqlMigrationPlan.checks.map(({ id }) => id),
+  POSTGRESQL_MIGRATION_CHECK_ORDER,
+  "PostgreSQL migration runtime checks must exactly cover the catalog IDs",
+);
+const mutationCheckIds = new Set();
+for (const scenario of postgresqlMigrationScenarios) {
+  const input = structuredClone(postgresqlMigrationInput);
+  for (const [path, replacement] of scenario.mutations) {
+    const parts = path.split(".");
+    const property = parts.pop();
+    const parent = parts.reduce((current, part) => current[part], input);
+    parent[property] = structuredClone(replacement);
+  }
+  const plan = planPostgresqlMigration(input);
+  for (const id of scenario.expectedChecks) {
+    mutationCheckIds.add(id);
+    assert.notEqual(
+      plan.checks.find((check) => check.id === id)?.classification,
+      "pass",
+      `${scenario.name}: ${id} must have runtime blocking semantics`,
+    );
+    assert.equal(
+      plan.status,
+      "blocked",
+      `${scenario.name}: a cataloged migration failure must block`,
+    );
+  }
+}
+assert.deepEqual(
+  [...mutationCheckIds].sort(),
+  [...POSTGRESQL_MIGRATION_CHECK_ORDER].sort(),
+  "Every PostgreSQL migration catalog check requires a blocking runtime scenario",
+);
 
 assert.equal(fixture.schemaVersion, "1.0.0");
 const blockingIds = catalog.checks
@@ -84,6 +148,11 @@ for (const check of fixture.checks) {
     assert(
       postgresqlRuntimeIds.has(check.id),
       `${check.id}: PostgreSQL planner did not emit a runtime check result`,
+    );
+  } else if (check.surface === "postgresql-migration-planner") {
+    assert(
+      postgresqlMigrationRuntimeIds.has(check.id),
+      `${check.id}: PostgreSQL migration planner did not emit a runtime check result`,
     );
   } else {
     const source =
