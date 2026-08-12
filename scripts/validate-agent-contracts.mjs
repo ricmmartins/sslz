@@ -47,6 +47,13 @@ function validateFormat(value, format, path) {
 }
 
 function validate(schema, value, path, schemaDirectory) {
+  if (schema === false) {
+    fail(path, "value is not allowed");
+  }
+  if (schema === true) {
+    return;
+  }
+
   if (schema.$ref) {
     if (schema.$ref.startsWith("#/$defs/")) {
       fail(path, "local references must be resolved by validateDocument");
@@ -136,10 +143,25 @@ function validate(schema, value, path, schemaDirectory) {
         fail(path, "items must be unique");
       }
     }
+    if (schema.prefixItems) {
+      schema.prefixItems.forEach((itemSchema, index) => {
+        if (index < value.length) {
+          validate(
+            itemSchema,
+            value[index],
+            `${path}[${index}]`,
+            schemaDirectory,
+          );
+        }
+      });
+    }
     if (schema.items) {
-      value.forEach((item, index) =>
-        validate(schema.items, item, `${path}[${index}]`, schemaDirectory),
+      const start = schema.prefixItems?.length ?? 0;
+      value.slice(start).forEach((item, index) =>
+        validate(schema.items, item, `${path}[${start + index}]`, schemaDirectory),
       );
+    } else if (schema.items === false && value.length > (schema.prefixItems?.length ?? 0)) {
+      fail(path, "additional array items are not allowed");
     }
   }
 
@@ -173,8 +195,8 @@ function validate(schema, value, path, schemaDirectory) {
     }
 
     for (const [property, propertyValue] of Object.entries(value)) {
-      const propertySchema = schema.properties?.[property];
-      if (propertySchema) {
+      if (Object.hasOwn(schema.properties ?? {}, property)) {
+        const propertySchema = schema.properties[property];
         validate(
           propertySchema,
           propertyValue,
@@ -365,6 +387,24 @@ function main() {
   const postgresqlRehearsalPlanSchema = load(
     "agent/schemas/postgresql-rehearsal-plan.schema.json",
   );
+  const postgresqlExecutionRequestSchema = load(
+    "agent/schemas/postgresql-execution-request.schema.json",
+  );
+  const postgresqlExecutionEvidenceSchema = load(
+    "agent/schemas/postgresql-execution-evidence.schema.json",
+  );
+  const postgresqlExecutionApprovalSchema = load(
+    "agent/schemas/postgresql-execution-approval.schema.json",
+  );
+  const postgresqlExecutionLineageSchema = load(
+    "agent/schemas/postgresql-execution-lineage.schema.json",
+  );
+  const postgresqlExecutionTrustSchema = load(
+    "agent/schemas/postgresql-execution-trust.schema.json",
+  );
+  const postgresqlExecutionPlanSchema = load(
+    "agent/schemas/postgresql-execution-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -448,6 +488,21 @@ function main() {
   const postgresqlRehearsalLineage = load(
     "agent/examples/postgresql-rehearsal-lineage.json",
   );
+  const postgresqlExecutionRequest = load(
+    "agent/examples/postgresql-execution-request.json",
+  );
+  const postgresqlExecutionEvidence = load(
+    "agent/examples/postgresql-execution-evidence.json",
+  );
+  const postgresqlExecutionApprovals = load(
+    "agent/examples/postgresql-execution-approvals.json",
+  );
+  const postgresqlExecutionLineage = load(
+    "agent/examples/postgresql-execution-lineage.json",
+  );
+  const postgresqlExecutionTrust = load(
+    "agent/examples/postgresql-execution-trust.json",
+  );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
   const providerRegistrationApproval = load(
@@ -522,6 +577,30 @@ function main() {
   assert.equal(
     postgresqlRehearsalPlanSchema.$id,
     "https://aka.ms/sslz/schemas/postgresql-rehearsal-plan.schema.json",
+  );
+  validateDocument(
+    postgresqlExecutionRequestSchema,
+    postgresqlExecutionRequest,
+  );
+  validateDocument(
+    postgresqlExecutionEvidenceSchema,
+    postgresqlExecutionEvidence,
+  );
+  validateDocument(
+    postgresqlExecutionApprovalSchema,
+    postgresqlExecutionApprovals,
+  );
+  validateDocument(
+    postgresqlExecutionLineageSchema,
+    postgresqlExecutionLineage,
+  );
+  validateDocument(
+    postgresqlExecutionTrustSchema,
+    postgresqlExecutionTrust,
+  );
+  assert.equal(
+    postgresqlExecutionPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/postgresql-execution-plan.schema.json",
   );
   assert.equal(
     iacPlanInputSchema.$id,
@@ -644,6 +723,11 @@ function main() {
     postgresqlMigrationPlanInput,
     postgresqlRehearsalEvidence,
     postgresqlRehearsalLineage,
+    postgresqlExecutionRequest,
+    postgresqlExecutionEvidence,
+    postgresqlExecutionApprovals,
+    postgresqlExecutionLineage,
+    postgresqlExecutionTrust,
     readyExample,
     blockedExample,
     providerRegistrationApproval,

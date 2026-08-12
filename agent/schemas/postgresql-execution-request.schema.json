@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-execution-request.schema.json",
+  "title": "SSLZ PostgreSQL migration execution request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "executionId",
+    "attemptOrdinal",
+    "requestedAt",
+    "environmentReference",
+    "sourceReference",
+    "targetReference",
+    "strategy",
+    "idempotencyKey",
+    "predecessorState",
+    "successorState",
+    "stageAuthorities"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "executionId": { "$ref": "#/$defs/reference" },
+    "attemptOrdinal": { "type": "integer", "minimum": 1 },
+    "requestedAt": { "type": "string", "format": "date-time" },
+    "environmentReference": { "$ref": "#/$defs/reference" },
+    "sourceReference": { "$ref": "#/$defs/reference" },
+    "targetReference": { "$ref": "#/$defs/reference" },
+    "strategy": { "$ref": "#/$defs/strategy" },
+    "idempotencyKey": { "$ref": "#/$defs/reference" },
+    "predecessorState": { "const": "rehearsal-reviewed" },
+    "successorState": { "const": "execution-planned" },
+    "stageAuthorities": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage", "authorityReference", "requiredCapabilities"],
+        "properties": {
+          "stage": { "$ref": "#/$defs/stage" },
+          "authorityReference": { "$ref": "#/$defs/reference" },
+          "requiredCapabilities": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/capability" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "strategy": {
+      "enum": ["offline-dump-restore", "online-logical-replication"]
+    },
+    "stage": {
+      "enum": [
+        "rehearsal-execution",
+        "initial-load",
+        "cdc-catch-up",
+        "write-freeze-connection-drain",
+        "cutover-readiness",
+        "source-of-truth-transfer",
+        "rollback",
+        "failback"
+      ]
+    },
+    "capability": {
+      "enum": [
+        "rehearsal-execute",
+        "initial-load-write",
+        "cdc-catch-up",
+        "write-freeze",
+        "connection-drain",
+        "cutover-readiness-declare",
+        "source-authority-transfer",
+        "rollback-initiate",
+        "failback-initiate"
+      ]
+    }
+  }
+}

@@ -19,6 +19,7 @@ on:
       - 'scripts/startup-postgresql-plan.*'
       - 'scripts/startup-postgresql-migration-plan.*'
       - 'scripts/startup-postgresql-rehearsal-plan.*'
+      - 'scripts/startup-postgresql-execution-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -46,6 +47,7 @@ on:
       - 'scripts/startup-postgresql-plan.*'
       - 'scripts/startup-postgresql-migration-plan.*'
       - 'scripts/startup-postgresql-rehearsal-plan.*'
+      - 'scripts/startup-postgresql-execution-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -95,6 +97,9 @@ jobs:
 
       - name: Test read-only PostgreSQL rehearsal planning
         run: node tests/startup-postgresql-rehearsal-plan.mjs
+
+      - name: Test approval-bound PostgreSQL execution planning
+        run: node tests/startup-postgresql-execution-plan.mjs
 
       - name: Test Defender workspace placement
         run: node tests/defender-workspace-placement.mjs

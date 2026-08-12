@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-execution-evidence.schema.json",
+  "title": "SSLZ PostgreSQL migration live execution evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "bundleId", "bindings", "attestations"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "bundleId": { "$ref": "#/$defs/reference" },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "migrationPlanDigest",
+        "rehearsalPlanDigest",
+        "currentLineageDigest",
+        "environmentReference",
+        "sourceReference",
+        "targetReference",
+        "targetRegion",
+        "targetEngine"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "migrationPlanDigest": { "$ref": "#/$defs/digest" },
+        "rehearsalPlanDigest": { "$ref": "#/$defs/digest" },
+        "currentLineageDigest": { "$ref": "#/$defs/digest" },
+        "environmentReference": { "$ref": "#/$defs/reference" },
+        "sourceReference": { "$ref": "#/$defs/reference" },
+        "targetReference": { "$ref": "#/$defs/reference" },
+        "targetRegion": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]{1,31}$"
+        },
+        "targetEngine": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family", "major", "minor"],
+          "properties": {
+            "family": { "const": "postgresql" },
+            "major": { "type": "integer", "minimum": 11, "maximum": 99 },
+            "minor": { "type": "integer", "minimum": 0, "maximum": 99 }
+          }
+        }
+      }
+    },
+    "attestations": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/attestation" }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "kind": {
+      "enum": [
+        "source-catalog",
+        "target-region-capacity",
+        "secret-reference-metadata",
+        "private-connectivity",
+        "dns-application-readiness",
+        "recovery-maintenance-owners",
+        "provider-iac-readiness",
+        "logical-replication-readiness"
+      ]
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceId",
+        "kind",
+        "observedAt",
+        "expiresAt",
+        "nonce",
+        "authorityReference",
+        "signerKeyId",
+        "status",
+        "capabilities",
+        "evidenceReference",
+        "bindingDigest",
+        "claimsDigest",
+        "signature"
+      ],
+      "properties": {
+        "evidenceId": { "$ref": "#/$defs/reference" },
+        "kind": { "$ref": "#/$defs/kind" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "nonce": { "$ref": "#/$defs/reference" },
+        "authorityReference": { "$ref": "#/$defs/reference" },
+        "signerKeyId": { "$ref": "#/$defs/reference" },
+        "status": { "const": "confirmed" },
+        "capabilities": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        },
+        "evidenceReference": { "$ref": "#/$defs/reference" },
+        "bindingDigest": { "$ref": "#/$defs/digest" },
+        "claimsDigest": { "$ref": "#/$defs/digest" },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        }
+      }
+    }
+  }
+}

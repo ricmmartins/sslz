@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-execution-trust.schema.json",
+  "title": "SSLZ PostgreSQL migration execution trust manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestId",
+    "artifactDigests",
+    "evidenceDigests",
+    "approvalDigests",
+    "keys"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "manifestId": { "$ref": "#/$defs/reference" },
+    "artifactDigests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessment",
+        "migrationPlanInput",
+        "migrationPlan",
+        "rehearsalEvidence",
+        "rehearsalPlan",
+        "currentLineage"
+      ],
+      "properties": {
+        "sourceAssessment": { "$ref": "#/$defs/digest" },
+        "migrationPlanInput": { "$ref": "#/$defs/digest" },
+        "migrationPlan": { "$ref": "#/$defs/digest" },
+        "rehearsalEvidence": { "$ref": "#/$defs/digest" },
+        "rehearsalPlan": { "$ref": "#/$defs/digest" },
+        "currentLineage": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "evidenceDigests": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/namedDigest" }
+    },
+    "approvalDigests": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/namedDigest" }
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keyId",
+          "algorithm",
+          "publicKeySpkiBase64",
+          "authorityReference",
+          "allowedStages",
+          "allowedEvidenceKinds"
+        ],
+        "properties": {
+          "keyId": { "$ref": "#/$defs/reference" },
+          "algorithm": { "const": "Ed25519" },
+          "publicKeySpkiBase64": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "authorityReference": { "$ref": "#/$defs/reference" },
+          "allowedStages": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/reference" }
+          },
+          "allowedEvidenceKinds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/reference" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "namedDigest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/reference" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    }
+  }
+}

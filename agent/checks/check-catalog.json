@@ -373,6 +373,104 @@
       "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/security-overview"
     },
     {
+      "id": "execution.postgresql.artifacts-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.lineage-monotonic",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/data-encryption-best-practices"
+    },
+    {
+      "id": "execution.postgresql.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/overview"
+    },
+    {
+      "id": "execution.postgresql.authorities-bound",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "execution.postgresql.signatures-valid",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/data-encryption-best-practices"
+    },
+    {
+      "id": "execution.postgresql.approvals-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.approval-scope-exact",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "execution.postgresql.strategy-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-logical"
+    },
+    {
+      "id": "execution.postgresql.privileges-exact",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "execution.postgresql.stage-order-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.rollback-boundaries-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/reliability-postgresql-flexible-server"
+    },
+    {
+      "id": "execution.postgresql.output-sanitized",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/security-overview"
+    },
+    {
       "id": "region.foundry-model.available",
       "category": "region",
       "severity": "blocking",

@@ -373,6 +373,104 @@
       "blockingStates": ["fail", "unresolved"]
     },
     {
+      "id": "execution.postgresql.artifacts-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.lineage-monotonic",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.replay-protected",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.evidence-current",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.target-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.authorities-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.signatures-valid",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.approvals-complete",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.approval-scope-exact",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.strategy-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.privileges-exact",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.stage-order-valid",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.rollback-boundaries-complete",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.output-sanitized",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
       "id": "region.foundry-model.available",
       "surface": "regional-planner",
       "source": "scripts/startup-regional-plan.mjs",
