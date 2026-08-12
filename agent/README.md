@@ -106,7 +106,7 @@ planner does not create a backend or credentials.
 
 ```bash
 ./scripts/startup-cool-foundation-plan.sh generate \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --baseline agent/examples/cool-foundation-baseline.json \
   --output-dir .sslz/generated/my-plan/cool-foundation
 ```
@@ -142,11 +142,11 @@ claims end-to-end recovery.
 
 ```bash
 ./scripts/startup-provider-remediation.sh dry-run \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --action provider.register.prod.microsoft-app
 
 ./scripts/startup-provider-remediation.sh apply \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --action provider.register.prod.microsoft-app \
   --approval <approval-artifact.json>
 ```
@@ -160,7 +160,7 @@ registration with argument arrays, verifies `Registered`, and records replay sta
 
 ```bash
 ./scripts/startup-deployment-integration.sh preview \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --provider bicep \
   --environment nonprod
 

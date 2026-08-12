@@ -89,7 +89,7 @@ description: "Common deployment errors and fixes"
 **Fix:**
 ```bash
 ./scripts/startup-provider-remediation.sh dry-run \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --action provider.register.prod.microsoft-app
 ```
 

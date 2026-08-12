@@ -21,6 +21,7 @@ on:
       - 'scripts/startup-deployment-integration.*'
       - 'scripts/azure-cli-invocation.mjs'
       - 'scripts/terraform-plan-provenance.mjs'
+      - 'scripts/regional-attempt.mjs'
       - 'tests/**'
   push:
     branches: [main]
@@ -42,6 +43,7 @@ on:
       - 'scripts/startup-deployment-integration.*'
       - 'scripts/azure-cli-invocation.mjs'
       - 'scripts/terraform-plan-provenance.mjs'
+      - 'scripts/regional-attempt.mjs'
       - 'tests/**'
 
 permissions:
@@ -92,6 +94,9 @@ jobs:
 
       - name: Test approved deployment integration
         run: node tests/startup-deployment-integration.mjs
+
+      - name: Test regional deployment attempts
+        run: node tests/regional-attempt.mjs
 
   validate-bicep:
     name: Validate Bicep

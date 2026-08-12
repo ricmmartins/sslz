@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0.0",
+  "chainId": "startup-primary",
+  "planId": "startup-primary-baseline",
+  "backendKeyPrefix": "startup-primary",
+  "attemptId": "startup-primary-a01-eastus2-e8212bc139",
+  "attemptNumber": 1,
+  "previousAttemptDigest": null,
+  "originalRegion": "eastus2",
+  "targetRegion": "eastus2",
+  "alternateRegion": "centralus",
+  "provider": "bicep",
+  "environment": "nonprod",
+  "status": "planned",
+  "bindings": {
+    "regionalEvidenceDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "planDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "artifactDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "manifestDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "approvalDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "identities": {
+    "identityDigest": "sha256:e8212bc1397060710298ba6f0d3fcc0f8abe1058eacbf9eb57ba39602f0b9baa",
+    "attemptKey": "a01-eastus2-e8212bc139",
+    "resourceSuffix": "",
+    "deploymentName": "sslz-nonprod-222222222222",
+    "previewDeploymentName": "sslz-preview-nonprod-eastus2",
+    "nestedDeploymentNames": {
+      "logAnalytics": "deploy-log-analytics-nonprod",
+      "networking": "deploy-networking-nonprod",
+      "defender": "deploy-defender-nonprod",
+      "budgets": "deploy-budgets-nonprod",
+      "policies": "deploy-policies-nonprod"
+    },
+    "policyAssignmentNames": {
+      "mcsb": "mcsb-audit",
+      "allowedLocations": "allowed-locations",
+      "allowedLocationsResourceGroups": "allowed-locations-rg",
+      "requireEnvironmentTag": "require-env-tag-rg",
+      "requireTeamTag": "require-team-tag-rg",
+      "inheritEnvironmentTag": "inherit-env-tag",
+      "inheritTeamTag": "inherit-team-tag",
+      "activityLogDiagnostics": "activity-log-diag"
+    },
+    "policyIdentityLifecycle": {
+      "type": "SystemAssigned",
+      "locationBound": true,
+      "mode": "cleanup-and-recreate",
+      "reuseAcrossChangedRegion": false
+    },
+    "stateKey": "startup-primary-nonprod-primary.tfstate",
+    "workspaceName": "startup-primary-nonprod-a01-eastus2-e8212bc139",
+    "artifactRoot": ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-2222222222/bicep"
+  },
+  "writeStarted": false,
+  "cleanup": {
+    "required": false,
+    "status": "not-required",
+    "evidenceDigest": null,
+    "completedAt": null,
+    "summary": null
+  },
+  "failureEvidence": [],
+  "events": [
+    {
+      "sequence": 1,
+      "status": "planned",
+      "occurredAt": "2026-08-11T12:00:00Z",
+      "evidenceDigest": null
+    }
+  ],
+  "createdAt": "2026-08-11T12:00:00Z",
+  "updatedAt": "2026-08-11T12:00:00Z",
+  "recordDigest": "sha256:dd4d32142e71527a98f2960fe49028d5fc1f4062df20ea734c8293f163c88cc1"
+}

@@ -45,7 +45,7 @@ the global static set.
 
 ```bash
 ./scripts/startup-provider-remediation.sh dry-run \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --action provider.register.prod.microsoft-app \
   --output text
 ```
@@ -74,7 +74,7 @@ The approval system, not this repository, is responsible for authenticating and 
 
 ```bash
 ./scripts/startup-provider-remediation.sh apply \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --action provider.register.prod.microsoft-app \
   --approval <approved-provider-registration.json> \
   --output json

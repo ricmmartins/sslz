@@ -23,6 +23,7 @@ The versioned contracts are:
 - [`deployment-execution-manifest.schema.json`](../agent/schemas/deployment-execution-manifest.schema.json)
 - [`deployment-approval.schema.json`](../agent/schemas/deployment-approval.schema.json)
 - [`deployment-result.schema.json`](../agent/schemas/deployment-result.schema.json)
+- [`regional-attempt.schema.json`](../agent/schemas/regional-attempt.schema.json)
 - [`terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
 
 ## Prepare the reviewed Phase 4 artifact
@@ -60,7 +61,7 @@ Terraform executable digest through `SSLZ_TERRAFORM_EXECUTABLE` or a documented 
 ```bash
 SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE=/protected/sslz-terraform-builder.pub \
 ./scripts/startup-deployment-integration.sh preview \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --provider terraform \
   --environment prod \
   --output json
@@ -111,6 +112,32 @@ authentication choice, notification-recipient commitment, unique nonce, and vali
 24 hours. It also duplicates every Defender workspace binding from the manifest, so omission or mutation invalidates the
 signature and replay record.
 
+The approval also binds the regional attempt ID, attempt digest and number, original and target regions, and reviewed
+Terraform state key. Switching regions therefore invalidates the prior manifest and approval even if every other target
+field is unchanged.
+
+## Regional failure, cleanup, and replan
+
+Regional attempts form an append-only `1.0.0` chain. Each attempt records its original and target region, attempt number,
+plan and artifact digests, deterministic deployment/resource/policy names, Terraform state/workspace identity, immutable
+failure-evidence hash, and lifecycle state. Bicep and Terraform derive the same attempt key, while retaining
+provider-specific artifact roots.
+
+After a deployment write starts, a failure moves the attempt to `cleanup-required`. Preserve the original sanitized
+failure evidence and perform only a reviewed, bounded cleanup of resources proven to belong to that attempt. There is no
+automatic rollback and no broad resource-group deletion. A failed cleanup remains visible and blocks both replan and
+alternate-region execution. Only a successful cleanup record can move the chain to `cleaned` and permit `replanned`.
+
+Changing the target region requires a new attempt number and fresh Phase 4 plan, previews, saved Terraform plan or Bicep
+what-if, manifest, and signed approval. Never copy a `.tfplan`, workspace, what-if result, manifest, or approval from the
+failed region. Terraform retains the reviewed chain backend key only to preserve ownership of subscription-level
+singletons; the cleaned predecessor record, chain lock, fresh provenance, and new approval gate every reuse. Later
+attempts use collision-safe nested deployment names, policy-assignment names, resource suffixes, workspaces, and artifact
+paths. Policy assignments retain their existing system-assigned
+identity architecture, so their location-bound identities are never adopted across regions: cleanup and recreation are
+mandatory. An unchanged-region retry may reuse the chain only when `safeSameRegionRetry` is explicitly evidenced; it
+still receives a new attempt record and cannot mutate prior evidence.
+
 Provision the trusted public-key file outside the repository through the protected runner configuration:
 
 ```bash
@@ -126,7 +153,7 @@ review. The repository stores neither key material nor approval identity.
 SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE=/protected/sslz-terraform-builder.pub \
 SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE=/protected/sslz-deployment-approver.pub \
   ./scripts/startup-deployment-integration.sh apply \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --manifest <reviewed-deployment-manifest.json> \
   --approval <signed-deployment-approval.json> \
   --output json
@@ -176,7 +203,9 @@ repository-relative `.sslz/deployment-state` path. The manifest and signed appro
 identity derived from the marker UUID and the mounted directory and marker filesystem identities, so copying the marker
 to a fresh directory cannot create a new replay namespace. Preview and apply for an approval must run on the same protected executor and unchanged local filesystem identity. Apply
 never creates or silently substitutes the durable store. Atomic single-use records block replay and concurrent use on
-that executor. The state stores only allowlisted hashes, targets, phases, timestamps, and result codes.
+that executor. Workflow concurrency is shared across Bicep and Terraform for the whole environment, regardless of
+regional-attempt chain, so provider or chain switching cannot create parallel attempts. The state stores only allowlisted hashes, targets, phases,
+timestamps, and result codes.
 
 ## Post-deployment gate
 

@@ -22,6 +22,7 @@ The input and output contracts are:
 - [`agent/schemas/subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
 - [`agent/schemas/defender-workspace-placement-decision.schema.json`](../agent/schemas/defender-workspace-placement-decision.schema.json)
 - [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
+- [`agent/schemas/regional-attempt.schema.json`](../agent/schemas/regional-attempt.schema.json)
 - [`agent/schemas/cool-foundation-baseline.schema.json`](../agent/schemas/cool-foundation-baseline.schema.json)
 - [`agent/schemas/cool-foundation-plan.schema.json`](../agent/schemas/cool-foundation-plan.schema.json)
 - [`agent/schemas/cool-foundation-manifest.schema.json`](../agent/schemas/cool-foundation-manifest.schema.json)
@@ -39,12 +40,18 @@ The input and output contracts are:
   --output-dir .sslz/generated/my-plan
 ```
 
-The output directory must be `.sslz/generated` or one of its descendants. The command writes:
+The output directory must be `.sslz/generated` or one of its descendants. Beneath the plan ID it writes an
+attempt-and-plan-digest directory for the summary, plus environment-specific attempt directories for provider artifacts:
 
 - one `.local.bicepparam` per environment and requested regional role;
 - one `.auto.tfvars` per environment and requested regional role;
 - `plan-summary.json`, containing the canonical decisions, artifact paths, preview classification, digest, and
   approval state.
+
+For example, a summary is written under
+`.sslz/generated/my-plan/a02-centralus-<plan-digest>/plan-summary.json`; parameter artifacts are written under the
+signed `regionalAttempt.artifactRoot`. A later plan or regional attempt never reconciles or deletes an earlier
+attempt directory.
 
 Only primary files are generated for `single-region-ready`. A reviewed `cool-infrastructure` recommendation generates
 the primary representations plus nonproduction secondary parameters targeting dedicated Bicep and Terraform roots.
@@ -54,11 +61,33 @@ backend key. They do not include subscription-global
 policy, budgets, Defender settings, global ingress, workloads, replication, or failover. `warm-workload` remains
 review-only and does not generate a secondary foundation.
 
+## Regional retries
+
+`regionalAttempt` is optional for the initial plan and defaults to attempt 1 in the selected primary region. A later
+attempt must provide the complete immutable predecessor record for both production and nonproduction. Each record must
+match its environment, chain, attempt number, original region, identity, and record digest. A changed-region attempt must
+also provide successful cleanup evidence for each environment; otherwise planning fails closed. The selected primary
+region must exactly match the attempt target. The production planner compares the new region-bound readiness evidence and
+computed plan digest with each predecessor binding and rejects reuse before writing retry artifacts.
+
+Every later attempt receives deterministic, collision-safe Bicep nested deployment names, resource and policy-assignment
+suffixes, Terraform workspace identities, raw saved-plan paths, and generated artifact paths. Terraform deliberately
+retains the chain's reviewed backend key so subscription-level singleton ownership is not lost; predecessor validation,
+successful cleanup evidence, chain concurrency, fresh provenance, and the new approval prevent stale or parallel state
+use. The attempt identity is provider-equivalent, but each provider gets its own artifact directory. Region changes
+always produce a different plan digest and require new previews, a new saved Terraform plan or Bicep what-if, a new
+execution manifest, and a new signed approval. The planner never imports a saved plan or regional evidence from a
+predecessor attempt. Artifact roots include both the attempt identity and plan digest, so retry generation cannot
+overwrite or mutate the failed attempt's evidence. Retry planning accepts only a failed no-write predecessor or a
+successfully cleaned predecessor and requires the same Terraform backend prefix and state key. Before execution, the
+executor reacquires the chain lock and verifies that exact predecessor digest and terminal state in its protected durable
+store; a cleanup transition preserves the original failure evidence while atomically advancing the stored record.
+
 ## Generate the execution-disabled Phase 7 plan
 
 ```bash
 ./scripts/startup-cool-foundation-plan.sh generate \
-  --plan .sslz/generated/my-plan/plan-summary.json \
+  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
   --baseline agent/examples/cool-foundation-baseline.json \
   --output-dir .sslz/generated/my-plan/cool-foundation
 ```

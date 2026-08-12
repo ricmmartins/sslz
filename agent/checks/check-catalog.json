@@ -532,6 +532,27 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "regional.retry.binding-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-what-if"
+    },
+    {
+      "id": "regional.retry.cleanup-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/delete-resource-group"
+    },
+    {
+      "id": "regional.retry.provider-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/developer/terraform/overview"
     }
   ]
 }

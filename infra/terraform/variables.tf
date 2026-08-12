@@ -33,6 +33,26 @@ variable "location" {
   }
 }
 
+variable "regional_attempt_suffix" {
+  description = "Deterministic suffix for a regional retry attempt; empty preserves first-attempt names"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.regional_attempt_suffix == "" || can(regex("^-a[0-9]{2}-[a-z0-9]+-[0-9a-f]{10}$", var.regional_attempt_suffix))
+    error_message = "regional_attempt_suffix must be empty or a deterministic regional attempt suffix."
+  }
+}
+
+variable "policy_assignment_prefix" {
+  description = "Deterministic prefix for retry-owned policy assignments; empty preserves first-attempt names"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.policy_assignment_prefix == "" || can(regex("^a[0-9]{2}-[a-z0-9]+-[0-9a-f]{10}-$", var.policy_assignment_prefix))
+    error_message = "policy_assignment_prefix must be empty or a deterministic regional attempt prefix."
+  }
+}
+
 variable "company_name" {
   description = "Company name used in resource naming (2-20 lowercase alphanumeric characters)"
   type        = string
@@ -198,7 +218,7 @@ variable "tags" {
 }
 
 locals {
-  prefix = var.prefix != "" ? var.prefix : "${var.company_name}-${var.environment}"
+  prefix = var.prefix != "" ? var.prefix : "${var.company_name}-${var.environment}${var.regional_attempt_suffix}"
 
   # Defender defaults: enable Servers and Databases for prod (matches Bicep behavior)
   enable_defender_for_servers   = var.enable_defender_for_servers != null ? var.enable_defender_for_servers : var.environment == "prod"

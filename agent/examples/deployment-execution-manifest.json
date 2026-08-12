@@ -7,7 +7,7 @@
     "version": "1.0.0",
     "id": "startup-primary-baseline",
     "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "artifactPath": ".sslz/generated/startup-primary-baseline/plan-summary.json",
+    "artifactPath": ".sslz/generated/startup-primary-baseline/a01-eastus2-bbbbbbbbbb/plan-summary.json",
     "artifactDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "approvalExpiresAt": "2026-08-09T13:00:00Z"
   },
@@ -19,6 +19,35 @@
     "topologyDecisionId": "topology.startup-primary-baseline.preflight",
     "topologyDecisionDigest": "sha256:9c1743fbe6581e15b3c860d9af6702590644c4c95991d145a9f1fabe224609a9",
     "topologyDecisionExpiresAt": "2026-08-09T13:00:00Z"
+  },
+  "regionalAttempt": {
+    "schemaVersion": "1.0.0",
+    "chainId": "startup-primary",
+    "attemptId": "startup-primary-a01-eastus2-e8212bc139",
+    "attemptNumber": 1,
+    "previousAttemptDigest": null,
+    "originalRegion": "eastus2",
+    "targetRegion": "eastus2",
+    "cleanupEvidenceDigest": null,
+    "safeSameRegionRetry": false,
+    "previousAttemptKey": null,
+    "previousTargetRegion": null,
+    "previousBindings": null,
+    "retiredPolicyAssignmentNames": [],
+    "identityDigest": "sha256:e8212bc1397060710298ba6f0d3fcc0f8abe1058eacbf9eb57ba39602f0b9baa",
+    "attemptKey": "a01-eastus2-e8212bc139",
+    "resourceSuffix": "",
+    "deploymentName": "sslz-nonprod-bbbbbbbbbbbb",
+    "previewDeploymentName": "sslz-preview-nonprod-eastus2",
+    "stateKey": "startup-primary-nonprod-primary.tfstate",
+    "workspaceName": "startup-primary-nonprod-a01-eastus2-e8212bc139",
+    "artifactRoot": ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-bbbbbbbbbb/bicep",
+    "policyIdentityLifecycle": {
+      "type": "SystemAssigned",
+      "locationBound": true,
+      "mode": "cleanup-and-recreate",
+      "reuseAcrossChangedRegion": false
+    }
   },
   "defenderWorkspacePlacement": {
     "decisionId": "workspace.startup-primary-baseline.nonprod",
@@ -46,7 +75,7 @@
   },
   "artifacts": {
     "parameter": {
-      "path": ".sslz/generated/startup-primary-baseline/bicep/nonprod-primary.local.bicepparam",
+      "path": ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-bbbbbbbbbb/bicep/nonprod-primary.local.bicepparam",
       "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
     },
     "source": {
@@ -94,7 +123,7 @@
         "--template-file",
         "infra/bicep/main.bicep",
         "--parameters",
-        ".sslz/generated/startup-primary-baseline/bicep/nonprod-primary.local.bicepparam",
+        ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-bbbbbbbbbb/bicep/nonprod-primary.local.bicepparam",
         "--name",
         "sslz-nonprod-bbbbbbbbbbbb",
         "--output",

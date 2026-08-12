@@ -6,7 +6,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -31,6 +30,12 @@ import {
   digest as defenderWorkspaceDigest,
   evidenceDigest as defenderEvidenceDigest,
 } from "../scripts/defender-workspace-placement.mjs";
+import {
+  createRegionalAttempt,
+  recordAttemptFailure,
+  recordAttemptStarted,
+  recordCleanupOutcome,
+} from "../scripts/regional-attempt.mjs";
 import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -331,6 +336,185 @@ try {
   assert(first.previews.every((preview) => preview.rawArtifact === null));
   assert.equal(first.approval.status, "pending");
 
+  const alternateInput = structuredClone(input);
+  const originalPrimary = alternateInput.regionalPlan.selectedPrimary;
+  alternateInput.regionalPlan.selectedPrimary =
+    alternateInput.regionalPlan.secondaryRecommendation;
+  alternateInput.regionalPlan.secondaryRecommendation = originalPrimary;
+  const primaryAttempt = (
+    environment,
+    provider,
+    character,
+    regionalEvidenceDigest = input.readinessEvidence.evidenceDigest,
+  ) =>
+    createRegionalAttempt({
+      chainId: input.planId,
+      planId: input.planId,
+      originalRegion: originalPrimary.region,
+      targetRegion: originalPrimary.region,
+      attemptNumber: 1,
+      provider,
+      environment,
+      backendKeyPrefix: input.deployment.terraformBackend.keyPrefix,
+      regionalEvidenceDigest,
+      planDigest: first.planDigest,
+      artifactDigest: `sha256:${character.repeat(64)}`,
+      manifestDigest:
+        "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      approvalDigest:
+        "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      createdAt: "2026-08-08T10:00:00Z",
+    });
+  const cleanedAttempt = (
+    environment,
+    provider,
+    character,
+    regionalEvidenceDigest,
+  ) => {
+    const attempt = primaryAttempt(
+      environment,
+      provider,
+      character,
+      regionalEvidenceDigest,
+    );
+    const failedPrimaryAttempt = recordAttemptFailure(
+      recordAttemptStarted(attempt, "2026-08-08T10:01:00Z"),
+      {
+        code: "deployment.execution.failed",
+        summary: `Synthetic ${environment} primary failure.`,
+        diagnostics: { status: "failed" },
+        occurredAt: "2026-08-08T10:02:00Z",
+      },
+    );
+    return recordCleanupOutcome(failedPrimaryAttempt, {
+      succeeded: true,
+      evidenceDigest:
+        "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      occurredAt: "2026-08-08T10:03:00Z",
+      summary: "Synthetic bounded cleanup completed.",
+    });
+  };
+  const cleanedProdAttempt = cleanedAttempt("prod", "terraform", "a");
+  const cleanedNonprodAttempt = cleanedAttempt("nonprod", "bicep", "e");
+  alternateInput.regionalAttempt = {
+    chainId: input.planId,
+    attemptNumber: 2,
+    originalRegion: originalPrimary.region,
+    targetRegion: alternateInput.regionalPlan.selectedPrimary.region,
+    previousAttempts: {
+      prod: cleanedProdAttempt,
+      nonprod: cleanedNonprodAttempt,
+    },
+    safeSameRegionRetry: false,
+  };
+  delete alternateInput.deployment.defenderWorkspacePlacement;
+  alternateInput.readinessEvidence = buildReadinessEvidence(alternateInput);
+  const staleRegionEvidenceRetry = structuredClone(alternateInput);
+  staleRegionEvidenceRetry.readinessEvidence = structuredClone(
+    input.readinessEvidence,
+  );
+  assert.throws(
+    () =>
+      generateIacPlan(staleRegionEvidenceRetry, {
+        outputPath: `${outputRelative}-stale-region-evidence`,
+        previewFixtures: successFixture,
+      }),
+    /exact plan, target, profiles, and regions|selected regional scope|target region/i,
+  );
+  const reusedRegionalDigestRetry = structuredClone(alternateInput);
+  reusedRegionalDigestRetry.regionalAttempt.previousAttempts = {
+    prod: cleanedAttempt(
+      "prod",
+      "terraform",
+      "a",
+      alternateInput.readinessEvidence.evidenceDigest,
+    ),
+    nonprod: cleanedAttempt(
+      "nonprod",
+      "bicep",
+      "e",
+      alternateInput.readinessEvidence.evidenceDigest,
+    ),
+  };
+  assert.throws(
+    () =>
+      generateIacPlan(reusedRegionalDigestRetry, {
+        outputPath: `${outputRelative}-reused-regional-evidence`,
+        previewFixtures: successFixture,
+      }),
+    /cannot reuse the prior regionalEvidenceDigest/,
+  );
+  const alternate = generateIacPlan(alternateInput, {
+    outputPath: `${outputRelative}-alternate`,
+    previewFixtures: successFixture,
+  });
+  const alternateBicep = alternate.artifacts.find(
+    (artifact) =>
+      artifact.provider === "bicep" &&
+      artifact.environment === "prod" &&
+      artifact.regionRole === "primary",
+  );
+  const alternateTerraform = alternate.artifacts.find(
+    (artifact) =>
+      artifact.provider === "terraform" &&
+      artifact.environment === "prod" &&
+      artifact.regionRole === "primary",
+  );
+  const alternateBicepParameters = parseBicepParameters(
+    readFileSync(resolve(root, alternateBicep.path), "utf8"),
+  );
+  const alternateTerraformParameters = parseTerraformVariables(
+    readFileSync(resolve(root, alternateTerraform.path), "utf8"),
+  );
+  assert.equal(alternate.decisionModel.regionalAttempt.attemptNumber, 2);
+  assert.match(alternateBicep.path, /a02-[a-z0-9]+-[0-9a-f]{10}/);
+  assert.equal(
+    alternateTerraform.stateKey,
+    first.artifacts.find(
+      (artifact) =>
+        artifact.provider === "terraform" &&
+        artifact.environment === "prod" &&
+        artifact.regionRole === "primary",
+    ).stateKey,
+  );
+  assert.match(
+    alternate.decisionModel.regionalAttempt.previousAttemptKeys.prod,
+    /^a01-/,
+  );
+  assert.match(alternateBicepParameters.regionalAttemptSuffix, /^-a02-/);
+  assert.match(alternateBicepParameters.policyAssignmentPrefix, /^a02-.*-$/);
+  assert.equal(
+    alternateTerraformParameters.regional_attempt_suffix,
+    alternateBicepParameters.regionalAttemptSuffix,
+  );
+  assert.equal(
+    alternateTerraformParameters.policy_assignment_prefix,
+    alternateBicepParameters.policyAssignmentPrefix,
+  );
+  assert.notEqual(alternate.planDigest, first.planDigest);
+  const nonterminalRetry = structuredClone(alternateInput);
+  nonterminalRetry.regionalAttempt.previousAttempts.prod = primaryAttempt(
+    "prod",
+    "terraform",
+    "a",
+  );
+  assert.throws(
+    () =>
+      generateIacPlan(nonterminalRetry, {
+        outputPath: `${outputRelative}-nonterminal-retry`,
+      }),
+    /predecessor must be terminal and retryable/,
+  );
+  const switchedStateRetry = structuredClone(alternateInput);
+  switchedStateRetry.deployment.terraformBackend.keyPrefix = "replacement-state";
+  assert.throws(
+    () =>
+      generateIacPlan(switchedStateRetry, {
+        outputPath: `${outputRelative}-switched-state`,
+      }),
+    /predecessor chain does not match/,
+  );
+
   const primaryBicep = first.artifacts.find(
     (artifact) =>
       artifact.provider === "bicep" &&
@@ -573,6 +757,15 @@ try {
     JSON.stringify(contactPlan),
     /cloud-operations@|security-operations@/,
   );
+  assert.throws(
+    () =>
+      generateIacPlan(input, {
+        providers: ["bicep", "terraform"],
+        outputPath: `${outputRelative}/real-contacts`,
+        previewFixtures: successFixture,
+      }),
+    /Refusing to mutate an existing generated artifact/,
+  );
 
   const bicepParameterNames = new Set(Object.keys(bicepParameters));
   const declaredBicepParameters = new Set(
@@ -710,10 +903,21 @@ try {
   });
   assert.equal(
     JSON.parse(
-      readFileSync(resolve(root, outputRelative, "plan-summary.json"), "utf8"),
+      readFileSync(
+        resolve(
+          root,
+          outputRelative,
+          replaced.planId,
+          `a${String(replaced.decisionModel.regionalAttempt.attemptNumber).padStart(2, "0")}-` +
+            `${replaced.decisionModel.regionalAttempt.targetRegion}-` +
+            replaced.planDigest.slice("sha256:".length, "sha256:".length + 10),
+          "plan-summary.json",
+        ),
+        "utf8",
+      ),
     ).planDigest,
     replaced.planDigest,
-    "A generated summary must be replaceable when bound decisions change",
+    "A generated summary must be scoped to the exact attempt and plan digest",
   );
 
   const expiredInput = structuredClone(approvedInput);
@@ -999,31 +1203,41 @@ try {
   );
 
   const reconciliationPath = `${outputRelative}/reconciliation`;
-  generateIacPlan(input, {
+  const reconciledOriginal = generateIacPlan(input, {
     outputPath: reconciliationPath,
     providers: ["bicep", "terraform"],
   });
-  generateIacPlan(createInput({ regionalMode: "single-region-ready" }), {
+  const reconciledReplacement = generateIacPlan(
+    createInput({ regionalMode: "single-region-ready" }),
+    {
     outputPath: reconciliationPath,
     providers: ["bicep"],
-  });
-  assert(
-    readdirSync(resolve(root, reconciliationPath, "bicep")).every(
-      (name) => !name.includes("secondary"),
-    ),
+    },
   );
   assert(
-    readdirSync(resolve(root, reconciliationPath, "terraform")).every(
-      (name) => !name.endsWith(".auto.tfvars"),
+    reconciledOriginal.artifacts.every((artifact) =>
+      existsSync(resolve(root, artifact.path)),
     ),
+    "A later plan must not delete immutable predecessor artifacts",
+  );
+  assert(
+    reconciledReplacement.artifacts.every((artifact) =>
+      existsSync(resolve(root, artifact.path)),
+    ),
+    "The current attempt artifacts must be generated",
   );
 
   const protectedOutput = `${outputRelative}/protected`;
+  const protectedArtifact = first.artifacts.find(
+    (artifact) =>
+      artifact.provider === "bicep" &&
+      artifact.environment === "prod" &&
+      artifact.regionRole === "primary",
+  );
   const protectedFile = resolve(
     root,
     protectedOutput,
-    "bicep",
-    "prod-primary.local.bicepparam",
+    protectedArtifact.path.slice(`${outputRelative}/`.length),
   );
   mkdirSync(dirname(protectedFile), { recursive: true });
   writeFileSync(protectedFile, "user-owned content\n");

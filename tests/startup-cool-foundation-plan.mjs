@@ -310,7 +310,7 @@ try {
   );
   assert.match(
     documentedCommand,
-    /startup-cool-foundation-plan\.sh generate \\\r?\n  --plan \.sslz\/generated\/my-plan\/plan-summary\.json \\\r?\n  --baseline agent\/examples\/cool-foundation-baseline\.json \\\r?\n  --output-dir \.sslz\/generated\/my-plan\/cool-foundation/,
+    /startup-cool-foundation-plan\.sh generate \\\r?\n  --plan \.sslz\/generated\/my-plan\/<attempt>\/plan-summary\.json \\\r?\n  --baseline agent\/examples\/cool-foundation-baseline\.json \\\r?\n  --output-dir \.sslz\/generated\/my-plan\/cool-foundation/,
   );
 
   const expired = structuredClone(sourcePlan);

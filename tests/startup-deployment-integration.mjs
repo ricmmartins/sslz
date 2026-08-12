@@ -96,6 +96,9 @@ const resultSchema = JSON.parse(
     "utf8",
   ),
 );
+const regionalAttemptSchema = JSON.parse(
+  readFileSync(resolve(root, "agent/schemas/regional-attempt.schema.json"), "utf8"),
+);
 
 const { publicKey, privateKey } = generateKeyPairSync("ed25519");
 const publicKeyPem = publicKey.export({ type: "spki", format: "pem" });
@@ -1557,6 +1560,12 @@ function createApproval(manifest, overrides = {}, signingKey = privateKey) {
     planVersion: manifest.plan.version,
     planId: manifest.plan.id,
     planDigest: manifest.plan.digest,
+    regionalAttemptId: manifest.regionalAttempt.attemptId,
+    regionalAttemptDigest: provenanceHashCanonical(manifest.regionalAttempt),
+    regionalAttemptNumber: manifest.regionalAttempt.attemptNumber,
+    originalRegion: manifest.regionalAttempt.originalRegion,
+    targetRegion: manifest.regionalAttempt.targetRegion,
+    regionalStateKey: manifest.regionalAttempt.stateKey,
     readinessEvidenceVersion: manifest.readinessEvidence.version,
     readinessEvidenceId: manifest.readinessEvidence.id,
     readinessEvidenceDigest: manifest.readinessEvidence.digest,
@@ -1653,6 +1662,7 @@ function apply(
       runner: runtime.runner,
       provenancePublicKey: provenancePublicKeyPem,
       statePath: stateRelative,
+      regionalStatePath: resolve(statePath, "regional-test-attempts", suffix),
       maximumValidationAttempts: options.maximumValidationAttempts ?? 1,
       sleep: () => {},
     },
@@ -2248,6 +2258,12 @@ try {
     planVersion: "2.0.0",
     planId: "other-plan",
     planDigest: `sha256:${"c".repeat(64)}`,
+    regionalAttemptId: "phase-six-test-a02-westus2-deadbeef00",
+    regionalAttemptDigest: `sha256:${"9".repeat(64)}`,
+    regionalAttemptNumber: 2,
+    originalRegion: "westus2",
+    targetRegion: "centralus",
+    regionalStateKey: "phase-six-test-prod-a02-westus2-deadbeef00.tfstate",
     readinessEvidenceVersion: "9.0.0",
     readinessEvidenceId: "readiness.other-plan.001",
     readinessEvidenceDigest: `sha256:${"9".repeat(64)}`,
@@ -2372,6 +2388,45 @@ try {
     ).code,
     "deployment.manifest.binding-mismatch",
   );
+
+  const currentRegionalBindings = {
+    regionalEvidenceDigest: bicepManifest.readinessEvidence.digest,
+    planDigest: bicepManifest.plan.digest,
+    artifactDigest: provenanceHashCanonical(bicepManifest.artifacts),
+  };
+  for (const [reusedLabel, reusedDigest] of Object.entries(
+    currentRegionalBindings,
+  )) {
+    const reusedRegionalBindingManifest = structuredClone(bicepManifest);
+    reusedRegionalBindingManifest.regionalAttempt.attemptNumber = 2;
+    reusedRegionalBindingManifest.regionalAttempt.previousAttemptKey =
+      "a01-eastus-0123456789";
+    reusedRegionalBindingManifest.regionalAttempt.previousTargetRegion =
+      "westus2";
+    reusedRegionalBindingManifest.regionalAttempt.previousBindings = {
+      regionalEvidenceDigest: `sha256:${"0".repeat(64)}`,
+      planDigest: `sha256:${"1".repeat(64)}`,
+      artifactDigest: `sha256:${"2".repeat(64)}`,
+      manifestDigest: `sha256:${"3".repeat(64)}`,
+      approvalDigest: `sha256:${"4".repeat(64)}`,
+      [reusedLabel]: reusedDigest,
+    };
+    reusedRegionalBindingManifest.manifestDigest = manifestDigest(
+      reusedRegionalBindingManifest,
+    );
+    assert.equal(
+      apply(
+        plan,
+        planPath,
+        reusedRegionalBindingManifest,
+        createApproval(reusedRegionalBindingManifest),
+        mockRuntime(),
+        `reused-regional-${reusedLabel}`,
+      ).code,
+      "deployment.regional-attempt.binding-reused",
+      `${reusedLabel} reuse must fail in apply preparation`,
+    );
+  }
 
   const changedManifest = structuredClone(bicepManifest);
   changedManifest.execution.provider = "terraform";
@@ -2723,13 +2778,14 @@ try {
     resign(successApproval, {
       approvedAt: "2026-08-09T11:31:00Z",
       expiresAt: "2026-08-09T12:31:00Z",
+      nonce: "aa".repeat(32),
     }),
     mockRuntime(),
     "success-replay",
   );
   assert.equal(
     replayWithResignedArtifact.code,
-    "deployment.approval.replayed",
+    "deployment.regional-attempt.replayed",
   );
 
   const raceApproval = resign(approval, { nonce: "f".repeat(64) });
@@ -2769,6 +2825,27 @@ try {
   assert.equal(deploymentFailure.verification.performed, false);
   assert.equal(deploymentFailure.verification.workloadDeploymentAllowed, false);
   assertSanitized(deploymentFailure);
+  const deploymentFailureLedgerDirectory = resolve(
+    statePath,
+    "regional-test-attempts",
+    "deployment-failure",
+  );
+  const deploymentFailureLedger = JSON.parse(
+    readFileSync(
+      resolve(
+        deploymentFailureLedgerDirectory,
+        readdirSync(deploymentFailureLedgerDirectory).find((name) =>
+          name.endsWith(".json"),
+        ),
+      ),
+      "utf8",
+    ),
+  );
+  validateDocument(regionalAttemptSchema, deploymentFailureLedger);
+  assert.equal(deploymentFailureLedger.status, "cleanup-required");
+  assert.equal(deploymentFailureLedger.cleanup.status, "pending");
+  assert.equal(deploymentFailureLedger.failureEvidence[0].sanitized, true);
+  assertSanitized(deploymentFailureLedger);
 
   const validationFailure = apply(
     plan,

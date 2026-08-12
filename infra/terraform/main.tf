@@ -259,6 +259,7 @@ resource "azurerm_security_center_workspace" "defender" {
 module "policy" {
   source                     = "./modules/policy"
   location                   = var.location
+  policy_assignment_prefix   = var.policy_assignment_prefix
   allowed_locations          = local.allowed_locations
   log_analytics_workspace_id = local.effective_log_analytics_workspace_id
   subscription_id            = var.subscription_id

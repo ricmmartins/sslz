@@ -19,6 +19,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import {
+  basename,
   dirname,
   isAbsolute,
   parse,
@@ -45,6 +46,11 @@ import {
   defenderWorkspaceDecisionDigest,
   digest as defenderWorkspaceDigest,
 } from "./defender-workspace-placement.mjs";
+import {
+  assertFreshRegionalBindings,
+  assertRegionalAttemptRecord,
+  attemptIdentity,
+} from "./regional-attempt.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_ROOT = resolve(root, ".sslz/generated");
@@ -973,6 +979,154 @@ function normalizeAction(action) {
   return normalized;
 }
 
+function regionalAttemptModel(input, primary) {
+  const attempt = input.regionalAttempt ?? {
+    chainId: input.planId,
+    attemptNumber: 1,
+    originalRegion: primary.region,
+    targetRegion: primary.region,
+    previousAttempts: { prod: null, nonprod: null },
+    safeSameRegionRetry: false,
+  };
+  if (attempt.targetRegion !== primary.region) {
+    throw new Error(
+      "The regional attempt target must match the newly selected primary region.",
+    );
+  }
+  const previousAttemptDigests = { prod: null, nonprod: null };
+  const cleanupEvidenceDigests = { prod: null, nonprod: null };
+  const previousAttemptKeys = { prod: null, nonprod: null };
+  const previousTargetRegions = { prod: null, nonprod: null };
+  const previousBindings = { prod: null, nonprod: null };
+  const retiredPolicyAssignmentNames = { prod: [], nonprod: [] };
+  if (attempt.attemptNumber === 1) {
+    if (Object.values(attempt.previousAttempts).some(Boolean)) {
+      throw new Error("The initial regional attempt cannot have a predecessor.");
+    }
+  } else {
+    for (const environment of ["prod", "nonprod"]) {
+      const previousInput = attempt.previousAttempts[environment];
+      if (!previousInput) {
+        throw new Error(
+          `A retry requires the complete immutable ${environment} predecessor record.`,
+        );
+      }
+      const previous = assertRegionalAttemptRecord(previousInput);
+      if (
+        previous.chainId !== attempt.chainId ||
+        previous.planId !== input.planId ||
+        previous.attemptNumber !== attempt.attemptNumber - 1 ||
+        previous.originalRegion !== attempt.originalRegion ||
+        previous.environment !== environment ||
+        previous.backendKeyPrefix !==
+          input.deployment.terraformBackend.keyPrefix ||
+        previous.identities.stateKey !==
+          `${input.deployment.terraformBackend.keyPrefix}-${environment}-primary.tfstate`
+      ) {
+        throw new Error(
+          `The ${environment} regional retry predecessor chain does not match.`,
+        );
+      }
+      if (!["failed", "cleaned"].includes(previous.status)) {
+        throw new Error(
+          `The ${environment} regional retry predecessor must be terminal and retryable.`,
+        );
+      }
+      previousAttemptDigests[environment] = previous.recordDigest;
+      cleanupEvidenceDigests[environment] = previous.cleanup.evidenceDigest;
+      previousAttemptKeys[environment] = previous.identities.attemptKey;
+      previousTargetRegions[environment] = previous.targetRegion;
+      previousBindings[environment] = structuredClone(previous.bindings);
+      retiredPolicyAssignmentNames[environment] = Object.values(
+        previous.identities.policyAssignmentNames,
+      ).sort();
+      if (
+        previous.cleanup.required &&
+        previous.cleanup.status !== "succeeded"
+      ) {
+        throw new Error(
+          `${environment} cleanup failure or pending cleanup blocks regional replan.`,
+        );
+      }
+      const changedRegion = attempt.targetRegion !== previous.targetRegion;
+      assertFreshRegionalBindings(
+        previous.bindings,
+        {
+          regionalEvidenceDigest: input.readinessEvidence.evidenceDigest,
+        },
+        changedRegion,
+      );
+      if (
+        changedRegion &&
+        previous.writeStarted &&
+        previous.status !== "cleaned"
+      ) {
+        throw new Error(
+          `A changed target region requires a cleaned ${environment} predecessor attempt.`,
+        );
+      }
+      if (
+        !changedRegion &&
+        previous.writeStarted &&
+        previous.status !== "cleaned" &&
+        attempt.safeSameRegionRetry !== true
+      ) {
+        throw new Error(
+          `A started same-region ${environment} retry requires cleanup or explicit safe retry evidence.`,
+        );
+      }
+    }
+  }
+  return {
+    schemaVersion: "1.0.0",
+    chainId: attempt.chainId,
+    attemptNumber: attempt.attemptNumber,
+    originalRegion: attempt.originalRegion,
+    targetRegion: attempt.targetRegion,
+    previousAttemptDigests,
+    cleanupEvidenceDigests,
+    previousAttemptKeys,
+    previousTargetRegions,
+    previousBindings,
+    retiredPolicyAssignmentNames,
+    safeSameRegionRetry: attempt.safeSameRegionRetry,
+  };
+}
+
+function assertRegionalPlanBindingsFresh(decisionModel, digest) {
+  const attempt = decisionModel.regionalAttempt;
+  for (const environment of ["prod", "nonprod"]) {
+    const previous = attempt.previousBindings[environment];
+    if (!previous) {
+      continue;
+    }
+    assertFreshRegionalBindings(
+      previous,
+      {
+        regionalEvidenceDigest:
+          decisionModel.readinessEvidence.evidenceDigest,
+        planDigest: digest,
+      },
+      attempt.targetRegion !== attempt.previousTargetRegions[environment],
+    );
+  }
+}
+
+function regionalAttemptIdentity(decisionModel, provider, environment) {
+  const attempt = decisionModel.regionalAttempt;
+  return attemptIdentity({
+    chainId: attempt.chainId,
+    planId: decisionModel.planId,
+    originalRegion: attempt.originalRegion,
+    targetRegion: attempt.targetRegion,
+    attemptNumber: attempt.attemptNumber,
+    provider,
+    environment,
+    backendKeyPrefix: decisionModel.terraformBackend.keyPrefix,
+    planDigest: planDigest(decisionModel),
+  });
+}
+
 function buildDecisionModel(input) {
   const primary = input.regionalPlan.selectedPrimary;
   const secondary =
@@ -1028,6 +1182,7 @@ function buildDecisionModel(input) {
     };
 
   return {
+    planId: input.planId,
     target: {
       tenantId: input.target.tenantId.toLowerCase(),
       environments: input.target.environments
@@ -1088,6 +1243,7 @@ function buildDecisionModel(input) {
           }
         : null,
     },
+    regionalAttempt: regionalAttemptModel(input, primary),
     services: input.deployment.services
       .map((service) => ({ type: service.type, purpose: service.purpose }))
       .sort(compareCanonical),
@@ -1278,13 +1434,30 @@ function assertGeneratedFile(path, content) {
   if (!existing.includes(GENERATED_MARKER) && !generatedJson) {
     throw new Error(`Refusing to overwrite a non-generated file: ${relativePath(path)}.`);
   }
+  throw new Error(
+    `Refusing to mutate an existing generated artifact: ${relativePath(path)}.`,
+  );
 }
 
 function writeGeneratedFile(path, content) {
   assertNoLinkedComponents(path);
-  assertGeneratedFile(path, content);
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, content, { encoding: "utf8", mode: 0o600 });
+  let descriptor;
+  try {
+    descriptor = openSync(path, "wx", 0o600);
+  } catch (error) {
+    if (error.code !== "EEXIST") {
+      throw error;
+    }
+    assertNoLinkedComponents(path);
+    assertGeneratedFile(path, content);
+    return;
+  }
+  try {
+    writeFileSync(descriptor, content, { encoding: "utf8" });
+  } finally {
+    closeSync(descriptor);
+  }
 }
 
 function bicepValue(value) {
@@ -1379,6 +1552,11 @@ function parameterValues(
   const managesWorkspaceAssociation =
     decisionModel.defenderWorkspace.required &&
     associationEnvironments[0]?.name === environment.name;
+  const attempt = regionalAttemptIdentity(
+    decisionModel,
+    "bicep",
+    environment.name,
+  );
   return {
     location: regionalTarget.region,
     companyName: decisionModel.configuration.companyName,
@@ -1417,6 +1595,12 @@ function parameterValues(
     ].sort(),
     logRetentionInDays: decisionModel.configuration.logRetentionInDays,
     logDailyQuotaGb: decisionModel.configuration.logDailyQuotaGb,
+    ...(decisionModel.regionalAttempt.attemptNumber > 1
+      ? {
+          regionalAttemptSuffix: attempt.resourceSuffix,
+          policyAssignmentPrefix: `${attempt.attemptKey}-`,
+        }
+      : {}),
   };
 }
 
@@ -1462,7 +1646,7 @@ function renderTerraformVariables(values, previewEligible) {
 function artifactDefinitions(
   decisionModel,
   providers,
-  outputDirectory,
+  planOutputDirectory,
   notificationContacts,
 ) {
   const regionalTargets = [
@@ -1479,12 +1663,24 @@ function artifactDefinitions(
             regionalTarget.role === "primary" || environment.name === "nonprod",
         )
         .map((regionalTarget) => {
+        const identity = regionalAttemptIdentity(
+          decisionModel,
+          provider,
+          environment.name,
+        );
+        const attemptSuffix =
+          decisionModel.regionalAttempt.attemptNumber > 1
+            ? `-${identity.attemptKey}`
+            : "";
         const extension =
           provider === "bicep" ? "local.bicepparam" : "auto.tfvars";
+        const relativeArtifactRoot = identity.artifactRoot
+          .slice(`.sslz/generated/${decisionModel.planId}/`.length)
+          .split("/");
         const path = resolve(
-          outputDirectory,
-          provider,
-          `${environment.name}-${regionalTarget.role}.${extension}`,
+          planOutputDirectory,
+          ...relativeArtifactRoot,
+          `${environment.name}-${regionalTarget.role}${attemptSuffix}.${extension}`,
         );
         const sourcePath =
           regionalTarget.role === "secondary"
@@ -1533,10 +1729,12 @@ function writeParameterArtifacts(definitions) {
   }
 }
 
-function reconcileParameterArtifacts(definitions, outputDirectory) {
+function reconcileParameterArtifacts(definitions) {
   const expected = new Set(definitions.map((definition) => definition.path));
-  for (const provider of SUPPORTED_PROVIDERS) {
-    const providerDirectory = resolve(outputDirectory, provider);
+  const providerDirectories = new Set(
+    definitions.map((definition) => dirname(definition.path)),
+  );
+  for (const providerDirectory of providerDirectories) {
     if (!existsSync(providerDirectory)) {
       continue;
     }
@@ -1949,6 +2147,15 @@ function persistTerraformProvenance(
 
 function terraformBackendArguments(decisionModel, definition, useOidc) {
   const backend = decisionModel.terraformBackend;
+  const identity = regionalAttemptIdentity(
+    decisionModel,
+    "terraform",
+    definition.environment.name,
+  );
+  const stateKey =
+    decisionModel.regionalAttempt.attemptNumber === 1
+      ? `${backend.keyPrefix}-${definition.environment.name}-${definition.regionalTarget.role}.tfstate`
+      : identity.stateKey;
   return [
     ...(backend.subscriptionId
       ? [`-backend-config=subscription_id=${backend.subscriptionId}`]
@@ -1956,7 +2163,7 @@ function terraformBackendArguments(decisionModel, definition, useOidc) {
     `-backend-config=resource_group_name=${backend.resourceGroupName}`,
     `-backend-config=storage_account_name=${backend.storageAccountName}`,
     `-backend-config=container_name=${backend.containerName}`,
-    `-backend-config=key=${backend.keyPrefix}-${definition.environment.name}-${definition.regionalTarget.role}.tfstate`,
+    `-backend-config=key=${stateKey}`,
     `-backend-config=use_oidc=${useOidc}`,
     `-backend-config=use_cli=${!useOidc}`,
     "-backend-config=use_azuread_auth=true",
@@ -1970,10 +2177,19 @@ function assertArtifactDestinationsAvailable(paths) {
 }
 
 function rawOutputPath(definition, rawArtifactDirectory, suffix) {
+  const identity = regionalAttemptIdentity(
+    definition.decisionModel,
+    definition.provider,
+    definition.environment.name,
+  );
+  const attemptSuffix =
+    definition.decisionModel.regionalAttempt.attemptNumber > 1
+      ? `-${identity.attemptKey}`
+      : "";
   return rawArtifactDirectory
     ? resolve(
         rawArtifactDirectory,
-        `${definition.provider}-${definition.environment.name}-${definition.regionalTarget.role}-${suffix}`,
+        `${definition.provider}-${definition.environment.name}-${definition.regionalTarget.role}${attemptSuffix}-${suffix}`,
       )
     : null;
 }
@@ -2000,7 +2216,13 @@ function writeExclusiveArtifacts(entries) {
 }
 
 function executePreview(decisionModel, definition, rawArtifactDirectory) {
+  definition.decisionModel = decisionModel;
   if (definition.provider === "bicep") {
+    const identity = regionalAttemptIdentity(
+      decisionModel,
+      "bicep",
+      definition.environment.name,
+    );
     assertArtifactDestinationsAvailable([
       rawOutputPath(definition, rawArtifactDirectory, "what-if.txt"),
     ]);
@@ -2019,7 +2241,9 @@ function executePreview(decisionModel, definition, rawArtifactDirectory) {
         "--parameters",
         definition.path,
         "--name",
-        `sslz-preview-${definition.environment.name}-${definition.regionalTarget.role}`,
+        decisionModel.regionalAttempt.attemptNumber === 1
+          ? `sslz-preview-${definition.environment.name}-${definition.regionalTarget.role}`
+          : identity.previewDeploymentName,
         "--result-format",
         "ResourceIdOnly",
       ],
@@ -2039,22 +2263,31 @@ function executePreview(decisionModel, definition, rawArtifactDirectory) {
 
   const useOidc = process.env.GITHUB_ACTIONS === "true";
   const trustedTerraform = terraformExecutable();
+  const identity = regionalAttemptIdentity(
+    decisionModel,
+    "terraform",
+    definition.environment.name,
+  );
+  const attemptSuffix =
+    decisionModel.regionalAttempt.attemptNumber > 1
+      ? `-${identity.attemptKey}`
+      : "";
   const rawPlanPath = rawArtifactDirectory
     ? resolve(
         rawArtifactDirectory,
-        `${definition.environment.name}-${definition.regionalTarget.role}.tfplan`,
+        `${definition.environment.name}-${definition.regionalTarget.role}${attemptSuffix}.tfplan`,
       )
     : null;
   const planJsonPath = rawPlanPath
     ? resolve(
         rawArtifactDirectory,
-        `${definition.environment.name}-${definition.regionalTarget.role}.plan.json`,
+        `${definition.environment.name}-${definition.regionalTarget.role}${attemptSuffix}.plan.json`,
       )
     : null;
   const provenancePath = rawPlanPath
     ? resolve(
         rawArtifactDirectory,
-        `${definition.environment.name}-${definition.regionalTarget.role}.provenance.json`,
+        `${definition.environment.name}-${definition.regionalTarget.role}${attemptSuffix}.provenance.json`,
       )
     : null;
   const versionOutputPath = rawOutputPath(
@@ -2409,27 +2642,45 @@ function generateIacPlan(
 
   const selectedProviders = normalizeProviders(providers);
   const outputDirectory = ensureGeneratedPath(outputPath, "Output directory");
-  const rawArtifactDirectory = rawArtifactPath
+  const rawArtifactBaseDirectory = rawArtifactPath
     ? ensureGeneratedPath(rawArtifactPath, "Raw artifact directory")
     : null;
   if (
-    rawArtifactDirectory &&
-    relative(outputDirectory, rawArtifactDirectory).startsWith("..")
+    rawArtifactBaseDirectory &&
+    relative(outputDirectory, rawArtifactBaseDirectory).startsWith("..")
   ) {
     throw new Error("Raw artifact directory must be inside the selected output directory.");
   }
 
   const decisionModel = buildDecisionModel(input);
+  const planOutputDirectory =
+    basename(outputDirectory) === decisionModel.planId
+      ? outputDirectory
+      : resolve(outputDirectory, decisionModel.planId);
   const resolvedNotificationContacts =
     validatedNotificationContacts(notificationContacts);
   const digest = planDigest(decisionModel);
+  assertRegionalPlanBindingsFresh(decisionModel, digest);
+  const planAttemptDirectory = resolve(
+    planOutputDirectory,
+    `a${String(decisionModel.regionalAttempt.attemptNumber).padStart(2, "0")}-` +
+      `${decisionModel.regionalAttempt.targetRegion}-` +
+      digest.slice("sha256:".length, "sha256:".length + 10),
+  );
+  const rawArtifactDirectory = rawArtifactBaseDirectory
+    ? resolve(
+        rawArtifactBaseDirectory,
+        relative(outputDirectory, planAttemptDirectory),
+        "raw",
+      )
+    : null;
   const definitions = artifactDefinitions(
     decisionModel,
     selectedProviders,
-    outputDirectory,
+    planOutputDirectory,
     resolvedNotificationContacts,
   );
-  reconcileParameterArtifacts(definitions, outputDirectory);
+  reconcileParameterArtifacts(definitions);
   writeParameterArtifacts(definitions);
   const previews = previewDefinitions(decisionModel, definitions, {
     execute: executePreviewCommands,
@@ -2463,7 +2714,13 @@ function generateIacPlan(
       sourcePath: definition.sourcePath,
       stateKey:
         definition.provider === "terraform"
-          ? `${decisionModel.terraformBackend.keyPrefix}-${definition.environment.name}-${definition.regionalTarget.role}.tfstate`
+          ? decisionModel.regionalAttempt.attemptNumber === 1
+            ? `${decisionModel.terraformBackend.keyPrefix}-${definition.environment.name}-${definition.regionalTarget.role}.tfstate`
+            : regionalAttemptIdentity(
+                decisionModel,
+                "terraform",
+                definition.environment.name,
+              ).stateKey
           : null,
       previewEligible: definition.previewEligible,
     })),
@@ -2476,7 +2733,7 @@ function generateIacPlan(
       rawArtifacts: rawArtifactDirectory ? "explicit-local-path" : "not-retained",
     },
   };
-  const summaryPath = resolve(outputDirectory, "plan-summary.json");
+  const summaryPath = resolve(planAttemptDirectory, "plan-summary.json");
   writeGeneratedFile(summaryPath, `${JSON.stringify(result, null, 2)}\n`);
   return result;
 }

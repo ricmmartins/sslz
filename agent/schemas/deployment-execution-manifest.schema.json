@@ -11,6 +11,7 @@
     "manifestDigest",
     "plan",
     "readinessEvidence",
+    "regionalAttempt",
     "defenderWorkspacePlacement",
     "execution",
     "artifacts",
@@ -101,6 +102,103 @@
         "topologyDecisionExpiresAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "regionalAttempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "chainId",
+        "attemptId",
+        "attemptNumber",
+        "previousAttemptDigest",
+        "originalRegion",
+        "targetRegion",
+        "cleanupEvidenceDigest",
+        "safeSameRegionRetry",
+        "previousAttemptKey",
+        "previousTargetRegion",
+        "previousBindings",
+        "retiredPolicyAssignmentNames",
+        "identityDigest",
+        "attemptKey",
+        "resourceSuffix",
+        "deploymentName",
+        "previewDeploymentName",
+        "stateKey",
+        "workspaceName",
+        "artifactRoot",
+        "policyIdentityLifecycle"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "chainId": { "$ref": "#/$defs/identifier" },
+        "attemptId": { "$ref": "#/$defs/identifier" },
+        "attemptNumber": { "type": "integer", "minimum": 1, "maximum": 99 },
+        "previousAttemptDigest": {
+          "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        },
+        "originalRegion": { "$ref": "#/$defs/region" },
+        "targetRegion": { "$ref": "#/$defs/region" },
+        "cleanupEvidenceDigest": {
+          "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        },
+        "safeSameRegionRetry": { "type": "boolean" },
+        "previousAttemptKey": {
+          "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }]
+        },
+        "previousTargetRegion": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "previousBindings": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "regionalEvidenceDigest",
+                "planDigest",
+                "artifactDigest",
+                "manifestDigest",
+                "approvalDigest"
+              ],
+              "properties": {
+                "regionalEvidenceDigest": { "$ref": "#/$defs/digest" },
+                "planDigest": { "$ref": "#/$defs/digest" },
+                "artifactDigest": { "$ref": "#/$defs/digest" },
+                "manifestDigest": { "$ref": "#/$defs/digest" },
+                "approvalDigest": { "$ref": "#/$defs/digest" }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "retiredPolicyAssignmentNames": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "identityDigest": { "$ref": "#/$defs/digest" },
+        "attemptKey": { "$ref": "#/$defs/identifier" },
+        "resourceSuffix": { "type": "string", "pattern": "^(?:|-a[0-9]{2}-[a-z0-9]+-[0-9a-f]{10})$" },
+        "deploymentName": { "$ref": "#/$defs/identifier" },
+        "previewDeploymentName": { "$ref": "#/$defs/identifier" },
+        "stateKey": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*\\.tfstate$" },
+        "workspaceName": { "$ref": "#/$defs/identifier" },
+        "artifactRoot": { "$ref": "#/$defs/generatedPath" },
+        "policyIdentityLifecycle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "locationBound", "mode", "reuseAcrossChangedRegion"],
+          "properties": {
+            "type": { "const": "SystemAssigned" },
+            "locationBound": { "const": true },
+            "mode": { "const": "cleanup-and-recreate" },
+            "reuseAcrossChangedRegion": { "const": false }
+          }
         }
       }
     },
@@ -535,6 +633,14 @@
     "reference": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
     },
     "generatedPath": {
       "type": "string",
