@@ -32,6 +32,7 @@ function run(
     "--nonprod-subscription",
     nonprod,
   ],
+  extraArguments = [],
 ) {
   const trace = join(mkdtempSync(join(tmpdir(), "sslz-preflight-")), "az.trace");
   const result = spawnSync(
@@ -40,6 +41,7 @@ function run(
       script,
       "inspect",
       ...subscriptionArguments,
+      ...extraArguments,
       "--output",
       "json",
     ],
@@ -105,6 +107,33 @@ assert.equal(
   "fail",
 );
 assert.equal(missingProvider.json.summary.actions.azureWrite, 1);
+
+const missingAksProvider = run(
+  "az-one-subscription-missing-aks-provider.json",
+  ["--startup-subscription", prod],
+  ["--profile", "aks", "--profile", "postgresql", "--profile", "foundry"],
+);
+const missingAksProviderCheck = missingAksProvider.json.checks.find(
+  (check) => check.id === "account.provider.required-registrations",
+);
+assert.equal(missingAksProviderCheck.status, "fail");
+assert.deepEqual(missingAksProviderCheck.evidence.selectedProfiles, [
+  "aks",
+  "foundry",
+  "postgresql",
+]);
+assert(
+  missingAksProviderCheck.evidence.missingProviders.every(
+    ({ namespace }) => namespace === "Microsoft.ContainerService",
+  ),
+);
+assert(
+  missingAksProviderCheck.remediationActionIds.includes(
+    "provider.register.prod.microsoft-containerservice",
+  ),
+);
+assert.equal(missingAksProviderCheck.remediationActionIds.length, 1);
+assert.equal(missingAksProvider.json.summary.actions.azureWrite, 1);
 
 const throttled = run("az-throttled.json");
 assert.equal(
@@ -205,6 +234,7 @@ for (const result of [
   tenantMismatch,
   denied,
   missingProvider,
+  missingAksProvider,
   throttled,
   billingUnavailable,
   subscriptionMismatch,

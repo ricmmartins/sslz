@@ -315,6 +315,24 @@ try {
   assert.equal(mixedCaseDryRun.action.subscriptionId, prod);
   assert.equal(mixedCaseDryRun.action.scope, `/subscriptions/${prod}`);
 
+  const sharedSubscriptionPlan = structuredClone(plan);
+  sharedSubscriptionPlan.decisionModel.target.environments.find(
+    ({ name }) => name === "nonprod",
+  ).subscriptionId = prod;
+  sharedSubscriptionPlan.planDigest = planDigest(
+    sharedSubscriptionPlan.decisionModel,
+  );
+  sharedSubscriptionPlan.approval.planDigest =
+    sharedSubscriptionPlan.planDigest;
+  const sharedSubscriptionDryRun = runProviderRemediation(
+    sharedSubscriptionPlan,
+    actionId,
+    null,
+    { mode: "dry-run", evaluatedAt },
+  );
+  assert.equal(sharedSubscriptionDryRun.status, "planned");
+  assert.equal(sharedSubscriptionDryRun.action.id, actionId);
+
   const unapproved = runProviderRemediation(plan, actionId, null, {
     mode: "apply",
     evaluatedAt,

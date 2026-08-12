@@ -9,6 +9,7 @@ on:
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
+      - 'scripts/validate-greenfield-journey.mjs'
       - 'scripts/startup-preflight.*'
       - 'scripts/subscription-topology.mjs'
       - 'scripts/defender-workspace-placement.mjs'
@@ -33,6 +34,7 @@ on:
       - 'infra/**'
       - 'examples/**'
       - 'scripts/validate-agent-contracts.mjs'
+      - 'scripts/validate-greenfield-journey.mjs'
       - 'scripts/startup-preflight.*'
       - 'scripts/subscription-topology.mjs'
       - 'scripts/defender-workspace-placement.mjs'
@@ -107,6 +109,12 @@ jobs:
 
       - name: Test regional deployment attempts
         run: node tests/regional-attempt.mjs
+
+      - name: Install Bicep CLI for synthetic deployment preparation
+        run: az bicep install
+
+      - name: Validate synthetic agent-aware founder journey
+        run: node scripts/validate-greenfield-journey.mjs
 
   validate-bicep:
     name: Validate Bicep

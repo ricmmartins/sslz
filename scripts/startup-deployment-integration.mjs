@@ -235,7 +235,7 @@ const EXPECTED_BICEP_RESOURCE_COUNTS = new Map([
   ["Microsoft.Authorization/roleAssignments", 4],
   ["Microsoft.Consumption/budgets", 1],
   ["Microsoft.Insights/diagnosticSettings", 1],
-  ["Microsoft.Network/networkSecurityGroups", 4],
+  ["Microsoft.Network/networkSecurityGroups", 5],
   ["Microsoft.Network/virtualNetworks", 1],
   ["Microsoft.OperationalInsights/workspaces", 1],
   ["Microsoft.Resources/deployments", 5],
@@ -259,6 +259,7 @@ const EXPECTED_BICEP_OUTPUTS = new Map([
   [
     "root",
     [
+      "aksIngressNsgRules",
       "logAnalyticsWorkspaceId",
       "logAnalyticsWorkspaceName",
       "resourceGroupMonitoring",
@@ -271,8 +272,10 @@ const EXPECTED_BICEP_OUTPUTS = new Map([
   [
     "networking",
     [
+      "aksIngressNsgRules",
       "aksSubnetId",
       "appSubnetId",
+      "containerAppsSubnetId",
       "dataSubnetId",
       "sharedSubnetId",
       "vnetId",
@@ -283,9 +286,15 @@ const EXPECTED_BICEP_OUTPUTS = new Map([
   ["budgets", []],
   ["policies", []],
 ]);
+const EXISTING_WORKSPACE_RUNTIME_REFERENCE =
+  "format('{0}{1}{2}{3}{4}{5}{6}{7}{8}', parameters('existingLogAnalyticsWorkspaceId'), variables('workspaceRegionGuard'), variables('primaryRegionPolicyGuard'), variables('workspacePrimaryGuard'), variables('workspaceReferenceGuard'), variables('workspaceSelectionGuard'), variables('externalWorkspaceReferenceGuard'), variables('sharedWorkspaceOwnershipGuard'), if(or(not(variables('useExistingLogAnalyticsWorkspace')), equals(toLower(reference('existingLogAnalyticsWorkspace', '2023-09-01', 'full').location), toLower(parameters('logAnalyticsWorkspaceLocation')))), '', fail('The existing Log Analytics workspace actual location must match logAnalyticsWorkspaceLocation.')))";
 const EXPECTED_BICEP_REFERENCES = new Set([
   "[if(parameters('deployNetworking'), reference('networking').outputs.vnetId.value, '')]",
   "[if(parameters('deployNetworking'), reference('networking').outputs.vnetName.value, '')]",
+  "[if(parameters('deployNetworking'), reference('networking').outputs.aksIngressNsgRules.value, createArray())]",
+  `[if(variables('useExistingLogAnalyticsWorkspace'), ${EXISTING_WORKSPACE_RUNTIME_REFERENCE}, reference('logAnalytics').outputs.workspaceId.value)]`,
+  `[if(variables('useExistingLogAnalyticsWorkspace'), createObject('value', ${EXISTING_WORKSPACE_RUNTIME_REFERENCE}), createObject('value', reference('logAnalytics').outputs.workspaceId.value))]`,
+  "[if(variables('useExistingLogAnalyticsWorkspace'), last(split(parameters('existingLogAnalyticsWorkspaceId'), '/')), reference('logAnalytics').outputs.workspaceName.value)]",
   "[reference('activityLogDiagAssignment', '2024-04-01', 'full').identity.principalId]",
   "[reference('inheritEnvironmentTag', '2024-04-01', 'full').identity.principalId]",
   "[reference('inheritTeamTag', '2024-04-01', 'full').identity.principalId]",
@@ -293,7 +302,10 @@ const EXPECTED_BICEP_REFERENCES = new Set([
   "[reference('logAnalytics').outputs.workspaceName.value]",
 ]);
 const EXPECTED_BICEP_DEPLOYMENT_SCOPES = new Map([
-  ["logAnalytics", "[variables('rgMonitoring')]"],
+  [
+    "logAnalytics",
+    "[format('{0}{1}{2}{3}{4}{5}{6}{7}', variables('rgMonitoring'), variables('workspaceRegionGuard'), variables('primaryRegionPolicyGuard'), variables('workspacePrimaryGuard'), variables('workspaceReferenceGuard'), variables('workspaceSelectionGuard'), variables('externalWorkspaceReferenceGuard'), variables('sharedWorkspaceOwnershipGuard'))]",
+  ],
   ["networking", "[variables('rgNetworking')]"],
   ["defender", null],
   ["budgets", null],
@@ -1637,6 +1649,29 @@ function unsafeBicepRuntimeExpression(value) {
   );
 }
 
+function isExpectedExistingWorkspaceResource(
+  symbolicName,
+  resource,
+  rootTemplate,
+) {
+  return (
+    rootTemplate &&
+    symbolicName === "existingLogAnalyticsWorkspace" &&
+    canonicalJson(resource) ===
+      canonicalJson({
+        condition: "[variables('useExistingLogAnalyticsWorkspace')]",
+        existing: true,
+        type: "Microsoft.OperationalInsights/workspaces",
+        apiVersion: "2023-09-01",
+        subscriptionId:
+          "[split(parameters('existingLogAnalyticsWorkspaceId'), '/')[2]]",
+        resourceGroup:
+          "[split(parameters('existingLogAnalyticsWorkspaceId'), '/')[4]]",
+        name: "[last(split(parameters('existingLogAnalyticsWorkspaceId'), '/'))]",
+      })
+  );
+}
+
 function summarizeBicepTemplate(document, subscriptionId) {
   if (
     !document ||
@@ -1673,6 +1708,15 @@ function summarizeBicepTemplate(document, subscriptionId) {
     for (const [symbolicName, resource] of bicepResourceEntries(
       template?.resources,
     )) {
+      if (
+        isExpectedExistingWorkspaceResource(
+          symbolicName,
+          resource,
+          rootTemplate,
+        )
+      ) {
+        continue;
+      }
       const type = [...EXPECTED_BICEP_RESOURCE_COUNTS.keys()].find(
         (item) => item.toLowerCase() === String(resource?.type).toLowerCase(),
       );
@@ -2802,6 +2846,7 @@ function buildDeploymentManifest(
     terraformAuthMode = "cli",
     provenancePublicKey = null,
     statePath = ".sslz/deployment-state",
+    stateStoreResolver = requireDurableStateStore,
     evaluatedAt = Date.now(),
     runner = defaultRunner,
   },
@@ -2814,7 +2859,13 @@ function buildDeploymentManifest(
     );
   }
   const planArtifactPath = assertPlanArtifact(plan, planPath);
-  const stateStoreId = requireDurableStateStore(statePath).storeId;
+  const stateStoreId = stateStoreResolver(statePath)?.storeId;
+  if (!UUID.test(stateStoreId ?? "")) {
+    fail(
+      "deployment.state.identity-unavailable",
+      "The deployment state store resolver did not return a valid stable identity.",
+    );
+  }
   const selection = selectExecution(plan, provider, environment);
   if (
     provider === "terraform" &&

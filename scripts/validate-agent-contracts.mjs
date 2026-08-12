@@ -144,6 +144,20 @@ function validate(schema, value, path, schemaDirectory) {
   }
 
   if (value && typeof value === "object" && !Array.isArray(value)) {
+    const propertyCount = Object.keys(value).length;
+    if (
+      schema.minProperties !== undefined &&
+      propertyCount < schema.minProperties
+    ) {
+      fail(path, `minimum property count is ${schema.minProperties}`);
+    }
+    if (
+      schema.maxProperties !== undefined &&
+      propertyCount > schema.maxProperties
+    ) {
+      fail(path, `maximum property count is ${schema.maxProperties}`);
+    }
+
     for (const required of schema.required ?? []) {
       if (!Object.hasOwn(value, required)) {
         fail(path, `missing required property ${required}`);
@@ -163,6 +177,16 @@ function validate(schema, value, path, schemaDirectory) {
       if (propertySchema) {
         validate(
           propertySchema,
+          propertyValue,
+          `${path}.${property}`,
+          schemaDirectory,
+        );
+      } else if (
+        schema.additionalProperties &&
+        typeof schema.additionalProperties === "object"
+      ) {
+        validate(
+          schema.additionalProperties,
           propertyValue,
           `${path}.${property}`,
           schemaDirectory,
@@ -386,6 +410,9 @@ function main() {
     "agent/schemas/terraform-plan-provenance.schema.json",
   );
   const preflightResultSchema = load("agent/schemas/preflight-result.schema.json");
+  const greenfieldJourneyReportSchema = load(
+    "agent/schemas/greenfield-journey-report.schema.json",
+  );
   const startupInput = load("agent/examples/startup-input.json");
   const workloadProfilePlan = load("agent/examples/workload-profile-plan.json");
   const regionalPlanningInput = load(
@@ -421,6 +448,9 @@ function main() {
   );
   const containerAppsCoolProfileInput = load(
     "agent/examples/container-apps-cool-profile-input.json",
+  );
+  const greenfieldJourneyReport = load(
+    "agent/examples/greenfield-journey-report.json",
   );
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
@@ -530,6 +560,23 @@ function main() {
     containerAppsCoolProfileInputSchema,
     containerAppsCoolProfileInput,
   );
+  validateDocument(greenfieldJourneyReportSchema, greenfieldJourneyReport);
+  assert.throws(
+    () =>
+      validateDocument(greenfieldJourneyReportSchema, {
+        ...greenfieldJourneyReport,
+        bindings: {},
+      }),
+    /minimum property count is 1/,
+  );
+  assert.throws(
+    () =>
+      validateDocument(greenfieldJourneyReportSchema, {
+        ...greenfieldJourneyReport,
+        bindings: { invalid: "not-a-digest" },
+      }),
+    /does not match \^sha256:/,
+  );
   assert.equal(
     deploymentResultSchema.$id,
     "https://aka.ms/sslz/schemas/deployment-result.schema.json",
@@ -557,6 +604,7 @@ function main() {
     defenderWorkspacePlacementDecision,
     coolFoundationBaseline,
     containerAppsCoolProfileInput,
+    greenfieldJourneyReport,
     profiles,
   ]);
 

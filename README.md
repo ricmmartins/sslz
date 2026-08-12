@@ -16,6 +16,26 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 - **Set budget alerts at 50%, 80%, and 100% of your monthly burn.** Tag everything with `environment` and `team`. No exceptions.
 - **Deploy this in under 1 hour with Bicep or Terraform.** Graduate to full ALZ when you hit ~50 engineers, multi-region, or regulatory compliance requirements.
 
+## Agent-aware journey on `main`
+
+The current `main` branch includes the additive agent-aware founder journey: account/topology preflight, workload and
+regional planning, PostgreSQL fallback, explicit Defender workspace placement, provider remediation, IaC review,
+readiness-bound approval, regional retry, and AKS ingress/postcheck contracts. Run its package-free synthetic
+end-to-end validation with:
+
+```bash
+node scripts/validate-greenfield-journey.mjs
+```
+
+This command uses deterministic fixtures and mocks, writes review artifacts only under ignored `.sslz/` paths, performs
+no Azure operations, and needs no Azure login or live tenant. It requires Node.js and the local Bicep CLI installed by
+`az bicep install`, but no npm install or project dependency restore. Its sanitized report follows
+[`agent/schemas/greenfield-journey-report.schema.json`](agent/schemas/greenfield-journey-report.schema.json).
+
+These capabilities describe the latest `main`; a tagged release contains only the features documented by that tag.
+The [Quick Start](#quick-start) below remains the baseline direct Bicep/Terraform deployment path and does not
+automatically invoke the agent orchestrators or their approvals.
+
 ## Background
 
 For a comprehensive walkthrough of the full Azure Landing Zone journey — from identity and RBAC to Platform and Application Landing Zones — see [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195). This project takes that foundation and distills it into a deployable starting point for startups.

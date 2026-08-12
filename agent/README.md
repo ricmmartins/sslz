@@ -27,11 +27,24 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/deployment-execution-manifest.schema.json` | Immutable provider, target, artifact, preview, and command binding |
 | `schemas/deployment-approval.schema.json` | Trusted signed approval for one exact platform deployment |
 | `schemas/deployment-result.schema.json` | Sanitized deployment and post-validation audit result |
+| `schemas/greenfield-journey-report.schema.json` | Sanitized validation-only founder journey stages, bindings, blockers, and negative cases |
 | `checks/check-catalog.json` | Stable check IDs and official documentation |
 | `profiles/` | Versioned compute and extension decision data |
 | `examples/` | Sanitized ready, blocked, and input examples |
 
 ## Validate locally
+
+```bash
+node scripts/validate-greenfield-journey.mjs
+```
+
+That is the canonical validation-only entry point for the complete agent-aware founder journey on the current `main`
+branch. It exercises the production planners and approval/remediation boundaries with deterministic mocks, creates no
+Azure resources, and requires no tenant access. The emitted report contains aliases and digests rather than tenant or
+subscription identifiers, PII, secrets, or raw diagnostics. Node.js and the local Bicep CLI installed by
+`az bicep install` are required; no npm install or project dependency restore is needed.
+
+Individual contract suites remain available for focused development:
 
 ```bash
 node scripts/validate-agent-contracts.mjs
@@ -49,17 +62,25 @@ node tests/startup-deployment-integration.mjs
 Validation and fixture tests use Node.js built-in modules and require no package installation, Azure login, or Azure
 permissions.
 
+Tagged releases may predate the complete journey; consult the documentation in the selected tag. Direct use of
+`infra/bicep` or `infra/terraform` is the baseline IaC workflow and bypasses this validation orchestrator unless the
+operator runs it explicitly.
+
 ## Inspect an Azure account
 
 ```bash
 ./scripts/startup-preflight.sh inspect \
   --prod-subscription <subscription-id> \
   --nonprod-subscription <subscription-id> \
+  --profile container-apps \
   --output text
 ```
 
 Use `--output json` for the contract defined by `schemas/preflight-result.schema.json`. The command never registers a
 provider, assigns a role, changes billing, or deploys resources.
+Repeat `--profile` for every selected compute or extension profile. When omitted, preflight preserves the baseline
+Container Apps behavior. AKS inspection therefore requests `--profile aks` and checks
+`Microsoft.ContainerService` without imposing that provider on unrelated workloads.
 
 ## Plan a workload profile
 

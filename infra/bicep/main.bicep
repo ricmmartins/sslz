@@ -40,7 +40,7 @@ param regionalAttemptSuffix string = ''
 @description('Deterministic prefix for retry-owned policy assignments; empty preserves first-attempt names')
 param policyAssignmentPrefix string = ''
 
-@description('Company name used for naming resources (2-10 lowercase alphanumeric characters). Must be ≤ 10 characters — keep this short if using `azd env new`.')
+@description('Company name used for naming resources (2-10 lowercase alphanumeric characters). Must be <= 10 characters; keep this short if using `azd env new`.')
 @minLength(2)
 @maxLength(10)
 param companyName string

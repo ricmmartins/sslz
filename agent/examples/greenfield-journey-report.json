@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.0.0",
+  "journeyId": "synthetic-greenfield-founder-v1",
+  "generatedAt": "2026-08-11T18:00:00.000Z",
+  "mode": "validation-only",
+  "status": "pass",
+  "stages": [
+    {
+      "id": "preflight",
+      "status": "pass"
+    },
+    {
+      "id": "aks-planning-postcheck",
+      "status": "not-observed"
+    },
+    {
+      "id": "aks-observed-acceptance",
+      "status": "pass"
+    }
+  ],
+  "blockerTransitions": [
+    {
+      "checkId": "account.provider.required-registrations",
+      "transitions": [
+        {
+          "status": "blocked",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      ]
+    }
+  ],
+  "bindings": {
+    "topologyDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "planDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "approvalDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "artifacts": [
+    {
+      "provider": "bicep",
+      "environment": "prod",
+      "region": "centralus",
+      "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    {
+      "provider": "terraform",
+      "environment": "prod",
+      "region": "centralus",
+      "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+    }
+  ],
+  "negativeJourneys": [
+    {
+      "id": "provider-remediation-not-approved",
+      "status": "blocked",
+      "failedAtStage": "provider-remediation",
+      "blockerIds": [
+        "remediation.approval.required"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Provider remediation approval is required."
+    }
+  ],
+  "diagnostics": {
+    "sanitized": true,
+    "azureWrites": 0,
+    "liveTenantDependency": false,
+    "preflightRunId": "synthetic-greenfield-preflight",
+    "deploymentPreparation": {
+      "status": "prepared",
+      "executionMode": "mock",
+      "writeEvents": 0,
+      "writePreparationEvents": 1
+    },
+    "planningPostcheck": {
+      "status": "not-observed",
+      "liveConnectivityClaimed": false
+    },
+    "acceptancePostcheck": {
+      "status": "pass",
+      "signatureAlgorithm": "Ed25519"
+    }
+  }
+}
