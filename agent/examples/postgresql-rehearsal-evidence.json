@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0.0",
+  "rehearsalId": "rehearsal.rds.orders.20260812",
+  "evidenceSetId": "evidence.rehearsal.orders.attempt-1",
+  "observedAt": "2026-08-12T12:15:00Z",
+  "expiresAt": "2026-08-13T12:15:00Z",
+  "maxEvidenceAgeHours": 24,
+  "environmentReference": "environment.rehearsal.orders.isolated",
+  "evidenceReferences": [
+    "evidence.rehearsal.orders.summary"
+  ],
+  "bindings": {
+    "sourceAssessmentDigest": "sha256:b224d0916898e5f4c708d6a42b27138f3e04280983e3c9863e3dab05abb53ccc",
+    "migrationPlanDigest": "sha256:c4a544fd4e39f3c827a9b329df697c941bb1d2b5a4ae08ea6467be4cd67d2f57",
+    "migrationIdentityDigest": "sha256:fa50d2c721430c4d57c07a4a334e16e168e09f7a8edfc37b34d20035b33a7224",
+    "targetRegion": "centralus",
+    "targetEngine": {
+      "family": "postgresql",
+      "major": 16,
+      "minor": 4
+    },
+    "targetPostgresqlDecisionDigest": "sha256:65f94eee3f7ab0546da39f585e8a1ba8c212ce193c5b303f6dc4b92b09d6b080",
+    "targetPostgresqlSelectedEvidenceDigest": "sha256:c1f0370e90cff4f954ee6ca72a05cf9797530ee8174853415560bce10b2b0308",
+    "targetMigrationEvidenceDigest": "sha256:09115c463c18e23a1b65878e7030061d7063fdd098d36fe83277223ca03ea1a6",
+    "strategy": "offline-dump-restore",
+    "scopeDigest": "sha256:7c8a7b670c090e11381e521a5c1ee6266cc814584d6db58c0a71a64cb21e5cfa",
+    "validationPlanDigest": "sha256:be5e6364f3299a72edc369ada981e45a96fa1daa2a1d0c5c2474398376f6d191",
+    "rollbackPlanDigest": "sha256:e6cecfa9a15220aa79fcb9f43ba11fed2cf67fb65d55f6842ae55bc576065456",
+    "acceptedLineageDigest": "sha256:fa28030ecf4c59171b22cd309959f642fcd9bb84c307cc03dfe1e8aa4606a872"
+  },
+  "transition": {
+    "from": "rehearse",
+    "requested": "cutover-ready"
+  },
+  "replayProtection": {
+    "attemptOrdinal": 1,
+    "priorEvidenceSetIds": []
+  },
+  "prechecks": {
+    "modelPrepared": true,
+    "schemaCompatibilityReviewed": true,
+    "requiredTransformationsReviewed": true,
+    "unsupportedObjectsResolved": true,
+    "evidenceReferences": [
+      "evidence.rehearsal.orders.prechecks"
+    ]
+  },
+  "initialLoad": {
+    "completed": true,
+    "method": "offline-dump-restore",
+    "snapshotReference": "snapshot.orders.rehearsal.1",
+    "loadArtifactReference": "artifact.orders.rehearsal.load.1",
+    "evidenceReferences": [
+      "evidence.rehearsal.orders.initial-load"
+    ]
+  },
+  "catchUp": {
+    "mode": "not-applicable",
+    "explicitlyPermitted": false,
+    "completed": false,
+    "maxLagSeconds": null,
+    "finalLagSeconds": null,
+    "evidenceReferences": []
+  },
+  "validation": {
+    "schemaCompatibilityPassed": true,
+    "objectCounts": {
+      "source": 40,
+      "target": 40
+    },
+    "rowCounts": [
+      {
+        "tableReference": "table.orders",
+        "sourceRows": 1250000,
+        "targetRows": 1250000,
+        "allowedDifferenceRows": 0
+      }
+    ],
+    "dataVerification": {
+      "method": "chunked-checksums",
+      "passed": true,
+      "coveragePercent": 100,
+      "sampleRows": 1250000,
+      "riskAcceptanceReference": null,
+      "evidenceReferences": [
+        "evidence.rehearsal.orders.checksums"
+      ]
+    },
+    "applicationSmokeTestsPassed": true,
+    "applicationSmokeTestReferences": [
+      "validation.app.orders.smoke"
+    ],
+    "queryReferences": [
+      "validation.catalog.counts",
+      "validation.business.orders"
+    ],
+    "evidenceReferences": [
+      "evidence.rehearsal.orders.validation"
+    ]
+  },
+  "cutoverReadiness": {
+    "writeFreezeRehearsed": true,
+    "connectionDrainRehearsed": true,
+    "dnsChangeReviewed": true,
+    "applicationChangeReviewed": true,
+    "validationOwnerConfirmed": true,
+    "cutoverOwnerConfirmed": true,
+    "evidenceReferences": [
+      "evidence.rehearsal.orders.cutover-readiness"
+    ]
+  },
+  "rollbackReadiness": {
+    "sourceRetained": true,
+    "failbackRehearsed": true,
+    "rollbackWindowConfirmed": true,
+    "rollbackOwnerConfirmed": true,
+    "evidenceReferences": [
+      "evidence.rehearsal.orders.rollback-readiness"
+    ]
+  },
+  "sourceOfTruth": {
+    "owner": "source",
+    "dualWritesObserved": false,
+    "transferAuthorized": false,
+    "evidenceReferences": [
+      "evidence.rehearsal.orders.source-authority"
+    ]
+  },
+  "redaction": {
+    "sanitized": true
+  }
+}

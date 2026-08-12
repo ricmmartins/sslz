@@ -11,7 +11,13 @@ import {
 import {
   POSTGRESQL_MIGRATION_CHECK_ORDER,
   planPostgresqlMigration,
+  postgresqlMigrationDigest,
 } from "../scripts/startup-postgresql-migration-plan.mjs";
+import {
+  POSTGRESQL_REHEARSAL_CHECK_ORDER,
+  planPostgresqlRehearsal,
+  postgresqlRehearsalDigest,
+} from "../scripts/startup-postgresql-rehearsal-plan.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(
@@ -57,6 +63,32 @@ const postgresqlMigrationPlan = planPostgresqlMigration(
 const postgresqlMigrationRuntimeIds = new Set(
   postgresqlMigrationPlan.checks.map(({ id }) => id),
 );
+const postgresqlRehearsalEvidence = JSON.parse(
+  readFileSync(
+    resolve(root, "agent/examples/postgresql-rehearsal-evidence.json"),
+    "utf8",
+  ),
+);
+const postgresqlRehearsalLineage = JSON.parse(
+  readFileSync(
+    resolve(root, "agent/examples/postgresql-rehearsal-lineage.json"),
+    "utf8",
+  ),
+);
+const postgresqlRehearsalPlan = planPostgresqlRehearsal(
+  postgresqlMigrationInput.sourceAssessment,
+  postgresqlMigrationInput,
+  postgresqlMigrationPlan,
+  postgresqlRehearsalEvidence,
+  postgresqlRehearsalLineage,
+  "2026-08-12T12:30:00Z",
+  postgresqlMigrationDigest(postgresqlMigrationInput),
+  postgresqlMigrationPlan.planDigest,
+  postgresqlRehearsalDigest(postgresqlRehearsalLineage),
+);
+const postgresqlRehearsalRuntimeIds = new Set(
+  postgresqlRehearsalPlan.checks.map(({ id }) => id),
+);
 assert.deepEqual(
   postgresqlPlan.requiredChecks,
   POSTGRESQL_CHECK_ORDER,
@@ -78,6 +110,16 @@ assert.deepEqual(
   postgresqlMigrationPlan.checks.map(({ id }) => id),
   POSTGRESQL_MIGRATION_CHECK_ORDER,
   "PostgreSQL migration runtime checks must exactly cover the catalog IDs",
+);
+assert.deepEqual(
+  postgresqlRehearsalPlan.requiredChecks,
+  POSTGRESQL_REHEARSAL_CHECK_ORDER,
+  "PostgreSQL rehearsal required checks must be emitted by the runtime planner",
+);
+assert.deepEqual(
+  postgresqlRehearsalPlan.checks.map(({ id }) => id),
+  POSTGRESQL_REHEARSAL_CHECK_ORDER,
+  "PostgreSQL rehearsal runtime checks must exactly cover the catalog IDs",
 );
 const mutationCheckIds = new Set();
 for (const scenario of postgresqlMigrationScenarios) {
@@ -153,6 +195,11 @@ for (const check of fixture.checks) {
     assert(
       postgresqlMigrationRuntimeIds.has(check.id),
       `${check.id}: PostgreSQL migration planner did not emit a runtime check result`,
+    );
+  } else if (check.surface === "postgresql-rehearsal-planner") {
+    assert(
+      postgresqlRehearsalRuntimeIds.has(check.id),
+      `${check.id}: PostgreSQL rehearsal planner did not emit a runtime check result`,
     );
   } else {
     const source =

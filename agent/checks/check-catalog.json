@@ -275,6 +275,104 @@
       "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
     },
     {
+      "id": "rehearsal.postgresql.contracts-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/overview"
+    },
+    {
+      "id": "rehearsal.postgresql.model-prechecks-complete",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.initial-load-evidenced",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.catch-up-permitted",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-logical"
+    },
+    {
+      "id": "rehearsal.postgresql.schema-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.row-counts-within-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.data-verification-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.cutover-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.rollback-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.source-of-truth-safe",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.output-sanitized",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/security-overview"
+    },
+    {
       "id": "region.foundry-model.available",
       "category": "region",
       "severity": "blocking",
