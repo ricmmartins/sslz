@@ -41,6 +41,10 @@ import {
   sanitizedAzureCliEnvironment,
 } from "./azure-cli-invocation.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
+import {
+  canonicalJson as canonicalIngressJson,
+  validateAksIngressDecision,
+} from "./aks-ingress-contract.mjs";
 import { topologyDecisionDigest } from "./subscription-topology.mjs";
 import {
   defenderWorkspaceDecisionDigest,
@@ -293,6 +297,9 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
     regionalMode: input.regionalPlan.requestedRegionalMode,
     primaryRegion: input.regionalPlan.selectedPrimary?.region,
     secondaryRegion: secondary,
+    aksIngressMode: input.workloadPlan.aksIngress?.mode ?? "not-applicable",
+    aksIngressDecisionDigest:
+      input.workloadPlan.aksIngress?.decisionDigest ?? null,
   };
   const actualSubject = {
     ...evidence.subject,
@@ -982,9 +989,22 @@ function assertSemanticInput(input, evaluatedAt) {
     input.regionalPlan.workloadSelection.computeProfile !==
       input.workloadPlan.computeProfile ||
     canonicalJson([...input.regionalPlan.workloadSelection.profileExtensions].sort()) !==
-      canonicalJson([...input.workloadPlan.profileExtensions].sort())
+      canonicalJson([...input.workloadPlan.profileExtensions].sort()) ||
+    canonicalJson(input.regionalPlan.workloadSelection.aksIngress) !==
+      canonicalJson(input.workloadPlan.aksIngress)
   ) {
     throw new Error("The regional recommendation belongs to a different workload selection.");
+  }
+  if (input.workloadPlan.computeProfile === "aks") {
+    const validatedIngress = validateAksIngressDecision(input.workloadPlan.aksIngress);
+    if (
+      canonicalIngressJson(validatedIngress) !==
+      canonicalIngressJson(input.workloadPlan.aksIngress)
+    ) {
+      throw new Error("The AKS ingress decision has been mutated after workload planning.");
+    }
+  } else if (input.workloadPlan.aksIngress !== null) {
+    throw new Error("A non-AKS workload cannot carry an AKS ingress decision.");
   }
   if (input.regionalPlan.selectedPrimary.disposition !== "eligible") {
     throw new Error("The selected primary regional candidate is not eligible.");
@@ -1343,6 +1363,9 @@ function buildDecisionModel(input) {
       profileVersion: input.workloadPlan.profileVersion,
       computeProfile: input.workloadPlan.computeProfile,
       profileExtensions: [...input.workloadPlan.profileExtensions].sort(),
+      aksIngress: input.workloadPlan.aksIngress
+        ? structuredClone(input.workloadPlan.aksIngress)
+        : null,
     },
     readinessEvidence: input.readinessEvidence
       ? {
@@ -1456,6 +1479,18 @@ function buildDecisionModel(input) {
         input.workloadPlan.computeProfile === "container-apps"
           ? "Microsoft.App/environments"
           : "Microsoft.Web/serverFarms",
+      aksIngressMode:
+        input.workloadPlan.aksIngress?.mode ?? "not-applicable",
+      aksIngressFrontendPort:
+        input.workloadPlan.aksIngress?.frontendPort ?? 0,
+      aksIngressBackendNodePort:
+        input.workloadPlan.aksIngress?.backendNodePort ?? 0,
+      aksIngressHealthProbeSourcePrefix:
+        input.workloadPlan.aksIngress?.healthProbe.sourcePrefix ?? "",
+      aksIngressSourcePrefixes:
+        input.workloadPlan.aksIngress?.dataSourcePrefixes ?? [],
+      aksIngressReservedNsgPriorities:
+        input.workloadPlan.aksIngress?.reservedNsgPriorities ?? [],
     },
     costAssumptions: {
       workload: input.workloadPlan.costAssumptions,
@@ -1721,6 +1756,16 @@ function parameterValues(
     deployNetworking: decisionModel.configuration.deployNetworking,
     vnetAddressPrefix: regionalTarget.vnetCidr,
     appSubnetDelegation: decisionModel.configuration.appSubnetDelegation,
+    aksIngressMode: decisionModel.configuration.aksIngressMode,
+    aksIngressFrontendPort: decisionModel.configuration.aksIngressFrontendPort,
+    aksIngressBackendNodePort:
+      decisionModel.configuration.aksIngressBackendNodePort,
+    aksIngressHealthProbeSourcePrefix:
+      decisionModel.configuration.aksIngressHealthProbeSourcePrefix,
+    aksIngressSourcePrefixes:
+      decisionModel.configuration.aksIngressSourcePrefixes,
+    aksIngressReservedNsgPriorities:
+      decisionModel.configuration.aksIngressReservedNsgPriorities,
     enableDefenderForServers: decisionModel.paidPlans.defenderForServers,
     enableDefenderForContainers: decisionModel.paidPlans.defenderForContainers,
     enableDefenderForDatabases: decisionModel.paidPlans.defenderForDatabases,

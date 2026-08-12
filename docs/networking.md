@@ -84,13 +84,43 @@ Priority  Direction  Action  Source              Destination        Port
 
 Yes, deny everything inbound by default. Then add explicit allow rules for what you need.
 
-### Common Allow Rules
+### AKS ingress modes
 
-**For AKS subnet:**
+Selecting AKS does not imply public exposure. Planning requires one explicit mode:
+
+- `private`: the workload service is `ClusterIP`; the AKS subnet allows only `VirtualNetwork` traffic before deny-all.
+  Public `LoadBalancer` and `NodePort` services are blocked by the planning contract.
+- `public-azure-load-balancer`: one reviewed TCP `LoadBalancer` service exposes frontend port 80 or 443 and maps to one
+  exact NodePort. The AKS subnet permits `AzureLoadBalancer` health probes to that NodePort and approved client source
+  prefixes to the same NodePort, then retains the VNet allow and deny-all.
+
+For example, a reviewed public service using NodePort `30080` and client CIDR `203.0.113.0/24` produces:
+
 ```
-110  Inbound  Allow  AzureLoadBalancer  snet-aks  *          (health probes)
-120  Inbound  Allow  Internet           snet-aks  80,443     (if using LoadBalancer service)
+100   Inbound  Allow  AzureLoadBalancer  snet-aks  30080
+110   Inbound  Allow  203.0.113.0/24     snet-aks  30080
+120   Inbound  Allow  VirtualNetwork     snet-aks  *
+4096  Inbound  Deny   *                  snet-aks  *
 ```
+
+SSLZ never generates Internet-to-all-NodePort, arbitrary NodePort ranges, or generic HTTP-to-subnet rules. Missing
+frontend/backend mapping, unproven source prefixes, a missing or mismatched probe, or a priority collision fails closed
+for architecture review. Bicep and Terraform expose the same deterministic rule list through `aksIngressNsgRules` /
+`aks_ingress_nsg_rules`. The `not-applicable` IaC default preserves legacy subnet behavior only for plans without AKS.
+
+Planning records `not-observed` health and reachability placeholders and never claims live connectivity. Acceptance or
+recovery must validate fresh evidence against both the canonical ingress decision and its signed manifest/approval
+binding:
+
+```bash
+SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE=/protected/approval-public-key.pem \
+  node scripts/aks-ingress-contract.mjs validate-postcheck postcheck.json acceptance \
+  aks-ingress-decision.json deployment-manifest.json deployment-approval.json
+```
+
+The validator rejects omitted or replayed bindings, mutated service/frontend/NodePort expectations, stale evidence,
+evidence observed more than 15 minutes ago or valid for more than 30 minutes, and missing health or reachability
+observations.
 
 **For App Service subnet (VNet integration — outbound only):**
 ```

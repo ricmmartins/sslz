@@ -63,6 +63,11 @@
     "policyEvidenceFreshness": "current",
     "paidPlanSelectionDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
   },
+  "aksIngress": {
+    "mode": "not-applicable",
+    "decisionDigest": null,
+    "postcheckDigest": null
+  },
   "execution": {
     "operation": "platform-baseline.deploy",
     "provider": "bicep",

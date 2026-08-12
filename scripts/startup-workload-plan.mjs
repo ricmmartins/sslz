@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
 import { validateDocument } from "./validate-agent-contracts.mjs";
+import { validateAksIngressDecision } from "./aks-ingress-contract.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PROFILE_VERSION = "1.0.0";
@@ -150,6 +151,7 @@ function architectureReviewPlan(input, reasons) {
     status: "architecture-review",
     computeProfile: null,
     profileExtensions: [],
+    aksIngress: null,
     rationale: [
       {
         decision: "architecture-review",
@@ -213,6 +215,7 @@ function planWorkload(input) {
   const extensions = [];
   const rationale = [];
   const unresolvedDecisions = unresolvedReliabilityDecisions(input);
+  let aksIngress = null;
 
   if (computeProfile === "aks") {
     rationale.push({
@@ -275,6 +278,24 @@ function planWorkload(input) {
       reason: "AKS cannot proceed without a confirmed operations owner.",
     });
   }
+  if (computeProfile === "aks" && !workload.aksIngress) {
+    unresolvedDecisions.unshift({
+      id: "network.aks-ingress.decision-explicit",
+      severity: "blocking",
+      question: "Is AKS ingress private or an explicitly constrained public Azure Load Balancer?",
+      reason: "AKS selection never implies public exposure.",
+    });
+  } else if (computeProfile === "aks") {
+    try {
+      aksIngress = validateAksIngressDecision(workload.aksIngress);
+    } catch (error) {
+      return architectureReviewPlan(input, [error.message]);
+    }
+  } else if (workload.aksIngress) {
+    return architectureReviewPlan(input, [
+      "An AKS ingress decision was supplied for a non-AKS workload profile.",
+    ]);
+  }
   if (customerManagedGpuSelected && managedModelFit === "unknown") {
     unresolvedDecisions.unshift({
       id: "workload.managed-model-fit.required",
@@ -298,6 +319,7 @@ function planWorkload(input) {
     status: blocked ? "blocked" : "ready",
     computeProfile,
     profileExtensions: extensions,
+    aksIngress,
     rationale,
     assumptions: baseAssumptions(input),
     requiredChecks,

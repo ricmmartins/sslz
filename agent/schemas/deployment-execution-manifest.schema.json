@@ -13,6 +13,7 @@
     "readinessEvidence",
     "regionalAttempt",
     "defenderWorkspacePlacement",
+    "aksIngress",
     "execution",
     "artifacts",
     "preview",
@@ -291,6 +292,28 @@
         },
         "paidPlanSelectionDigest": {
           "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "aksIngress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "decisionDigest", "postcheckDigest"],
+      "properties": {
+        "mode": {
+          "enum": ["not-applicable", "private", "public-azure-load-balancer"]
+        },
+        "decisionDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        },
+        "postcheckDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
         }
       }
     },

@@ -198,6 +198,9 @@ function buildReadinessEvidence(input) {
       regionalMode: input.regionalPlan.requestedRegionalMode,
       primaryRegion: input.regionalPlan.selectedPrimary.region,
       secondaryRegion: secondary,
+      aksIngressMode: input.workloadPlan.aksIngress?.mode ?? "not-applicable",
+      aksIngressDecisionDigest:
+        input.workloadPlan.aksIngress?.decisionDigest ?? null,
     },
     codeEvidence: {
       preflight: codeEvidence(

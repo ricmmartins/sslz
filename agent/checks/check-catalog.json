@@ -184,6 +184,27 @@
       "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq"
     },
     {
+      "id": "network.aks-ingress.decision-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/aks/load-balancer-standard"
+    },
+    {
+      "id": "network.aks-ingress.provider-parity",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/aks/concepts-network"
+    },
+    {
+      "id": "network.aks-ingress.postcheck-current",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/aks/load-balancer-standard"
+    },
+    {
       "id": "security.defender.selection-reviewed",
       "category": "security",
       "severity": "blocking",

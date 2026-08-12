@@ -115,6 +115,21 @@ was already consumed locally, deployment failed, or a required platform check di
 Workload deployment remains blocked when any post-deployment check fails. See
 [Approved Deployment Integration](approved-deployment-integration.md).
 
+### AKS public LoadBalancer resets or ingress planning is blocked
+
+**Cause:** The subnet deny-all rule has no reviewed exact load-balancer path, or the requested service does not match the
+signed ingress decision. Common blockers are a missing decision, `LoadBalancer` under private mode, an arbitrary NodePort
+range, a probe that is not sourced from `AzureLoadBalancer`, a probe/backend port mismatch, an unproven client source, or
+an NSG priority collision.
+
+**Fix:**
+
+1. Choose `private` with `ClusterIP`, or `public-azure-load-balancer` with frontend 80/443 and one exact NodePort.
+2. For public mode, bind the `AzureLoadBalancer` probe and reviewed client prefixes to that NodePort.
+3. Regenerate workload, regional, IaC, readiness, manifest, and approval artifacts; do not hand-add broad test rules.
+4. After deployment, supply fresh service type, frontend, backend mapping, health, and HTTP/TCP reachability evidence.
+   Missing live evidence blocks acceptance/recovery and must not be reported as successful connectivity.
+
 ### Subscription Tenant Mismatch
 
 **Error:** `InvalidSubscriptionId` or `SubscriptionNotFound`

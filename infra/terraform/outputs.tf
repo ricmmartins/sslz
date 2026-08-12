@@ -36,3 +36,8 @@ output "vnet_name" {
   description = "Virtual network name"
   value       = var.deploy_networking ? module.networking[0].vnet_name : null
 }
+
+output "aks_ingress_nsg_rules" {
+  description = "Deterministic AKS ingress NSG rules emitted by the primary networking module"
+  value       = var.deploy_networking ? module.networking[0].aks_ingress_nsg_rules : []
+}

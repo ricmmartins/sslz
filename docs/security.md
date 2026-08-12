@@ -197,6 +197,10 @@ Set up these alerts on your Log Analytics workspace:
 3. **TLS everywhere** — Enforce HTTPS on all public endpoints (App Service: HTTPS Only = On)
 4. **No public IPs on databases** — Use Private Endpoints or service firewall to restrict access
 
+AKS requires an explicit ingress mode. Private mode has no public NSG allow. Public Azure Load Balancer mode permits only
+the Azure health-probe service tag and approved client sources to one exact backend NodePort; broad NodePort ranges and
+generic Internet-to-HTTP rules are rejected.
+
 ### What You Can Skip
 
 - **Azure Firewall** — $900+/month. Use NSGs until compliance says otherwise.

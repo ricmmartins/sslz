@@ -41,6 +41,11 @@ import {
   planDigest,
 } from "./startup-iac-plan.mjs";
 import {
+  aksIngressDigest,
+  validateAksIngressDecision,
+  validateAksIngressPostcheck,
+} from "./aks-ingress-contract.mjs";
+import {
   azureCliConfigDirectory,
   azureCliInvocation as shellFreeAzureCliInvocation,
   sanitizedAzureCliEnvironment,
@@ -765,6 +770,7 @@ function validateReviewedPlan(plan, evaluatedAt) {
           profileVersion: profile.profileVersion,
           computeProfile: profile.computeProfile,
           profileExtensions: profile.profileExtensions,
+          aksIngress: profile.aksIngress,
         },
         regionalPlan: {
           requestedRegionalMode: regional.mode,
@@ -1834,6 +1840,14 @@ function expectedBicepParameters(plan, selection) {
     deployNetworking: configuration.deployNetworking,
     vnetAddressPrefix: plan.decisionModel.regional.primary.vnetCidr,
     appSubnetDelegation: configuration.appSubnetDelegation,
+    aksIngressMode: configuration.aksIngressMode,
+    aksIngressFrontendPort: configuration.aksIngressFrontendPort,
+    aksIngressBackendNodePort: configuration.aksIngressBackendNodePort,
+    aksIngressHealthProbeSourcePrefix:
+      configuration.aksIngressHealthProbeSourcePrefix,
+    aksIngressSourcePrefixes: configuration.aksIngressSourcePrefixes,
+    aksIngressReservedNsgPriorities:
+      configuration.aksIngressReservedNsgPriorities,
     enableDefenderForServers: paidPlans.defenderForServers,
     enableDefenderForContainers: paidPlans.defenderForContainers,
     enableDefenderForDatabases: paidPlans.defenderForDatabases,
@@ -2056,6 +2070,14 @@ function expectedTerraformVariables(plan, selection) {
     deploy_networking: configuration.deployNetworking,
     vnet_address_prefix: plan.decisionModel.regional.primary.vnetCidr,
     app_subnet_delegation: configuration.appSubnetDelegation,
+    aks_ingress_mode: configuration.aksIngressMode,
+    aks_ingress_frontend_port: configuration.aksIngressFrontendPort,
+    aks_ingress_backend_node_port: configuration.aksIngressBackendNodePort,
+    aks_ingress_health_probe_source_prefix:
+      configuration.aksIngressHealthProbeSourcePrefix,
+    aks_ingress_source_prefixes: configuration.aksIngressSourcePrefixes,
+    aks_ingress_reserved_nsg_priorities:
+      configuration.aksIngressReservedNsgPriorities,
     enable_defender_for_servers: paidPlans.defenderForServers,
     enable_defender_for_containers: paidPlans.defenderForContainers,
     enable_defender_for_databases: paidPlans.defenderForDatabases,
@@ -2756,6 +2778,21 @@ function defenderWorkspacePlacementBinding(plan) {
   };
 }
 
+function aksIngressBinding(plan) {
+  const ingress = plan.decisionModel.profile.aksIngress;
+  return ingress
+    ? {
+        mode: ingress.mode,
+        decisionDigest: ingress.decisionDigest,
+        postcheckDigest: hashCanonical(ingress.postcheck),
+      }
+    : {
+        mode: "not-applicable",
+        decisionDigest: null,
+        postcheckDigest: null,
+      };
+}
+
 function buildDeploymentManifest(
   plan,
   {
@@ -2899,6 +2936,7 @@ function buildDeploymentManifest(
       ? terraformPreparationArguments(plan, selection, terraformAuthMode)
       : null;
   const defenderWorkspacePlacement = defenderWorkspacePlacementBinding(plan);
+  const aksIngress = aksIngressBinding(plan);
   const manifest = {
     schemaVersion: VERSION,
     manifestVersion: VERSION,
@@ -2932,6 +2970,7 @@ function buildDeploymentManifest(
     },
     regionalAttempt: regionalAttemptBinding(plan, selection),
     defenderWorkspacePlacement,
+    aksIngress,
     execution: {
       operation: "platform-baseline.deploy",
       provider,
@@ -3159,6 +3198,7 @@ function assertManifestCurrent(
     },
     regionalAttempt: regionalAttemptBinding(plan, selection),
     defenderWorkspacePlacement: defenderWorkspacePlacementBinding(plan),
+    aksIngress: aksIngressBinding(plan),
     execution: {
       operation: "platform-baseline.deploy",
       provider: manifest.execution.provider,
@@ -3230,6 +3270,8 @@ function assertManifestCurrent(
       canonicalJson(expected.regionalAttempt) ||
     canonicalJson(manifest.defenderWorkspacePlacement) !==
       canonicalJson(expected.defenderWorkspacePlacement) ||
+    canonicalJson(manifest.aksIngress) !==
+      canonicalJson(expected.aksIngress) ||
     canonicalJson(manifest.execution) !== canonicalJson(expected.execution) ||
     canonicalJson(manifest.artifacts) !== canonicalJson(expected.artifacts) ||
     manifest.preview.reviewedSummaryDigest !== expected.reviewedSummaryDigest ||
@@ -3378,6 +3420,9 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
       manifest.defenderWorkspacePlacement.policyEvidenceFreshness,
     defenderPaidPlanSelectionDigest:
       manifest.defenderWorkspacePlacement.paidPlanSelectionDigest,
+    aksIngressMode: manifest.aksIngress.mode,
+    aksIngressDecisionDigest: manifest.aksIngress.decisionDigest,
+    aksIngressPostcheckDigest: manifest.aksIngress.postcheckDigest,
     operation: manifest.execution.operation,
     provider: manifest.execution.provider,
     environment: manifest.execution.environment,
@@ -3404,6 +3449,60 @@ function validateApproval(approval, manifest, publicKey, evaluatedAt) {
       );
     }
   }
+}
+
+function validateApprovedAksIngressPostcheck({
+  postcheck,
+  purpose,
+  expectedDecision,
+  manifest,
+  approval,
+  publicKey,
+  evaluatedAt = Date.now(),
+}) {
+  if (!["acceptance", "recovery"].includes(purpose)) {
+    fail(
+      "network.aks-ingress.postcheck-purpose",
+      "Signed AKS ingress postcheck validation is only valid for acceptance or recovery.",
+    );
+  }
+  validateDocument(manifestSchema, manifest);
+  if (
+    manifest.manifestVersion !== VERSION ||
+    manifestDigest(manifest) !== manifest.manifestDigest
+  ) {
+    fail(
+      "network.aks-ingress.postcheck-manifest-invalid",
+      "AKS ingress postcheck validation requires the intact reviewed deployment manifest.",
+    );
+  }
+  validateApproval(approval, manifest, publicKey, evaluatedAt);
+  const decision = validateAksIngressDecision(expectedDecision);
+  const expectedBinding = {
+    mode: decision.mode,
+    decisionDigest: decision.decisionDigest,
+    postcheckDigest: aksIngressDigest(decision.postcheck),
+  };
+  if (
+    canonicalJson(manifest.aksIngress) !== canonicalJson(expectedBinding)
+  ) {
+    fail(
+      "network.aks-ingress.postcheck-binding-mismatch",
+      "The signed manifest does not bind the reviewed AKS ingress decision and planning postcheck.",
+    );
+  }
+  const observation = validateAksIngressPostcheck(
+    postcheck,
+    purpose,
+    evaluatedAt,
+    { expectedDecision },
+  );
+  return {
+    status: purpose === "acceptance" ? "accepted" : "recovered",
+    liveConnectivityObserved: observation.liveConnectivityObserved,
+    evidenceDigest: hashCanonical(postcheck),
+    approvalDigest: approvalArtifactDigest(approval),
+  };
 }
 
 function requireDurableStateStore(requestedPath) {
@@ -5430,7 +5529,9 @@ export {
   manifestDigest,
   expectedTerraformResourceGraph,
   runDeploymentIntegration,
+  readTrustedPublicKey,
   sanitizedTerraformEnvironment,
+  validateApprovedAksIngressPostcheck,
 };
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {

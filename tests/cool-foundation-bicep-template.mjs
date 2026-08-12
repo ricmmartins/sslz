@@ -55,12 +55,16 @@ assert.equal(
   true,
 );
 
-const containerAppsNsg =
-  networkingDeployment.properties.template.resources.find(
-    (resource) =>
-      resource.type === "Microsoft.Network/networkSecurityGroups" &&
-      resource.name.includes("containerApps"),
-  );
+const nestedResources = Array.isArray(
+  networkingDeployment.properties.template.resources,
+)
+  ? networkingDeployment.properties.template.resources
+  : Object.values(networkingDeployment.properties.template.resources);
+const containerAppsNsg = nestedResources.find(
+  (resource) =>
+    resource.type === "Microsoft.Network/networkSecurityGroups" &&
+    resource.name.includes("containerApps"),
+);
 assert(
   containerAppsNsg,
   "Compiled foundation must contain the Container Apps subnet NSG.",

@@ -6,6 +6,7 @@ import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
 import { loadRegionalAttempt } from "./regional-attempt.mjs";
+import { validateAksIngressDecision } from "./aks-ingress-contract.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -332,6 +333,12 @@ function main() {
   const readinessEvidenceSchema = load(
     "agent/schemas/readiness-evidence.schema.json",
   );
+  const aksIngressDecisionSchema = load(
+    "agent/schemas/aks-ingress-decision.schema.json",
+  );
+  const aksIngressPostcheckSchema = load(
+    "agent/schemas/aks-ingress-postcheck.schema.json",
+  );
   const subscriptionTopologyDecisionSchema = load(
     "agent/schemas/subscription-topology-decision.schema.json",
   );
@@ -404,6 +411,8 @@ function main() {
     "agent/examples/terraform-plan-provenance.json",
   );
   const readinessEvidence = load("agent/examples/readiness-evidence.json");
+  const aksIngressPrivate = load("agent/examples/aks-ingress-private.json");
+  const aksIngressPublic = load("agent/examples/aks-ingress-public.json");
   const defenderWorkspacePlacementDecision = load(
     "agent/examples/defender-workspace-placement-decision.json",
   );
@@ -502,6 +511,16 @@ function main() {
   loadRegionalAttempt(resolve(root, "agent/examples/regional-attempt.json"));
   validateDocument(terraformPlanProvenanceSchema, terraformPlanProvenance);
   validateDocument(readinessEvidenceSchema, readinessEvidence);
+  validateDocument(aksIngressDecisionSchema, aksIngressPrivate);
+  validateDocument(aksIngressDecisionSchema, aksIngressPublic);
+  validateDocument(
+    aksIngressPostcheckSchema,
+    validateAksIngressDecision(aksIngressPrivate).postcheck,
+  );
+  validateDocument(
+    aksIngressPostcheckSchema,
+    validateAksIngressDecision(aksIngressPublic).postcheck,
+  );
   validateDocument(
     defenderWorkspacePlacementDecisionSchema,
     defenderWorkspacePlacementDecision,
@@ -533,6 +552,8 @@ function main() {
     regionalAttempt,
     terraformPlanProvenance,
     readinessEvidence,
+    aksIngressPrivate,
+    aksIngressPublic,
     defenderWorkspacePlacementDecision,
     coolFoundationBaseline,
     containerAppsCoolProfileInput,

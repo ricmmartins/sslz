@@ -36,6 +36,12 @@ const examplePlan = JSON.parse(
   readFileSync(resolve(root, "agent/examples/workload-profile-plan.json"), "utf8"),
 );
 const catalogIds = new Set(catalog.checks.map((check) => check.id));
+const privateIngress = JSON.parse(
+  readFileSync(resolve(root, "agent/examples/aks-ingress-private.json"), "utf8"),
+);
+const publicIngress = JSON.parse(
+  readFileSync(resolve(root, "agent/examples/aks-ingress-public.json"), "utf8"),
+);
 
 function merge(base, overrides) {
   if (
@@ -156,6 +162,7 @@ for (const requirement of [
         requiresKubernetes: false,
         kubernetesRequirements: [requirement],
         incidentOwnerConfirmed: true,
+        aksIngress: privateIngress,
       },
     }),
   );
@@ -168,6 +175,7 @@ const customerManagedGpu = planWorkload(
       requiresCustomerManagedGpu: true,
       managedModelFit: "no",
       incidentOwnerConfirmed: true,
+      aksIngress: privateIngress,
     },
   }),
 );
@@ -180,6 +188,7 @@ const unknownManagedModelFit = planWorkload(
       requiresCustomerManagedGpu: true,
       managedModelFit: "unknown",
       incidentOwnerConfirmed: true,
+      aksIngress: privateIngress,
     },
   }),
 );
@@ -188,6 +197,56 @@ assert(
   unknownManagedModelFit.unresolvedDecisions.some(
     (decision) => decision.id === "workload.managed-model-fit.required",
   ),
+);
+
+const missingIngress = planWorkload(
+  merge(baseInput, {
+    workload: {
+      requiresKubernetes: true,
+      kubernetesRequirements: ["operator"],
+      incidentOwnerConfirmed: true,
+      aksIngress: null,
+    },
+  }),
+);
+assert.equal(missingIngress.status, "blocked");
+assert(
+  missingIngress.unresolvedDecisions.some(
+    ({ id }) => id === "network.aks-ingress.decision-explicit",
+  ),
+);
+
+const publicIngressPlan = planWorkload(
+  merge(baseInput, {
+    workload: {
+      requiresKubernetes: true,
+      kubernetesRequirements: ["operator"],
+      incidentOwnerConfirmed: true,
+      aksIngress: publicIngress,
+    },
+  }),
+);
+assert.equal(publicIngressPlan.status, "ready");
+assert.equal(publicIngressPlan.aksIngress.mode, "public-azure-load-balancer");
+
+const publicServiceUnderPrivateMode = planWorkload(
+  merge(baseInput, {
+    workload: {
+      requiresKubernetes: true,
+      kubernetesRequirements: ["operator"],
+      incidentOwnerConfirmed: true,
+      aksIngress: {
+        ...privateIngress,
+        serviceType: "LoadBalancer",
+        frontendExposure: "public",
+      },
+    },
+  }),
+);
+assert.equal(publicServiceUnderPrivateMode.status, "architecture-review");
+assert.match(
+  publicServiceUnderPrivateMode.architectureReview.reasons[0],
+  /forbids public LoadBalancer or NodePort/,
 );
 
 const source = readFileSync(script, "utf8");

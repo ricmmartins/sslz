@@ -44,7 +44,7 @@ that digest.
 The validator fails closed unless:
 
 - the evidence subject exactly matches the plan ID, tenant, prod/nonprod subscriptions, selected profile version,
-  compute profile, extensions, regional mode, and primary/secondary regions;
+  compute profile, extensions, regional mode, primary/secondary regions, and AKS ingress mode/decision digest;
 - the embedded topology decision has a valid self-digest, is current, and exactly matches the subject tenant and
   environment subscriptions;
 - the authoritative preflight passes and every item is current;
@@ -76,6 +76,10 @@ the canonical decision model, and includes those bindings in the plan digest. Fo
 decision, selected evidence digest, fallback rationale, and provider-parameter digest. Legacy v1/v2 inputs can still be represented
 locally, but their approval remains
 `pending` with `readiness-evidence-required`.
+
+For AKS, readiness binds the explicit ingress mode and decision digest. The manifest and approval additionally bind the
+postcheck digest so changing the service type, frontend exposure, backend NodePort, probe, source prefixes, or evidence
+expectations invalidates approval.
 
 Phase 6 revalidates the full artifact when preparing a Bicep or Terraform preview. The immutable deployment manifest
 copies the evidence version, opaque ID, digest, expiry, topology decision ID/digest, and exact environment mapping. The

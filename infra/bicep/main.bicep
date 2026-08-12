@@ -66,6 +66,25 @@ param vnetAddressPrefix string = environment == 'prod' ? '10.0.0.0/16' : '10.1.0
 @description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
 param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
 
+@description('Explicit AKS ingress mode. not-applicable preserves the legacy subnet behavior when AKS is absent.')
+@allowed(['not-applicable', 'private', 'public-azure-load-balancer'])
+param aksIngressMode string = 'not-applicable'
+
+@description('Public frontend port bound by the reviewed AKS ingress contract; zero when not applicable.')
+param aksIngressFrontendPort int = 0
+
+@description('Exact backend NodePort used by the public Azure Load Balancer; zero for private or absent AKS.')
+param aksIngressBackendNodePort int = 0
+
+@description('Azure Load Balancer health probe service tag; empty for private or absent AKS.')
+param aksIngressHealthProbeSourcePrefix string = ''
+
+@description('Reviewed public client source prefixes for the exact AKS NodePort.')
+param aksIngressSourcePrefixes string[] = []
+
+@description('Existing AKS NSG priorities that generated ingress rules must not collide with.')
+param aksIngressReservedNsgPriorities int[] = []
+
 @description('Enable Defender for Servers P2 (recommended for prod)')
 param enableDefenderForServers bool = environment == 'prod'
 
@@ -220,6 +239,12 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
     vnetName: 'vnet-${prefix}'
     vnetAddressPrefix: vnetAddressPrefix
     appSubnetDelegation: appSubnetDelegation
+    aksIngressMode: aksIngressMode
+    aksIngressFrontendPort: aksIngressFrontendPort
+    aksIngressBackendNodePort: aksIngressBackendNodePort
+    aksIngressHealthProbeSourcePrefix: aksIngressHealthProbeSourcePrefix
+    aksIngressSourcePrefixes: aksIngressSourcePrefixes
+    aksIngressReservedNsgPriorities: aksIngressReservedNsgPriorities
     includeContainerAppsSubnet: false
     tags: tags
   }
@@ -307,3 +332,5 @@ output logAnalyticsWorkspaceName string = effectiveLogAnalyticsWorkspaceName
 output vnetId string = deployNetworking ? networking!.outputs.vnetId : ''
 @description('Virtual network name')
 output vnetName string = deployNetworking ? networking!.outputs.vnetName : ''
+@description('Deterministic AKS ingress NSG rules emitted by the primary networking template')
+output aksIngressNsgRules array = deployNetworking ? networking!.outputs.aksIngressNsgRules : []

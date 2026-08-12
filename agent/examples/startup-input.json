@@ -19,7 +19,8 @@
     "incidentOwnerConfirmed": true,
     "usesDocker": true,
     "kubernetesRequirements": [],
-    "managedModelFit": "unknown"
+    "managedModelFit": "unknown",
+    "aksIngress": null
   },
   "reliability": {
     "dataResidency": "United States",
