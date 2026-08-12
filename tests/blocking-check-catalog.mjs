@@ -4,6 +4,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  POSTGRESQL_CHECK_ORDER,
+  planPostgresql,
+} from "../scripts/startup-postgresql-plan.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(
@@ -15,6 +19,31 @@ const fixture = JSON.parse(
     "utf8",
   ),
 );
+const postgresqlPlan = planPostgresql(
+  JSON.parse(
+    readFileSync(
+      resolve(root, "agent/examples/postgresql-regional-plan-input.json"),
+      "utf8",
+    ),
+  ),
+);
+const postgresqlRuntimeIds = new Set(
+  postgresqlPlan.candidates.flatMap((candidate) =>
+    candidate.checks.map(({ id }) => id),
+  ),
+);
+assert.deepEqual(
+  postgresqlPlan.requiredChecks,
+  POSTGRESQL_CHECK_ORDER,
+  "PostgreSQL required checks must be emitted by the runtime planner",
+);
+for (const candidate of postgresqlPlan.candidates) {
+  assert.deepEqual(
+    candidate.checks.map(({ id }) => id),
+    POSTGRESQL_CHECK_ORDER,
+    `${candidate.region}: PostgreSQL runtime checks must exactly cover the catalog IDs`,
+  );
+}
 
 assert.equal(fixture.schemaVersion, "1.0.0");
 const blockingIds = catalog.checks
@@ -51,14 +80,21 @@ for (const check of fixture.checks) {
     `${check.id}: pass state cannot block`,
   );
 
-  const source =
-    sourceCache.get(check.source) ??
-    readFileSync(resolve(root, check.source), "utf8");
-  sourceCache.set(check.source, source);
-  assert(
-    source.includes(check.id),
-    `${check.id}: producer surface ${check.source} does not reference the check`,
-  );
+  if (check.surface === "postgresql-regional-planner") {
+    assert(
+      postgresqlRuntimeIds.has(check.id),
+      `${check.id}: PostgreSQL planner did not emit a runtime check result`,
+    );
+  } else {
+    const source =
+      sourceCache.get(check.source) ??
+      readFileSync(resolve(root, check.source), "utf8");
+    sourceCache.set(check.source, source);
+    assert(
+      source.includes(check.id),
+      `${check.id}: producer surface ${check.source} does not reference the check`,
+    );
+  }
 
   const isBlocking = (state) => check.blockingStates.includes(state);
   assert.equal(isBlocking(check.passState), false, `${check.id}: pass must proceed`);

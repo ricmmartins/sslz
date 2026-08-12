@@ -158,6 +158,11 @@ cost, and source observation/expiry. Unsupported edition or version, extension m
 capacity, unknown or stale capacity, policy denial, residency rejection, unsupported recovery targets, and cost-ceiling
 breaches remain distinct blocking reasons.
 
+Every candidate also emits an auditable runtime result for each PostgreSQL catalog check: edition/version, extensions,
+quota, capacity, recovery, and Bicep/Terraform parameter parity. A fallback can be selected only when all six results pass;
+stale evidence produces unresolved evidence-backed checks, and readiness revalidates the exact check set before IaC
+planning.
+
 **Nonprod default:**
 
 - Burstable compute when supported by the workload;

@@ -9,14 +9,15 @@ import { validateDocument } from "./validate-agent-contracts.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SCHEMA_VERSION = "1.0.0";
 const PLANNER_VERSION = "1.0.0";
-const POSTGRESQL_CHECK_IDS = Object.freeze([
-  "region.postgresql.edition-version-supported",
-  "region.postgresql.extensions-supported",
-  "quota.postgresql.eligible",
-  "capacity.postgresql.available",
-  "region.postgresql.recovery-supported",
-  "workload.postgresql.provider-parity",
-]);
+const POSTGRESQL_CHECK_IDS = Object.freeze({
+  editionVersion: "region.postgresql.edition-version-supported",
+  extensions: "region.postgresql.extensions-supported",
+  quota: "quota.postgresql.eligible",
+  capacity: "capacity.postgresql.available",
+  recovery: "region.postgresql.recovery-supported",
+  providerParity: "workload.postgresql.provider-parity",
+});
+const POSTGRESQL_CHECK_ORDER = Object.freeze(Object.values(POSTGRESQL_CHECK_IDS));
 
 function load(relativePath) {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8"));
@@ -79,6 +80,125 @@ function exactEditionSupported(evidence, requirements) {
     (edition) =>
       edition.tier === requirements.tier && edition.sku === requirements.sku,
   );
+}
+
+function runtimeCheck(id, classification, evidence, summary) {
+  const evidenceTimestamp = evidence?.source.observedAt ?? null;
+  const evidenceState = evidence?.freshness ?? "not-applicable";
+  return {
+    id,
+    classification: evidenceState === "stale" ? "unresolved" : classification,
+    freshness: evidenceState,
+    evidenceTimestamp,
+    summary:
+      evidenceState === "stale"
+        ? `${summary} The supporting evidence is stale, future-dated, or expired.`
+        : summary,
+  };
+}
+
+function normalizeTerraformParameters(parameters) {
+  return Object.fromEntries(
+    Object.entries(parameters).map(([key, value]) => [
+      key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()),
+      value,
+    ]),
+  );
+}
+
+function providerParametersEquivalent(parameters) {
+  return (
+    canonicalJson(parameters.bicep) ===
+    canonicalJson(normalizeTerraformParameters(parameters.terraform))
+  );
+}
+
+function candidateChecks(input, evidence, evidenceFreshness, evidenceDigest) {
+  const requirements = input.requirements;
+  const checkEvidence = {
+    source: evidence.source,
+    freshness: evidenceFreshness,
+  };
+  const editionSupported = exactEditionSupported(evidence, requirements);
+  const versionSupported = exactVersionSupported(evidence, requirements);
+  const missingExtensions = requirements.extensions.filter(
+    (extension) => !evidence.supportedExtensions.includes(extension),
+  );
+  const quotaClassification =
+    evidence.quota.status === "unknown"
+      ? "unresolved"
+      : evidence.quota.status === "shortage" ||
+          evidence.quota.available < evidence.quota.required
+        ? "fail"
+        : "pass";
+  const capacityClassification =
+    evidence.capacity.status === "unknown"
+      ? "unresolved"
+      : evidence.capacity.status === "unavailable"
+        ? "fail"
+        : "pass";
+  const zoneSupported =
+    !requirements.zoneRedundant ||
+    (evidence.zoneSupport.available &&
+      evidence.zoneSupport.zones.length >= requirements.minimumZones);
+  const recoverySupported =
+    evidence.recovery.minimumRtoMinutes <= requirements.rtoMinutes &&
+    evidence.recovery.minimumRpoMinutes <= requirements.rpoMinutes;
+  const parameters = providerParameters(input, evidence.region, evidenceDigest);
+  return [
+    runtimeCheck(
+      POSTGRESQL_CHECK_IDS.editionVersion,
+      editionSupported && versionSupported ? "pass" : "fail",
+      checkEvidence,
+      editionSupported && versionSupported
+        ? "The exact PostgreSQL edition, tier, SKU, and engine version are supported."
+        : "The exact PostgreSQL edition, tier, SKU, or engine version is unsupported.",
+    ),
+    runtimeCheck(
+      POSTGRESQL_CHECK_IDS.extensions,
+      missingExtensions.length === 0 ? "pass" : "fail",
+      checkEvidence,
+      missingExtensions.length === 0
+        ? "Every required PostgreSQL extension is supported."
+        : `Required extensions are unsupported: ${missingExtensions.join(", ")}.`,
+    ),
+    runtimeCheck(
+      POSTGRESQL_CHECK_IDS.quota,
+      quotaClassification,
+      checkEvidence,
+      quotaClassification === "pass"
+        ? "Quota is eligible for the exact PostgreSQL selection."
+        : quotaClassification === "fail"
+          ? "Quota is insufficient for the exact PostgreSQL selection."
+          : "Quota eligibility is unresolved.",
+    ),
+    runtimeCheck(
+      POSTGRESQL_CHECK_IDS.capacity,
+      capacityClassification,
+      checkEvidence,
+      capacityClassification === "pass"
+        ? "Point-in-time capacity is available for the exact PostgreSQL selection."
+        : capacityClassification === "fail"
+          ? "Point-in-time capacity is unavailable for the exact PostgreSQL selection."
+          : "Point-in-time capacity is unresolved.",
+    ),
+    runtimeCheck(
+      POSTGRESQL_CHECK_IDS.recovery,
+      zoneSupported && recoverySupported ? "pass" : "fail",
+      checkEvidence,
+      zoneSupported && recoverySupported
+        ? "Zone support and observed recovery capabilities meet the RTO/RPO constraints."
+        : "Zone support or observed recovery capabilities do not meet the constraints.",
+    ),
+    runtimeCheck(
+      POSTGRESQL_CHECK_IDS.providerParity,
+      providerParametersEquivalent(parameters) ? "pass" : "fail",
+      null,
+      providerParametersEquivalent(parameters)
+        ? "Bicep and Terraform PostgreSQL planning parameters are semantically equivalent."
+        : "Bicep and Terraform PostgreSQL planning parameters diverge.",
+    ),
+  ];
 }
 
 function evaluateCandidate(input, evidence) {
@@ -235,20 +355,34 @@ function evaluateCandidate(input, evidence) {
   const unresolved = reasons.filter(
     (reason) => reason.classification === "unresolved",
   );
+  const evidenceDigest = digest(evidence);
+  const checks = candidateChecks(
+    input,
+    evidence,
+    evidenceFreshness,
+    evidenceDigest,
+  );
+  const blockingChecks = checks.filter(
+    ({ classification }) => classification !== "pass",
+  );
+  const failedChecks = blockingChecks.filter(
+    ({ classification }) => classification === "fail",
+  );
   const eligible =
     failures.length === 0 &&
     unresolved.length === 0 &&
+    blockingChecks.length === 0 &&
     evidenceFreshness === "current";
-  const evidenceDigest = digest(evidence);
   return {
     region: evidence.region,
     preferenceRank: evidence.preferenceRank,
     disposition: eligible
       ? "eligible"
-      : failures.length > 0
+      : failures.length > 0 || failedChecks.length > 0
         ? "rejected"
         : "unresolved",
     reasons: reasons.sort((left, right) => left.code.localeCompare(right.code)),
+    checks,
     evidenceDigest,
     evidence: {
       serviceAvailability: evidence.serviceAvailability,
@@ -354,6 +488,7 @@ function planPostgresql(input) {
       ...input.requirements,
       extensions: [...input.requirements.extensions].sort(),
     },
+    requiredChecks: [...POSTGRESQL_CHECK_ORDER],
     candidates,
     fallback,
     selectedEvidenceDigest: selected?.evidenceDigest ?? null,
@@ -413,6 +548,7 @@ function main() {
 
 export {
   POSTGRESQL_CHECK_IDS,
+  POSTGRESQL_CHECK_ORDER,
   canonicalJson,
   digest as postgresqlDecisionDigest,
   planPostgresql,

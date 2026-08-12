@@ -416,6 +416,34 @@ try {
     /PostgreSQL readiness binding does not match/,
   );
 
+  const failedRuntimeCheckPostgresql = structuredClone(input);
+  const selectedPostgresqlCandidate =
+    failedRuntimeCheckPostgresql.postgresqlPlan.candidates.find(
+      ({ region }) =>
+        region === failedRuntimeCheckPostgresql.postgresqlPlan.selectedRegion,
+    );
+  selectedPostgresqlCandidate.checks.find(
+    ({ id }) => id === "workload.postgresql.provider-parity",
+  ).classification = "fail";
+  const failedCheckPayload = Object.fromEntries(
+    Object.entries(failedRuntimeCheckPostgresql.postgresqlPlan).filter(
+      ([key]) => key !== "decisionDigest",
+    ),
+  );
+  failedRuntimeCheckPostgresql.postgresqlPlan.decisionDigest =
+    postgresqlDecisionDigest(failedCheckPayload);
+  failedRuntimeCheckPostgresql.readinessEvidence = buildReadinessEvidence(
+    failedRuntimeCheckPostgresql,
+  );
+  assert.throws(
+    () =>
+      generateIacPlan(failedRuntimeCheckPostgresql, {
+        outputPath: `${outputRelative}-postgresql-runtime-check-failed`,
+        previewFixtures: successFixture,
+      }),
+    /does not emit a passing runtime result for every required catalog check/,
+  );
+
   const alternateInput = structuredClone(input);
   const originalPrimary = alternateInput.regionalPlan.selectedPrimary;
   alternateInput.regionalPlan.selectedPrimary =

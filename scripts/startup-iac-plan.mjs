@@ -52,6 +52,7 @@ import {
   attemptIdentity,
 } from "./regional-attempt.mjs";
 import {
+  POSTGRESQL_CHECK_ORDER,
   postgresqlDecisionDigest,
 } from "./startup-postgresql-plan.mjs";
 
@@ -673,6 +674,25 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
       readinessFail(
         "readiness.postgresql.blocked",
         "The PostgreSQL selected evidence does not identify an eligible exact selection.",
+      );
+    }
+    if (
+      canonicalJson(input.postgresqlPlan.requiredChecks) !==
+        canonicalJson(POSTGRESQL_CHECK_ORDER) ||
+      input.postgresqlPlan.candidates.some(
+        ({ checks }) =>
+          canonicalJson(checks.map(({ id }) => id)) !==
+          canonicalJson(POSTGRESQL_CHECK_ORDER),
+      ) ||
+      canonicalJson(selectedCandidate.checks.map(({ id }) => id)) !==
+        canonicalJson(POSTGRESQL_CHECK_ORDER) ||
+      selectedCandidate.checks.some(
+        ({ classification }) => classification !== "pass",
+      )
+    ) {
+      readinessFail(
+        "readiness.postgresql.blocked",
+        "The PostgreSQL decision does not emit a passing runtime result for every required catalog check.",
       );
     }
     assertEvidenceCurrent(

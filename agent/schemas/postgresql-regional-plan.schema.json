@@ -12,6 +12,7 @@
     "targetRegion",
     "selectedRegion",
     "requirements",
+    "requiredChecks",
     "candidates",
     "fallback",
     "selectedEvidenceDigest",
@@ -34,6 +35,22 @@
       "type": "object",
       "additionalProperties": true
     },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "region.postgresql.edition-version-supported",
+          "region.postgresql.extensions-supported",
+          "quota.postgresql.eligible",
+          "capacity.postgresql.available",
+          "region.postgresql.recovery-supported",
+          "workload.postgresql.provider-parity"
+        ]
+      }
+    },
     "candidates": {
       "type": "array",
       "minItems": 1,
@@ -45,6 +62,7 @@
           "preferenceRank",
           "disposition",
           "reasons",
+          "checks",
           "evidenceDigest",
           "evidence",
           "exactSelection",
@@ -66,6 +84,13 @@
                 "summary": { "type": "string", "minLength": 1 }
               }
             }
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/check" }
           },
           "evidenceDigest": { "$ref": "#/$defs/digest" },
           "evidence": {
@@ -141,6 +166,38 @@
     "digest": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "freshness",
+        "evidenceTimestamp",
+        "summary"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "region.postgresql.edition-version-supported",
+            "region.postgresql.extensions-supported",
+            "quota.postgresql.eligible",
+            "capacity.postgresql.available",
+            "region.postgresql.recovery-supported",
+            "workload.postgresql.provider-parity"
+          ]
+        },
+        "classification": { "enum": ["pass", "fail", "unresolved"] },
+        "freshness": { "enum": ["current", "stale", "not-applicable"] },
+        "evidenceTimestamp": {
+          "oneOf": [
+            { "type": "string", "format": "date-time" },
+            { "type": "null" }
+          ]
+        },
+        "summary": { "type": "string", "minLength": 1 }
+      }
     },
     "providerParameters": {
       "type": "object",
