@@ -163,6 +163,118 @@
       "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
     },
     {
+      "id": "migration.postgresql.assessment-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.engine-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.extensions-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/extensions/concepts-extensions-versions"
+    },
+    {
+      "id": "migration.postgresql.encoding-collation-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-collation"
+    },
+    {
+      "id": "migration.postgresql.capacity-headroom",
+      "category": "capacity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-limits"
+    },
+    {
+      "id": "migration.postgresql.availability-compatible",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/reliability-postgresql-flexible-server"
+    },
+    {
+      "id": "migration.postgresql.private-connectivity-ready",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-networking-private"
+    },
+    {
+      "id": "migration.postgresql.identity-auth-mapped",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-azure-ad-authentication"
+    },
+    {
+      "id": "migration.postgresql.tool-available",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.logical-replication-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-logical"
+    },
+    {
+      "id": "migration.postgresql.objects-mappable",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.downtime-compatible",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.source-of-truth-explicit",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.validation-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.rollback-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
       "id": "region.foundry-model.available",
       "category": "region",
       "severity": "blocking",

@@ -1,0 +1,331 @@
+[
+  {
+    "name": "compatible AWS RDS offline migration",
+    "mutations": [],
+    "expectedStatus": "ready",
+    "expectedStrategy": "offline-dump-restore",
+    "expectedChecks": []
+  },
+  {
+    "name": "Google Cloud SQL online migration with logical replication",
+    "mutations": [
+      ["sourceAssessment.provider", "google-cloud-sql"],
+      ["sourceAssessment.size.allocatedGiB", 600],
+      ["sourceAssessment.size.usedGiB", 500],
+      ["sourceAssessment.size.monthlyGrowthGiB", 50],
+      ["target.migrationEvidence.capacity.provisionedStorageGiB", 1024],
+      ["sourceAssessment.governance.toleratedDowntimeMinutes", 15],
+      ["sourceAssessment.identity.authenticationModes", ["cloud-iam"]]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "online-logical-replication",
+    "expectedChecks": []
+  },
+  {
+    "name": "self-managed source with unsupported extension",
+    "mutations": [
+      ["sourceAssessment.provider", "self-managed"],
+      ["sourceAssessment.sourceType", "self-managed"],
+      [
+        "sourceAssessment.extensions",
+        [
+          {
+            "name": "pgcrypto",
+            "version": "1.3",
+            "databaseReferences": ["database.orders"]
+          },
+          {
+            "name": "uuid-ossp",
+            "version": "1.1",
+            "databaseReferences": ["database.orders"]
+          },
+          {
+            "name": "postgis",
+            "version": "3.4",
+            "databaseReferences": ["database.orders"]
+          }
+        ]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.extensions-compatible"]
+  },
+  {
+    "name": "major version mismatch",
+    "mutations": [
+      ["sourceAssessment.engine.major", 15]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.engine-compatible"]
+  },
+  {
+    "name": "missing logical replication prerequisites",
+    "mutations": [
+      ["requirements.strategy", "online-logical-replication"],
+      ["sourceAssessment.replication.logicalReplicationEnabled", false],
+      ["sourceAssessment.replication.walLevel", "replica"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": [
+      "migration.postgresql.logical-replication-ready",
+      "migration.postgresql.downtime-compatible"
+    ]
+  },
+  {
+    "name": "excessive downtime requirement",
+    "mutations": [
+      ["sourceAssessment.size.allocatedGiB", 6000],
+      ["sourceAssessment.size.usedGiB", 5000],
+      ["sourceAssessment.size.monthlyGrowthGiB", 100],
+      ["sourceAssessment.governance.toleratedDowntimeMinutes", 2]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.downtime-compatible"]
+  },
+  {
+    "name": "collation and encoding issue",
+    "mutations": [
+      ["target.migrationEvidence.supportedEncodings", ["LATIN1"]],
+      ["target.migrationEvidence.supportedCollations", ["C"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": [
+      "migration.postgresql.encoding-collation-compatible"
+    ]
+  },
+  {
+    "name": "large objects with explicit offline handling",
+    "mutations": [
+      ["sourceAssessment.inventory.largeObjects.count", 25],
+      ["sourceAssessment.inventory.largeObjects.totalGiB", 1.5],
+      ["decisions.largeObjectHandling", "offline-window"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "offline-dump-restore",
+    "expectedChecks": []
+  },
+  {
+    "name": "RLS roles and ownership are explicitly mapped",
+    "mutations": [],
+    "expectedStatus": "ready",
+    "expectedStrategy": "offline-dump-restore",
+    "expectedChecks": []
+  },
+  {
+    "name": "capacity storage IOPS and connections shortfall",
+    "mutations": [
+      ["target.migrationEvidence.capacity.provisionedStorageGiB", 16],
+      ["target.migrationEvidence.capacity.maxIops", 1000],
+      ["target.migrationEvidence.capacity.maxConnections", 150]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.capacity-headroom"]
+  },
+  {
+    "name": "private connectivity missing",
+    "mutations": [
+      ["target.migrationEvidence.network.privateConnectivity", "missing"],
+      ["target.migrationEvidence.network.privateDns", "missing"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": [
+      "migration.postgresql.private-connectivity-ready"
+    ]
+  },
+  {
+    "name": "stale source assessment",
+    "mutations": [
+      ["sourceAssessment.observedAt", "2026-08-01T10:00:00Z"],
+      ["sourceAssessment.expiresAt", "2026-08-02T10:00:00Z"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.assessment-current"]
+  },
+  {
+    "name": "source of truth ambiguity",
+    "mutations": [
+      ["sourceAssessment.governance.sourceOfTruth", "ambiguous"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": [
+      "migration.postgresql.source-of-truth-explicit"
+    ]
+  },
+  {
+    "name": "rollback missing",
+    "mutations": [
+      ["rollbackPlan", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.rollback-complete"]
+  },
+  {
+    "name": "target region binding mismatch",
+    "mutations": [
+      ["target.migrationEvidence.region", "eastus2"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.target-bound"]
+  },
+  {
+    "name": "regional target evidence stale against migration planning time",
+    "mutations": [
+      ["planningAt", "2026-08-20T12:00:00Z"],
+      ["sourceAssessment.observedAt", "2026-08-20T10:00:00Z"],
+      ["sourceAssessment.expiresAt", "2026-08-21T10:00:00Z"],
+      ["target.migrationEvidence.observedAt", "2026-08-20T10:30:00Z"],
+      ["target.migrationEvidence.expiresAt", "2026-08-21T10:30:00Z"],
+      ["target.regionalPlanningInput.evidence.0.source.expiresAt", "2026-08-21T17:30:00Z"],
+      ["target.regionalPlanningInput.evidence.1.source.expiresAt", "2026-08-21T17:35:00Z"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.target-bound"]
+  },
+  {
+    "name": "availability and zone topology mismatch",
+    "mutations": [
+      ["target.migrationEvidence.availability.highAvailability", "same-zone"],
+      ["target.migrationEvidence.availability.zones", ["1"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.availability-compatible"]
+  },
+  {
+    "name": "identity mapping missing",
+    "mutations": [
+      ["sourceAssessment.identity.authenticationModes", ["cloud-iam"]],
+      ["decisions.roleMappingReference", null],
+      ["decisions.authenticationMappingReference", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": [
+      "migration.postgresql.identity-auth-mapped",
+      "migration.postgresql.objects-mappable"
+    ]
+  },
+  {
+    "name": "ownership omitted from scope",
+    "mutations": [
+      ["scope.includeOwnership", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.objects-mappable"]
+  },
+  {
+    "name": "large objects omitted from scope",
+    "mutations": [
+      ["sourceAssessment.inventory.largeObjects.count", 2],
+      ["sourceAssessment.inventory.largeObjects.totalGiB", 0.5],
+      ["scope.includeLargeObjects", false],
+      ["decisions.largeObjectHandling", "offline-window"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.objects-mappable"]
+  },
+  {
+    "name": "source connectivity missing",
+    "mutations": [
+      ["sourceAssessment.network.connectivity", "missing"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": [
+      "migration.postgresql.private-connectivity-ready"
+    ]
+  },
+  {
+    "name": "validation plan incomplete",
+    "mutations": [
+      ["validationPlan.rowCounts", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.validation-complete"]
+  },
+  {
+    "name": "offline strategy does not require logical replication",
+    "mutations": [
+      ["requirements.strategy", "offline-dump-restore"],
+      ["sourceAssessment.replication.logicalReplicationEnabled", false],
+      ["sourceAssessment.replication.walLevel", "replica"],
+      ["sourceAssessment.replication.availableReplicationSlots", 0],
+      ["sourceAssessment.replication.replicaIdentityReady", false]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "offline-dump-restore",
+    "expectedChecks": []
+  },
+  {
+    "name": "offline migration tool unavailable",
+    "mutations": [
+      ["requirements.strategy", "offline-dump-restore"],
+      [
+        "target.migrationEvidence.migrationTools",
+        [
+          {
+            "name": "pg-dump-restore",
+            "available": false,
+            "supportsOnline": false
+          },
+          {
+            "name": "native-logical-replication",
+            "available": false,
+            "supportsOnline": true
+          }
+        ]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.tool-available"]
+  },
+  {
+    "name": "extension references an unassessed database",
+    "mutations": [
+      [
+        "sourceAssessment.extensions.0.databaseReferences",
+        ["database.unassessed"]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.objects-mappable"]
+  },
+  {
+    "name": "ownership lacks role inventory and mapping",
+    "mutations": [
+      ["sourceAssessment.security.roles", []],
+      ["decisions.roleMappingReference", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.objects-mappable"]
+  },
+  {
+    "name": "certificate authentication lacks direct support or mapping",
+    "mutations": [
+      ["sourceAssessment.identity.authenticationModes", ["certificate"]],
+      ["target.migrationEvidence.identity.authenticationModes", ["postgresql-native"]],
+      ["decisions.authenticationMappingReference", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-architecture-review",
+    "expectedChecks": ["migration.postgresql.identity-auth-mapped"]
+  }
+]

@@ -347,6 +347,15 @@ function main() {
   const postgresqlRegionalPlanSchema = load(
     "agent/schemas/postgresql-regional-plan.schema.json",
   );
+  const postgresqlSourceAssessmentSchema = load(
+    "agent/schemas/postgresql-source-assessment.schema.json",
+  );
+  const postgresqlMigrationPlanInputSchema = load(
+    "agent/schemas/postgresql-migration-plan-input.schema.json",
+  );
+  const postgresqlMigrationPlanSchema = load(
+    "agent/schemas/postgresql-migration-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -421,6 +430,9 @@ function main() {
   const postgresqlRegionalPlanInput = load(
     "agent/examples/postgresql-regional-plan-input.json",
   );
+  const postgresqlMigrationPlanInput = load(
+    "agent/examples/postgresql-migration-plan-input.json",
+  );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
   const providerRegistrationApproval = load(
@@ -471,6 +483,18 @@ function main() {
   assert.equal(
     postgresqlRegionalPlanSchema.$id,
     "https://aka.ms/sslz/schemas/postgresql-regional-plan.schema.json",
+  );
+  assert.equal(
+    postgresqlSourceAssessmentSchema.$id,
+    "https://aka.ms/sslz/schemas/postgresql-source-assessment.schema.json",
+  );
+  validateDocument(
+    postgresqlMigrationPlanInputSchema,
+    postgresqlMigrationPlanInput,
+  );
+  assert.equal(
+    postgresqlMigrationPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/postgresql-migration-plan.schema.json",
   );
   assert.equal(
     iacPlanInputSchema.$id,
@@ -590,6 +614,7 @@ function main() {
     workloadProfilePlan,
     regionalPlanningInput,
     postgresqlRegionalPlanInput,
+    postgresqlMigrationPlanInput,
     readyExample,
     blockedExample,
     providerRegistrationApproval,

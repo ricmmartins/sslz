@@ -163,6 +163,118 @@
       "blockingStates": ["fail", "unresolved"]
     },
     {
+      "id": "migration.postgresql.assessment-current",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.target-bound",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.engine-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.extensions-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.encoding-collation-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.capacity-headroom",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.availability-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.private-connectivity-ready",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.identity-auth-mapped",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.tool-available",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.logical-replication-ready",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.objects-mappable",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.downtime-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.source-of-truth-explicit",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.validation-complete",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.rollback-complete",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
       "id": "region.foundry-model.available",
       "surface": "regional-planner",
       "source": "scripts/startup-regional-plan.mjs",
