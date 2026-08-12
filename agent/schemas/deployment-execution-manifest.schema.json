@@ -77,7 +77,9 @@
         "expiresAt",
         "topologyDecisionId",
         "topologyDecisionDigest",
-        "topologyDecisionExpiresAt"
+        "topologyDecisionExpiresAt",
+        "postgresqlDecisionDigest",
+        "postgresqlSelectedEvidenceDigest"
       ],
       "properties": {
         "version": {
@@ -102,6 +104,18 @@
         "topologyDecisionExpiresAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "postgresqlDecisionDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        },
+        "postgresqlSelectedEvidenceDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
         }
       }
     },

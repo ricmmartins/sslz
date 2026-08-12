@@ -21,6 +21,8 @@ The input and output contracts are:
 - [`agent/schemas/readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
 - [`agent/schemas/subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
 - [`agent/schemas/defender-workspace-placement-decision.schema.json`](../agent/schemas/defender-workspace-placement-decision.schema.json)
+- [`agent/schemas/postgresql-regional-plan-input.schema.json`](../agent/schemas/postgresql-regional-plan-input.schema.json)
+- [`agent/schemas/postgresql-regional-plan.schema.json`](../agent/schemas/postgresql-regional-plan.schema.json)
 - [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
 - [`agent/schemas/regional-attempt.schema.json`](../agent/schemas/regional-attempt.schema.json)
 - [`agent/schemas/cool-foundation-baseline.schema.json`](../agent/schemas/cool-foundation-baseline.schema.json)
@@ -82,6 +84,11 @@ overwrite or mutate the failed attempt's evidence. Retry planning accepts only a
 successfully cleaned predecessor and requires the same Terraform backend prefix and state key. Before execution, the
 executor reacquires the chain lock and verifies that exact predecessor digest and terminal state in its protected durable
 store; a cleanup transition preserves the original failure evidence while atomically advancing the stored record.
+
+For PostgreSQL, a changed region additionally requires a new target-specific PostgreSQL decision and fresh selected
+evidence. The decision is part of the canonical IaC model, so changing fallback selection changes the plan digest and
+invalidates every prior parameter artifact, manifest, and approval. The prior region's evidence digest cannot satisfy the
+new readiness subject.
 
 ## Generate the execution-disabled Phase 7 plan
 
@@ -153,6 +160,8 @@ The planner canonicalizes object keys and computes a SHA-256 digest over all app
 - explicit Terraform remote-backend coordinates, including the backend subscription.
 - the readiness evidence version, opaque artifact ID, canonical digest, issue time, and expiry.
 - the topology decision ID, digest, expiry, tenant, and exact environment-to-subscription mapping.
+- the full PostgreSQL regional decision, selected evidence digest, exact fallback rationale, provider-equivalent planning
+  parameters, and planning-only safety boundary when the PostgreSQL profile is selected.
 
 Approval metadata contains the immutable plan ID and digest. If either value changes, an earlier approval is replaced
 with `pending`, `reapprovalRequired` is true, and the summary records why it was invalidated.
@@ -167,6 +176,10 @@ Servers is enabled. Generated Bicep and Terraform parameters select the same exp
 existing resource ID; neither provider may fall back to a default region. Legacy v1/v2 inputs remain representable for
 compatibility, but their approval is forced to
 `pending` with `readiness-evidence-required`.
+
+PostgreSQL currently has no deployable resource in either IaC root. Its Bicep and Terraform values are semantically
+equivalent decision parameters validated as direct input and bound into readiness, plan, manifest, and approval digests.
+They do not add a server resource, reserve capacity, register a provider, or expand the execution boundary.
 
 Phase 7 readiness additionally requires the cost ceiling, exercise cadence/status, owner role/reference, external
 reviews, and billing/support confirmation. The generated approval binding remains pending and cannot authorize

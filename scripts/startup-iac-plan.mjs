@@ -51,6 +51,9 @@ import {
   assertRegionalAttemptRecord,
   attemptIdentity,
 } from "./regional-attempt.mjs";
+import {
+  postgresqlDecisionDigest,
+} from "./startup-postgresql-plan.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_ROOT = resolve(root, ".sslz/generated");
@@ -76,6 +79,7 @@ const READINESS_CHECK_IDS = {
   coolCost: "readiness.cost.cool-footprint-provenance",
   region: "readiness.region.evidence-current",
   foundry: "readiness.foundry.deployment-quota-current",
+  postgresql: "readiness.postgresql.selection-current",
   defenderWorkspace: "operations.monitoring.destination-valid",
 };
 const READINESS_ERROR_CHECK_IDS = new Map([
@@ -130,6 +134,11 @@ const READINESS_ERROR_CHECK_IDS = new Map([
   ["readiness.foundry.evidence-required", READINESS_CHECK_IDS.foundry],
   ["readiness.foundry.blocked", READINESS_CHECK_IDS.foundry],
   ["readiness.foundry.scope-mismatch", READINESS_CHECK_IDS.foundry],
+  ["readiness.postgresql.evidence-required", READINESS_CHECK_IDS.postgresql],
+  ["readiness.postgresql.blocked", READINESS_CHECK_IDS.postgresql],
+  ["readiness.postgresql.scope-mismatch", READINESS_CHECK_IDS.postgresql],
+  ["readiness.postgresql.digest-mismatch", READINESS_CHECK_IDS.postgresql],
+  ["readiness.postgresql.provider-parity", READINESS_CHECK_IDS.postgresql],
   ["readiness.defender-workspace.required", READINESS_CHECK_IDS.defenderWorkspace],
   ["readiness.defender-workspace.blocked", READINESS_CHECK_IDS.defenderWorkspace],
   ["readiness.defender-workspace.stale", READINESS_CHECK_IDS.defenderWorkspace],
@@ -147,6 +156,9 @@ const inputSchemaV2 = load("agent/schemas/iac-plan-input-v2.schema.json");
 const inputSchemaV3 = load("agent/schemas/iac-plan-input-v3.schema.json");
 const readinessEvidenceSchema = load(
   "agent/schemas/readiness-evidence.schema.json",
+);
+const postgresqlPlanSchema = load(
+  "agent/schemas/postgresql-regional-plan.schema.json",
 );
 
 class ReadinessEvidenceError extends Error {
@@ -615,6 +627,119 @@ function assertReadinessEvidence(input, evaluatedAt = Date.now()) {
         `${item.role} regional evidence is not passing.`,
       );
     }
+  }
+
+  const postgresqlSelected =
+    input.workloadPlan.profileExtensions.includes("postgresql");
+  const postgresql = evidence.codeEvidence.postgresql;
+  if (postgresqlSelected) {
+    if (!input.postgresqlPlan || !postgresql) {
+      readinessFail(
+        "readiness.postgresql.evidence-required",
+        "The PostgreSQL profile requires a deterministic regional decision and readiness binding.",
+      );
+    }
+    validateDocument(postgresqlPlanSchema, input.postgresqlPlan);
+    const decisionPayload = Object.fromEntries(
+      Object.entries(input.postgresqlPlan).filter(
+        ([key]) => key !== "decisionDigest",
+      ),
+    );
+    if (
+      postgresqlDecisionDigest(decisionPayload) !==
+      input.postgresqlPlan.decisionDigest
+    ) {
+      readinessFail(
+        "readiness.postgresql.digest-mismatch",
+        "The PostgreSQL regional decision digest does not match its canonical content.",
+      );
+    }
+    if (
+      !["ready", "fallback-required"].includes(input.postgresqlPlan.status) ||
+      !input.postgresqlPlan.selectedRegion ||
+      !input.postgresqlPlan.selectedEvidenceDigest
+    ) {
+      readinessFail(
+        "readiness.postgresql.blocked",
+        "The exact PostgreSQL edition, version, extensions, quota, capacity, recovery, residency, policy, and cost selection is not eligible.",
+      );
+    }
+    const selectedCandidate = input.postgresqlPlan.candidates.find(
+      (candidate) =>
+        candidate.region === input.postgresqlPlan.selectedRegion &&
+        candidate.evidenceDigest === input.postgresqlPlan.selectedEvidenceDigest,
+    );
+    if (!selectedCandidate || selectedCandidate.disposition !== "eligible") {
+      readinessFail(
+        "readiness.postgresql.blocked",
+        "The PostgreSQL selected evidence does not identify an eligible exact selection.",
+      );
+    }
+    assertEvidenceCurrent(
+      selectedCandidate.evidence.source,
+      evaluatedAt,
+      "PostgreSQL selected regional evidence",
+      "observedAt",
+      READINESS_CHECK_IDS.postgresql,
+    );
+    const providerParametersDigest = postgresqlDecisionDigest(
+      input.postgresqlPlan.providerParameters,
+    );
+    const expectedPostgresql = {
+      status: "pass",
+      issuer: "startup-postgresql-plan.mjs",
+      reference: `postgresql.${input.postgresqlPlan.planId}`,
+      observedAt: selectedCandidate.evidence.source.observedAt,
+      expiresAt: selectedCandidate.evidence.source.expiresAt,
+      evidenceDigest: input.postgresqlPlan.selectedEvidenceDigest,
+      decisionDigest: input.postgresqlPlan.decisionDigest,
+      selectedEvidenceDigest: input.postgresqlPlan.selectedEvidenceDigest,
+      targetRegion: input.postgresqlPlan.targetRegion,
+      selectedRegion: input.postgresqlPlan.selectedRegion,
+      fallbackRequired: input.postgresqlPlan.fallback.required,
+      fallbackRationale: [...input.postgresqlPlan.fallback.rationale],
+      providerParametersDigest,
+      deploymentBoundary: "planning-only",
+    };
+    if (canonicalJson(postgresql) !== canonicalJson(expectedPostgresql)) {
+      readinessFail(
+        "readiness.postgresql.scope-mismatch",
+        "The PostgreSQL readiness binding does not match the exact selected evidence, fallback rationale, and provider parameters.",
+      );
+    }
+    if (
+      input.postgresqlPlan.selectedRegion !== expectedSubject.primaryRegion ||
+      input.postgresqlPlan.capacityReservationClaimed !== false ||
+      input.postgresqlPlan.deploymentBoundary !== "planning-only" ||
+      input.postgresqlPlan.azureOperations !== "none"
+    ) {
+      readinessFail(
+        "readiness.postgresql.scope-mismatch",
+        "The PostgreSQL decision does not match the selected primary region or planning-only safety boundary.",
+      );
+    }
+    const normalizedTerraform = Object.fromEntries(
+      Object.entries(input.postgresqlPlan.providerParameters.terraform).map(
+        ([key, value]) => [
+          key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()),
+          value,
+        ],
+      ),
+    );
+    if (
+      canonicalJson(input.postgresqlPlan.providerParameters.bicep) !==
+      canonicalJson(normalizedTerraform)
+    ) {
+      readinessFail(
+        "readiness.postgresql.provider-parity",
+        "Bicep and Terraform PostgreSQL planning parameters are not semantically equivalent.",
+      );
+    }
+  } else if (input.postgresqlPlan || postgresql !== null) {
+    readinessFail(
+      "readiness.postgresql.scope-mismatch",
+      "PostgreSQL evidence must be omitted when the PostgreSQL profile is not selected.",
+    );
   }
 
   const cost = evidence.humanAttestations.coolFootprintCost;
@@ -1224,6 +1349,12 @@ function buildDecisionModel(input) {
           defenderWorkspaceDecisionExpiresAt:
            input.readinessEvidence.codeEvidence.defenderWorkspacePlacement
              .expiresAt,
+          postgresqlDecisionDigest:
+            input.readinessEvidence.codeEvidence.postgresql?.decisionDigest ??
+            null,
+          postgresqlSelectedEvidenceDigest:
+            input.readinessEvidence.codeEvidence.postgresql
+              ?.selectedEvidenceDigest ?? null,
         }
       : null,
     regional: {
@@ -1244,6 +1375,9 @@ function buildDecisionModel(input) {
         : null,
     },
     regionalAttempt: regionalAttemptModel(input, primary),
+    postgresql: input.postgresqlPlan
+      ? structuredClone(input.postgresqlPlan)
+      : null,
     services: input.deployment.services
       .map((service) => ({ type: service.type, purpose: service.purpose }))
       .sort(compareCanonical),

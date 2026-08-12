@@ -18,11 +18,15 @@ import {
   canonicalJson,
   generateIacPlan,
   planDigest,
+  readinessEvidenceDigest,
   sanitizedTerraformEnvironment as sanitizedPlannerTerraformEnvironment,
   summarizePreview,
   writeExclusiveArtifacts,
 } from "../scripts/startup-iac-plan.mjs";
 import { planRegions } from "../scripts/startup-regional-plan.mjs";
+import {
+  postgresqlDecisionDigest,
+} from "../scripts/startup-postgresql-plan.mjs";
 import { planWorkload } from "../scripts/startup-workload-plan.mjs";
 import { validateDocument } from "../scripts/validate-agent-contracts.mjs";
 import {
@@ -335,6 +339,82 @@ try {
   );
   assert(first.previews.every((preview) => preview.rawArtifact === null));
   assert.equal(first.approval.status, "pending");
+  assert.equal(
+    first.decisionModel.postgresql.decisionDigest,
+    input.postgresqlPlan.decisionDigest,
+  );
+
+  const omittedPostgresql = structuredClone(input);
+  delete omittedPostgresql.postgresqlPlan;
+  assert.throws(
+    () =>
+      generateIacPlan(omittedPostgresql, {
+        outputPath: `${outputRelative}-postgresql-omitted`,
+        previewFixtures: successFixture,
+      }),
+    /PostgreSQL profile requires a deterministic regional decision/,
+  );
+
+  const mutatedPostgresql = structuredClone(input);
+  mutatedPostgresql.postgresqlPlan.providerParameters.bicep.version = "15.8";
+  assert.throws(
+    () =>
+      generateIacPlan(mutatedPostgresql, {
+        outputPath: `${outputRelative}-postgresql-mutated`,
+        previewFixtures: successFixture,
+      }),
+    /PostgreSQL regional decision digest does not match/,
+  );
+
+  const stalePostgresql = structuredClone(input);
+  const staleCandidate = stalePostgresql.postgresqlPlan.candidates.find(
+    ({ region }) => region === stalePostgresql.postgresqlPlan.selectedRegion,
+  );
+  staleCandidate.evidence.source.expiresAt = "2026-08-09T11:59:59Z";
+  staleCandidate.evidenceDigest = postgresqlDecisionDigest(
+    staleCandidate.evidence,
+  );
+  stalePostgresql.postgresqlPlan.selectedEvidenceDigest =
+    staleCandidate.evidenceDigest;
+  const stalePayload = Object.fromEntries(
+    Object.entries(stalePostgresql.postgresqlPlan).filter(
+      ([key]) => key !== "decisionDigest",
+    ),
+  );
+  stalePostgresql.postgresqlPlan.decisionDigest =
+    postgresqlDecisionDigest(stalePayload);
+  stalePostgresql.readinessEvidence = buildReadinessEvidence(stalePostgresql);
+  assert.throws(
+    () =>
+      generateIacPlan(stalePostgresql, {
+        outputPath: `${outputRelative}-postgresql-stale`,
+        previewFixtures: successFixture,
+        evaluatedAt: Date.parse("2026-08-09T12:00:00Z"),
+      }),
+    (error) => {
+      assert.equal(error.code, "readiness.evidence.stale");
+      assert.equal(error.checkId, "readiness.postgresql.selection-current");
+      assert.match(
+        error.message,
+        /PostgreSQL selected regional evidence is future-dated, stale, expired/,
+      );
+      return true;
+    },
+  );
+
+  const targetMismatchedPostgresql = structuredClone(input);
+  targetMismatchedPostgresql.readinessEvidence.codeEvidence.postgresql.selectedRegion =
+    "centralus";
+  targetMismatchedPostgresql.readinessEvidence.evidenceDigest =
+    readinessEvidenceDigest(targetMismatchedPostgresql.readinessEvidence);
+  assert.throws(
+    () =>
+      generateIacPlan(targetMismatchedPostgresql, {
+        outputPath: `${outputRelative}-postgresql-target-mismatch`,
+        previewFixtures: successFixture,
+      }),
+    /PostgreSQL readiness binding does not match/,
+  );
 
   const alternateInput = structuredClone(input);
   const originalPrimary = alternateInput.regionalPlan.selectedPrimary;

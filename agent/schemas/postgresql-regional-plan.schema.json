@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-regional-plan.schema.json",
+  "title": "SSLZ deterministic PostgreSQL regional decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "planId",
+    "status",
+    "targetRegion",
+    "selectedRegion",
+    "requirements",
+    "candidates",
+    "fallback",
+    "selectedEvidenceDigest",
+    "providerParameters",
+    "deploymentBoundary",
+    "azureOperations",
+    "capacityReservationClaimed",
+    "decisionDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "status": { "enum": ["ready", "fallback-required", "blocked"] },
+    "targetRegion": { "$ref": "#/$defs/region" },
+    "selectedRegion": {
+      "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "region",
+          "preferenceRank",
+          "disposition",
+          "reasons",
+          "evidenceDigest",
+          "evidence",
+          "exactSelection",
+          "capacityReservationClaimed"
+        ],
+        "properties": {
+          "region": { "$ref": "#/$defs/region" },
+          "preferenceRank": { "type": "integer", "minimum": 0 },
+          "disposition": { "enum": ["eligible", "rejected", "unresolved"] },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "classification", "summary"],
+              "properties": {
+                "code": { "$ref": "#/$defs/reference" },
+                "classification": { "enum": ["fail", "unresolved"] },
+                "summary": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "evidenceDigest": { "$ref": "#/$defs/digest" },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "exactSelection": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "capacityReservationClaimed": { "const": false }
+        }
+      }
+    },
+    "fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "fromRegion",
+        "toRegion",
+        "rationale",
+        "requiresNewPlanArtifactsManifestApproval"
+      ],
+      "properties": {
+        "required": { "type": "boolean" },
+        "fromRegion": { "$ref": "#/$defs/region" },
+        "toRegion": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "rationale": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        },
+        "requiresNewPlanArtifactsManifestApproval": { "type": "boolean" }
+      }
+    },
+    "selectedEvidenceDigest": {
+      "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+    },
+    "providerParameters": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bicep", "terraform"],
+          "properties": {
+            "bicep": { "$ref": "#/$defs/providerParameters" },
+            "terraform": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+    "deploymentBoundary": { "const": "planning-only" },
+    "azureOperations": { "const": "none" },
+    "capacityReservationClaimed": { "const": false },
+    "decisionDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "providerParameters": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

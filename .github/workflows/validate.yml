@@ -14,6 +14,7 @@ on:
       - 'scripts/defender-workspace-placement.mjs'
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
+      - 'scripts/startup-postgresql-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -36,6 +37,7 @@ on:
       - 'scripts/defender-workspace-placement.mjs'
       - 'scripts/startup-workload-plan.*'
       - 'scripts/startup-regional-plan.*'
+      - 'scripts/startup-postgresql-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -73,6 +75,9 @@ jobs:
 
       - name: Test read-only regional planner
         run: node tests/startup-regional-plan.mjs
+
+      - name: Test deterministic PostgreSQL regional fallback
+        run: node tests/startup-postgresql-plan.mjs
 
       - name: Test Defender workspace placement
         run: node tests/defender-workspace-placement.mjs

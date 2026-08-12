@@ -6,6 +6,12 @@ import {
   buildDefenderWorkspaceDecision,
   evidenceDigest as defenderEvidenceDigest,
 } from "../scripts/defender-workspace-placement.mjs";
+import {
+  planPostgresql,
+  postgresqlDecisionDigest,
+} from "../scripts/startup-postgresql-plan.mjs";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 const observedAt = "2026-08-08T10:00:00Z";
 const attestedAt = "2026-08-08T10:30:00Z";
@@ -48,6 +54,33 @@ function humanAttestation(
 }
 
 function buildReadinessEvidence(input) {
+  if (
+    input.workloadPlan.profileExtensions.includes("postgresql") &&
+    (!input.postgresqlPlan ||
+      input.postgresqlPlan.selectedRegion !==
+        input.regionalPlan.selectedPrimary.region)
+  ) {
+    const postgresqlInput = JSON.parse(
+      readFileSync(
+        resolve("agent/examples/postgresql-regional-plan-input.json"),
+        "utf8",
+      ),
+    );
+    const selectedRegion = input.regionalPlan.selectedPrimary.region;
+    const selectedEvidence = postgresqlInput.evidence[1];
+    selectedEvidence.region = selectedRegion;
+    selectedEvidence.preferenceRank = 0;
+    selectedEvidence.source.reference =
+      `fixture.postgresql.${selectedRegion}.valid`;
+    selectedEvidence.source.observedAt = observedAt;
+    selectedEvidence.source.expiresAt = expiresAt;
+    postgresqlInput.planId = input.planId;
+    postgresqlInput.planningAt = "2026-08-08T12:00:00Z";
+    postgresqlInput.targetRegion = selectedRegion;
+    postgresqlInput.allowedLocations = [selectedRegion];
+    postgresqlInput.evidence = [selectedEvidence];
+    input.postgresqlPlan = planPostgresql(postgresqlInput);
+  }
   const environments = Object.fromEntries(
     input.target.environments.map((environment) => [
       environment.name,
@@ -184,6 +217,35 @@ function buildReadinessEvidence(input) {
           { role, region },
         ),
       ),
+      postgresql: input.postgresqlPlan
+        ? (() => {
+            const selected = input.postgresqlPlan.candidates.find(
+              (candidate) =>
+                candidate.region === input.postgresqlPlan.selectedRegion,
+            );
+            return {
+              status: "pass",
+              issuer: "startup-postgresql-plan.mjs",
+              reference: `postgresql.${input.postgresqlPlan.planId}`,
+              observedAt: selected.evidence.source.observedAt,
+              expiresAt: selected.evidence.source.expiresAt,
+              evidenceDigest: input.postgresqlPlan.selectedEvidenceDigest,
+              decisionDigest: input.postgresqlPlan.decisionDigest,
+              selectedEvidenceDigest:
+                input.postgresqlPlan.selectedEvidenceDigest,
+              targetRegion: input.postgresqlPlan.targetRegion,
+              selectedRegion: input.postgresqlPlan.selectedRegion,
+              fallbackRequired: input.postgresqlPlan.fallback.required,
+              fallbackRationale: [
+                ...input.postgresqlPlan.fallback.rationale,
+              ],
+              providerParametersDigest: postgresqlDecisionDigest(
+                input.postgresqlPlan.providerParameters,
+              ),
+              deploymentBoundary: "planning-only",
+            };
+          })()
+        : null,
       foundry: input.workloadPlan.profileExtensions.includes("foundry")
         ? regions.map(({ role, region }, index) =>
             codeEvidence(

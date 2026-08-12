@@ -121,6 +121,48 @@
       "documentationUrl": "https://learn.microsoft.com/azure/virtual-machines/allocation-failure"
     },
     {
+      "id": "region.postgresql.edition-version-supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-supported-versions"
+    },
+    {
+      "id": "region.postgresql.extensions-supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/extensions/concepts-extensions-versions"
+    },
+    {
+      "id": "quota.postgresql.eligible",
+      "category": "quota",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-limits"
+    },
+    {
+      "id": "capacity.postgresql.available",
+      "category": "capacity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-compute"
+    },
+    {
+      "id": "region.postgresql.recovery-supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/reliability-postgresql-flexible-server"
+    },
+    {
+      "id": "workload.postgresql.provider-parity",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
       "id": "region.foundry-model.available",
       "category": "region",
       "severity": "blocking",

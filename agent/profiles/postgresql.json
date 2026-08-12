@@ -7,7 +7,15 @@
   ],
   "requiredChecks": [
     "region.services.available",
-    "quota.workload.headroom"
+    "region.policy.allowed-locations",
+    "region.data-residency.compatible",
+    "region.availability-zones.supported",
+    "region.postgresql.edition-version-supported",
+    "region.postgresql.extensions-supported",
+    "quota.postgresql.eligible",
+    "capacity.postgresql.available",
+    "region.postgresql.recovery-supported",
+    "workload.postgresql.provider-parity"
   ],
   "regionalRequirements": {
     "services": [
@@ -15,7 +23,9 @@
     ],
     "computeSkuEvidence": false,
     "gpuSkuEvidence": false,
-    "foundryDeploymentEvidence": false
+    "foundryDeploymentEvidence": false,
+    "planningContract": "postgresql-regional-plan.schema.json",
+    "deploymentBoundary": "planning-only"
   },
   "costAssumptions": [
     "Nonproduction begins with Burstable compute when the workload supports it.",

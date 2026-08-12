@@ -1574,6 +1574,10 @@ function createApproval(manifest, overrides = {}, signingKey = privateKey) {
     topologyDecisionDigest: manifest.readinessEvidence.topologyDecisionDigest,
     topologyDecisionExpiresAt:
       manifest.readinessEvidence.topologyDecisionExpiresAt,
+    postgresqlDecisionDigest:
+      manifest.readinessEvidence.postgresqlDecisionDigest,
+    postgresqlSelectedEvidenceDigest:
+      manifest.readinessEvidence.postgresqlSelectedEvidenceDigest,
     defenderWorkspacePlacementDecisionId:
       manifest.defenderWorkspacePlacement.decisionId,
     defenderWorkspacePlacementDecisionDigest:
@@ -2271,6 +2275,8 @@ try {
     topologyDecisionId: "topology.other-plan.preflight",
     topologyDecisionDigest: `sha256:${"8".repeat(64)}`,
     topologyDecisionExpiresAt: "2026-08-09T11:59:58Z",
+    postgresqlDecisionDigest: `sha256:${"2".repeat(64)}`,
+    postgresqlSelectedEvidenceDigest: `sha256:${"1".repeat(64)}`,
     defenderWorkspacePlacementDecisionId: "workspace.other-plan.prod",
     defenderWorkspacePlacementDecisionDigest: `sha256:${"7".repeat(64)}`,
     defenderWorkspaceRegion: "centralus",
@@ -2342,6 +2348,20 @@ try {
     "deployment.approval.malformed",
   );
 
+  const omittedApprovalPostgresql = { ...approval };
+  delete omittedApprovalPostgresql.postgresqlDecisionDigest;
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      bicepManifest,
+      omittedApprovalPostgresql,
+      mockRuntime(),
+      "approval-postgresql-omitted",
+    ).code,
+    "deployment.approval.malformed",
+  );
+
   const omittedManifestEvidence = structuredClone(bicepManifest);
   delete omittedManifestEvidence.readinessEvidence;
   assert.equal(
@@ -2388,6 +2408,64 @@ try {
     ).code,
     "deployment.manifest.binding-mismatch",
   );
+
+  const omittedManifestPostgresql = structuredClone(bicepManifest);
+  delete omittedManifestPostgresql.readinessEvidence.postgresqlDecisionDigest;
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      omittedManifestPostgresql,
+      approval,
+      mockRuntime(),
+      "manifest-postgresql-omitted",
+    ).code,
+    "deployment.input.malformed",
+  );
+
+  const changedPostgresqlManifest = structuredClone(bicepManifest);
+  changedPostgresqlManifest.readinessEvidence.postgresqlDecisionDigest =
+    `sha256:${"0".repeat(64)}`;
+  changedPostgresqlManifest.manifestDigest = manifestDigest(
+    changedPostgresqlManifest,
+  );
+  assert.equal(
+    apply(
+      plan,
+      planPath,
+      changedPostgresqlManifest,
+      createApproval(changedPostgresqlManifest),
+      mockRuntime(),
+      "manifest-postgresql-mutated",
+    ).code,
+    "deployment.manifest.binding-mismatch",
+  );
+
+  const postApprovalFallbackPlan = structuredClone(plan);
+  postApprovalFallbackPlan.decisionModel.postgresql.fallback.required =
+    !postApprovalFallbackPlan.decisionModel.postgresql.fallback.required;
+  const postApprovalFallbackPath = resolve(
+    root,
+    outputRelative,
+    "post-approval-postgresql-fallback-plan.json",
+  );
+  writeFileSync(
+    postApprovalFallbackPath,
+    `${JSON.stringify(postApprovalFallbackPlan, null, 2)}\n`,
+  );
+  const postApprovalFallbackRuntime = mockRuntime();
+  assert.equal(
+    apply(
+      postApprovalFallbackPlan,
+      postApprovalFallbackPath,
+      bicepManifest,
+      approval,
+      postApprovalFallbackRuntime,
+      "postgresql-fallback-after-approval",
+    ).code,
+    "deployment.plan.digest-mismatch",
+  );
+  assert.equal(postApprovalFallbackRuntime.calls.length, 0);
 
   const currentRegionalBindings = {
     regionalEvidenceDigest: bicepManifest.readinessEvidence.digest,

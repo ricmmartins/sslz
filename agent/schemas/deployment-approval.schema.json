@@ -25,6 +25,8 @@
     "topologyDecisionId",
     "topologyDecisionDigest",
     "topologyDecisionExpiresAt",
+    "postgresqlDecisionDigest",
+    "postgresqlSelectedEvidenceDigest",
     "defenderWorkspacePlacementDecisionId",
     "defenderWorkspacePlacementDecisionDigest",
     "defenderWorkspaceRegion",
@@ -123,6 +125,18 @@
     "topologyDecisionExpiresAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "postgresqlDecisionDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "postgresqlSelectedEvidenceDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
     },
     "defenderWorkspacePlacementDecisionId": {
       "type": "string",

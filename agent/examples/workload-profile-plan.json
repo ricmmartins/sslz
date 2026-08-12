@@ -27,7 +27,16 @@
     "quota.workload.headroom",
     "region.services.available",
     "security.defender.selection-reviewed",
-    "operations.monitoring.destination-valid"
+    "operations.monitoring.destination-valid",
+    "region.policy.allowed-locations",
+    "region.data-residency.compatible",
+    "region.availability-zones.supported",
+    "region.postgresql.edition-version-supported",
+    "region.postgresql.extensions-supported",
+    "quota.postgresql.eligible",
+    "capacity.postgresql.available",
+    "region.postgresql.recovery-supported",
+    "workload.postgresql.provider-parity"
   ],
   "unresolvedDecisions": [
     {
