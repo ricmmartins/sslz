@@ -21,6 +21,9 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/postgresql-rehearsal-lineage.schema.json` | Read-only accepted evidence-set lineage for deterministic replay rejection |
 | `schemas/postgresql-rehearsal-plan.schema.json` | Deterministic execution-disabled PostgreSQL rehearsal and validation plan |
 | `schemas/postgresql-execution-*.schema.json` | Approval-bound live-evidence, trust, lineage, stage-approval, request, and deterministic no-operation orchestration contracts |
+| `schemas/container-image-cicd-source-assessment.schema.json` | Non-secret container image, registry, and CI/CD source inventory |
+| `schemas/container-image-cicd-plan-input.schema.json` | Source assessment, ACR and CI/CD target evidence, region policy, requirements, transition decisions, replay lineage, and program integration bindings |
+| `schemas/container-image-cicd-plan.schema.json` | Deterministic execution-disabled container image and CI/CD migration plan |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
@@ -61,6 +64,7 @@ node tests/startup-regional-plan.mjs
 node tests/startup-postgresql-migration-plan.mjs
 node tests/startup-postgresql-rehearsal-plan.mjs
 node tests/startup-postgresql-execution-plan.mjs
+node tests/startup-container-image-cicd-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
 node tests/startup-cool-foundation-plan.mjs
@@ -231,3 +235,12 @@ The PostgreSQL execution planner is a separate local JSON contract evaluator. It
 signatures, single-use nonces, exact stage authority and capability boundaries, freshness, target/environment matching,
 and monotonic lineage, then emits descriptions and rollback boundaries only. Even an eligible plan performs no source,
 target, cloud, IaC, network, DNS, database, dump/restore, replication, cutover, rollback, failback, state, or file write.
+
+The container image and CI/CD planner is a separate deterministic local JSON evaluator. It inventories registry metadata,
+image platforms, tags versus digests, provenance, SBOM, signatures, attestations, base images, vulnerability posture,
+registry replication/retention/encryption/network controls, build triggers, protected branches and environments, runner
+identity and egress, secret-reference metadata, artifact promotion, rollback, and deployment targets across AWS ECR, GCP
+Artifact Registry/GCR, and generic OCI sources paired with GitHub Actions, CodeBuild, Cloud Build, GitLab CI, Jenkins, or
+Azure DevOps. It produces a deterministic Azure Container Registry target and a guarded dual-publish, cutover, and rollback
+transition plan whose `executionEligible` and safety fields are always `false`/`none`. It never stores credentials,
+secret-bearing URLs, or repository contents, and never emits registry, build, cloud, or IaC commands.

@@ -924,6 +924,174 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/developer/terraform/overview"
+    },
+    {
+      "id": "migration.container.assessment-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-intro"
+    },
+    {
+      "id": "migration.container.evidence-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-intro"
+    },
+    {
+      "id": "migration.container.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-intro"
+    },
+    {
+      "id": "migration.container.digest-pinned",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices"
+    },
+    {
+      "id": "migration.container.mutable-tag-untrusted",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-image-lock"
+    },
+    {
+      "id": "migration.container.platforms-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/push-multi-architecture-images"
+    },
+    {
+      "id": "migration.container.base-image-supported",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tasks-base-images"
+    },
+    {
+      "id": "migration.container.sbom-present",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-oras-artifacts"
+    },
+    {
+      "id": "migration.container.signatures-verified",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push"
+    },
+    {
+      "id": "migration.container.provenance-continuous",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/container-secure-supply-chain/articles/container-secure-supply-chain-overview"
+    },
+    {
+      "id": "migration.container.vulnerability-policy-met",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/defender-for-cloud/defender-for-containers-introduction"
+    },
+    {
+      "id": "migration.container.registry-controls-parity",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices"
+    },
+    {
+      "id": "migration.container.unsigned-promotion-blocked",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push"
+    },
+    {
+      "id": "migration.container.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices"
+    },
+    {
+      "id": "migration.container.source-of-truth-explicit",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-import-images"
+    },
+    {
+      "id": "migration.cicd.source-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview"
+    },
+    {
+      "id": "migration.cicd.triggers-governed",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/security/overview"
+    },
+    {
+      "id": "migration.cicd.runner-least-privilege",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/security/misc"
+    },
+    {
+      "id": "migration.cicd.environment-separation",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/environments"
+    },
+    {
+      "id": "migration.cicd.secret-references-external",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/release/azure-key-vault"
+    },
+    {
+      "id": "migration.cicd.promotion-governed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/approvals"
+    },
+    {
+      "id": "migration.cicd.deployment-targets-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/environments"
+    },
+    {
+      "id": "migration.cicd.dual-publish-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-import-images"
+    },
+    {
+      "id": "migration.cicd.rollback-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/deployment-jobs"
     }
   ]
 }

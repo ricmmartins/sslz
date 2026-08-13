@@ -1,0 +1,300 @@
+[
+  {
+    "name": "compatible AWS ECR and GitHub Actions transition",
+    "mutations": [],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible AWS ECR and CodeBuild transition",
+    "mutations": [
+      ["sourceAssessment.cicd.provider", "aws-codebuild"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible GCP Artifact Registry and Cloud Build transition",
+    "mutations": [
+      ["sourceAssessment.registry.provider", "gcp-artifact-registry"],
+      ["sourceAssessment.registry.region", "us-central1"],
+      ["sourceAssessment.cicd.provider", "gcp-cloud-build"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible GCP GCR and Cloud Build transition",
+    "mutations": [
+      ["sourceAssessment.registry.provider", "gcp-gcr"],
+      ["sourceAssessment.registry.region", "us-central1"],
+      ["sourceAssessment.cicd.provider", "gcp-cloud-build"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible generic OCI and GitHub Actions transition",
+    "mutations": [
+      ["sourceAssessment.registry.provider", "generic-oci"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible generic OCI and GitLab CI transition",
+    "mutations": [
+      ["sourceAssessment.registry.provider", "generic-oci"],
+      ["sourceAssessment.cicd.provider", "gitlab-ci"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible generic OCI and Jenkins transition",
+    "mutations": [
+      ["sourceAssessment.registry.provider", "generic-oci"],
+      ["sourceAssessment.cicd.provider", "jenkins"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible generic OCI and Azure DevOps transition",
+    "mutations": [
+      ["sourceAssessment.registry.provider", "generic-oci"],
+      ["sourceAssessment.cicd.provider", "azure-devops"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "dual-publish-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "stale source assessment",
+    "mutations": [
+      ["sourceAssessment.observedAt", "2026-08-01T10:00:00Z"],
+      ["sourceAssessment.expiresAt", "2026-08-02T10:00:00Z"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.assessment-current"]
+  },
+  {
+    "name": "omitted evidence for a scoped image",
+    "mutations": [
+      [
+        "scope.imageReferences",
+        ["image.orders.api", "image.orders.web"]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.evidence-complete"]
+  },
+  {
+    "name": "target region outside the region policy",
+    "mutations": [
+      ["target.registryTargetEvidence.region", "westeurope"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.target-bound"]
+  },
+  {
+    "name": "tag-mutable promotion breaks digest pinning",
+    "mutations": [
+      ["sourceAssessment.cicd.promotion.model", "tag-mutable"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": [
+      "migration.container.digest-pinned",
+      "migration.cicd.promotion-governed"
+    ]
+  },
+  {
+    "name": "source registry tag immutability disabled",
+    "mutations": [
+      ["sourceAssessment.registry.tagImmutability", "disabled"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.mutable-tag-untrusted"]
+  },
+  {
+    "name": "target registry missing an image platform",
+    "mutations": [
+      ["target.registryTargetEvidence.supportedPlatforms", ["linux/amd64"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.platforms-compatible"]
+  },
+  {
+    "name": "end-of-life base image",
+    "mutations": [
+      ["sourceAssessment.images.0.baseImage.supportStatus", "end-of-life"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.base-image-supported"]
+  },
+  {
+    "name": "missing SBOM",
+    "mutations": [
+      ["sourceAssessment.images.0.sbomFormat", "none"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.sbom-present"]
+  },
+  {
+    "name": "unsigned image cannot be promoted",
+    "mutations": [
+      ["sourceAssessment.images.0.signed", false],
+      ["sourceAssessment.images.0.signatureType", "none"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": [
+      "migration.container.signatures-verified",
+      "migration.container.unsigned-promotion-blocked"
+    ]
+  },
+  {
+    "name": "tampered provenance subject digest",
+    "mutations": [
+      [
+        "sourceAssessment.images.0.provenanceSubjectDigest",
+        "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.provenance-continuous"]
+  },
+  {
+    "name": "vulnerability policy exceeded",
+    "mutations": [
+      ["sourceAssessment.images.0.vulnerabilities.critical", 3]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.vulnerability-policy-met"]
+  },
+  {
+    "name": "target retention below policy",
+    "mutations": [
+      ["target.registryTargetEvidence.retention.days", 10]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.registry-controls-parity"]
+  },
+  {
+    "name": "replayed attempt ordinal",
+    "mutations": [
+      [
+        "lineage.acceptedAttempts",
+        [
+          {
+            "attemptOrdinal": 1,
+            "assessmentId": "assessment.ecr.orders.20260810",
+            "nonce": "nonce.container.orders.0000"
+          }
+        ]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.replay-protected"]
+  },
+  {
+    "name": "ambiguous source of truth",
+    "mutations": [
+      ["sourceAssessment.governance.sourceOfTruth", "ambiguous"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.container.source-of-truth-explicit"]
+  },
+  {
+    "name": "unsupported registry and CI/CD pairing",
+    "mutations": [
+      ["sourceAssessment.cicd.provider", "jenkins"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.source-bound"]
+  },
+  {
+    "name": "unrestricted fork pull-request triggers",
+    "mutations": [
+      ["sourceAssessment.cicd.triggers.pullRequestFromForks", "allowed"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.triggers-governed"]
+  },
+  {
+    "name": "runner uses static credentials",
+    "mutations": [
+      ["sourceAssessment.cicd.runner.identityType", "static-credential"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.runner-least-privilege"]
+  },
+  {
+    "name": "production environment shares secrets",
+    "mutations": [
+      ["sourceAssessment.cicd.environments.1.isolatedSecrets", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.environment-separation"]
+  },
+  {
+    "name": "inline pipeline secret",
+    "mutations": [
+      ["sourceAssessment.cicd.secrets.0.exposure", "inline"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.secret-references-external"]
+  },
+  {
+    "name": "deployment target missing approval",
+    "mutations": [
+      ["sourceAssessment.cicd.deploymentTargets.0.approvalReference", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.deployment-targets-bound"]
+  },
+  {
+    "name": "dual publish disabled",
+    "mutations": [
+      ["transition.dualPublish.enabled", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.dual-publish-ready"]
+  },
+  {
+    "name": "rollback plan missing",
+    "mutations": [
+      ["transition.rollbackPlan", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.cicd.rollback-complete"]
+  }
+]

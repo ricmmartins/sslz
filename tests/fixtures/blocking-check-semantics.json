@@ -924,6 +924,174 @@
       "source": "scripts/regional-attempt.mjs",
       "passState": "matched",
       "blockingStates": ["missing", "mismatched"]
+    },
+    {
+      "id": "migration.container.assessment-current",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.evidence-complete",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.target-bound",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.digest-pinned",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.mutable-tag-untrusted",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.platforms-compatible",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.base-image-supported",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.sbom-present",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.signatures-verified",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.provenance-continuous",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.vulnerability-policy-met",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.registry-controls-parity",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.unsigned-promotion-blocked",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.replay-protected",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.source-of-truth-explicit",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.source-bound",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.triggers-governed",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.runner-least-privilege",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.environment-separation",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.secret-references-external",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.promotion-governed",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.deployment-targets-bound",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.dual-publish-ready",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.rollback-complete",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
     }
   ]
 }

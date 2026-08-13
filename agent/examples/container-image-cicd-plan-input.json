@@ -1,0 +1,264 @@
+{
+  "schemaVersion": "1.0.0",
+  "planId": "ecr-orders-to-acr",
+  "planningAt": "2026-08-12T12:00:00Z",
+  "maxAssessmentAgeHours": 24,
+  "sourceAssessment": {
+    "schemaVersion": "1.0.0",
+    "assessmentId": "assessment.ecr.orders.20260812",
+    "observedAt": "2026-08-12T10:00:00Z",
+    "expiresAt": "2026-08-13T10:00:00Z",
+    "registry": {
+      "provider": "aws-ecr",
+      "reference": "registryref.source.ecr.orders",
+      "region": "us-east-1",
+      "tagImmutability": "enabled",
+      "deploysByMutableTag": false,
+      "replication": {
+        "enabled": true,
+        "regions": ["us-east-1", "us-west-2"]
+      },
+      "retention": {
+        "enabled": true,
+        "days": 90
+      },
+      "encryption": {
+        "atRest": "customer-managed"
+      },
+      "network": {
+        "publicAccess": "disabled",
+        "privateAccess": "ready"
+      },
+      "scanning": {
+        "enabled": true,
+        "reference": "scanref.ecr.orders"
+      }
+    },
+    "images": [
+      {
+        "reference": "image.orders.api",
+        "repository": "orders/api",
+        "digest": "sha256:b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+        "tags": ["v1.4.2"],
+        "platforms": ["linux/amd64", "linux/arm64"],
+        "signed": true,
+        "signatureType": "sigstore",
+        "attestations": {
+          "provenance": true,
+          "sbom": true,
+          "vulnerabilityScan": true
+        },
+        "provenanceSubjectDigest": "sha256:b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+        "sbomFormat": "spdx",
+        "baseImage": {
+          "reference": "baseimage.distroless.static",
+          "digest": "sha256:2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+          "supportStatus": "supported"
+        },
+        "vulnerabilities": {
+          "scanStatus": "scanned",
+          "critical": 0,
+          "high": 0,
+          "medium": 2,
+          "low": 5
+        }
+      }
+    ],
+    "cicd": {
+      "provider": "github-actions",
+      "pipelineReference": "pipelineref.orders.build",
+      "triggers": {
+        "protectedBranchPush": true,
+        "pullRequestFromForks": "blocked",
+        "tagTriggers": false,
+        "scheduled": false
+      },
+      "protectedBranches": ["main", "release"],
+      "environments": [
+        {
+          "name": "nonprod",
+          "purpose": "nonprod",
+          "requiredReviewers": 1,
+          "isolatedSecrets": true,
+          "isolatedIdentity": true
+        },
+        {
+          "name": "prod",
+          "purpose": "prod",
+          "requiredReviewers": 2,
+          "isolatedSecrets": true,
+          "isolatedIdentity": true
+        }
+      ],
+      "runner": {
+        "identityType": "oidc-federated",
+        "privilege": "least",
+        "egress": "allowlist",
+        "hostedType": "hosted"
+      },
+      "secrets": [
+        {
+          "reference": "secretref.registry.pull",
+          "exposure": "reference",
+          "store": "external-managed"
+        }
+      ],
+      "promotion": {
+        "model": "digest-immutable",
+        "requiresSignature": true,
+        "requiresAttestation": true,
+        "gateReferences": ["gate.orders.signature", "gate.orders.sbom"]
+      },
+      "deploymentTargets": [
+        {
+          "reference": "deploytarget.orders.nonprod",
+          "environment": "nonprod",
+          "imageReference": "image.orders.api",
+          "boundByDigest": true,
+          "approvalReference": "approval.orders.nonprod"
+        },
+        {
+          "reference": "deploytarget.orders.prod",
+          "environment": "prod",
+          "imageReference": "image.orders.api",
+          "boundByDigest": true,
+          "approvalReference": "approval.orders.prod"
+        }
+      ]
+    },
+    "governance": {
+      "sourceOfTruth": "source-registry",
+      "dataResidency": "UnitedStates",
+      "compliance": ["soc2", "iso27001"],
+      "owner": {
+        "role": "PlatformOwner",
+        "reference": "owner.platform.orders"
+      },
+      "evidenceReferences": [
+        "evidence.ecr.catalog.20260812",
+        "evidence.pipeline.audit.20260812"
+      ]
+    }
+  },
+  "target": {
+    "regionPolicy": {
+      "allowedRegions": ["eastus2", "centralus"],
+      "residency": "UnitedStates"
+    },
+    "registryTargetEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-08-12T10:30:00Z",
+      "expiresAt": "2026-08-13T10:30:00Z",
+      "reference": "registryref.target.acr.orders",
+      "region": "eastus2",
+      "residency": "UnitedStates",
+      "sku": "Premium",
+      "supportedPlatforms": ["linux/amd64", "linux/arm64"],
+      "tagImmutability": "enabled",
+      "replication": {
+        "enabled": true,
+        "regions": ["eastus2", "centralus"]
+      },
+      "retention": {
+        "enabled": true,
+        "days": 120
+      },
+      "encryption": {
+        "atRest": "customer-managed"
+      },
+      "network": {
+        "publicAccess": "disabled",
+        "privateEndpoint": "ready"
+      },
+      "capabilities": {
+        "signatureVerification": true,
+        "sbom": true,
+        "provenance": true,
+        "quarantine": true
+      },
+      "promotion": {
+        "preservesDigest": true
+      }
+    },
+    "cicdTargetEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-08-12T10:30:00Z",
+      "expiresAt": "2026-08-13T10:30:00Z",
+      "reference": "pipelineref.target.actions.orders",
+      "provider": "github-actions",
+      "oidcFederation": true,
+      "environments": ["nonprod", "prod"],
+      "protectedBranches": ["main", "release"],
+      "runnerIdentity": {
+        "leastPrivilege": true,
+        "egress": "allowlist"
+      },
+      "secretStore": "external-managed"
+    }
+  },
+  "scope": {
+    "imageReferences": ["image.orders.api"],
+    "environments": ["nonprod", "prod"],
+    "includeBaseImages": true,
+    "includeAttestations": true
+  },
+  "requirements": {
+    "requireMultiArch": true,
+    "requiredPlatforms": ["linux/amd64", "linux/arm64"],
+    "requireSignatures": true,
+    "requireSbom": true,
+    "requireProvenance": true,
+    "maxCriticalVulnerabilities": 0,
+    "maxHighVulnerabilities": 0,
+    "requirePrivateRegistry": true,
+    "requireImmutableTags": true,
+    "requireReplication": true,
+    "minRetentionDays": 90,
+    "requireEncryptionAtRest": true,
+    "requireCustomerManagedKey": true,
+    "blockUnsignedPromotion": true
+  },
+  "transition": {
+    "strategy": "auto",
+    "dualPublish": {
+      "enabled": true,
+      "windowMinutes": 4320,
+      "sourceRegistryReference": "registryref.source.ecr.orders",
+      "targetRegistryReference": "registryref.target.acr.orders"
+    },
+    "cutoverReference": "runbook.container.cutover.orders.v1",
+    "trafficShiftReference": "runbook.container.traffic.orders.v1",
+    "promotion": {
+      "approvalReference": "approval.container.promotion.orders",
+      "gateReferences": ["gate.orders.signature", "gate.orders.sbom"]
+    },
+    "secretRotationReferences": ["secretref.registry.rotated"],
+    "rollbackPlan": {
+      "ownerReference": "owner.container.rollback",
+      "rollbackWindowMinutes": 120,
+      "conditions": [
+        "rollback.validation.failed",
+        "rollback.error-budget.exhausted"
+      ],
+      "failbackSourceOfTruth": "source-registry",
+      "stepReferences": ["runbook.container.failback.v1"]
+    }
+  },
+  "lineage": {
+    "lineageId": "lineage.container.orders",
+    "observedAt": "2026-08-12T11:45:00Z",
+    "expiresAt": "2026-08-13T11:45:00Z",
+    "attemptOrdinal": 1,
+    "attemptNonce": "nonce.container.orders.0001",
+    "acceptedAttempts": []
+  },
+  "integration": {
+    "workloadProfilePlanDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "regionalPlanDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "iacPlanDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "readinessEvidenceDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "deploymentManifestDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "deploymentApprovalDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "postgresqlMigrationIdentityDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+  }
+}
