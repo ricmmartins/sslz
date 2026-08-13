@@ -1,0 +1,345 @@
+{
+  "schemaVersion": "1.0.0",
+  "planId": "aws-directconnect-to-expressroute-orders",
+  "planningAt": "2026-09-01T12:00:00Z",
+  "maxAssessmentAgeHours": 24,
+  "sourceAssessment": {
+    "schemaVersion": "1.0.0",
+    "assessmentId": "assessment.aws.orders.20260901",
+    "observedAt": "2026-09-01T10:00:00Z",
+    "expiresAt": "2026-09-02T10:00:00Z",
+    "cloud": {
+      "provider": "aws",
+      "connectivityType": "direct-connect",
+      "region": "us-east-1"
+    },
+    "network": {
+      "cidrs": [
+        "10.20.0.0/16"
+      ],
+      "addressTranslation": null,
+      "gateways": [
+        {
+          "reference": "gateway.aws.directconnect.orders",
+          "kind": "dedicated-circuit",
+          "routingDomainReference": "routingdomain.orders",
+          "redundant": true,
+          "bgpAsn": 65010,
+          "mtu": 1500
+        }
+      ],
+      "routing": {
+        "model": "dynamic-bgp",
+        "symmetric": true,
+        "defaultRouteAdvertised": false,
+        "defaultRouteAccepted": false,
+        "routeOwners": [
+          {
+            "prefix": "10.20.0.0/16",
+            "ownerReference": "owner.route.aws.orders"
+          }
+        ]
+      },
+      "firewallPolicy": {
+        "enforcementPoint": "firewall",
+        "intentReference": "intent.firewall.aws.orders",
+        "explicitDenyByDefault": true
+      },
+      "privateAccess": [
+        {
+          "service": "blob-storage",
+          "kind": "private-endpoint",
+          "reference": "privateaccess.aws.blob.orders"
+        }
+      ]
+    },
+    "dns": {
+      "zones": [
+        {
+          "name": "contoso.internal",
+          "authority": "source",
+          "sourceOfTruthReference": "dns.sot.contoso.internal"
+        }
+      ],
+      "resolvers": [
+        {
+          "reference": "resolver.aws.inbound.orders",
+          "reachableFromSource": true,
+          "reachableFromTarget": true
+        }
+      ],
+      "forwarding": {
+        "conditionalForwardingConfigured": true,
+        "splitHorizon": true,
+        "loopDetected": false
+      },
+      "ttlPolicy": {
+        "maxTtlSeconds": 300,
+        "negativeCachingSeconds": 60
+      },
+      "certificates": [
+        {
+          "reference": "cert.orders.api.contoso.internal",
+          "sniDependent": true,
+          "dnsDependencyResolved": true
+        }
+      ]
+    },
+    "identity": {
+      "federation": {
+        "issuer": "https://token.actions.githubusercontent.com",
+        "audience": "AzureADTokenExchange",
+        "subject": "repo:contoso/orders:environment:prod",
+        "environment": "prod",
+        "usesLongLivedSecret": false,
+        "privilege": "least"
+      },
+      "environments": [
+        {
+          "name": "nonprod",
+          "purpose": "nonprod",
+          "isolatedIdentity": true
+        },
+        {
+          "name": "prod",
+          "purpose": "prod",
+          "isolatedIdentity": true
+        }
+      ]
+    },
+    "egress": {
+      "consumers": ["runner", "workload"],
+      "defaultDeny": true,
+      "allowlist": [
+        {
+          "destination": "20.190.128.0/18",
+          "port": 443,
+          "protocol": "tcp",
+          "reference": "egress.aws.aad.orders"
+        }
+      ],
+      "natOrProxyReference": "natgw.aws.orders"
+    },
+    "governance": {
+      "sourceOfTruth": "source-network",
+      "dataResidency": "UnitedStates",
+      "owner": {
+        "role": "networkowner",
+        "reference": "owner.network.aws.orders",
+        "confirmed": true
+      },
+      "evidenceReferences": [
+        "evidence.aws.directconnect.20260901",
+        "evidence.aws.audit.20260901"
+      ],
+      "telemetry": {
+        "monitoringReference": "telemetry.aws.orders",
+        "logsCentralized": true,
+        "alertingConfigured": true
+      },
+      "recovery": {
+        "rpoMinutes": 15,
+        "rtoMinutes": 60,
+        "rollbackReference": "runbook.aws.rollback.orders.v1"
+      }
+    }
+  },
+  "target": {
+    "regionPolicy": {
+      "allowedRegions": [
+        "eastus2",
+        "centralus"
+      ],
+      "residency": "UnitedStates"
+    },
+    "connectivityTargetEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-09-01T10:30:00Z",
+      "expiresAt": "2026-09-02T10:30:00Z",
+      "reference": "connref.target.expressroute.orders",
+      "region": "eastus2",
+      "residency": "UnitedStates",
+      "gatewayKind": "expressroute",
+      "routingDomainReference": "routingdomain.orders",
+      "redundant": true,
+      "bgpAsn": 65515,
+      "mtu": 1500,
+      "azureCidrs": [
+        "10.40.0.0/16"
+      ],
+      "ownerReference": "owner.network.azure.orders",
+      "routing": {
+        "symmetric": true,
+        "defaultRouteAdvertised": false,
+        "defaultRouteAccepted": false,
+        "routeOwners": [
+          {
+            "prefix": "10.40.0.0/16",
+            "ownerReference": "owner.route.azure.orders"
+          }
+        ]
+      },
+      "firewallPolicy": {
+        "enforcementPoint": "nva",
+        "intentReference": "intent.firewall.azure.orders",
+        "explicitDenyByDefault": true
+      },
+      "privateEndpoints": [
+        {
+          "service": "blob-storage",
+          "kind": "private-endpoint",
+          "reference": "pe.azure.blob.orders"
+        }
+      ],
+      "telemetry": {
+        "monitoringReference": "telemetry.azure.orders",
+        "logsCentralized": true,
+        "alertingConfigured": true
+      }
+    },
+    "dnsTargetEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-09-01T10:30:00Z",
+      "expiresAt": "2026-09-02T10:30:00Z",
+      "reference": "dnsref.target.azure.orders",
+      "zones": [
+        {
+          "name": "azure.contoso.internal",
+          "authority": "target",
+          "sourceOfTruthReference": "dns.sot.azure.contoso.internal"
+        }
+      ],
+      "resolvers": [
+        {
+          "reference": "resolver.azure.dns.orders",
+          "reachableFromSource": true,
+          "reachableFromTarget": true
+        }
+      ],
+      "forwarding": {
+        "conditionalForwardingConfigured": true,
+        "splitHorizon": true,
+        "loopDetected": false
+      },
+      "ttlPolicy": {
+        "maxTtlSeconds": 300,
+        "negativeCachingSeconds": 60
+      },
+      "certificates": []
+    },
+    "identityTargetEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-09-01T10:30:00Z",
+      "expiresAt": "2026-09-02T10:30:00Z",
+      "reference": "identityref.target.azure.orders",
+      "federation": {
+        "issuer": "https://token.actions.githubusercontent.com",
+        "audience": "AzureADTokenExchange",
+        "subject": "repo:contoso/orders:environment:prod",
+        "environment": "prod",
+        "usesLongLivedSecret": false,
+        "privilege": "least"
+      },
+      "environments": [
+        {
+          "name": "nonprod",
+          "purpose": "nonprod",
+          "isolatedIdentity": true
+        },
+        {
+          "name": "prod",
+          "purpose": "prod",
+          "isolatedIdentity": true
+        }
+      ]
+    },
+    "egressTargetEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-09-01T10:30:00Z",
+      "expiresAt": "2026-09-02T10:30:00Z",
+      "reference": "egressref.target.azure.orders",
+      "consumers": ["runner", "workload"],
+      "defaultDeny": true,
+      "allowlist": [
+        {
+          "destination": "20.190.128.0/18",
+          "port": 443,
+          "protocol": "tcp",
+          "reference": "egress.azure.aad.orders"
+        }
+      ],
+      "natOrProxyReference": "natgw.azure.orders"
+    }
+  },
+  "requirements": {
+    "requireSymmetricRouting": true,
+    "requireUniqueRouteOwnership": true,
+    "blockDefaultRoutes": true,
+    "minimumRoutePrefixLength": 8,
+    "requireGatewayRedundancy": true,
+    "requiredMtu": 1500,
+    "acceptableAsns": [
+      65010,
+      65515
+    ],
+    "requireExplicitFirewallIntent": true,
+    "requireOidcFederation": true,
+    "blockLongLivedSecrets": true,
+    "requireLeastPrivilege": true,
+    "requireEnvironmentSeparation": true,
+    "requireBoundedEgress": true,
+    "minimumEgressPrefixLength": 16,
+    "requireDefaultDenyEgress": true,
+    "requireResolverReachability": true,
+    "requireDnsLoopPrevention": true,
+    "maxTtlSeconds": 300,
+    "requireTelemetry": true,
+    "requireRecoveryPlan": true,
+    "maxRpoMinutes": 30,
+    "maxRtoMinutes": 120,
+    "requireRollbackPlan": true,
+    "requireOwnerConfirmation": true
+  },
+  "transition": {
+    "strategy": "auto",
+    "coexistenceWindowMinutes": 2880,
+    "validationReference": "runbook.connectivity.validation.orders.v1",
+    "cutoverReference": "runbook.connectivity.cutover.orders.v1",
+    "trafficShiftReference": "runbook.connectivity.trafficshift.orders.v1",
+    "blastRadiusReference": "runbook.connectivity.blastradius.orders.v1",
+    "rollbackPlan": {
+      "ownerReference": "owner.connectivity.rollback.orders",
+      "rollbackWindowMinutes": 120,
+      "conditions": [
+        "rollback.validation.failed",
+        "rollback.error-budget.exhausted"
+      ],
+      "failbackSourceOfTruth": "source-network",
+      "stepReferences": [
+        "runbook.connectivity.failback.orders.v1"
+      ]
+    }
+  },
+  "lineage": {
+    "lineageId": "lineage.connectivity.orders",
+    "observedAt": "2026-09-01T11:45:00Z",
+    "expiresAt": "2026-09-02T11:45:00Z",
+    "attemptOrdinal": 1,
+    "attemptNonce": "nonce.connectivity.orders.0001",
+    "acceptedAttempts": []
+  },
+  "integrityClaims": {
+    "sourceAssessmentDigestClaim": "sha256:853c6e2a62feb6fcb679230278a433ca7bccd3940634c80531702e7930fc32ec",
+    "targetEvidenceDigestClaim": "sha256:29a94213e4d25ad36f3192d57df75508f2b8329e692f63fc3d7f47eb77da2418"
+  },
+  "integration": {
+    "workloadProfilePlanDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "regionalPlanDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "iacPlanDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "readinessEvidenceDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "deploymentManifestDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "deploymentApprovalDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "postgresqlMigrationIdentityDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "containerImageCicdPlanDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+  }
+}

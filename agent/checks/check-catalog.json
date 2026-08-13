@@ -1092,6 +1092,251 @@
       "severity": "blocking",
       "automation": "manual",
       "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/deployment-jobs"
+    },
+    {
+      "id": "migration.connectivity.architecture-supported",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-introduction"
+    },
+    {
+      "id": "migration.connectivity.assessment-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/migrate/migrate-services-overview"
+    },
+    {
+      "id": "migration.connectivity.evidence-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/migrate/migrate-services-overview"
+    },
+    {
+      "id": "migration.connectivity.address-space-no-overlap",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/ip-services/private-ip-addresses"
+    },
+    {
+      "id": "migration.connectivity.route-ownership-exact",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview"
+    },
+    {
+      "id": "migration.connectivity.symmetric-routing",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-optimize-routing"
+    },
+    {
+      "id": "migration.connectivity.no-default-route",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview"
+    },
+    {
+      "id": "migration.connectivity.bgp-asn-acceptable",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-routing"
+    },
+    {
+      "id": "migration.connectivity.mtu-compatible",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/troubleshoot/azure/expressroute/expressroute-troubleshooting-network-performance"
+    },
+    {
+      "id": "migration.connectivity.gateway-redundant",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/designing-for-high-availability-with-expressroute"
+    },
+    {
+      "id": "migration.connectivity.firewall-policy-explicit",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/firewall/overview"
+    },
+    {
+      "id": "migration.connectivity.private-endpoint-ready",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/private-link/private-endpoint-overview"
+    },
+    {
+      "id": "migration.connectivity.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-introduction"
+    },
+    {
+      "id": "migration.connectivity.source-of-truth-explicit",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-howto-coexist-resource-manager"
+    },
+    {
+      "id": "migration.connectivity.integrity-verified",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/network-best-practices"
+    },
+    {
+      "id": "migration.connectivity.target-integrity-verified",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/network-best-practices"
+    },
+    {
+      "id": "migration.connectivity.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "migration.connectivity.owner-confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/overview"
+    },
+    {
+      "id": "migration.connectivity.telemetry-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/overview"
+    },
+    {
+      "id": "migration.connectivity.recovery-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "migration.connectivity.transition-bounded",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-howto-coexist-resource-manager"
+    },
+    {
+      "id": "migration.connectivity.rollback-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "migration.dns.authority-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/private-dns-overview"
+    },
+    {
+      "id": "migration.dns.loop-prevented",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/private-resolver-hybrid-dns"
+    },
+    {
+      "id": "migration.dns.resolver-reachable",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/dns-private-resolver-overview"
+    },
+    {
+      "id": "migration.dns.forwarding-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/private-resolver-hybrid-dns"
+    },
+    {
+      "id": "migration.dns.ttl-policy-met",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/dns-zones-records"
+    },
+    {
+      "id": "migration.dns.certificate-sni-bound",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/application-gateway/ssl-overview"
+    },
+    {
+      "id": "migration.identity.oidc-pinned",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/workload-id/workload-identity-federation"
+    },
+    {
+      "id": "migration.identity.no-long-lived-secrets",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/workload-id/workload-identities-overview"
+    },
+    {
+      "id": "migration.identity.least-privilege",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "migration.identity.environment-separation",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/environments"
+    },
+    {
+      "id": "migration.egress.bounded-allowlist",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/firewall/rule-processing"
+    },
+    {
+      "id": "migration.egress.default-deny-enforced",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/firewall/rule-processing"
+    },
+    {
+      "id": "migration.egress.nat-proxy-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/nat-gateway/nat-overview"
     }
   ]
 }

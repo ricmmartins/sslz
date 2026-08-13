@@ -22,6 +22,11 @@ import {
   CONTAINER_CICD_CHECK_ORDER,
   planContainerImageCicd,
 } from "../scripts/startup-container-image-cicd-plan.mjs";
+import {
+  CONNECTIVITY_CHECK_ORDER,
+  connectivityPlanDigest,
+  planConnectivity,
+} from "../scripts/startup-connectivity-plan.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(
@@ -108,6 +113,22 @@ const containerCicdScenarios = JSON.parse(
 const containerCicdPlan = planContainerImageCicd(containerCicdInput);
 const containerCicdRuntimeIds = new Set(
   containerCicdPlan.checks.map(({ id }) => id),
+);
+const connectivityInput = JSON.parse(
+  readFileSync(
+    resolve(root, "agent/examples/connectivity-plan-input.json"),
+    "utf8",
+  ),
+);
+const connectivityScenarios = JSON.parse(
+  readFileSync(
+    resolve(root, "tests/fixtures/connectivity-planner/scenarios.json"),
+    "utf8",
+  ),
+);
+const connectivityPlan = planConnectivity(connectivityInput);
+const connectivityRuntimeIds = new Set(
+  connectivityPlan.checks.map(({ id }) => id),
 );
 assert.deepEqual(
   postgresqlPlan.requiredChecks,
@@ -211,6 +232,62 @@ assert.deepEqual(
   "Every container image and CI/CD catalog check requires a blocking runtime scenario",
 );
 
+assert.deepEqual(
+  connectivityPlan.requiredChecks,
+  CONNECTIVITY_CHECK_ORDER,
+  "Connectivity, DNS, identity, and egress required checks must be emitted by the runtime planner",
+);
+assert.deepEqual(
+  connectivityPlan.checks.map(({ id }) => id),
+  CONNECTIVITY_CHECK_ORDER,
+  "Connectivity, DNS, identity, and egress runtime checks must exactly cover the catalog IDs",
+);
+
+function withFreshConnectivityDigests(input, scenario = {}) {
+  if (!scenario.skipSourceDigestRecompute) {
+    input.integrityClaims.sourceAssessmentDigestClaim = connectivityPlanDigest(
+      input.sourceAssessment,
+    );
+  }
+  if (!scenario.skipTargetDigestRecompute) {
+    input.integrityClaims.targetEvidenceDigestClaim = connectivityPlanDigest(
+      input.target,
+    );
+  }
+  return input;
+}
+
+const connectivityMutationCheckIds = new Set();
+for (const scenario of connectivityScenarios) {
+  const input = structuredClone(connectivityInput);
+  for (const [path, replacement] of scenario.mutations) {
+    const parts = path.split(".");
+    const property = parts.pop();
+    const parent = parts.reduce((current, part) => current[part], input);
+    parent[property] = structuredClone(replacement);
+  }
+  withFreshConnectivityDigests(input, scenario);
+  const plan = planConnectivity(input);
+  for (const id of scenario.expectedChecks) {
+    connectivityMutationCheckIds.add(id);
+    assert.notEqual(
+      plan.checks.find((check) => check.id === id)?.classification,
+      "pass",
+      `${scenario.name}: ${id} must have runtime blocking semantics`,
+    );
+    assert.equal(
+      plan.status,
+      "blocked",
+      `${scenario.name}: a cataloged connectivity, DNS, identity, or egress failure must block`,
+    );
+  }
+}
+assert.deepEqual(
+  [...connectivityMutationCheckIds].sort(),
+  [...CONNECTIVITY_CHECK_ORDER].sort(),
+  "Every connectivity, DNS, identity, and egress catalog check requires a blocking runtime scenario",
+);
+
 assert.equal(fixture.schemaVersion, "1.0.0");
 const blockingIds = catalog.checks
   .filter((check) => check.severity === "blocking")
@@ -265,6 +342,11 @@ for (const check of fixture.checks) {
     assert(
       containerCicdRuntimeIds.has(check.id),
       `${check.id}: container image and CI/CD planner did not emit a runtime check result`,
+    );
+  } else if (check.surface === "connectivity-planner") {
+    assert(
+      connectivityRuntimeIds.has(check.id),
+      `${check.id}: connectivity, DNS, identity, and egress planner did not emit a runtime check result`,
     );
   } else {
     const source =

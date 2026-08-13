@@ -1092,6 +1092,251 @@
       "source": "scripts/startup-container-image-cicd-plan.mjs",
       "passState": "pass",
       "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.architecture-supported",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.assessment-current",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.evidence-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.address-space-no-overlap",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.route-ownership-exact",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.symmetric-routing",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.no-default-route",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.bgp-asn-acceptable",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.mtu-compatible",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.gateway-redundant",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.firewall-policy-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.private-endpoint-ready",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.target-bound",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.source-of-truth-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.integrity-verified",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.target-integrity-verified",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.replay-protected",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.owner-confirmed",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.telemetry-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.recovery-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.transition-bounded",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.rollback-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.authority-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.loop-prevented",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.resolver-reachable",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.forwarding-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.ttl-policy-met",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.certificate-sni-bound",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.oidc-pinned",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.no-long-lived-secrets",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.least-privilege",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.environment-separation",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.egress.bounded-allowlist",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.egress.default-deny-enforced",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.egress.nat-proxy-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
     }
   ]
 }
