@@ -405,6 +405,15 @@ function main() {
   const postgresqlExecutionPlanSchema = load(
     "agent/schemas/postgresql-execution-plan.schema.json",
   );
+  const containerImageCicdSourceAssessmentSchema = load(
+    "agent/schemas/container-image-cicd-source-assessment.schema.json",
+  );
+  const containerImageCicdPlanInputSchema = load(
+    "agent/schemas/container-image-cicd-plan-input.schema.json",
+  );
+  const containerImageCicdPlanSchema = load(
+    "agent/schemas/container-image-cicd-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -502,6 +511,9 @@ function main() {
   );
   const postgresqlExecutionTrust = load(
     "agent/examples/postgresql-execution-trust.json",
+  );
+  const containerImageCicdPlanInput = load(
+    "agent/examples/container-image-cicd-plan-input.json",
   );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
@@ -601,6 +613,18 @@ function main() {
   assert.equal(
     postgresqlExecutionPlanSchema.$id,
     "https://aka.ms/sslz/schemas/postgresql-execution-plan.schema.json",
+  );
+  assert.equal(
+    containerImageCicdSourceAssessmentSchema.$id,
+    "https://aka.ms/sslz/schemas/container-image-cicd-source-assessment.schema.json",
+  );
+  validateDocument(
+    containerImageCicdPlanInputSchema,
+    containerImageCicdPlanInput,
+  );
+  assert.equal(
+    containerImageCicdPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/container-image-cicd-plan.schema.json",
   );
   assert.equal(
     iacPlanInputSchema.$id,
@@ -728,6 +752,7 @@ function main() {
     postgresqlExecutionApprovals,
     postgresqlExecutionLineage,
     postgresqlExecutionTrust,
+    containerImageCicdPlanInput,
     readyExample,
     blockedExample,
     providerRegistrationApproval,
