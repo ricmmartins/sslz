@@ -1,0 +1,450 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/connectivity-source-assessment.schema.json",
+  "title": "SSLZ dual-cloud connectivity, DNS, identity, and egress source assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "assessmentId",
+    "observedAt",
+    "expiresAt",
+    "cloud",
+    "network",
+    "dns",
+    "identity",
+    "egress",
+    "governance"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "assessmentId": { "$ref": "#/$defs/reference" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "cloud": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "connectivityType", "region"],
+      "properties": {
+        "provider": { "enum": ["aws", "gcp", "onprem-generic"] },
+        "connectivityType": {
+          "enum": [
+            "direct-connect",
+            "site-to-site-vpn",
+            "cloud-interconnect",
+            "cloud-vpn",
+            "expressroute",
+            "ipsec-vpn"
+          ]
+        },
+        "region": { "$ref": "#/$defs/region" }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cidrs",
+        "addressTranslation",
+        "gateways",
+        "routing",
+        "firewallPolicy",
+        "privateAccess"
+      ],
+      "properties": {
+        "cidrs": { "$ref": "#/$defs/cidrList" },
+        "addressTranslation": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "approved",
+                "ownerReference",
+                "reference",
+                "translatedPrefixes"
+              ],
+              "properties": {
+                "approved": { "const": true },
+                "ownerReference": { "$ref": "#/$defs/reference" },
+                "reference": { "$ref": "#/$defs/reference" },
+                "translatedPrefixes": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["sourcePrefix", "translatedPrefix"],
+                    "properties": {
+                      "sourcePrefix": { "$ref": "#/$defs/cidr" },
+                      "translatedPrefix": { "$ref": "#/$defs/cidr" }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "gateways": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reference",
+              "kind",
+              "routingDomainReference",
+              "redundant",
+              "bgpAsn",
+              "mtu"
+            ],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "kind": { "enum": ["dedicated-circuit", "vpn-tunnel"] },
+              "routingDomainReference": { "$ref": "#/$defs/reference" },
+              "redundant": { "type": "boolean" },
+              "bgpAsn": { "$ref": "#/$defs/asn" },
+              "mtu": { "type": "integer", "minimum": 576, "maximum": 9216 }
+            }
+          }
+        },
+        "routing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model",
+            "symmetric",
+            "defaultRouteAdvertised",
+            "defaultRouteAccepted",
+            "routeOwners"
+          ],
+          "properties": {
+            "model": { "enum": ["dynamic-bgp", "static"] },
+            "symmetric": { "type": "boolean" },
+            "defaultRouteAdvertised": { "type": "boolean" },
+            "defaultRouteAccepted": { "type": "boolean" },
+            "routeOwners": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["prefix", "ownerReference"],
+                "properties": {
+                  "prefix": { "$ref": "#/$defs/cidr" },
+                  "ownerReference": { "$ref": "#/$defs/reference" }
+                }
+              }
+            }
+          }
+        },
+        "firewallPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enforcementPoint",
+            "intentReference",
+            "explicitDenyByDefault"
+          ],
+          "properties": {
+            "enforcementPoint": { "enum": ["firewall", "nsg", "nva"] },
+            "intentReference": { "$ref": "#/$defs/reference" },
+            "explicitDenyByDefault": { "type": "boolean" }
+          }
+        },
+        "privateAccess": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["service", "kind", "reference"],
+            "properties": {
+              "service": { "$ref": "#/$defs/value" },
+              "kind": { "enum": ["private-endpoint", "service-endpoint"] },
+              "reference": { "$ref": "#/$defs/reference" }
+            }
+          }
+        }
+      }
+    },
+    "dns": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zones", "resolvers", "forwarding", "ttlPolicy", "certificates"],
+      "properties": {
+        "zones": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "authority", "sourceOfTruthReference"],
+            "properties": {
+              "name": { "$ref": "#/$defs/dnsName" },
+              "authority": { "enum": ["source", "target"] },
+              "sourceOfTruthReference": {
+                "oneOf": [{ "$ref": "#/$defs/reference" }, { "type": "null" }]
+              }
+            }
+          }
+        },
+        "resolvers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference", "reachableFromSource", "reachableFromTarget"],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "reachableFromSource": { "type": "boolean" },
+              "reachableFromTarget": { "type": "boolean" }
+            }
+          }
+        },
+        "forwarding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "conditionalForwardingConfigured",
+            "splitHorizon",
+            "loopDetected"
+          ],
+          "properties": {
+            "conditionalForwardingConfigured": { "type": "boolean" },
+            "splitHorizon": { "type": "boolean" },
+            "loopDetected": { "type": "boolean" }
+          }
+        },
+        "ttlPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxTtlSeconds", "negativeCachingSeconds"],
+          "properties": {
+            "maxTtlSeconds": { "$ref": "#/$defs/ttlSeconds" },
+            "negativeCachingSeconds": { "$ref": "#/$defs/ttlSeconds" }
+          }
+        },
+        "certificates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference", "sniDependent", "dnsDependencyResolved"],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "sniDependent": { "type": "boolean" },
+              "dnsDependencyResolved": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["federation", "environments"],
+      "properties": {
+        "federation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "issuer",
+            "audience",
+            "subject",
+            "environment",
+            "usesLongLivedSecret",
+            "privilege"
+          ],
+          "properties": {
+            "issuer": { "$ref": "#/$defs/issuerUrl" },
+            "audience": { "$ref": "#/$defs/value" },
+            "subject": { "$ref": "#/$defs/reference" },
+            "environment": { "$ref": "#/$defs/value" },
+            "usesLongLivedSecret": { "type": "boolean" },
+            "privilege": { "enum": ["least", "broad"] }
+          }
+        },
+        "environments": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "purpose", "isolatedIdentity"],
+            "properties": {
+              "name": { "$ref": "#/$defs/value" },
+              "purpose": { "enum": ["nonprod", "prod"] },
+              "isolatedIdentity": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "egress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumers",
+        "defaultDeny",
+        "allowlist",
+        "natOrProxyReference"
+      ],
+      "properties": {
+        "consumers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["runner", "workload"] }
+        },
+        "defaultDeny": { "type": "boolean" },
+        "allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["destination", "port", "protocol", "reference"],
+            "properties": {
+              "destination": { "$ref": "#/$defs/cidr" },
+              "port": { "$ref": "#/$defs/port" },
+              "protocol": { "enum": ["tcp", "udp"] },
+              "reference": { "$ref": "#/$defs/reference" }
+            }
+          }
+        },
+        "natOrProxyReference": {
+          "oneOf": [{ "$ref": "#/$defs/reference" }, { "type": "null" }]
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceOfTruth",
+        "dataResidency",
+        "owner",
+        "evidenceReferences",
+        "telemetry",
+        "recovery"
+      ],
+      "properties": {
+        "sourceOfTruth": {
+          "enum": ["source-network", "target-network", "ambiguous"]
+        },
+        "dataResidency": { "$ref": "#/$defs/value" },
+        "owner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["role", "reference", "confirmed"],
+          "properties": {
+            "role": { "$ref": "#/$defs/value" },
+            "reference": { "$ref": "#/$defs/reference" },
+            "confirmed": { "type": "boolean" }
+          }
+        },
+        "evidenceReferences": { "$ref": "#/$defs/referenceList" },
+        "telemetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["monitoringReference", "logsCentralized", "alertingConfigured"],
+          "properties": {
+            "monitoringReference": { "$ref": "#/$defs/reference" },
+            "logsCentralized": { "type": "boolean" },
+            "alertingConfigured": { "type": "boolean" }
+          }
+        },
+        "recovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rpoMinutes", "rtoMinutes", "rollbackReference"],
+          "properties": {
+            "rpoMinutes": { "type": "integer", "minimum": 1 },
+            "rtoMinutes": { "type": "integer", "minimum": 1 },
+            "rollbackReference": { "$ref": "#/$defs/reference" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "referenceList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "nonEmptyReferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "regionList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/region" }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "cidr": {
+      "type": "string",
+      "pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])/(?:[0-9]|[1-2][0-9]|3[0-2])$"
+    },
+    "cidrList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/cidr" }
+    },
+    "asn": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4294967294
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "ttlSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 86400
+    },
+    "dnsName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+    },
+    "issuerUrl": {
+      "type": "string",
+      "pattern": "^https://[a-z0-9.-]+(?:/[A-Za-z0-9._~%/-]*)?$"
+    }
+  }
+}

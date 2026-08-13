@@ -24,6 +24,9 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/container-image-cicd-source-assessment.schema.json` | Non-secret container image, registry, and CI/CD source inventory |
 | `schemas/container-image-cicd-plan-input.schema.json` | Source assessment, ACR and CI/CD target evidence, region policy, requirements, transition decisions, replay lineage, and program integration bindings |
 | `schemas/container-image-cicd-plan.schema.json` | Deterministic execution-disabled container image and CI/CD migration plan |
+| `schemas/connectivity-source-assessment.schema.json` | Non-secret dual-cloud private connectivity, DNS, workload identity, and egress source inventory |
+| `schemas/connectivity-plan-input.schema.json` | Source assessment, Azure connectivity/DNS/identity/egress target evidence, requirements, transition decisions, replay lineage, and program integration bindings |
+| `schemas/connectivity-plan.schema.json` | Deterministic execution-disabled dual-cloud connectivity, DNS, identity, and egress migration plan |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
@@ -65,6 +68,7 @@ node tests/startup-postgresql-migration-plan.mjs
 node tests/startup-postgresql-rehearsal-plan.mjs
 node tests/startup-postgresql-execution-plan.mjs
 node tests/startup-container-image-cicd-plan.mjs
+node tests/startup-connectivity-plan.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
 node tests/startup-cool-foundation-plan.mjs
@@ -244,3 +248,20 @@ Artifact Registry/GCR, and generic OCI sources paired with GitHub Actions, CodeB
 Azure DevOps. It produces a deterministic Azure Container Registry target and a guarded dual-publish, cutover, and rollback
 transition plan whose `executionEligible` and safety fields are always `false`/`none`. It never stores credentials,
 secret-bearing URLs, or repository contents, and never emits registry, build, cloud, or IaC commands.
+
+The dual-cloud connectivity, DNS, identity, and egress planner (`scripts/startup-connectivity-plan.mjs`) is a separate
+deterministic local JSON evaluator. It inventories source-cloud (AWS, GCP, or generic/on-prem) network CIDRs, address
+translation, gateways, routing and BGP/ASN/MTU, firewall/NSG/NVA policy intent, private access, DNS zones and resolvers,
+workload identity federation, and egress destinations and NAT/proxy references, against Azure ExpressRoute or VPN
+Gateway target evidence. It blocks on overlapping address space without an approved exact translation, asymmetric
+routing or broad default routes, non-redundant gateways, unacceptable BGP ASNs or incompatible MTU, implicit firewall
+policy, missing private endpoint/service endpoint evidence where required, DNS authority ambiguity or forwarding loops,
+unreachable resolvers, long-lived secrets or static credentials, unpinned OIDC issuer/audience/subject, mixed
+nonproduction/production environments, unbounded egress, missing telemetry/ownership/recovery/rollback evidence, and
+stale, tampered, mismatched, or replayed evidence. It produces a guarded phased connectivity cutover transition plan
+whose `executionEligible` and safety fields are always `false`/`none`, models IPv4 connectivity only, never stores
+credentials or secret-bearing URLs, and never emits network, DNS, identity, cloud, or IaC commands or creates tunnels.
+
+This SSLZ increment adds only planner scripts, schemas, examples, catalog entries, and validation wiring. It does not
+modify the `infra/bicep` or `infra/terraform` modules, parameters, or resources, so no Bicep/Terraform parity change is
+required for this or the container image/CI-CD planning increment.

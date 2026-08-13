@@ -414,6 +414,15 @@ function main() {
   const containerImageCicdPlanSchema = load(
     "agent/schemas/container-image-cicd-plan.schema.json",
   );
+  const connectivitySourceAssessmentSchema = load(
+    "agent/schemas/connectivity-source-assessment.schema.json",
+  );
+  const connectivityPlanInputSchema = load(
+    "agent/schemas/connectivity-plan-input.schema.json",
+  );
+  const connectivityPlanSchema = load(
+    "agent/schemas/connectivity-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -514,6 +523,9 @@ function main() {
   );
   const containerImageCicdPlanInput = load(
     "agent/examples/container-image-cicd-plan-input.json",
+  );
+  const connectivityPlanInput = load(
+    "agent/examples/connectivity-plan-input.json",
   );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
@@ -625,6 +637,15 @@ function main() {
   assert.equal(
     containerImageCicdPlanSchema.$id,
     "https://aka.ms/sslz/schemas/container-image-cicd-plan.schema.json",
+  );
+  assert.equal(
+    connectivitySourceAssessmentSchema.$id,
+    "https://aka.ms/sslz/schemas/connectivity-source-assessment.schema.json",
+  );
+  validateDocument(connectivityPlanInputSchema, connectivityPlanInput);
+  assert.equal(
+    connectivityPlanSchema.$id,
+    "https://aka.ms/sslz/schemas/connectivity-plan.schema.json",
   );
   assert.equal(
     iacPlanInputSchema.$id,
@@ -753,6 +774,7 @@ function main() {
     postgresqlExecutionLineage,
     postgresqlExecutionTrust,
     containerImageCicdPlanInput,
+    connectivityPlanInput,
     readyExample,
     blockedExample,
     providerRegistrationApproval,

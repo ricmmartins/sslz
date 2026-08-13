@@ -21,6 +21,7 @@ on:
       - 'scripts/startup-postgresql-rehearsal-plan.*'
       - 'scripts/startup-postgresql-execution-plan.*'
       - 'scripts/startup-container-image-cicd-plan.*'
+      - 'scripts/startup-connectivity-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -50,6 +51,7 @@ on:
       - 'scripts/startup-postgresql-rehearsal-plan.*'
       - 'scripts/startup-postgresql-execution-plan.*'
       - 'scripts/startup-container-image-cicd-plan.*'
+      - 'scripts/startup-connectivity-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -105,6 +107,9 @@ jobs:
 
       - name: Test read-only container image and CI/CD planning
         run: node tests/startup-container-image-cicd-plan.mjs
+
+      - name: Test read-only dual-cloud connectivity, DNS, identity, and egress planning
+        run: node tests/startup-connectivity-plan.mjs
 
       - name: Test Defender workspace placement
         run: node tests/defender-workspace-placement.mjs
