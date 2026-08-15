@@ -196,6 +196,9 @@ jobs:
       - name: Test compiled Container Apps cool profile guards
         run: az bicep build --file infra/bicep/cool-container-apps.bicep --stdout | node tests/cool-container-apps-bicep-template.mjs
 
+      - name: Test compiled SaaS private runtime path
+        run: az bicep build --file examples/saas-startup/main.bicep --stdout | node tests/saas-startup-bicep-template.mjs
+
   validate-terraform:
     name: Validate Terraform
     runs-on: ubuntu-latest
@@ -283,6 +286,10 @@ jobs:
                 echo "  ✓ OK"
               else
                 echo "  ✗ FAILED"
+                failed=1
+              fi
+              if ! terraform -chdir="$dir" test; then
+                echo "  ✗ TESTS FAILED"
                 failed=1
               fi
             fi

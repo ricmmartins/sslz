@@ -7,7 +7,7 @@ A multi-tenant SaaS application running on Azure Container Apps with Azure SQL.
 ```
 Internet
     │
-Azure Container Apps Environment
+Azure Container Apps Environment (public mode or VNet-injected private-data mode)
     ├── ca-<app>-api            (backend API)
     └── ca-<app>-web            (frontend SPA / SSR)
         │
@@ -94,7 +94,17 @@ Store secrets (SQL connection strings, Redis keys, API keys) in Key Vault and re
 
 ### Private Endpoints (Optional)
 
-By default, Azure SQL and Redis have `publicNetworkAccess: Enabled`. To enable network-level isolation through Private Endpoints:
+By default, Azure SQL and Redis have `publicNetworkAccess: Enabled`, and the Container Apps environment keeps its platform-managed network. This default public path is unchanged.
+
+Private mode is an atomic network configuration: the Container Apps environment is injected into a dedicated infrastructure subnet, SQL and Redis public access is disabled, both services receive Private Endpoints in a separate subnet, and both Private DNS zones are linked to the VNet containing those subnets.
+
+Before enabling private mode, prepare one VNet with:
+
+- A dedicated Container Apps infrastructure subnet with a single IPv4 prefix of `/27` or larger, delegated to `Microsoft.App/environments`. Size for expected replicas and zero-downtime revision changes; `/23` is a practical growth-oriented starting point.
+- A distinct, non-overlapping subnet for SQL and Redis Private Endpoints.
+- Address space that does not overlap the Container Apps reserved ranges documented in [Azure Container Apps virtual network configuration](https://learn.microsoft.com/azure/container-apps/custom-virtual-networks#subnet).
+
+The templates reject malformed or cross-VNet resource IDs, reuse of one subnet for both purposes, undersized or overlapping subnet prefixes, and Container Apps reserved-range overlap. Bicep also verifies the existing subnet delegation before creating the environment; Terraform relies on Azure's Container Apps resource validation for the delegation because the AzureRM subnet data source does not expose delegation metadata.
 
 **Bicep:**
 ```bash
@@ -103,18 +113,20 @@ az deployment group create \
   --template-file main.bicep \
   --parameters main.bicepparam \
   --parameters deployPrivateEndpoints=true \
-               privateEndpointSubnetId='/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-data' \
+               containerAppsInfrastructureSubnetId='/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-container-apps' \
+               privateEndpointSubnetId='/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-private-endpoints' \
                vnetId='/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>'
 ```
 
 **Terraform:**
 ```hcl
 deploy_private_endpoints   = true
-private_endpoint_subnet_id = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-data"
 vnet_id                    = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>"
+container_apps_infrastructure_subnet_id = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-container-apps"
+private_endpoint_subnet_id              = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-private-endpoints"
 ```
 
-This creates Private Endpoints and Private DNS Zones for both SQL Server (`privatelink.database.windows.net`) and Redis (`privatelink.redis.cache.windows.net`), linked to your VNet.
+The outputs include the Container Apps environment ID, both subnet IDs in private mode, and the two Private DNS zone IDs. These make the runtime path explicit for post-deployment checks without exposing credentials.
 
 ## Teardown
 

@@ -5,3 +5,11 @@ app_name            = "myapp"
 environment         = "prod"
 sql_admin_login     = "appadmin"  # Avoid common names like admin, sa, root
 sql_admin_password  = "CHANGE-ME-use-keyvault-in-production"
+
+# Private mode requires two distinct subnets in the same VNet:
+# - a dedicated /27-or-larger subnet delegated to Microsoft.App/environments
+# - a separate subnet for SQL and Redis Private Endpoints
+# deploy_private_endpoints                 = true
+# vnet_id                                 = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>"
+# container_apps_infrastructure_subnet_id = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-container-apps"
+# private_endpoint_subnet_id              = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-private-endpoints"

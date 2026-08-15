@@ -69,27 +69,62 @@ variable "sql_admin_password" {
 }
 
 variable "deploy_private_endpoints" {
-  description = "Deploy Private Endpoints for SQL and Redis (requires VNet with data subnet)"
+  description = "Deploy Private Endpoints for SQL and Redis and inject Container Apps into the same VNet"
   type        = bool
   default     = false
 }
 
-variable "private_endpoint_subnet_id" {
-  description = "Subnet resource ID for Private Endpoints (required when deploy_private_endpoints is true)"
+variable "container_apps_infrastructure_subnet_id" {
+  description = "Dedicated Container Apps infrastructure subnet resource ID; required in private mode, /27 or larger, and delegated to Microsoft.App/environments"
   type        = string
   default     = ""
+  validation {
+    condition = (
+      var.container_apps_infrastructure_subnet_id == "" ||
+      can(regex("^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/resourcegroups/[^/]+/providers/microsoft\\.network/virtualnetworks/[^/]+/subnets/[^/]+$", lower(var.container_apps_infrastructure_subnet_id)))
+    )
+    error_message = "container_apps_infrastructure_subnet_id must be an Azure subnet resource ID."
+  }
+}
+
+variable "private_endpoint_subnet_id" {
+  description = "Dedicated subnet resource ID for SQL and Redis Private Endpoints; required in private mode and distinct from the Container Apps subnet"
+  type        = string
+  default     = ""
+  validation {
+    condition = (
+      var.private_endpoint_subnet_id == "" ||
+      can(regex("^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/resourcegroups/[^/]+/providers/microsoft\\.network/virtualnetworks/[^/]+/subnets/[^/]+$", lower(var.private_endpoint_subnet_id)))
+    )
+    error_message = "private_endpoint_subnet_id must be an Azure subnet resource ID."
+  }
 }
 
 variable "vnet_id" {
-  description = "VNet resource ID for Private DNS Zone links (required when deploy_private_endpoints is true)"
+  description = "VNet resource ID shared by the Container Apps subnet, Private Endpoint subnet, and Private DNS Zone links"
   type        = string
   default     = ""
+  validation {
+    condition = (
+      var.vnet_id == "" ||
+      can(regex("^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/resourcegroups/[^/]+/providers/microsoft\\.network/virtualnetworks/[^/]+$", lower(var.vnet_id)))
+    )
+    error_message = "vnet_id must be an Azure virtual network resource ID."
+  }
 }
 
 check "private_endpoint_config" {
   assert {
-    condition     = !var.deploy_private_endpoints || (var.private_endpoint_subnet_id != "" && var.vnet_id != "")
-    error_message = "private_endpoint_subnet_id and vnet_id are required when deploy_private_endpoints is true."
+    condition = !var.deploy_private_endpoints || (
+      var.container_apps_infrastructure_subnet_id != "" &&
+      var.private_endpoint_subnet_id != "" &&
+      var.vnet_id != "" &&
+      try(split("/", lower(var.vnet_id))[2] == lower(var.subscription_id), false) &&
+      startswith(lower(var.container_apps_infrastructure_subnet_id), "${lower(var.vnet_id)}/subnets/") &&
+      startswith(lower(var.private_endpoint_subnet_id), "${lower(var.vnet_id)}/subnets/") &&
+      lower(var.container_apps_infrastructure_subnet_id) != lower(var.private_endpoint_subnet_id)
+    )
+    error_message = "Private endpoint mode requires distinct Container Apps and Private Endpoint subnet IDs beneath vnet_id."
   }
 }
 
