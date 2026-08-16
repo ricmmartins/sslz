@@ -125,6 +125,7 @@ function createInput({
   workspaceRegion = null,
   oneSubscription = false,
   aksIngress = null,
+  defenderForStorage = true,
 } = {}) {
   const planningInput = structuredClone(regionalInput);
   planningInput.startupInput.reliability.regionalMode = regionalMode;
@@ -174,7 +175,7 @@ function createInput({
         defenderForDatabases: true,
         defenderForKeyVault: true,
         defenderForResourceManager: true,
-        defenderForStorage: true,
+        defenderForStorage,
       },
       services: [
         {
@@ -521,6 +522,7 @@ function terraformVariables(environment = "prod") {
     enable_defender_for_containers: { value: false },
     enable_defender_for_databases: { value: true },
     enable_defender_for_key_vault: { value: true },
+    enable_defender_for_storage: { value: true },
     configure_defender_workspace: { value: true },
     defender_workspace_association_managed_externally: { value: false },
     defender_workspace_shared_subscription: { value: false },
@@ -966,6 +968,9 @@ function bicepCompiledTemplate() {
     outputs: Object.fromEntries(
       [
         "aksIngressNsgRules",
+        "defenderForStorageEnabled",
+        "defenderForStorageSubPlan",
+        "defenderForStorageTier",
         "logAnalyticsWorkspaceId",
         "logAnalyticsWorkspaceName",
         "resourceGroupMonitoring",
@@ -979,6 +984,14 @@ function bicepCompiledTemplate() {
     workspaceId: { type: "string", value: "fixture" },
     workspaceName: { type: "string", value: "fixture" },
   };
+  template.resources.defender.properties.template.outputs =
+    Object.fromEntries(
+      [
+        "defenderForStorageEnabled",
+        "defenderForStorageSubPlan",
+        "defenderForStorageTier",
+      ].map((name) => [name, { type: "string", value: "fixture" }]),
+    );
   template.resources.networking.properties.template.outputs =
     Object.fromEntries(
       [
@@ -1002,6 +1015,7 @@ function bicepCompiledParameters(
   associationManagedExternally = false,
   sharedSubscription = false,
   aksIngress = null,
+  defenderForStorage = true,
 ) {
   const ingress = aksIngress ?? {
     mode: "not-applicable",
@@ -1037,6 +1051,7 @@ function bicepCompiledParameters(
         enableDefenderForContainers: false,
         enableDefenderForDatabases: true,
         enableDefenderForKeyVault: true,
+        enableDefenderForStorage: defenderForStorage,
         configureDefenderWorkspace: !associationManagedExternally,
         defenderWorkspaceAssociationManagedExternally:
           associationManagedExternally,
@@ -1072,6 +1087,7 @@ function mockRuntime({
   aksIngress = null,
   workspaceRetentionInDays = 90,
   workspaceDailyQuotaGb = 5,
+  defenderForStorage = true,
 } = {}) {
   const calls = [];
   let budgetReads = 0;
@@ -1127,6 +1143,7 @@ function mockRuntime({
               associationManagedExternally,
               workspaceId !== null,
               aksIngress,
+              defenderForStorage,
             ),
           ),
           templateJson: JSON.stringify(template),
@@ -1397,12 +1414,19 @@ function mockRuntime({
         OpenSourceRelationalDatabases: ["Standard", null],
         KeyVaults: ["Standard", null],
         Arm: ["Standard", null],
-        StorageAccounts: [
-          "Standard",
-          unhealthyCheck === "storage-subplan"
-            ? "DefenderForStorage"
-            : "DefenderForStorageV2",
-        ],
+        StorageAccounts: defenderForStorage
+          ? [
+              "Standard",
+              unhealthyCheck === "storage-subplan"
+                ? "DefenderForStorage"
+                : "DefenderForStorageV2",
+            ]
+          : [
+              "Free",
+              unhealthyCheck === "storage-subplan"
+                ? "DefenderForStorageV2"
+                : null,
+            ],
       };
       const name = args[args.indexOf("--name") + 1];
       const [pricingTier, subPlan] = tiers[name] ?? [];
@@ -1768,6 +1792,41 @@ try {
     runner: previewRuntime.runner,
   });
   validateDocument(manifestSchema, bicepManifest);
+  const { plan: storageOptOutPlan, planPath: storageOptOutPlanPath } =
+    writeReviewedPlan(
+      createInput({ defenderForStorage: false }),
+      "storage-defender-opt-out",
+    );
+  const storageOptOutManifest = buildDeploymentManifest(storageOptOutPlan, {
+    provider: "bicep",
+    environment: "prod",
+    planPath: storageOptOutPlanPath,
+    evaluatedAt,
+    runner: mockRuntime({ defenderForStorage: false }).runner,
+  });
+  validateDocument(manifestSchema, storageOptOutManifest);
+  assert.equal(
+    storageOptOutPlan.decisionModel.paidPlans.defenderForStorage,
+    false,
+  );
+  const tamperedStorageOptInPlan = structuredClone(storageOptOutPlan);
+  tamperedStorageOptInPlan.decisionModel.paidPlans.defenderForStorage = true;
+  tamperedStorageOptInPlan.planDigest = planDigest(
+    tamperedStorageOptInPlan.decisionModel,
+  );
+  tamperedStorageOptInPlan.approval.planDigest =
+    tamperedStorageOptInPlan.planDigest;
+  assert.throws(
+    () =>
+      buildDeploymentManifest(tamperedStorageOptInPlan, {
+        provider: "bicep",
+        environment: "prod",
+        planPath: storageOptOutPlanPath,
+        evaluatedAt,
+        runner: mockRuntime({ defenderForStorage: true }).runner,
+      }),
+    (error) => error.code === "deployment.defender.selection-mismatch",
+  );
   const { plan: aksPlan, planPath: aksPlanPath } = writeReviewedPlan(
     createInput({ aksIngress: publicAksIngress }),
     "aks-ingress-postcheck",
@@ -2832,6 +2891,41 @@ try {
       call.args[2] === "create",
   );
   assert.equal(bicepDeployCalls.length, 1);
+
+  const storageOptOutApproval = createApproval(storageOptOutManifest);
+  const storageOptOutSuccess = apply(
+    storageOptOutPlan,
+    storageOptOutPlanPath,
+    storageOptOutManifest,
+    resign(storageOptOutApproval, { nonce: "ab".repeat(32) }),
+    mockRuntime({ defenderForStorage: false }),
+    "storage-opt-out-success",
+  );
+  assert.equal(
+    storageOptOutSuccess.status,
+    "succeeded",
+    JSON.stringify(storageOptOutSuccess, null, 2),
+  );
+  assert.equal(storageOptOutSuccess.verification.healthy, true);
+  const retainedStorageSubplanFailure = apply(
+    storageOptOutPlan,
+    storageOptOutPlanPath,
+    storageOptOutManifest,
+    resign(storageOptOutApproval, { nonce: "ac".repeat(32) }),
+    mockRuntime({
+      defenderForStorage: false,
+      unhealthyCheck: "storage-subplan",
+    }),
+    "storage-opt-out-retained-subplan",
+  );
+  assert.equal(
+    retainedStorageSubplanFailure.code,
+    "deployment.validation.failed",
+  );
+  assert.equal(
+    retainedStorageSubplanFailure.verification.workloadDeploymentAllowed,
+    false,
+  );
 
   const existingWorkspaceId =
     `/subscriptions/${prod}/resourceGroups/rg-shared-monitoring/providers/` +

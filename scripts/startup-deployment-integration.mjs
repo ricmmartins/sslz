@@ -55,6 +55,7 @@ import {
   terraformExecutable,
   verifyTerraformProvenance,
 } from "./terraform-plan-provenance.mjs";
+import { digest as defenderWorkspaceDigest } from "./defender-workspace-placement.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
 import {
   assertFreshRegionalBindings,
@@ -78,6 +79,14 @@ const UUID =
 const LOG_ANALYTICS_WORKSPACE_ID =
   /^\/subscriptions\/([0-9a-f-]{36})\/resourcegroups\/([^/]+)\/providers\/microsoft\.operationalinsights\/workspaces\/([^/]+)$/i;
 const DIGEST = /^sha256:[0-9a-f]{64}$/;
+const EXPECTED_PAID_PLAN_KEYS = [
+  "defenderForContainers",
+  "defenderForDatabases",
+  "defenderForKeyVault",
+  "defenderForResourceManager",
+  "defenderForServers",
+  "defenderForStorage",
+];
 const SAFE_COMMAND_TOKEN = /^[A-Za-z0-9._:/={}(),@-]+$/;
 const SIGNING_DOMAIN = "sslz-deployment-approval-v1";
 const TERRAFORM_CLI_CONFIG_PATH = resolve(
@@ -260,6 +269,9 @@ const EXPECTED_BICEP_OUTPUTS = new Map([
     "root",
     [
       "aksIngressNsgRules",
+      "defenderForStorageEnabled",
+      "defenderForStorageSubPlan",
+      "defenderForStorageTier",
       "logAnalyticsWorkspaceId",
       "logAnalyticsWorkspaceName",
       "resourceGroupMonitoring",
@@ -282,13 +294,23 @@ const EXPECTED_BICEP_OUTPUTS = new Map([
       "vnetName",
     ],
   ],
-  ["defender", []],
+  [
+    "defender",
+    [
+      "defenderForStorageEnabled",
+      "defenderForStorageSubPlan",
+      "defenderForStorageTier",
+    ],
+  ],
   ["budgets", []],
   ["policies", []],
 ]);
 const EXISTING_WORKSPACE_RUNTIME_REFERENCE =
   "format('{0}{1}{2}{3}{4}{5}{6}{7}{8}', parameters('existingLogAnalyticsWorkspaceId'), variables('workspaceRegionGuard'), variables('primaryRegionPolicyGuard'), variables('workspacePrimaryGuard'), variables('workspaceReferenceGuard'), variables('workspaceSelectionGuard'), variables('externalWorkspaceReferenceGuard'), variables('sharedWorkspaceOwnershipGuard'), if(or(not(variables('useExistingLogAnalyticsWorkspace')), equals(toLower(reference('existingLogAnalyticsWorkspace', '2023-09-01', 'full').location), toLower(parameters('logAnalyticsWorkspaceLocation')))), '', fail('The existing Log Analytics workspace actual location must match logAnalyticsWorkspaceLocation.')))";
 const EXPECTED_BICEP_REFERENCES = new Set([
+  "[reference('defender').outputs.defenderForStorageEnabled.value]",
+  "[tryGet(tryGet(reference('defender').outputs, 'defenderForStorageSubPlan'), 'value')]",
+  "[reference('defender').outputs.defenderForStorageTier.value]",
   "[if(parameters('deployNetworking'), reference('networking').outputs.vnetId.value, '')]",
   "[if(parameters('deployNetworking'), reference('networking').outputs.vnetName.value, '')]",
   "[if(parameters('deployNetworking'), reference('networking').outputs.aksIngressNsgRules.value, createArray())]",
@@ -844,6 +866,29 @@ function validateReviewedPlan(plan, evaluatedAt) {
   }
   const readinessWorkspace =
     plan.readinessEvidence.codeEvidence.defenderWorkspacePlacement;
+  const paidPlans = plan.decisionModel.paidPlans;
+  if (
+    !paidPlans ||
+    typeof paidPlans !== "object" ||
+    Array.isArray(paidPlans) ||
+    canonicalJson(Object.keys(paidPlans).sort()) !==
+      canonicalJson(EXPECTED_PAID_PLAN_KEYS) ||
+    Object.values(paidPlans).some((enabled) => typeof enabled !== "boolean")
+  ) {
+    fail(
+      "deployment.defender.selection-invalid",
+      "The reviewed Defender paid-plan selection must contain exactly the supported boolean decisions.",
+    );
+  }
+  if (
+    defenderWorkspaceDigest(paidPlans) !==
+    readinessWorkspace.paidPlanSelectionDigest
+  ) {
+    fail(
+      "deployment.defender.selection-mismatch",
+      "The reviewed Defender paid-plan selection differs from readiness evidence.",
+    );
+  }
   const expectedWorkspace = {
     decisionId: readinessWorkspace.decisionId,
     decisionDigest: readinessWorkspace.decisionDigest,
@@ -933,13 +978,10 @@ function validateReviewedPlan(plan, evaluatedAt) {
       "Phase 6 supports only the reviewed primary single-region baseline.",
     );
   }
-  if (
-    plan.decisionModel.paidPlans?.defenderForResourceManager !== true ||
-    plan.decisionModel.paidPlans?.defenderForStorage !== true
-  ) {
+  if (plan.decisionModel.paidPlans?.defenderForResourceManager !== true) {
     fail(
       "deployment.defender.unsupported",
-      "The current SSLZ roots require the reviewed Resource Manager and Storage Defender selections.",
+      "The current SSLZ roots require the reviewed Resource Manager Defender selection.",
     );
   }
 }
@@ -1896,6 +1938,7 @@ function expectedBicepParameters(plan, selection) {
     enableDefenderForContainers: paidPlans.defenderForContainers,
     enableDefenderForDatabases: paidPlans.defenderForDatabases,
     enableDefenderForKeyVault: paidPlans.defenderForKeyVault,
+    enableDefenderForStorage: paidPlans.defenderForStorage,
     configureDefenderWorkspace: managesWorkspaceAssociation,
     defenderWorkspaceAssociationManagedExternally:
       workspace.required && !managesWorkspaceAssociation,
@@ -2126,6 +2169,7 @@ function expectedTerraformVariables(plan, selection) {
     enable_defender_for_containers: paidPlans.defenderForContainers,
     enable_defender_for_databases: paidPlans.defenderForDatabases,
     enable_defender_for_key_vault: paidPlans.defenderForKeyVault,
+    enable_defender_for_storage: paidPlans.defenderForStorage,
     configure_defender_workspace: managesWorkspaceAssociation,
     defender_workspace_association_managed_externally:
       workspace.required && !managesWorkspaceAssociation,
@@ -4550,7 +4594,9 @@ function postDeploymentChecks(manifest, runner) {
       : "Free",
     KeyVaults: decision.paidPlans.defenderForKeyVault ? "Standard" : "Free",
     Arm: "Standard",
-    StorageAccounts: "Standard",
+    StorageAccounts: decision.paidPlans.defenderForStorage
+      ? "Standard"
+      : "Free",
   };
   const defenderMap = new Map(
     Object.keys(expectedDefender).map((name) => [
@@ -4577,8 +4623,10 @@ function postDeploymentChecks(manifest, runner) {
         tier !== "Standard" ||
         defenderMap.get(name)?.subPlan === "P2") &&
       (name !== "StorageAccounts" ||
-        tier !== "Standard" ||
-        defenderMap.get(name)?.subPlan === "DefenderForStorageV2"),
+        (tier === "Standard"
+          ? defenderMap.get(name)?.subPlan === "DefenderForStorageV2"
+          : defenderMap.get(name)?.subPlan == null ||
+            defenderMap.get(name)?.subPlan === "")),
   );
   const defenderWorkspaceSetting = decision.paidPlans.defenderForServers
     ? readResult(runner, [

@@ -249,6 +249,7 @@ module "security" {
   enable_defender_for_containers = var.enable_defender_for_containers
   enable_defender_for_databases  = local.enable_defender_for_databases
   enable_defender_for_key_vault  = var.enable_defender_for_key_vault
+  enable_defender_for_storage    = var.enable_defender_for_storage
 }
 
 resource "azurerm_security_center_workspace" "defender" {

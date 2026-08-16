@@ -13,6 +13,7 @@ param budgetStartDate = '2026-03-01T00:00:00Z' // set to 1st of your deployment 
 param enableDefenderForServers = false
 param enableDefenderForContainers = false
 param enableDefenderForDatabases = false
+param enableDefenderForStorage = false
 param securityContactEmail = 'security@mycompany.com'
 param allowedLocations = [
   'eastus2'

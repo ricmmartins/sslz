@@ -17,6 +17,9 @@ param enableDefenderForDatabases bool
 @description('Enable Defender for Key Vault (recommended, low cost)')
 param enableDefenderForKeyVault bool = true
 
+@description('Enable the paid Defender for Storage V2 plan. Disabled by default for startup cost control.')
+param enableDefenderForStorage bool = false
+
 @description('Email address for Defender for Cloud security alerts')
 param securityContactEmail string
 
@@ -103,13 +106,17 @@ resource defenderArm 'Microsoft.Security/pricings@2024-01-01' = {
   }
 }
 
-// Defender for Storage — detect malicious uploads and anomalous access
+// Defender for Storage V2 — opt in only when the workload justifies the added cost.
 resource defenderStorage 'Microsoft.Security/pricings@2024-01-01' = {
   name: 'StorageAccounts'
-  properties: {
-    pricingTier: 'Standard'
-    subPlan: 'DefenderForStorageV2'
-  }
+  properties: enableDefenderForStorage
+    ? {
+        pricingTier: 'Standard'
+        subPlan: 'DefenderForStorageV2'
+      }
+    : {
+        pricingTier: 'Free'
+      }
 }
 
 // ============================================================================
@@ -133,3 +140,10 @@ resource securityContact 'Microsoft.Security/securityContacts@2023-12-01-preview
     ]
   }
 }
+
+@description('Whether the paid Defender for Storage V2 plan is enabled.')
+output defenderForStorageEnabled bool = enableDefenderForStorage
+@description('Configured Defender for Storage pricing tier.')
+output defenderForStorageTier string = enableDefenderForStorage ? 'Standard' : 'Free'
+@description('Configured Defender for Storage subplan; null when disabled.')
+output defenderForStorageSubPlan string? = enableDefenderForStorage ? 'DefenderForStorageV2' : null

@@ -26,3 +26,9 @@ variable "enable_defender_for_key_vault" {
   type        = bool
   default     = true
 }
+
+variable "enable_defender_for_storage" {
+  description = "Enable the paid Defender for Storage V2 plan. Disabled by default for startup cost control."
+  type        = bool
+  default     = false
+}

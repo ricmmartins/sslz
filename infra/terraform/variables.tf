@@ -245,6 +245,12 @@ variable "enable_defender_for_key_vault" {
   default     = true
 }
 
+variable "enable_defender_for_storage" {
+  description = "Enable the paid Defender for Storage V2 plan. Disabled by default for startup cost control."
+  type        = bool
+  default     = false
+}
+
 variable "allowed_locations" {
   description = "Allowed Azure regions for resource deployment (defaults to the primary location)"
   type        = list(string)

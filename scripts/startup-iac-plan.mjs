@@ -1770,6 +1770,7 @@ function parameterValues(
     enableDefenderForContainers: decisionModel.paidPlans.defenderForContainers,
     enableDefenderForDatabases: decisionModel.paidPlans.defenderForDatabases,
     enableDefenderForKeyVault: decisionModel.paidPlans.defenderForKeyVault,
+    enableDefenderForStorage: decisionModel.paidPlans.defenderForStorage,
     configureDefenderWorkspace: managesWorkspaceAssociation,
     defenderWorkspaceAssociationManagedExternally:
       decisionModel.defenderWorkspace.required && !managesWorkspaceAssociation,

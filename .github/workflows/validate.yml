@@ -193,6 +193,9 @@ jobs:
       - name: Test compiled Defender workspace placement
         run: node tests/defender-workspace-bicep-template.mjs
 
+      - name: Test compiled Defender for Storage opt-in
+        run: node tests/defender-storage-bicep-template.mjs
+
       - name: Test compiled Container Apps cool profile guards
         run: az bicep build --file infra/bicep/cool-container-apps.bicep --stdout | node tests/cool-container-apps-bicep-template.mjs
 

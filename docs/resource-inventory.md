@@ -165,12 +165,14 @@ All plans are `Microsoft.Security/pricings` resources at subscription scope.
 | `OpenSourceRelationalDatabases` | PostgreSQL, MySQL, MariaDB | Standard | Free | — |
 | `KeyVaults` | Key Vault | Standard | Standard | — |
 | `Arm` | ARM control plane | Standard | Standard | — |
-| `StorageAccounts` | Storage | Standard | Standard | DefenderForStorageV2 |
+| `StorageAccounts` | Storage | Free | Free | DefenderForStorageV2 only when explicitly enabled |
 
 > **Notes:**
 > - Defender for Servers, Databases are enabled by default in prod, disabled in nonprod.
 > - Defender for Containers defaults to disabled; enable via parameter if running AKS.
 > - Defender for Key Vault and ARM are always Standard (low cost).
+> - Defender for Storage V2 defaults to Free in both environments. Explicitly set `enableDefenderForStorage` (Bicep)
+>   or `enable_defender_for_storage` (Terraform) to opt into Standard after reviewing current pricing.
 
 When Defender for Servers is enabled, `Microsoft.Security/workspaceSettings/default` (Terraform:
 `azurerm_security_center_workspace.default`) explicitly associates the subscription with the effective Log Analytics

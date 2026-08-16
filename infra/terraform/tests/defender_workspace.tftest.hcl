@@ -64,6 +64,43 @@ run "explicit_new_workspace" {
     error_message = "The new workspace resource group must use the selected regional plan."
   }
 
+  assert {
+    condition     = output.defender_for_storage_tier == "Free"
+    error_message = "Defender for Storage must default to the non-billable Free tier."
+  }
+
+  assert {
+    condition     = output.defender_for_storage_subplan == null
+    error_message = "The disabled Defender for Storage plan must not emit a paid subplan."
+  }
+
+  assert {
+    condition     = output.defender_for_storage_enabled == false
+    error_message = "The root output must report the default-off Defender for Storage decision."
+  }
+}
+
+run "explicit_storage_defender_opt_in" {
+  command = plan
+
+  variables {
+    enable_defender_for_storage = true
+  }
+
+  assert {
+    condition     = output.defender_for_storage_tier == "Standard"
+    error_message = "Explicit opt-in must select the paid Defender for Storage tier."
+  }
+
+  assert {
+    condition     = output.defender_for_storage_subplan == "DefenderForStorageV2"
+    error_message = "Explicit opt-in must select DefenderForStorageV2."
+  }
+
+  assert {
+    condition     = output.defender_for_storage_enabled == true
+    error_message = "The root output must report the explicit Defender for Storage opt-in."
+  }
 }
 
 run "approved_existing_workspace" {

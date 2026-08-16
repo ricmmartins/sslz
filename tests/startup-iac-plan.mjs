@@ -88,6 +88,7 @@ assert.match(
 function createInput({
   regionalMode = "cool-infrastructure",
   defenderForServers = true,
+  defenderForStorage = true,
   existingWorkspaceId = null,
   workspaceRegion = null,
   oneSubscription = false,
@@ -149,7 +150,7 @@ function createInput({
         defenderForDatabases: true,
         defenderForKeyVault: true,
         defenderForResourceManager: true,
-        defenderForStorage: true,
+        defenderForStorage,
       },
       services: [
         {
@@ -714,8 +715,48 @@ try {
     ).subscriptionId,
   );
   assert.equal(bicepParameters.configureDefenderWorkspace, true);
+  assert.equal(bicepParameters.enableDefenderForStorage, true);
   assert.equal(bicepParameters.logAnalyticsWorkspaceLocation, "eastus2");
   assert.equal(bicepParameters.existingLogAnalyticsWorkspaceId, "");
+
+  const storageOptOutPlan = generateIacPlan(
+    createInput({ defenderForStorage: false }),
+    {
+      providers: ["bicep", "terraform"],
+      outputPath: `${outputRelative}/storage-opt-out`,
+      previewFixtures: successFixture,
+    },
+  );
+  const storageOptOutBicep = parseBicepParameters(
+    readFileSync(
+      resolve(
+        root,
+        storageOptOutPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "bicep" &&
+            artifact.environment === "prod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  const storageOptOutTerraform = parseTerraformVariables(
+    readFileSync(
+      resolve(
+        root,
+        storageOptOutPlan.artifacts.find(
+          (artifact) =>
+            artifact.provider === "terraform" &&
+            artifact.environment === "prod" &&
+            artifact.regionRole === "primary",
+        ).path,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(storageOptOutBicep.enableDefenderForStorage, false);
+  assert.equal(storageOptOutTerraform.enable_defender_for_storage, false);
 
   const existingWorkspaceId =
     `/subscriptions/${terraformSubscriptionId}` +
