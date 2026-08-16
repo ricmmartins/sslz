@@ -27,6 +27,9 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/connectivity-source-assessment.schema.json` | Non-secret dual-cloud private connectivity, DNS, workload identity, and egress source inventory |
 | `schemas/connectivity-plan-input.schema.json` | Source assessment, Azure connectivity/DNS/identity/egress target evidence, requirements, transition decisions, replay lineage, and program integration bindings |
 | `schemas/connectivity-plan.schema.json` | Deterministic execution-disabled dual-cloud connectivity, DNS, identity, and egress migration plan |
+| `schemas/program-lineage-input.schema.json` | Canonical baseline identities plus exact PostgreSQL, container, and connectivity planner artifacts |
+| `schemas/program-lineage-envelope.schema.json` | Deterministic execution-disabled cross-program identity, stage chain, readiness separation, and authority boundary |
+| `schemas/program-lineage-trusted-digests.schema.json` | Externally protected PostgreSQL planner trust arguments supplied outside the artifact bundle |
 | `schemas/iac-plan-input.schema.json` | Profile, regional recommendation, target, and deployment decisions |
 | `schemas/iac-plan-input-v2.schema.json` | Phase 6-capable IaC input requiring the exact Terraform backend subscription |
 | `schemas/iac-plan-input-v3.schema.json` | Approval-capable IaC input requiring bound readiness evidence |
@@ -40,7 +43,7 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 | `schemas/deployment-execution-manifest.schema.json` | Immutable provider, target, artifact, preview, and command binding |
 | `schemas/deployment-approval.schema.json` | Trusted signed approval for one exact platform deployment |
 | `schemas/deployment-result.schema.json` | Sanitized deployment and post-validation audit result |
-| `schemas/greenfield-journey-report.schema.json` | Sanitized validation-only founder journey stages, bindings, blockers, and negative cases |
+| `schemas/greenfield-journey-report.schema.json` | Sanitized v2 validation-only founder journey with required program-lineage identity and separated readiness |
 | `checks/check-catalog.json` | Stable check IDs and official documentation |
 | `profiles/` | Versioned compute and extension decision data |
 | `examples/` | Sanitized ready, blocked, and input examples |
@@ -69,6 +72,7 @@ node tests/startup-postgresql-rehearsal-plan.mjs
 node tests/startup-postgresql-execution-plan.mjs
 node tests/startup-container-image-cicd-plan.mjs
 node tests/startup-connectivity-plan.mjs
+node tests/startup-program-lineage.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
 node tests/startup-cool-foundation-plan.mjs
@@ -261,6 +265,25 @@ nonproduction/production environments, unbounded egress, missing telemetry/owner
 stale, tampered, mismatched, or replayed evidence. It produces a guarded phased connectivity cutover transition plan
 whose `executionEligible` and safety fields are always `false`/`none`, models IPv4 connectivity only, never stores
 credentials or secret-bearing URLs, and never emits network, DNS, identity, cloud, or IaC commands or creates tunnels.
+
+The program-lineage builder (`scripts/startup-program-lineage.mjs`) is a local contract validator, not an orchestrator
+for live work. Its v1 envelope chains exact canonical digests for the baseline workload, region, PostgreSQL decision,
+IaC plan, readiness evidence, deployment manifest, and signed deployment approval through the real PostgreSQL migration,
+rehearsal, execution-contract, container image/CI/CD, and connectivity planner outputs. Every stage remains
+`executionEnabled`, `executionEligible`, and `executionAllowed` false and names a distinct future authority. The Phase 5/6
+approval remains scoped to `greenfield-platform-deployment-only`; it does not authorize database writes, image promotion,
+DNS, network, identity, egress, cutover, rollback, or failback.
+
+The builder reruns every planner and compares its complete canonical output, reevaluates evidence expiry at the envelope
+generation time, and rejects self-rehashed substitutions. Attempt 2 and later require an independently supplied
+`--trusted-previous-envelope` whose exact program, lineage, history, ordinal, nonce, and digest are appended to the new
+attempt. PostgreSQL planner trust arguments must be supplied separately with `--trusted-planner-digests`; they are never
+derived from the bundled artifacts. Replay and trusted-digest storage remain the responsibility of a protected external
+executor; the lineage builder does not create or update them.
+
+The canonical greenfield report schema is now v2. Older v1 reports fail closed because they do not contain the required
+program envelope and readiness separation. The report and envelope identify evidence as `synthetic` or `live`; the
+checked-in journey uses sanitized synthetic fixtures exclusively.
 
 This SSLZ increment adds only planner scripts, schemas, examples, catalog entries, and validation wiring. It does not
 modify the `infra/bicep` or `infra/terraform` modules, parameters, or resources, so no Bicep/Terraform parity change is

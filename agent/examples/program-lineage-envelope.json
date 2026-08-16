@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0.0",
+  "programId": "program.synthetic-startup-lineage.v1",
+  "generatedAt": "2026-08-12T12:50:00.000Z",
+  "mode": "validation-only",
+  "evidenceMode": "synthetic",
+  "status": "ready-for-human-review",
+  "readiness": {
+    "baselineGreenfieldDeployment": {
+      "status": "ready",
+      "evidenceMode": "synthetic",
+      "authority": "signed-baseline-deployment-approval-only"
+    },
+    "migrationAndDualCloudPlanning": {
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "executionAuthority": "not-granted"
+    }
+  },
+  "authorityBoundary": {
+    "baselineApprovalScope": "greenfield-platform-deployment-only",
+    "excludedAuthorities": [
+      "container-image-promotion",
+      "database-migration-writes",
+      "dns-changes",
+      "dual-cloud-network-operations",
+      "egress-changes",
+      "identity-changes",
+      "migration-cutover",
+      "migration-rollback-or-failback"
+    ],
+    "futureApprovalRequired": true
+  },
+  "baseline": {
+    "journeyId": "synthetic-greenfield-founder-v2",
+    "evidenceMode": "synthetic",
+    "target": {
+      "environment": "prod",
+      "environmentReference": "environment.production.orders",
+      "region": "centralus",
+      "targetReference": "target.postgresql.orders.flexible"
+    },
+    "bindings": {
+      "workloadProfilePlanDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a",
+      "regionalPlanDigest": "sha256:4c30d0bca32830228412969a31e662c9c577bc6f903be1cc30ae723834785af2",
+      "postgresqlDecisionDigest": "sha256:c7880cfbd0f655bfffb210409ac62eff4a15c248c98533aaf6094be99b777a77",
+      "iacPlanDigest": "sha256:4d853262c3b5a8be2d73249e5572bb83134d550e9e620a24e910b3da36d70ecc",
+      "readinessEvidenceDigest": "sha256:c73ef25d3ebd4cea602fcc35c6f263d9641ca489744f863d3326b80d6a7d185f",
+      "deploymentManifestDigest": "sha256:0d5b8e4f5db3c96cfdb1c6c768b5c2be24ce4adae278cff8bff6be2864925b6a",
+      "deploymentApprovalDigest": "sha256:2c766019e5c4d17d547d0b5cb08f99eaed76a36d275af39f868f54639da9fec4"
+    },
+    "bindingDigest": "sha256:2756b4d16e1686b60c6f3d19d51a83e27d0c9c1f25d2c61f587cb2b2321d87f5"
+  },
+  "lineage": {
+    "lineageId": "lineage.synthetic-startup-program",
+    "attemptOrdinal": 1,
+    "attemptNonce": "nonce.synthetic-startup-program.0001",
+    "acceptedAttempts": [],
+    "acceptedAttemptCount": 0,
+    "lineageDigest": "sha256:994ba0bd5075d9d95aae7efb9b68890dddf7fdfbe0ea5b36b19f20434425f307"
+  },
+  "checks": [
+    {
+      "id": "program.lineage.artifacts-complete",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.digests-current",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.evidence-current",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.stage-order-valid",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.replay-protected",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.target-bound",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.lineage-bound",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.cross-program-bound",
+      "classification": "pass"
+    },
+    {
+      "id": "program.lineage.authority-separated",
+      "classification": "pass"
+    }
+  ],
+  "stages": [
+    {
+      "id": "postgresql-migration-planning",
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "artifactDigest": "sha256:8e3634e2684e8de5de7909ff7e6536de1aec3e0cd0568fe0782530b501fecf66",
+      "predecessorDigest": "sha256:2756b4d16e1686b60c6f3d19d51a83e27d0c9c1f25d2c61f587cb2b2321d87f5",
+      "executionEnabled": false,
+      "executionEligible": false,
+      "executionAllowed": false,
+      "requiredFutureAuthority": "postgresql-migration-stage-approvals",
+      "stageDigest": "sha256:be869a0db62d54bdac608e5ded708fd70730a30313220d3a41f1e90cdbc06ef9"
+    },
+    {
+      "id": "postgresql-rehearsal-planning",
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "artifactDigest": "sha256:dae31ac3d6ef3391feeaf7079bf11278384079e9295f3118945de99183543e4b",
+      "predecessorDigest": "sha256:be869a0db62d54bdac608e5ded708fd70730a30313220d3a41f1e90cdbc06ef9",
+      "executionEnabled": false,
+      "executionEligible": false,
+      "executionAllowed": false,
+      "requiredFutureAuthority": "postgresql-rehearsal-execution-approval",
+      "stageDigest": "sha256:6a25b13eb2a55cd49895cb06deef03869d7ff41279e8642afa9a424f576bf7a2"
+    },
+    {
+      "id": "postgresql-execution-contract-planning",
+      "status": "future-authorities-required",
+      "evidenceMode": "synthetic",
+      "artifactDigest": "sha256:1a1ffac25a557429137378fb24549d1a918c99991805a06437d1983093169935",
+      "predecessorDigest": "sha256:6a25b13eb2a55cd49895cb06deef03869d7ff41279e8642afa9a424f576bf7a2",
+      "executionEnabled": false,
+      "executionEligible": false,
+      "executionAllowed": false,
+      "requiredFutureAuthority": "postgresql-stage-specific-signed-authorities",
+      "stageDigest": "sha256:b4a1138c57773e347c2450da22d9b676672c3a167084b3cd77d05974f6b6b1e3"
+    },
+    {
+      "id": "container-image-cicd-planning",
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "artifactDigest": "sha256:734ac28c9609ab59b8843c862da3bca9f16099698f5e4c29778e6e6d50cce964",
+      "predecessorDigest": "sha256:b4a1138c57773e347c2450da22d9b676672c3a167084b3cd77d05974f6b6b1e3",
+      "executionEnabled": false,
+      "executionEligible": false,
+      "executionAllowed": false,
+      "requiredFutureAuthority": "container-promotion-and-pipeline-authorities",
+      "stageDigest": "sha256:29547b7328d5b11a1a438639ca1954412e382b76bbfcd81823a02c5b42d3151f"
+    },
+    {
+      "id": "dual-cloud-connectivity-planning",
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "artifactDigest": "sha256:66c10f23b2b23d1efffe0c5d1566f276f9f86b5e2ead2d3ddcc406200e5a34ef",
+      "predecessorDigest": "sha256:29547b7328d5b11a1a438639ca1954412e382b76bbfcd81823a02c5b42d3151f",
+      "executionEnabled": false,
+      "executionEligible": false,
+      "executionAllowed": false,
+      "requiredFutureAuthority": "connectivity-dns-identity-egress-authorities",
+      "stageDigest": "sha256:3618593348bff824d1dca8011e457b10a2e26be05d3077b1845ea017213cc926"
+    }
+  ],
+  "safety": {
+    "executionEnabled": false,
+    "executionEligible": false,
+    "executionAllowed": false,
+    "networkCalls": "none",
+    "cloudOperations": "none",
+    "databaseOperations": "none",
+    "imageOperations": "none",
+    "dnsOperations": "none",
+    "identityOperations": "none",
+    "iacOperations": "none",
+    "generatedCommands": "none",
+    "generatedArtifacts": "stdout-only"
+  },
+  "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a",
+  "envelopeDigest": "sha256:80d4da21c71c2911ca83b9d867666978734a4ac64e342ccb134e27a3fbe0659d"
+}

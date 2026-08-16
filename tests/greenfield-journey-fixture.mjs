@@ -51,6 +51,10 @@ import {
   recordCleanupOutcome,
   replanRegionalAttempt,
 } from "../scripts/regional-attempt.mjs";
+import {
+  PROGRAM_GENERATED_AT,
+  runProgramLineageJourney,
+} from "./program-lineage-fixture.mjs";
 import { buildReadinessEvidence } from "./readiness-fixture.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -1425,10 +1429,39 @@ export async function runGreenfieldJourney() {
     ),
   ];
 
+  const programLineageJourney = runProgramLineageJourney(
+    {
+      journeyId: "synthetic-greenfield-founder-v2",
+      evidenceMode: "synthetic",
+      target: {
+        environment: "prod",
+        environmentReference: "environment.production.orders",
+        region: productionManifest.execution.region,
+        targetReference: "target.postgresql.orders.flexible",
+      },
+      bindings: {
+        workloadProfilePlanDigest: digest(workload),
+        regionalPlanDigest: digest(regional),
+        postgresqlDecisionDigest: postgresql.decisionDigest,
+        iacPlanDigest: iac.planDigest,
+        readinessEvidenceDigest: productionManifest.readinessEvidence.digest,
+        deploymentManifestDigest: productionManifest.manifestDigest,
+        deploymentApprovalDigest: productionApprovalDigest,
+      },
+    },
+    { postgresqlRegionalPlanInput: postgresqlInput },
+  );
+  negatives.push(...programLineageJourney.negativeJourneys);
+  writeFileSync(
+    join(generatedRoot, "program-lineage-envelope.json"),
+    `${JSON.stringify(programLineageJourney.envelope, null, 2)}\n`,
+    "utf8",
+  );
+
   const report = {
-    schemaVersion: "1.0.0",
-    journeyId: "synthetic-greenfield-founder-v1",
-    generatedAt: fixedNow,
+    schemaVersion: "2.0.0",
+    journeyId: "synthetic-greenfield-founder-v2",
+    generatedAt: PROGRAM_GENERATED_AT,
     mode: "validation-only",
     status: "pass",
     stages: [
@@ -1444,6 +1477,12 @@ export async function runGreenfieldJourney() {
       { id: "deployment-preparation", status: "pass" },
       { id: "aks-planning-postcheck", status: "not-observed" },
       { id: "aks-observed-acceptance", status: "pass" },
+      { id: "program-lineage", status: "pass" },
+      { id: "postgresql-migration-planning", status: "pass" },
+      { id: "postgresql-rehearsal-planning", status: "pass" },
+      { id: "postgresql-execution-contract-planning", status: "pass" },
+      { id: "container-image-cicd-planning", status: "pass" },
+      { id: "dual-cloud-connectivity-planning", status: "pass" },
     ],
     blockerTransitions,
     bindings: {
@@ -1459,6 +1498,10 @@ export async function runGreenfieldJourney() {
       manifestDigest: productionManifest.manifestDigest,
       approvalDigest: productionApprovalDigest,
       acceptanceEvidenceDigest: acceptancePostcheck.evidenceDigest,
+      programLineageEnvelopeDigest:
+        programLineageJourney.envelope.envelopeDigest,
+      programIdentityDigest:
+        programLineageJourney.envelope.programIdentityDigest,
     },
     artifacts: iac.artifacts.map(({ provider, environment, region, digest: artifactDigest }) => ({
       provider,
@@ -1467,6 +1510,26 @@ export async function runGreenfieldJourney() {
       digest: artifactDigest,
     })),
     negativeJourneys: negatives,
+    readinessSummary: {
+      baselineGreenfieldDeployment: {
+        status: "ready",
+        evidenceMode: "synthetic",
+        authority: "signed-baseline-deployment-approval-only",
+      },
+      migrationAndDualCloudPlanning: {
+        status: "ready-for-human-review",
+        evidenceMode: "synthetic",
+        executionAuthority: "not-granted",
+      },
+    },
+    programLineage: {
+      schemaVersion: programLineageJourney.envelope.schemaVersion,
+      status: programLineageJourney.envelope.status,
+      evidenceMode: programLineageJourney.envelope.evidenceMode,
+      envelopeDigest: programLineageJourney.envelope.envelopeDigest,
+      programIdentityDigest:
+        programLineageJourney.envelope.programIdentityDigest,
+    },
     diagnostics: {
       sanitized: true,
       azureWrites: 0,
@@ -1484,6 +1547,26 @@ export async function runGreenfieldJourney() {
       },
     },
   };
+  assert(
+    report.bindings.programLineageEnvelopeDigest ===
+      programLineageJourney.envelope.envelopeDigest,
+    "Report envelope binding must match the emitted program envelope.",
+  );
+  assert(
+    report.bindings.programIdentityDigest ===
+      programLineageJourney.envelope.programIdentityDigest,
+    "Report program identity binding must match the emitted program envelope.",
+  );
+  assert(
+    report.programLineage.envelopeDigest ===
+      programLineageJourney.envelope.envelopeDigest,
+    "Report lineage envelope reference must match the emitted program envelope.",
+  );
+  assert(
+    report.programLineage.programIdentityDigest ===
+      programLineageJourney.envelope.programIdentityDigest,
+    "Report lineage identity reference must match the emitted program envelope.",
+  );
   assert(
     report.negativeJourneys.every(
       (negative) =>

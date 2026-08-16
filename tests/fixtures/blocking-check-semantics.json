@@ -1337,6 +1337,69 @@
       "source": "scripts/startup-connectivity-plan.mjs",
       "passState": "pass",
       "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "program.lineage.artifacts-complete",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "invalid"]
+    },
+    {
+      "id": "program.lineage.digests-current",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["mismatch", "mutated"]
+    },
+    {
+      "id": "program.lineage.evidence-current",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["stale", "blocked"]
+    },
+    {
+      "id": "program.lineage.stage-order-valid",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["omitted", "duplicate", "out-of-order"]
+    },
+    {
+      "id": "program.lineage.replay-protected",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["reused-nonce", "non-monotonic"]
+    },
+    {
+      "id": "program.lineage.target-bound",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["environment-mismatch", "region-mismatch", "target-mismatch"]
+    },
+    {
+      "id": "program.lineage.lineage-bound",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["predecessor-mismatch", "artifact-lineage-mismatch"]
+    },
+    {
+      "id": "program.lineage.cross-program-bound",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["artifact-substitution", "baseline-substitution"]
+    },
+    {
+      "id": "program.lineage.authority-separated",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["execution-enabled", "approval-scope-widened"]
     }
   ]
 }

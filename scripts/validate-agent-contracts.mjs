@@ -489,6 +489,15 @@ function main() {
   const greenfieldJourneyReportSchema = load(
     "agent/schemas/greenfield-journey-report.schema.json",
   );
+  const programLineageInputSchema = load(
+    "agent/schemas/program-lineage-input.schema.json",
+  );
+  const programLineageEnvelopeSchema = load(
+    "agent/schemas/program-lineage-envelope.schema.json",
+  );
+  const programLineageTrustedDigestsSchema = load(
+    "agent/schemas/program-lineage-trusted-digests.schema.json",
+  );
   const startupInput = load("agent/examples/startup-input.json");
   const workloadProfilePlan = load("agent/examples/workload-profile-plan.json");
   const regionalPlanningInput = load(
@@ -557,6 +566,9 @@ function main() {
   );
   const greenfieldJourneyReport = load(
     "agent/examples/greenfield-journey-report.json",
+  );
+  const programLineageEnvelope = load(
+    "agent/examples/program-lineage-envelope.json",
   );
   const catalog = load("agent/checks/check-catalog.json");
   const profiles = [
@@ -736,6 +748,31 @@ function main() {
     containerAppsCoolProfileInput,
   );
   validateDocument(greenfieldJourneyReportSchema, greenfieldJourneyReport);
+  assert.equal(
+    programLineageInputSchema.$id,
+    "https://aka.ms/sslz/schemas/program-lineage-input.schema.json",
+  );
+  assert.equal(
+    programLineageTrustedDigestsSchema.$id,
+    "https://aka.ms/sslz/schemas/program-lineage-trusted-digests.schema.json",
+  );
+  validateDocument(programLineageEnvelopeSchema, programLineageEnvelope);
+  assert.equal(
+    greenfieldJourneyReport.programLineage.envelopeDigest,
+    programLineageEnvelope.envelopeDigest,
+  );
+  assert.equal(
+    greenfieldJourneyReport.programLineage.programIdentityDigest,
+    programLineageEnvelope.programIdentityDigest,
+  );
+  assert.equal(
+    greenfieldJourneyReport.bindings.programLineageEnvelopeDigest,
+    programLineageEnvelope.envelopeDigest,
+  );
+  assert.equal(
+    greenfieldJourneyReport.bindings.programIdentityDigest,
+    programLineageEnvelope.programIdentityDigest,
+  );
   assert.throws(
     () =>
       validateDocument(greenfieldJourneyReportSchema, {
@@ -748,9 +785,28 @@ function main() {
     () =>
       validateDocument(greenfieldJourneyReportSchema, {
         ...greenfieldJourneyReport,
-        bindings: { invalid: "not-a-digest" },
+        bindings: {
+          ...greenfieldJourneyReport.bindings,
+          programIdentityDigest: "not-a-digest",
+        },
       }),
     /does not match \^sha256:/,
+  );
+  assert.throws(
+    () =>
+      validateDocument(greenfieldJourneyReportSchema, {
+        ...greenfieldJourneyReport,
+        schemaVersion: "1.0.0",
+      }),
+    /expected constant "2.0.0"/,
+  );
+  assert.throws(
+    () => {
+      const incomplete = structuredClone(greenfieldJourneyReport);
+      delete incomplete.programLineage;
+      validateDocument(greenfieldJourneyReportSchema, incomplete);
+    },
+    /missing required property programLineage/,
   );
   assert.equal(
     deploymentResultSchema.$id,
@@ -790,6 +846,7 @@ function main() {
     coolFoundationBaseline,
     containerAppsCoolProfileInput,
     greenfieldJourneyReport,
+    programLineageEnvelope,
     profiles,
   ]);
 

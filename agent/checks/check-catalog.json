@@ -1337,6 +1337,69 @@
       "severity": "blocking",
       "automation": "readOnly",
       "documentationUrl": "https://learn.microsoft.com/azure/nat-gateway/nat-overview"
+    },
+    {
+      "id": "program.lineage.artifacts-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/"
+    },
+    {
+      "id": "program.lineage.digests-current",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/data-encryption-best-practices"
+    },
+    {
+      "id": "program.lineage.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/observability"
+    },
+    {
+      "id": "program.lineage.stage-order-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "program.lineage.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "program.lineage.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org"
+    },
+    {
+      "id": "program.lineage.lineage-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "program.lineage.cross-program-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-principles"
+    },
+    {
+      "id": "program.lineage.authority-separated",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
     }
   ]
 }

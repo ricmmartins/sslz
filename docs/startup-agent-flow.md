@@ -19,10 +19,11 @@ node scripts/validate-greenfield-journey.mjs
 ```
 
 It runs the complete synthetic founder journey through production contracts with deterministic mocks, including
-fail-closed negative journeys and a separately signed synthetic observed AKS acceptance. It performs no Azure writes or
-live-tenant reads. It requires Node.js and the local Bicep CLI installed by `az bicep install`, but no npm install or
-project dependency restore. Tagged releases expose only the capabilities documented in their tag; direct
-Bicep/Terraform usage remains the baseline deployment workflow rather than an implicit agent run.
+fail-closed negative journeys, a separately signed synthetic observed AKS acceptance, and an execution-disabled
+cross-program lineage envelope. It performs no Azure writes or live-tenant reads. It requires Node.js and the local
+Bicep CLI installed by `az bicep install`, but no npm install or project dependency restore. Tagged releases expose only
+the capabilities documented in their tag; direct Bicep/Terraform usage remains the baseline deployment workflow rather
+than an implicit agent run.
 
 ## Acceptance-gap context
 
@@ -286,6 +287,33 @@ Application health, database connectivity, secondary-region deployment, and Hot/
 work and are not performed by Phase 6.
 
 See [Approved Deployment Integration](approved-deployment-integration.md).
+
+## Cross-program planning lineage
+
+The canonical journey references a separate v1 program-lineage envelope rather than copying migration identities into
+the signed Phase 5/6 deployment approval. This keeps the existing approval scope unchanged while binding one exact
+sequence of real planner outputs:
+
+1. PostgreSQL migration assessment and planning;
+2. PostgreSQL rehearsal planning;
+3. PostgreSQL execution-contract planning;
+4. container image and CI/CD migration planning;
+5. dual-cloud connectivity, DNS, identity, and egress planning.
+
+Each stage binds the exact artifact digest and predecessor stage digest. The final program identity and envelope digests
+therefore change when any upstream artifact, target, environment, lineage, order, or cross-program binding changes.
+Duplicate, omitted, out-of-order, stale, replayed, mismatched, or substituted artifacts fail closed. The fixtures invoke
+the production planner modules with sanitized synthetic evidence; they do not assert against planner source text.
+
+The envelope does not authorize execution. Every stage sets `executionEnabled`, `executionEligible`, and
+`executionAllowed` to false and names a distinct future approval. The existing baseline approval remains limited to
+`greenfield-platform-deployment-only` and does not authorize migration, database writes, image promotion, connectivity,
+DNS, identity, egress, cutover, rollback, or failback. Its report separately identifies baseline greenfield deployment
+readiness and non-executable migration/dual-cloud planning readiness, including whether evidence is synthetic or live.
+
+The canonical greenfield journey report is v2 and requires this envelope identity and readiness separation. A v1 report
+is intentionally rejected rather than accepted with incomplete lineage. See
+[Program Lineage Envelope](program-lineage-envelope.md).
 
 ## Agent result contract
 

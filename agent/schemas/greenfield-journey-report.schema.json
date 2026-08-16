@@ -15,10 +15,12 @@
     "bindings",
     "artifacts",
     "negativeJourneys",
+    "readinessSummary",
+    "programLineage",
     "diagnostics"
   ],
   "properties": {
-    "schemaVersion": { "const": "1.0.0" },
+    "schemaVersion": { "const": "2.0.0" },
     "journeyId": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -79,6 +81,14 @@
     "bindings": {
       "type": "object",
       "minProperties": 1,
+      "required": [
+        "programLineageEnvelopeDigest",
+        "programIdentityDigest"
+      ],
+      "properties": {
+        "programLineageEnvelopeDigest": { "$ref": "#/$defs/digest" },
+        "programIdentityDigest": { "$ref": "#/$defs/digest" }
+      },
       "additionalProperties": { "$ref": "#/$defs/digest" }
     },
     "artifacts": {
@@ -135,6 +145,56 @@
             "maxLength": 300
           }
         }
+      }
+    },
+    "readinessSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineGreenfieldDeployment",
+        "migrationAndDualCloudPlanning"
+      ],
+      "properties": {
+        "baselineGreenfieldDeployment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "evidenceMode", "authority"],
+          "properties": {
+            "status": { "const": "ready" },
+            "evidenceMode": { "enum": ["synthetic", "live"] },
+            "authority": {
+              "const": "signed-baseline-deployment-approval-only"
+            }
+          }
+        },
+        "migrationAndDualCloudPlanning": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "evidenceMode", "executionAuthority"],
+          "properties": {
+            "status": { "const": "ready-for-human-review" },
+            "evidenceMode": { "enum": ["synthetic", "live"] },
+            "executionAuthority": { "const": "not-granted" }
+          }
+        }
+      }
+    },
+    "programLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "status",
+        "evidenceMode",
+        "envelopeDigest",
+        "programIdentityDigest"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "status": { "const": "ready-for-human-review" },
+        "evidenceMode": { "enum": ["synthetic", "live"] },
+        "envelopeDigest": { "$ref": "#/$defs/digest" },
+        "programIdentityDigest": { "$ref": "#/$defs/digest" }
       }
     },
     "diagnostics": {

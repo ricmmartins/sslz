@@ -19,9 +19,11 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 ## Agent-aware journey on `main`
 
 The current `main` branch includes the additive agent-aware founder journey: account/topology preflight, workload and
-regional planning, PostgreSQL fallback plus approval-bound migration orchestration planning, explicit Defender workspace
-placement, provider remediation, IaC review, readiness-bound approval, regional retry, and AKS ingress/postcheck contracts. Run its package-free synthetic
-end-to-end validation with:
+regional planning, PostgreSQL fallback, IaC review, readiness-bound baseline approval, provider remediation, regional
+retry, and AKS ingress/postcheck contracts. It also emits a separate execution-disabled program-lineage envelope that
+binds PostgreSQL migration, rehearsal, and execution-contract planning to container image/CI/CD and dual-cloud
+connectivity planning without extending baseline deployment authority. Run its package-free synthetic end-to-end
+validation with:
 
 ```bash
 node scripts/validate-greenfield-journey.mjs
@@ -29,8 +31,9 @@ node scripts/validate-greenfield-journey.mjs
 
 This command uses deterministic fixtures and mocks, writes review artifacts only under ignored `.sslz/` paths, performs
 no Azure operations, and needs no Azure login or live tenant. It requires Node.js and the local Bicep CLI installed by
-`az bicep install`, but no npm install or project dependency restore. Its sanitized report follows
-[`agent/schemas/greenfield-journey-report.schema.json`](agent/schemas/greenfield-journey-report.schema.json).
+`az bicep install`, but no npm install or project dependency restore. Its sanitized v2 report follows
+[`agent/schemas/greenfield-journey-report.schema.json`](agent/schemas/greenfield-journey-report.schema.json) and
+separates baseline deployment readiness from non-executable migration and dual-cloud planning readiness.
 
 These capabilities describe the latest `main`; a tagged release contains only the features documented by that tag.
 The [Quick Start](#quick-start) below remains the baseline direct Bicep/Terraform deployment path and does not
