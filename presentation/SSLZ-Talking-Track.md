@@ -57,7 +57,7 @@
 
 **SAY:**
 
-> "So I built the Startup-Scale Landing Zone — SSLZ. It's an opinionated, production-ready Azure infrastructure template that deploys in under one hour using either Bicep or Terraform.
+> "So I built the Startup-Scale Landing Zone — SSLZ. It's an opinionated, deployable Azure infrastructure baseline that can be applied with either Bicep or Terraform.
 >
 > Four things make it different:
 >
@@ -115,7 +115,7 @@
 
 **SAY:**
 
-> "I also built three production-grade example architectures. These aren't toy demos — each one has full Bicep and Terraform implementations, deployment instructions, and realistic cost estimates.
+> "I also built three detailed example architectures. Each one has Bicep and Terraform implementations, deployment instructions, and cost estimates that require workload-specific validation.
 >
 > SaaS startup: Container Apps with Azure SQL Elastic Pool, Redis, Key Vault. Multi-tenant with shared schema. Container Apps scale to zero in non-prod.
 >
@@ -135,7 +135,7 @@
 
 > "Let me share where this stands in terms of traction.
 >
-> On the repo side: 211 commits in about six weeks. Dual IaC — 6 Bicep modules, 5 Terraform modules. Five GitHub Actions workflows. Eight documentation pages. Three startup archetype examples. Custom domain — startupscalelanding.zone. This is polished and production-ready.
+> On the repo side: the agent-aware delivery is tracked through merged PR #29. The project includes dual IaC, GitHub Actions workflows, documentation, three startup archetype examples, and the startupscalelanding.zone site. The baseline is deployable, while the status matrix states which agent capabilities remain planning-only or require live evidence.
 >
 > But the bigger story is the content engine I've been building. I've published **38 articles** on the Startups at Microsoft blog on TechCommunity. Collectively, those posts have generated **nearly 190,000 views**.
 >
@@ -244,7 +244,7 @@
 
 **SAY:**
 
-> "To wrap up: I identified this gap through my direct work with startups. I built the solution — 211 commits, dual IaC, full documentation, live website. I published the blog series to build the audience. And now I'm driving the org integration with Founders Hub.
+> "To wrap up: I identified this gap through my direct work with startups. I built the solution with dual IaC, documented guardrails, and a live website. I published the blog series to build the audience. And now I'm driving the org integration with Founders Hub.
 >
 > I'll leave you with the line that guides this whole project: **'For startups, the alternative isn't ALZ — it's usually no governance at all.'**
 >
@@ -260,7 +260,7 @@
 > "The graduation guide has explicit signals — 50+ engineers, compliance requirements, multi-region, hybrid connectivity. But even if they stay on SSLZ longer than expected, they're still on Azure with proper governance. That's infinitely better than zero governance."
 
 **Q: "Who maintains this long-term?"**
-> "I do. It's actively maintained — 211 commits and counting. The blog series keeps me engaged with the community, and I iterate based on real feedback from startups."
+> "I do. It's actively maintained, with the agent-aware delivery tracked through merged PR #29. The blog series keeps me engaged with the community, and I iterate based on real feedback from startups."
 
 **Q: "Can this work with Terraform Cloud / Azure DevOps / other CI/CD?"**
 > "Yes. The default is GitHub Actions, but the Terraform modules work with any CI system. The Bicep modules work with Azure DevOps or anything that can run `az deployment`. It's just IaC."

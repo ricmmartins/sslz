@@ -2,6 +2,12 @@
 
 A multi-tenant SaaS application running on Azure Container Apps with Azure SQL.
 
+## Status and execution boundary
+
+The Bicep and Terraform examples are direct operator IaC, not Phase 6 agent-approved workload deployments. Current-main
+evidence covers compilation, Terraform validation/tests, and hosted CI. It does not include a retained live deployment or
+end-to-end private DNS/connectivity test for this example.
+
 ## Architecture
 
 ```
@@ -97,6 +103,10 @@ Store secrets (SQL connection strings, Redis keys, API keys) in Key Vault and re
 By default, Azure SQL and Redis have `publicNetworkAccess: Enabled`, and the Container Apps environment keeps its platform-managed network. This default public path is unchanged.
 
 Private mode is an atomic network configuration: the Container Apps environment is injected into a dedicated infrastructure subnet, SQL and Redis public access is disabled, both services receive Private Endpoints in a separate subnet, and both Private DNS zones are linked to the VNet containing those subnets.
+
+[PR #27](https://github.com/ricmmartins/sslz/pull/27) delivered this runtime path. Enabling it still requires an operator
+to supply and validate the existing VNet and distinct subnets, deploy to nonproduction first, and test Container Apps
+resolution and connectivity to both private services.
 
 Before enabling private mode, prepare one VNet with:
 

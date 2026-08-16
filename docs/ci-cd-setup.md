@@ -271,6 +271,11 @@ contract suites, Bicep build/lint, Terraform format/lint/validate, blocking-chec
 tests. It performs no Azure deployment. The **Integration Test** workflow runs Bicep what-if and Terraform plan on its
 weekly schedule or manual dispatch against the dedicated integration subscription.
 
+Hosted validation passed for the PR #29 baseline. The latest verified successful Azure-authenticated scheduled
+what-if/plan run during the documentation audit was on 2026-08-10 at commit `a7acdbd`; its deployment job was skipped and
+it predates PRs #10-#29. Treat it as historical live-preview evidence, not current-main deployment evidence. See the
+[implementation and evidence matrix](implementation-status.md).
+
 ### Deploy via Workflow Dispatch
 
 The deploy workflows are manual Phase 6 apply wrappers and cannot run on pull request, push, or schedule. Before

@@ -29,7 +29,8 @@ Security that protects you without slowing you down. Every recommendation here i
 The default deployment sets the subscription `StorageAccounts` pricing resource to `Free` and omits a paid subplan,
 including when reconciling a subscription previously deployed by SSLZ. Setting the input to `true` is an explicit
 subscription-wide opt-in to `Standard` with `DefenderForStorageV2`; review the current Azure pricing and every storage
-account in the subscription before enabling it.
+account in the subscription before enabling it. This default-off behavior was delivered by
+[PR #28](https://github.com/ricmmartins/sslz/pull/28); repository validation does not prove a live subscription tier.
 
 ### Defender workspace placement
 

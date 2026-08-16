@@ -7,6 +7,12 @@ description: "Read-only container image, registry, and CI/CD source assessment a
 
 # Container Image and CI/CD Migration Planning
 
+## Status
+
+[PR #25](https://github.com/ricmmartins/sslz/pull/25) delivered this planner. It is execution-disabled and validated with
+synthetic fixtures and hosted CI; the repository has no current-main live registry, image, pipeline, promotion, cutover,
+or rollback evidence. See the [implementation and evidence matrix](implementation-status.md).
+
 This increment assesses supplied container image, registry, and CI/CD metadata and generates a deterministic plan for
 moving from AWS ECR, GCP Artifact Registry/GCR, or a generic OCI registry — paired with GitHub Actions, AWS CodeBuild,
 GCP Cloud Build, GitLab CI, Jenkins, or Azure DevOps — to Azure Container Registry with a GitHub Actions or Azure DevOps

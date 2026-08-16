@@ -7,6 +7,13 @@ description: "Phased, backward-compatible delivery plan for agent-assisted SSLZ"
 
 # Startup Agent Implementation Plan
 
+## Current status
+
+This document preserves the phased design and review gates, but it is no longer a literal PR-number roadmap. Phases 0-6
+have delivered contract, planning, or approval-gated implementations. Phase 7 has delivered execution-disabled planning
+artifacts only. The PostgreSQL migration, image/CI, dual-cloud, and program-lineage work delivered after the original plan
+is also execution-disabled. See the [authoritative status matrix and actual PR history](implementation-status.md).
+
 ## Goal
 
 Deliver agent-assisted account and workload planning without changing current SSLZ deployments until the new path is
@@ -61,6 +68,8 @@ decision.
 
 ## Phase 0: Contract assets
 
+**Status:** Implemented and extended beyond the original three-schema proposal.
+
 **Purpose:** turn the approved documentation into testable artifacts without calling Azure.
 
 **Changes:**
@@ -82,6 +91,8 @@ decision.
 **Rollback:** remove the additive contract assets and CI job.
 
 ## Phase 1: Read-only account preflight
+
+**Status:** Implemented as the additive `inspect` path, including the later subscription-topology decision.
 
 **Purpose:** replace assumptions about account readiness with structured evidence.
 
@@ -123,7 +134,7 @@ decision.
 - verify that blocking unknowns do not pass;
 - verify secret-like fixture values are redacted.
 
-**Acceptance:**
+**Implementation acceptance:**
 
 - deterministic JSON for every fixture;
 - nonzero exit for `blocked` and `error`;
@@ -230,7 +241,8 @@ as executable readiness. Cool and warm requests produce review-required planning
 
 ## Phase 4: IaC plan generation
 
-**Status:** Implemented as an additive, local-only generator and optional read-only preview command.
+**Status:** Implemented as an additive, local-only generator and optional non-deploying preview command. Terraform plan
+can acquire and release a remote-state backend lease, so preview is not universally read-only.
 
 **Purpose:** convert an approved profile into reviewable inputs for existing SSLZ deployment paths.
 
@@ -316,14 +328,21 @@ Provider deployment workflows are dispatch-only Phase 6 wrappers; PR and push wo
 
 - manual and agent paths produce the same platform configuration;
 - deployment workflows fail closed without the readiness-bound Phase 4 plan, reviewed manifest, and signed approval;
-- integration test deploys, validates, and tears down in nonprod;
+- the opt-in integration workflow defines deploy, validation, and teardown for a disposable nonproduction subscription;
 - rollback guidance is attached to the result.
+
+The current-main code path is covered by synthetic and hosted CI tests. A successful current-main approved Phase 6
+deployment, postcheck, and teardown record remains a live gate; older integration runs are not evidence for this baseline.
 
 ## Phase 7: Hot/Cool deployment
 
-**Purpose:** add secondary-region infrastructure only after the planning path is proven.
+**Status:** Planning-only. The cool foundation and Container Apps profile generate execution-disabled artifacts. No
+secondary-region preview/apply executor is accepted by Phase 6.
 
-**First deployable mode:** `cool-infrastructure`.
+**Purpose:** add secondary-region infrastructure only after the planning path, separate authority, and live recovery
+evidence are proven.
+
+**First proposed deployable mode:** `cool-infrastructure`.
 
 **Order:**
 
@@ -340,18 +359,22 @@ deployment does not mark the workload as recovery ready.
 
 ## Pull request sequence
 
-| PR | Scope | Azure writes |
-|---|---|---:|
-| 1 | Schemas, catalog, examples, schema CI | No |
-| 2 | Read-only account preflight and fixture tests | No |
-| 3 | Workload profile planner and tests | No |
-| 4 | Region and capacity planner and tests | No |
-| 5 | Parameter generation and IaC plan summaries | No |
-| 6 | Approved provider registration allowlist | Yes |
-| 7 | Existing SSLZ deployment integration | Yes |
-| 8+ | Service-specific Hot/Cool modules and recovery tests | Yes |
+The following was the original conceptual sequence, not GitHub PR numbering:
 
-Do not combine read-only planning with write automation in the same first PR.
+| Conceptual increment | Delivered in | Azure writes |
+|---|---|---:|
+| Contracts, catalog, examples, schema CI | [#4](https://github.com/ricmmartins/sslz/pull/4) | No |
+| Read-only account preflight and fixture tests | [#5](https://github.com/ricmmartins/sslz/pull/5), later extended by [#16](https://github.com/ricmmartins/sslz/pull/16) | No |
+| Workload profile planner and tests | [#6](https://github.com/ricmmartins/sslz/pull/6) | No |
+| Region and capacity planner and tests | [#7](https://github.com/ricmmartins/sslz/pull/7), later extended by [#18](https://github.com/ricmmartins/sslz/pull/18) and [#19](https://github.com/ricmmartins/sslz/pull/19) | No |
+| Parameter generation and IaC plan summaries | [#8](https://github.com/ricmmartins/sslz/pull/8), later hardened by [#11](https://github.com/ricmmartins/sslz/pull/11), [#13](https://github.com/ricmmartins/sslz/pull/13), and [#17](https://github.com/ricmmartins/sslz/pull/17) | No |
+| Approved provider registration allowlist | [#9](https://github.com/ricmmartins/sslz/pull/9) | Approval-gated |
+| Existing SSLZ deployment integration | [#10](https://github.com/ricmmartins/sslz/pull/10), later hardened by [#11](https://github.com/ricmmartins/sslz/pull/11), [#13](https://github.com/ricmmartins/sslz/pull/13), and [#20](https://github.com/ricmmartins/sslz/pull/20) | Approval-gated |
+| Hot/Cool foundation and profile | [#14](https://github.com/ricmmartins/sslz/pull/14) and [#15](https://github.com/ricmmartins/sslz/pull/15) | No; execution disabled |
+| Migration and dual-cloud programs | [#22](https://github.com/ricmmartins/sslz/pull/22), [#23](https://github.com/ricmmartins/sslz/pull/23), [#24](https://github.com/ricmmartins/sslz/pull/24), [#25](https://github.com/ricmmartins/sslz/pull/25), [#26](https://github.com/ricmmartins/sslz/pull/26), and [#29](https://github.com/ricmmartins/sslz/pull/29) | No; execution disabled |
+
+The [status matrix](implementation-status.md#delivery-history) lists every merged PR from #4 through #29. PR #12 was
+closed without merge. Read-only planning and write automation remain separate surfaces.
 
 ## Review gates
 
@@ -374,7 +397,7 @@ Before Hot/Cool deployment:
 
 ## Definition of done
 
-The agent-assisted path is ready for an initial startup pilot when:
+The original pilot definition is:
 
 1. it can complete inspect and plan modes without Azure writes;
 2. account, billing uncertainty, quota, capacity, service availability, and policy failures are distinct;
@@ -384,3 +407,7 @@ The agent-assisted path is ready for an initial startup pilot when:
 6. manual SSLZ deployment remains unchanged;
 7. nonprod integration tests pass for both Bicep and Terraform;
 8. the pilot begins single-region, with Hot/Cool limited to a reviewed plan until recovery tests pass.
+
+Repository tests cover the contract and guardrail portions of this list. Pilot readiness still requires authorized live
+read-only evidence, current-main previews, a protected approved nonproduction deployment, and the human reviews listed
+above. Phase 7 additionally requires measured service-specific recovery evidence and a separately reviewed executor.

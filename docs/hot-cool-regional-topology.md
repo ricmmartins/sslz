@@ -9,8 +9,10 @@ description: "Startup-scale regional capacity and recovery planning"
 
 ## Status
 
-The regional and capacity evaluator is implemented as a read-only planning command. SSLZ remains single-region until
-deployable modules, explicit approval, validation, and recovery tests are implemented.
+The regional and capacity evaluator, cool-foundation planner, and Container Apps cool-profile planner are implemented.
+All Phase 7 outputs remain execution-disabled: no secondary-region preview/apply path is accepted by Phase 6, and no
+current-main live recovery evidence exists. See the
+[implementation and evidence matrix](implementation-status.md).
 
 ## Purpose
 

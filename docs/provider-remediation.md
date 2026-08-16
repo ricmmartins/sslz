@@ -7,6 +7,12 @@ description: "Single-use approval for one allowlisted Azure resource-provider re
 
 # Approved Provider Remediation
 
+## Status
+
+The narrow approval-gated writer is implemented and covered by local synthetic and hosted CI tests. No current-main live
+provider registration is claimed by repository evidence. See the
+[implementation and evidence matrix](implementation-status.md).
+
 ## Purpose
 
 Phase 5 adds the first write-capable startup-agent command. Its complete Azure write surface is one

@@ -7,6 +7,15 @@ description: "Read-only source assessment and migration planning for Azure Datab
 
 # PostgreSQL Migration Planning
 
+## Status
+
+PRs [#22](https://github.com/ricmmartins/sslz/pull/22),
+[#23](https://github.com/ricmmartins/sslz/pull/23), and
+[#24](https://github.com/ricmmartins/sslz/pull/24) delivered migration, rehearsal, and approval-bound execution-contract
+planners. Every operation remains execution-disabled. Validation is synthetic and hosted; no current-main live database,
+rehearsal, cutover, rollback, or failback evidence is claimed. See the
+[implementation and evidence matrix](implementation-status.md).
+
 The first migration increment assesses supplied PostgreSQL metadata and generates a deterministic plan for moving from
 AWS RDS, Google Cloud SQL, or self-managed PostgreSQL to Azure Database for PostgreSQL Flexible Server. It has no source
 database connection, Azure operation, migration-tool action, dump/restore action, CDC change, DNS change, or write path.
@@ -125,11 +134,12 @@ require current live-owner confirmation.
 This additive planning contract does not affect Bicep or Terraform parameters, resources, previews, or apply surfaces, so
 no IaC parity change is required.
 
-## Approval-bound execution contract
+## Approval-bound, execution-disabled contract
 
-The next increment models the future write-capable migration path without implementing one. It consumes the exact source
-assessment, migration input and plan, rehearsal evidence and report, a current execution lineage, independently signed
-live-condition attestations, eight separately signed stage approvals, and a protected trust manifest:
+[PR #24](https://github.com/ricmmartins/sslz/pull/24) implemented the contract evaluator for a possible future
+write-capable migration path, not the writer itself. It consumes the exact source assessment, migration input and plan,
+rehearsal evidence and report, a current execution lineage, independently signed live-condition attestations, eight
+separately signed stage approvals, and a protected trust manifest:
 
 ```bash
 node scripts/startup-postgresql-execution-plan.mjs plan \

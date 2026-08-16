@@ -7,6 +7,13 @@ description: "Signed single-use approval for one immutable existing SSLZ platfor
 
 # Approved Deployment Integration
 
+## Evidence status
+
+The write-capable path and workflow gates are implemented and covered by local synthetic and hosted CI tests. This
+repository does not contain or identify a successful approved Phase 6 apply and postcheck record for current `main`.
+Historical Integration Test what-if/plan success predates this path's later hardening and is not live deployment evidence.
+See the [implementation and evidence matrix](implementation-status.md).
+
 ## Purpose
 
 Phase 6 is the only landing-zone write path exposed by `deploy-bicep.yml` and `deploy-terraform.yml`. Both workflows are
@@ -242,3 +249,7 @@ commands.
 Disable deployment by removing the `sslz-deployment` runner label or access to
 `startup-deployment-integration.sh`. There is no direct workflow fallback: a new write requires a current Phase 4 v3
 plan, readiness evidence, reviewed immutable manifest, and matching signed single-use approval.
+
+Direct operator use of `infra/bicep`, `infra/terraform`, or the example deployment commands remains outside these
+agent-gated workflows. Those commands can write Azure without a Phase 6 artifact; the operator is responsible for access,
+plan review, change approval, state protection, postchecks, and rollback.

@@ -7,11 +7,18 @@ description: "Digest-bound local Bicep and Terraform review inputs"
 
 # IaC Plan Generation
 
+## Status
+
+The local generator and optional non-deploying preview path are implemented. Repository tests and hosted CI validate the
+generator. Historical Azure-authenticated what-if/plan success predates later hardening; no current-main live preview or
+apply evidence is claimed here. See the [implementation and evidence matrix](implementation-status.md).
+
 ## Purpose
 
 Phase 4 converts a ready workload profile and eligible regional recommendation into reviewable inputs for the existing
-SSLZ Bicep and Terraform roots. It does not add workload modules or run an Azure or Terraform write operation. The
-dispatch-only deployment workflows consume Phase 4 output only through the signed Phase 6 integration.
+SSLZ Bicep and Terraform roots. It does not add workload modules or apply managed infrastructure. The dispatch-only
+deployment workflows consume Phase 4 output only through the signed Phase 6 integration. Preview writes ignored local
+artifacts, and Terraform can acquire and release a remote-state backend lease.
 
 The input and output contracts are:
 
@@ -198,7 +205,7 @@ The Container Apps increment adds another pending approval binding but still exp
 `ready-for-review` profile cannot deploy, change traffic or DNS, register providers, replicate data, or claim end-to-end
 recovery.
 
-## Read-only previews
+## Non-deploying previews
 
 Use previews only in an environment that already has the required tools and authentication:
 
@@ -213,7 +220,9 @@ Use previews only in an environment that already has the required tools and auth
 
 Bicep runs subscription-scope what-if. Complete-mode semantics are not accepted. Terraform initializes the explicitly
 configured `azurerm` remote backend in its bound subscription with Azure AD data-plane authentication and runs plan;
-local shared state is not accepted. The planner does not create the backend or configure credentials.
+local shared state is not accepted. Terraform can acquire and release a Blob lease while locking remote state, so the
+preview identity needs the corresponding backend permission even though plan does not apply managed infrastructure. The
+planner does not create the backend or configure credentials.
 
 The retained summary contains only deterministic change counts, destructive-change classification, and a bounded
 error class. Raw tool text, environment variables, and account output are not retained. To preserve raw output for an
