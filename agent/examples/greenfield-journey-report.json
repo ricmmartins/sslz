@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "1.0.0",
-  "journeyId": "synthetic-greenfield-founder-v1",
-  "generatedAt": "2026-08-11T18:00:00.000Z",
+  "schemaVersion": "2.0.0",
+  "journeyId": "synthetic-greenfield-founder-v2",
+  "generatedAt": "2026-08-12T12:50:00.000Z",
   "mode": "validation-only",
   "status": "pass",
   "stages": [
@@ -15,6 +15,10 @@
     },
     {
       "id": "aks-observed-acceptance",
+      "status": "pass"
+    },
+    {
+      "id": "program-lineage",
       "status": "pass"
     }
   ],
@@ -36,7 +40,9 @@
   "bindings": {
     "topologyDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
     "planDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
-    "approvalDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+    "approvalDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "programLineageEnvelopeDigest": "sha256:80d4da21c71c2911ca83b9d867666978734a4ac64e342ccb134e27a3fbe0659d",
+    "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a"
   },
   "artifacts": [
     {
@@ -64,6 +70,25 @@
       "diagnostic": "Provider remediation approval is required."
     }
   ],
+  "readinessSummary": {
+    "baselineGreenfieldDeployment": {
+      "status": "ready",
+      "evidenceMode": "synthetic",
+      "authority": "signed-baseline-deployment-approval-only"
+    },
+    "migrationAndDualCloudPlanning": {
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "executionAuthority": "not-granted"
+    }
+  },
+  "programLineage": {
+    "schemaVersion": "1.0.0",
+    "status": "ready-for-human-review",
+    "evidenceMode": "synthetic",
+    "envelopeDigest": "sha256:80d4da21c71c2911ca83b9d867666978734a4ac64e342ccb134e27a3fbe0659d",
+    "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a"
+  },
   "diagnostics": {
     "sanitized": true,
     "azureWrites": 0,

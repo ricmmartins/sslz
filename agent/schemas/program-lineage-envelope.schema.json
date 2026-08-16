@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/program-lineage-envelope.schema.json",
+  "title": "SSLZ non-executable program lineage envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "programId",
+    "generatedAt",
+    "mode",
+    "evidenceMode",
+    "status",
+    "readiness",
+    "authorityBoundary",
+    "baseline",
+    "lineage",
+    "checks",
+    "stages",
+    "safety",
+    "programIdentityDigest",
+    "envelopeDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "programId": { "$ref": "#/$defs/reference" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "mode": { "const": "validation-only" },
+    "evidenceMode": { "enum": ["synthetic", "live"] },
+    "status": { "const": "ready-for-human-review" },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineGreenfieldDeployment",
+        "migrationAndDualCloudPlanning"
+      ],
+      "properties": {
+        "baselineGreenfieldDeployment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "evidenceMode", "authority"],
+          "properties": {
+            "status": { "const": "ready" },
+            "evidenceMode": { "enum": ["synthetic", "live"] },
+            "authority": {
+              "const": "signed-baseline-deployment-approval-only"
+            }
+          }
+        },
+        "migrationAndDualCloudPlanning": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "evidenceMode", "executionAuthority"],
+          "properties": {
+            "status": { "const": "ready-for-human-review" },
+            "evidenceMode": { "enum": ["synthetic", "live"] },
+            "executionAuthority": { "const": "not-granted" }
+          }
+        }
+      }
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineApprovalScope",
+        "excludedAuthorities",
+        "futureApprovalRequired"
+      ],
+      "properties": {
+        "baselineApprovalScope": {
+          "const": "greenfield-platform-deployment-only"
+        },
+        "excludedAuthorities": {
+          "type": "array",
+          "minItems": 8,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        },
+        "futureApprovalRequired": { "const": true }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "journeyId",
+        "evidenceMode",
+        "target",
+        "bindings",
+        "bindingDigest"
+      ],
+      "properties": {
+        "journeyId": { "$ref": "#/$defs/reference" },
+        "evidenceMode": { "enum": ["synthetic", "live"] },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "environment",
+            "environmentReference",
+            "region",
+            "targetReference"
+          ],
+          "properties": {
+            "environment": { "enum": ["prod", "nonprod"] },
+            "environmentReference": { "$ref": "#/$defs/reference" },
+            "region": { "$ref": "#/$defs/region" },
+            "targetReference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        "bindings": {
+          "type": "object",
+          "minProperties": 7,
+          "additionalProperties": { "$ref": "#/$defs/digest" }
+        },
+        "bindingDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lineageId",
+        "attemptOrdinal",
+        "attemptNonce",
+        "acceptedAttempts",
+        "acceptedAttemptCount",
+        "lineageDigest"
+      ],
+      "properties": {
+        "lineageId": { "$ref": "#/$defs/reference" },
+        "attemptOrdinal": { "type": "integer", "minimum": 1 },
+        "attemptNonce": { "$ref": "#/$defs/reference" },
+        "acceptedAttempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attemptOrdinal", "attemptNonce", "envelopeDigest"],
+            "properties": {
+              "attemptOrdinal": { "type": "integer", "minimum": 1 },
+              "attemptNonce": { "$ref": "#/$defs/reference" },
+              "envelopeDigest": { "$ref": "#/$defs/digest" }
+            }
+          }
+        },
+        "acceptedAttemptCount": { "type": "integer", "minimum": 0 },
+        "lineageDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "classification"],
+        "properties": {
+          "id": { "$ref": "#/$defs/checkId" },
+          "classification": { "const": "pass" }
+        }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "evidenceMode",
+          "artifactDigest",
+          "predecessorDigest",
+          "executionEnabled",
+          "executionEligible",
+          "executionAllowed",
+          "requiredFutureAuthority",
+          "stageDigest"
+        ],
+        "properties": {
+          "id": { "$ref": "#/$defs/reference" },
+          "status": {
+            "enum": ["ready-for-human-review", "future-authorities-required"]
+          },
+          "evidenceMode": { "enum": ["synthetic", "live"] },
+          "artifactDigest": { "$ref": "#/$defs/digest" },
+          "predecessorDigest": { "$ref": "#/$defs/digest" },
+          "executionEnabled": { "const": false },
+          "executionEligible": { "const": false },
+          "executionAllowed": { "const": false },
+          "requiredFutureAuthority": { "$ref": "#/$defs/reference" },
+          "stageDigest": { "$ref": "#/$defs/digest" }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "executionEligible",
+        "executionAllowed",
+        "networkCalls",
+        "cloudOperations",
+        "databaseOperations",
+        "imageOperations",
+        "dnsOperations",
+        "identityOperations",
+        "iacOperations",
+        "generatedCommands",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "executionEligible": { "const": false },
+        "executionAllowed": { "const": false },
+        "networkCalls": { "const": "none" },
+        "cloudOperations": { "const": "none" },
+        "databaseOperations": { "const": "none" },
+        "imageOperations": { "const": "none" },
+        "dnsOperations": { "const": "none" },
+        "identityOperations": { "const": "none" },
+        "iacOperations": { "const": "none" },
+        "generatedCommands": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "programIdentityDigest": { "$ref": "#/$defs/digest" },
+    "envelopeDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "checkId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$"
+    }
+  }
+}
