@@ -14,6 +14,7 @@ param budgetStartDate = '2026-03-01T00:00:00Z' // set to 1st of your deployment 
 param enableDefenderForServers = true
 param enableDefenderForContainers = false // set to true if running AKS
 param enableDefenderForDatabases = true
+param enableDefenderForStorage = false // opt in only when storage threat protection justifies the added cost
 param securityContactEmail = 'security@mycompany.com'
 param allowedLocations = [
   'eastus2'

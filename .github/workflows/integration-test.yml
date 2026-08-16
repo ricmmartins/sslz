@@ -38,6 +38,7 @@ env:
   TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
   TF_VAR_deploy_networking: "true"
   TF_VAR_security_contact_email: "landing-zone-test@contoso.com"
+  TF_VAR_enable_defender_for_storage: "false"
 
 jobs:
   # ============================================================================
@@ -68,6 +69,7 @@ jobs:
               monthlyBudgetAmount=500 \
               budgetAlertEmails='["landing-zone-test@contoso.com"]' \
               securityContactEmail='landing-zone-test@contoso.com' \
+              enableDefenderForStorage=false \
               budgetStartDate='2026-01-01T00:00:00Z'
 
   # ============================================================================

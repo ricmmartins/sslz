@@ -48,6 +48,7 @@ deploy_networking = true
 enable_defender_for_containers = false # set true if running AKS (~$7/vCPU/month)
 # enable_defender_for_databases  = true  # recommended for prod (~$15/server/month)
 # enable_defender_for_key_vault = true  # default: true, low cost (~$0.02/10K transactions)
+enable_defender_for_storage = false # paid Defender for Storage V2 is explicit opt-in
 
 # Restrict deployments to these Azure regions (defaults to [location] if omitted)
 log_analytics_workspace_location = "eastus2"

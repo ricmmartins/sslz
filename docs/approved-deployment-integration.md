@@ -50,8 +50,9 @@ SSLZ_TERRAFORM_EXECUTABLE=/opt/hashicorp/terraform \
 ```
 
 The Phase 6 preview rejects fixture, missing, failed, destructive, secondary-region, expired, or changed Phase 4
-artifacts. Resource Manager and Storage Defender selections must be `true` because both existing SSLZ roots currently
-deploy those plans as Standard.
+artifacts. Resource Manager Defender must remain selected because the existing roots deploy it as Standard. Storage
+Defender is review-bound but may be `false`; generated Bicep and Terraform inputs carry that decision exactly and only
+select `Standard` with `DefenderForStorageV2` after explicit opt-in.
 
 Terraform also requires the builder-signed provenance emitted by Phase 4. It proves that the exact saved plan was
 generated inside an atomic protected snapshot of the reviewed source, parameters, backend, provider lock, Terraform

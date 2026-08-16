@@ -97,6 +97,9 @@ param enableDefenderForDatabases bool = environment == 'prod'
 @description('Enable Defender for Key Vault (recommended, low cost)')
 param enableDefenderForKeyVault bool = true
 
+@description('Enable the paid Defender for Storage V2 plan. Disabled by default for startup cost control.')
+param enableDefenderForStorage bool = false
+
 @description('Email address for Defender for Cloud security alerts')
 param securityContactEmail string
 
@@ -261,6 +264,7 @@ module defender 'modules/defender.bicep' = {
     enableDefenderForContainers: enableDefenderForContainers
     enableDefenderForDatabases: enableDefenderForDatabases
     enableDefenderForKeyVault: enableDefenderForKeyVault
+    enableDefenderForStorage: enableDefenderForStorage
     securityContactEmail: securityContactEmail
     configureDefenderWorkspace: configureDefenderWorkspace
     logAnalyticsWorkspaceId: effectiveLogAnalyticsWorkspaceId
@@ -334,3 +338,9 @@ output vnetId string = deployNetworking ? networking!.outputs.vnetId : ''
 output vnetName string = deployNetworking ? networking!.outputs.vnetName : ''
 @description('Deterministic AKS ingress NSG rules emitted by the primary networking template')
 output aksIngressNsgRules array = deployNetworking ? networking!.outputs.aksIngressNsgRules : []
+@description('Whether the paid Defender for Storage V2 plan is enabled')
+output defenderForStorageEnabled bool = defender.outputs.defenderForStorageEnabled
+@description('Configured Defender for Storage pricing tier')
+output defenderForStorageTier string = defender.outputs.defenderForStorageTier
+@description('Configured Defender for Storage subplan; null when disabled')
+output defenderForStorageSubPlan string? = defender.outputs.?defenderForStorageSubPlan

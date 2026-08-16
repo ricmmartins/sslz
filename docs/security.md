@@ -21,9 +21,15 @@ Security that protects you without slowing you down. Every recommendation here i
 | Defender for Databases | Prod only | Varies | SQL/Postgres threat detection — alerts on SQL injection, anomalous access, brute force. |
 | Defender for Key Vault | Both subs | ~$0.02/10k transactions | Alerts on unusual access patterns to secrets. Cheap insurance. Always enabled by default. |
 | Defender for ARM | Both subs | ~$4/sub/month | Detects suspicious control-plane operations (mass deletions, privilege escalation). Always enabled by this landing zone. |
-| Defender for Storage | No | ~$10/month per account | Malware scanning. Skip unless you accept user file uploads. |
+| Defender for Storage V2 | Explicit opt-in | Paid; review current Azure pricing | Advanced threat protection for storage. Enable only when the workload and cost review justify it. |
 | Defender for App Service | No | ~$15/month per instance | Limited value compared to other plans. Revisit later. |
 | Defender for DNS | No | ~$0.70/million queries | Niche. Only if you suspect DNS exfiltration (you don't). |
+
+`enableDefenderForStorage` in Bicep and `enable_defender_for_storage` in Terraform both default to `false`.
+The default deployment sets the subscription `StorageAccounts` pricing resource to `Free` and omits a paid subplan,
+including when reconciling a subscription previously deployed by SSLZ. Setting the input to `true` is an explicit
+subscription-wide opt-in to `Standard` with `DefenderForStorageV2`; review the current Azure pricing and every storage
+account in the subscription before enabling it.
 
 ### Defender workspace placement
 

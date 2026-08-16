@@ -41,3 +41,18 @@ output "aks_ingress_nsg_rules" {
   description = "Deterministic AKS ingress NSG rules emitted by the primary networking module"
   value       = var.deploy_networking ? module.networking[0].aks_ingress_nsg_rules : []
 }
+
+output "defender_for_storage_enabled" {
+  description = "Whether the paid Defender for Storage V2 plan is enabled"
+  value       = module.security.defender_for_storage_enabled
+}
+
+output "defender_for_storage_tier" {
+  description = "Configured Defender for Storage pricing tier"
+  value       = module.security.defender_for_storage_tier
+}
+
+output "defender_for_storage_subplan" {
+  description = "Configured Defender for Storage subplan, or null when disabled"
+  value       = module.security.defender_for_storage_subplan
+}

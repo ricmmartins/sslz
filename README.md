@@ -148,6 +148,7 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 - `securityContactEmail` — Email for Defender for Cloud alerts.
 - `budgetAlertEmails` — List of emails for budget notifications.
 - `monthlyBudgetAmount` — Your monthly budget in USD.
+- `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
 
 ```bash
 # Preview what will be created (no changes made)
@@ -183,6 +184,7 @@ Open `terraform.tfvars` and fill in the **REQUIRED** values (marked in the file)
 - `environment` — `"prod"` or `"nonprod"`
 - `budget_alert_emails` — List of email addresses
 - `security_contact_email` — Email for security alerts
+- `enable_defender_for_storage` — Keep `false` unless you explicitly opt into the paid Defender for Storage V2 plan
 
 ```bash
 # Initialize Terraform
