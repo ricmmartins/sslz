@@ -60,7 +60,7 @@
 
 ## SLIDE 8 — Project Traction & Metrics
 - This is your credibility slide. Deliver the numbers with confidence. Let them land.
-- "211 commits in six weeks. This isn't a side project — I've put serious effort into this."
+- "The agent-aware delivery is tracked through merged PR #29. This isn't a side project — I've put serious effort into it."
 - Blog numbers — this is the punch: "38 articles on TechCommunity. Nearly 190,000 total views."
 - Pause after 190K. Let that number register.
 - Call out the top 3: "From Zero to Hero — 42K views. The Entra ID article — 35K. AWS vs Azure — 25K. These are reaching the audience we want."
@@ -125,6 +125,6 @@
 - **Time management:** Aim for 20–25 minutes of presentation, 10–15 minutes of discussion.
 - **If they want a demo:** Offer to show startupscalelanding.zone and the GitHub repo. Walk through the README quick start. Show the graduation guide.
 - **If they push back on ALZ overlap:** "This is the on-ramp, not the destination. SSLZ feeds startups INTO ALZ when they're ready."
-- **If they ask about maintenance:** "I'm actively maintaining it. 211 commits and counting. The blog series builds community around it."
+- **If they ask about maintenance:** "I'm actively maintaining it, with the agent-aware delivery tracked through merged PR #29. The blog series builds community around it."
 - **If they ask who else is using it:** Reference the blog views and community engagement. If you have specific startup names, mention them.
 - **Body language:** You're the plan owner. Stand (or sit forward). Make eye contact. Don't hedge.

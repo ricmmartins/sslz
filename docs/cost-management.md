@@ -55,7 +55,8 @@ SSLZ keeps the paid Defender for Storage V2 plan off by default in both Bicep an
 the subscription `StorageAccounts` pricing resource at `Free` without a paid subplan. Set
 `enableDefenderForStorage = true` or `enable_defender_for_storage = true` only after reviewing the workload need, the number of storage accounts in
 the subscription, and current Azure pricing. Because the plan is subscription-wide, future storage accounts can also
-affect cost after opt-in.
+affect cost after opt-in. [PR #28](https://github.com/ricmmartins/sslz/pull/28) delivered this default-off behavior;
+confirm the effective tier and budget impact in the target subscription after any approved opt-in.
 
 ### 1. Forgotten Dev Resources
 

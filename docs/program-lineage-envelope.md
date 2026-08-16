@@ -63,6 +63,11 @@ The report distinguishes:
 - migration and dual-cloud planning readiness for human review, with no execution authority;
 - synthetic evidence used by checked-in validation from future live evidence supplied by protected systems.
 
+The canonical greenfield report is version `2.0.0`. Its `programLineage` summary references the separately emitted
+envelope by exact `envelopeDigest` and `programIdentityDigest`; it does not embed the full envelope. The checked-in
+report is synthetic. [PR #29](https://github.com/ricmmartins/sslz/pull/29) delivered this integration; it did not add an
+executor or live migration, image, or connectivity evidence.
+
 ## Compatibility
 
 The canonical greenfield report is version `2.0.0`. Version 1 reports are rejected because they lack the required program

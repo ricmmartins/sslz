@@ -2,6 +2,12 @@
 
 A developer-facing API product running on Azure App Service with API Management, Cosmos DB, and Application Insights.
 
+## Status and execution boundary
+
+The Bicep and Terraform examples are direct operator IaC, not Phase 6 agent-approved workload deployments. Current-main
+evidence covers Bicep build/lint plus Terraform format/lint/validation in hosted CI; it does not include example-specific
+Terraform behavioral tests or a retained live deployment, application-health, or recovery record for this example.
+
 ## Architecture
 
 ```

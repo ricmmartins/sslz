@@ -2,7 +2,13 @@
 
 This directory contains the versioned, machine-readable contracts for the startup agent flow. The additive startup
 preflight performs Azure reads only. The workload and regional planners read local JSON only and make no Azure calls.
-The IaC planner writes ignored local review inputs and can optionally run read-only previews.
+The IaC planner writes ignored local review inputs and can optionally run non-deploying previews. Terraform preview can
+acquire and release a remote-state backend lease; it does not apply managed infrastructure.
+
+Capability delivery does not imply execution authority. Phase 7 and the PostgreSQL migration, container image/CI/CD, and
+dual-cloud programs remain planning-only and execution-disabled. The
+[implementation and evidence matrix](../docs/implementation-status.md) is authoritative for delivered status, approval
+boundaries, synthetic and hosted validation, historical live preview evidence, and remaining live gates.
 
 ## Contents
 
@@ -54,8 +60,8 @@ The IaC planner writes ignored local review inputs and can optionally run read-o
 node scripts/validate-greenfield-journey.mjs
 ```
 
-That is the canonical validation-only entry point for the complete agent-aware founder journey on the current `main`
-branch. It exercises the production planners and approval/remediation boundaries with deterministic mocks, creates no
+That is the canonical validation-only entry point for the integrated agent-aware founder journey on the current `main`
+branch. It exercises the repository planners and approval/remediation boundaries with deterministic mocks, creates no
 Azure resources, and requires no tenant access. The emitted report contains aliases and digests rather than tenant or
 subscription identifiers, PII, secrets, or raw diagnostics. Node.js and the local Bicep CLI installed by
 `az bicep install` are required; no npm install or project dependency restore is needed.
@@ -84,9 +90,9 @@ node tests/startup-deployment-integration.mjs
 Validation and fixture tests use Node.js built-in modules and require no package installation, Azure login, or Azure
 permissions.
 
-Tagged releases may predate the complete journey; consult the documentation in the selected tag. Direct use of
-`infra/bicep` or `infra/terraform` is the baseline IaC workflow and bypasses this validation orchestrator unless the
-operator runs it explicitly.
+Tagged releases may predate the integrated journey; consult the documentation in the selected tag. Direct use of
+`infra/bicep` or `infra/terraform` is an operator-controlled baseline IaC workflow outside the startup-agent approval
+gates unless the operator explicitly uses the Phase 4-6 commands.
 
 ## Inspect an Azure account
 
@@ -215,10 +221,11 @@ SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE=/protected/sslz-deployment.pub \
   --approval <signed-deployment-approval.json>
 ```
 
-Preview reruns read-only inspection over the exact hashed artifact set and emits an immutable manifest without writing
-Azure or local state. Bicep preview binds exact compiled-template, concrete-parameter, and semantic resource-graph
-digests. Terraform
-additionally requires Phase 4 Ed25519 provenance tying the saved plan to an atomic source snapshot. Apply verifies both
+Preview reruns non-deploying inspection over the exact hashed artifact set and emits an immutable manifest without
+applying managed infrastructure. Bicep preview binds exact compiled-template, concrete-parameter, and semantic
+resource-graph digests. Terraform planning can acquire and release a remote-state backend lease and therefore requires
+the corresponding backend permission; it additionally requires Phase 4 Ed25519 provenance tying the saved plan to an
+atomic source snapshot. Apply verifies both
 trust anchors, compiles Bicep template and parameters once into read-only ARM JSON when selected, rechecks the exact
 target, executes only incremental Bicep or the exact saved Terraform plan, and blocks workloads unless every platform
 check passes. Preview and approval bind the documented owner-protected local replay store at the fixed
@@ -282,8 +289,9 @@ derived from the bundled artifacts. Replay and trusted-digest storage remain the
 executor; the lineage builder does not create or update them.
 
 The canonical greenfield report schema is now v2. Older v1 reports fail closed because they do not contain the required
-program envelope and readiness separation. The report and envelope identify evidence as `synthetic` or `live`; the
-checked-in journey uses sanitized synthetic fixtures exclusively.
+program-lineage identity and readiness separation. The report references the separately emitted envelope by exact
+envelope and program identity digests. The report and envelope identify evidence as `synthetic` or `live`; the checked-in
+journey uses sanitized synthetic fixtures exclusively.
 
 This SSLZ increment adds only planner scripts, schemas, examples, catalog entries, and validation wiring. It does not
 modify the `infra/bicep` or `infra/terraform` modules, parameters, or resources, so no Bicep/Terraform parity change is

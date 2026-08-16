@@ -7,6 +7,11 @@ description: "Read-only private connectivity, DNS, workload identity, and egress
 
 # Dual-Cloud Connectivity, DNS, Identity, and Egress Planning
 
+[PR #26](https://github.com/ricmmartins/sslz/pull/26) delivered this planner. It is execution-disabled and validated with
+synthetic fixtures and hosted CI; the repository has no current-main live tunnel, routing, DNS, federation, egress,
+coexistence, cutover, or failback evidence. See the
+[implementation and evidence matrix](implementation-status.md).
+
 This increment assesses supplied private connectivity, DNS, workload identity, and egress metadata and generates a
 deterministic plan for connecting an AWS, GCP, or generic/on-prem source network to Azure over AWS Direct Connect, AWS
 Site-to-Site VPN, GCP Cloud Interconnect, GCP Cloud VPN, or a generic/on-prem ExpressRoute or IPsec VPN circuit,

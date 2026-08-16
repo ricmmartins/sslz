@@ -101,6 +101,10 @@ The contract separates:
 
 ## Modes
 
+Only `inspect` is implemented by `startup-preflight.sh`. Planning and approved writes are implemented by separate,
+scope-limited commands; the table defines the shared result semantics rather than granting preflight a generic apply
+surface.
+
 | Mode | Azure reads | Azure writes | Intended use |
 |---|---:|---:|---|
 | `inspect` | Yes | No | Discover account and workload readiness |
@@ -236,7 +240,7 @@ The deployment plan records decisions, not secrets or complete IaC output.
       "subscriptionId": "<prod-id>",
       "primaryRegion": "eastus2",
       "secondaryRegion": "centralus",
-      "regionalMode": "hot-cool"
+      "regionalMode": "single-region-ready"
     }
   ],
   "services": [
@@ -419,15 +423,18 @@ unsupported regions, stale evidence, scope mismatch, and ambiguous/default place
 }
 ```
 
-## Acceptance criteria
+## Acceptance criteria and coverage
 
-The first implementation of this contract must:
+The schema and the `startup-preflight inspect` producer are implemented. Current validation confirms that the inspect
+producer:
 
-1. emit valid JSON without changing Azure in `inspect` and `plan` modes;
-2. produce identical status semantics for the same mocked Azure responses;
-3. reject unsupported major versions;
-4. prevent plan creation when blocking checks are unresolved;
-5. bind approval to a stable plan digest;
-6. redact sensitive values before output;
-7. include an official documentation URL for every check and action;
-8. preserve the existing human-readable preflight output by default.
+1. emits valid JSON without changing Azure;
+2. produces identical status semantics for the same mocked Azure responses;
+3. rejects unsupported major versions;
+4. redacts sensitive values before output;
+5. includes an official documentation URL for every check and action;
+6. preserves the existing human-readable preflight output by default.
+
+`plan` and `apply` are reserved schema vocabulary; `startup-preflight` does not produce those modes. The separate,
+scope-limited planning and write commands use their own contracts to prevent plan creation while blocking checks remain
+and to bind approval to stable plan digests.

@@ -7,6 +7,12 @@ description: "Privacy-preserving evidence bound to IaC and deployment approval"
 
 # Readiness Evidence Contract
 
+## Status
+
+The contract and validator are implemented, but checked-in evidence is synthetic. Contract validity does not prove that
+the referenced tenant, billing, review, owner, capacity, recovery, or workload evidence exists in a protected live
+system. See the [implementation and evidence matrix](implementation-status.md).
+
 ## Purpose
 
 [`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json) is the no-write `3.0.0` contract that

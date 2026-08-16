@@ -18,26 +18,32 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 
 ## Agent-aware journey on `main`
 
-The current `main` branch includes the additive agent-aware founder journey: account/topology preflight, workload and
-regional planning, PostgreSQL fallback, IaC review, readiness-bound baseline approval, provider remediation, regional
-retry, and AKS ingress/postcheck contracts. It also emits a separate execution-disabled program-lineage envelope that
-binds PostgreSQL migration, rehearsal, and execution-contract planning to container image/CI/CD and dual-cloud
-connectivity planning without extending baseline deployment authority. Run its package-free synthetic end-to-end
-validation with:
+The current `main` branch includes delivered account/topology preflight, workload and regional planning, PostgreSQL
+fallback, IaC review, approval-gated provider remediation and primary baseline deployment paths, regional retry, and AKS
+ingress/postcheck contracts. Phase 7 secondary-region artifacts and the PostgreSQL migration, container image/CI/CD, and
+dual-cloud programs are planning-only and execution-disabled.
+
+The canonical greenfield report is version `2.0.0`. It references a separately emitted, execution-disabled
+program-lineage envelope for PostgreSQL migration, image/CI, and dual-cloud connectivity by exact envelope and program
+identity digests, without extending the signed primary-baseline authority.
+See the [authoritative implementation and evidence matrix](docs/implementation-status.md) before interpreting a passing
+plan or test as live readiness. Run the package-free synthetic end-to-end validation with:
 
 ```bash
 node scripts/validate-greenfield-journey.mjs
 ```
 
 This command uses deterministic fixtures and mocks, writes review artifacts only under ignored `.sslz/` paths, performs
-no Azure operations, and needs no Azure login or live tenant. It requires Node.js and the local Bicep CLI installed by
+no Azure operations, and needs no Azure login or live tenant. It is local synthetic evidence, not a live deployment,
+migration, recovery, image-promotion, or connectivity test. It requires Node.js and the local Bicep CLI installed by
 `az bicep install`, but no npm install or project dependency restore. Its sanitized v2 report follows
 [`agent/schemas/greenfield-journey-report.schema.json`](agent/schemas/greenfield-journey-report.schema.json) and
 separates baseline deployment readiness from non-executable migration and dual-cloud planning readiness.
 
 These capabilities describe the latest `main`; a tagged release contains only the features documented by that tag.
-The [Quick Start](#quick-start) below remains the baseline direct Bicep/Terraform deployment path and does not
-automatically invoke the agent orchestrators or their approvals.
+The [Quick Start](#quick-start) below is a direct operator Bicep/Terraform path. It does not invoke the agent plan,
+provider-remediation approval, or signed deployment approval; the operator owns its access, review, state, validation,
+and rollback.
 
 ## Background
 
@@ -303,6 +309,7 @@ Pre-built configurations for common startup archetypes:
 
 ## Documentation
 
+- [Implementation and Evidence Status](docs/implementation-status.md) — Authoritative delivery, authority, evidence, and next-gate matrix
 - [Architecture Decisions](docs/architecture.md) — Why this layout, what we skipped, and when to revisit
 - [Resource Inventory](docs/resource-inventory.md) — Complete list of every Azure resource created
 - [Networking Deep Dive](docs/networking.md) — VNet design, NSGs, when you need a hub

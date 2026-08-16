@@ -2,15 +2,18 @@
 layout: page
 title: "Startup Agent Flow"
 nav_order: 8
-description: "Design proposal for agent-assisted Azure account and SSLZ setup"
+description: "Implemented and planned agent-assisted Azure account and SSLZ setup"
 ---
 
 # Startup Agent Flow
 
 ## Status
 
-Phases 1-7 are implemented as additive wrappers around the existing SSLZ deployment flow. The account topology path
-described below is read-only and does not change Azure.
+Phases 0-6 have delivered contract, planning, or narrowly approval-gated implementation. Phase 7 has delivered
+execution-disabled cool-foundation and Container Apps planning artifacts, but no secondary-region executor. The
+PostgreSQL migration, image/CI, dual-cloud connectivity, and program-lineage surfaces are also delivered as planning and
+validation contracts without execution authority. See the
+[authoritative implementation and evidence matrix](implementation-status.md).
 
 The canonical current-`main` validation command is:
 
@@ -18,7 +21,7 @@ The canonical current-`main` validation command is:
 node scripts/validate-greenfield-journey.mjs
 ```
 
-It runs the complete synthetic founder journey through production contracts with deterministic mocks, including
+It runs the integrated synthetic founder journey through repository contracts with deterministic mocks, including
 fail-closed negative journeys, a separately signed synthetic observed AKS acceptance, and an execution-disabled
 cross-program lineage envelope. It performs no Azure writes or live-tenant reads. It requires Node.js and the local
 Bicep CLI installed by `az bicep install`, but no npm install or project dependency restore. Tagged releases expose only
@@ -190,11 +193,12 @@ For each candidate region, check:
 
 ### Hot/Cool startup topology
 
-The Hot/Cool option is an opt-in workload profile, not the default for every startup.
+The Hot/Cool option is an opt-in conceptual target, not the default for every startup. The table describes intended
+topology, not current deployment evidence or execution support.
 
 | Layer | Primary region (Hot) | Secondary region (Cool) |
 |---|---|---|
-| SSLZ baseline | Deployed | Deployed |
+| SSLZ baseline | Deployable through the approved Phase 6 primary path | Planning representation only |
 | Networking | Deployed | Deployed with non-overlapping address space |
 | Observability | Active | Ready to receive regional telemetry |
 | Application compute | Active and scaled normally | Minimum viable scale or deployment-ready, based on RTO |
@@ -221,8 +225,9 @@ available there.
 See [Hot/Cool Regional Topology](hot-cool-regional-topology.md) for entry criteria, service-specific recovery, cost
 controls, and testing requirements.
 
-The first planner release marks only current `single-region-ready` output as executable readiness. A
-`cool-infrastructure` or `warm-workload` request remains review-only and generates no IaC or Azure operations.
+The regional planner marks only current `single-region-ready` output as executable readiness. A `cool-infrastructure`
+or `warm-workload` recommendation remains review-only and performs no Azure operation. Separate Phase 7 planners can
+generate execution-disabled provider representations, but Phase 6 will not preview or apply them.
 
 ## Phase 4: Plan and approval
 
@@ -303,7 +308,7 @@ sequence of real planner outputs:
 Each stage binds the exact artifact digest and predecessor stage digest. The final program identity and envelope digests
 therefore change when any upstream artifact, target, environment, lineage, order, or cross-program binding changes.
 Duplicate, omitted, out-of-order, stale, replayed, mismatched, or substituted artifacts fail closed. The fixtures invoke
-the production planner modules with sanitized synthetic evidence; they do not assert against planner source text.
+the repository planner modules with sanitized synthetic evidence; they do not assert against planner source text.
 
 The envelope does not authorize execution. Every stage sets `executionEnabled`, `executionEligible`, and
 `executionAllowed` to false and names a distinct future approval. The existing baseline approval remains limited to
@@ -315,42 +320,24 @@ The canonical greenfield journey report is v2 and requires this envelope identit
 is intentionally rejected rather than accepted with incomplete lineage. See
 [Program Lineage Envelope](program-lineage-envelope.md).
 
-## Agent result contract
+## Agent result contracts
 
-Checks should eventually support a versioned machine-readable result. The complete design is in the
-[Preflight Result Contract](preflight-result-contract.md). This is a design target, not an implemented interface.
-
-```json
-{
-  "schemaVersion": "1.0",
-  "planId": "generated-identifier",
-  "mode": "plan",
-  "checks": [
-    {
-      "id": "account.subscription.tenant-match",
-      "status": "pass",
-      "severity": "blocking",
-      "summary": "The selected subscriptions belong to the intended tenant.",
-      "evidence": {
-        "tenantId": "<tenant-id>",
-        "subscriptionIds": ["<prod-id>", "<nonprod-id>"]
-      },
-      "automaticRemediation": false,
-      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
-    }
-  ],
-  "requiresApproval": true
-}
-```
+The versioned machine-readable result schemas are implemented. `startup-preflight` produces the `inspect` result;
+scope-limited commands produce the separate provider-remediation, deployment, readiness, regional-attempt,
+greenfield-report, and program-lineage contracts linked from [`agent/README.md`](../agent/README.md). The complete
+shared preflight semantics, including reserved modes without a generic producer, are in the
+[Preflight Result Contract](preflight-result-contract.md). Use the checked-in
+[`ready-container-apps.json`](../agent/examples/ready-container-apps.json) and
+[`blocked-billing.json`](../agent/examples/blocked-billing.json) specimens rather than copying an abbreviated contract.
 
 Do not include access tokens, secrets, full billing records, personal email addresses, or other unnecessary personal
 data in this output.
 
-## Initial acceptance criteria
+## Delivered baseline criteria
 
-The first implementation is complete when it can:
+The delivered contract and agent-gated planner baseline can:
 
-1. run without changing Azure in plan mode;
+1. inspect and plan without changing Azure;
 2. identify the active account, tenant, and explicit target subscriptions;
 3. detect tenant mismatch and missing required roles;
 4. report missing providers without registering them automatically;
@@ -358,10 +345,14 @@ The first implementation is complete when it can:
 6. ask the workload questions and select Container Apps or AKS with a reason;
 7. evaluate a primary and optional secondary region without claiming capacity is guaranteed;
 8. produce a reviewable deployment plan;
-9. require explicit approval before any write operation;
-10. leave the existing manual Bicep and Terraform workflows unchanged.
+9. require explicit, artifact-bound approval before an agent-gated write operation.
 
-## Out of scope for the first implementation
+Direct operator Bicep and Terraform commands remain a separate, non-agent path. The `deploy-bicep.yml` and
+`deploy-terraform.yml` workflows require Phase 6 artifacts and invoke the approval-gated deployment integration. The
+separate `integration-test.yml` write path is a manually dispatched disposable-nonproduction test path protected by
+`integration-nonprod`; it is outside the agent approval flow and is not a landing-zone delivery path.
+
+## Out of scope or still separately gated
 
 - automatic credit redemption or entitlement transfer;
 - unattended privileged role assignments;
