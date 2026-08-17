@@ -20,6 +20,8 @@
   "authorityBoundary": {
     "baselineApprovalScope": "greenfield-platform-deployment-only",
     "excludedAuthorities": [
+      "provider-registration",
+      "platform-deployment",
       "container-image-promotion",
       "database-migration-writes",
       "dns-changes",
@@ -27,7 +29,13 @@
       "egress-changes",
       "identity-changes",
       "migration-cutover",
-      "migration-rollback-or-failback"
+      "migration-rollback-or-failback",
+      "certificate-issuance-or-renewal",
+      "secret-store-or-rotation-writes",
+      "pipeline-or-artifact-promotion-writes",
+      "application-configuration-or-feature-flag-writes",
+      "traffic-database-or-application-writes",
+      "backup-or-restore-operations"
     ],
     "futureApprovalRequired": true
   },
@@ -157,6 +165,18 @@
       "executionAllowed": false,
       "requiredFutureAuthority": "connectivity-dns-identity-egress-authorities",
       "stageDigest": "sha256:3618593348bff824d1dca8011e457b10a2e26be05d3077b1845ea017213cc926"
+    },
+    {
+      "id": "control-plane-ownership-planning",
+      "status": "ready-for-human-review",
+      "evidenceMode": "synthetic",
+      "artifactDigest": "sha256:203d3f9249ec29676129206c057aec9ea0a30d29de04cea7fc19576d03fd8f5b",
+      "predecessorDigest": "sha256:3618593348bff824d1dca8011e457b10a2e26be05d3077b1845ea017213cc926",
+      "executionEnabled": false,
+      "executionEligible": false,
+      "executionAllowed": false,
+      "requiredFutureAuthority": "capability-specific-live-control-plane-authorities",
+      "stageDigest": "sha256:cb6d892b80b99830d5fab440dfa038fc640a046a4bf4d93fe39af1fac976dfb7"
     }
   ],
   "safety": {
@@ -173,6 +193,6 @@
     "generatedCommands": "none",
     "generatedArtifacts": "stdout-only"
   },
-  "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a",
-  "envelopeDigest": "sha256:80d4da21c71c2911ca83b9d867666978734a4ac64e342ccb134e27a3fbe0659d"
+  "programIdentityDigest": "sha256:57134050889e4d9f389a8f838c9cf5220756006454ea9f1ca464214d18a5aed2",
+  "envelopeDigest": "sha256:07b52c19108387d8340a58c27589a124924a2d15c2735d8e54eafff4e7140129"
 }

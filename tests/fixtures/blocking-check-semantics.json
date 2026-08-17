@@ -1400,6 +1400,97 @@
       "source": "scripts/startup-program-lineage.mjs",
       "passState": "pass",
       "blockingStates": ["execution-enabled", "approval-scope-widened"]
+    },
+    {
+      "id": "control.ownership.artifacts-bound",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["tampered", "environment-mismatch", "target-mismatch", "artifact-substitution"]
+    },
+    {
+      "id": "control.ownership.raci-complete",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing-accountable", "missing-responsible", "omitted", "duplicate"]
+    },
+    {
+      "id": "control.ownership.authority-unambiguous",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["ambiguous", "authority-substitution", "conflicting-owner"]
+    },
+    {
+      "id": "control.ownership.separation-of-duties",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["self-approval", "missing-approval-authority"]
+    },
+    {
+      "id": "control.ownership.escalation-acyclic",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["circular", "self-escalation"]
+    },
+    {
+      "id": "control.ownership.source-of-truth-authorized",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["unapproved-transfer", "missing-handoff"]
+    },
+    {
+      "id": "control.ownership.rollback-failback-owned",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["ownerless-rollback", "ownerless-failback"]
+    },
+    {
+      "id": "control.ownership.evidence-current",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["stale", "expired", "future-dated"]
+    },
+    {
+      "id": "control.ownership.handoff-integrity",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["tampered", "unaccepted", "offered-by-mismatch", "accepted-by-mismatch"]
+    },
+    {
+      "id": "control.ownership.replay-protected",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["replayed-attempt", "replayed-handoff", "duplicate-evidence"]
+    },
+    {
+      "id": "control.ownership.transition-order-valid",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["omitted", "duplicate", "out-of-order"]
+    },
+    {
+      "id": "control.ownership.lineage-monotonic",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["gap", "non-monotonic"]
+    },
+    {
+      "id": "control.ownership.safety-enforced",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["execution-enabled", "live-operations-enabled"]
     }
   ]
 }

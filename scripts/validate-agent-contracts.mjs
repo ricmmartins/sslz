@@ -423,6 +423,15 @@ function main() {
   const connectivityPlanSchema = load(
     "agent/schemas/connectivity-plan.schema.json",
   );
+  const controlPlaneOwnershipPlanInputSchema = load(
+    "agent/schemas/control-plane-ownership-plan-input.schema.json",
+  );
+  const controlPlaneOwnershipTrustedBindingsSchema = load(
+    "agent/schemas/control-plane-ownership-trusted-bindings.schema.json",
+  );
+  const controlPlaneOwnershipPlanSchema = load(
+    "agent/schemas/control-plane-ownership-plan.schema.json",
+  );
   const iacPlanInputSchema = load("agent/schemas/iac-plan-input.schema.json");
   const iacPlanInputV2Schema = load(
     "agent/schemas/iac-plan-input-v2.schema.json",
@@ -535,6 +544,15 @@ function main() {
   );
   const connectivityPlanInput = load(
     "agent/examples/connectivity-plan-input.json",
+  );
+  const controlPlaneOwnershipPlanInput = load(
+    "agent/examples/control-plane-ownership-plan-input.json",
+  );
+  const controlPlaneOwnershipTrustedBindings = load(
+    "agent/examples/control-plane-ownership-trusted-bindings.json",
+  );
+  const controlPlaneOwnershipPlan = load(
+    "agent/examples/control-plane-ownership-plan.json",
   );
   const readyExample = load("agent/examples/ready-container-apps.json");
   const blockedExample = load("agent/examples/blocked-billing.json");
@@ -659,6 +677,18 @@ function main() {
     connectivityPlanSchema.$id,
     "https://aka.ms/sslz/schemas/connectivity-plan.schema.json",
   );
+  validateDocument(
+    controlPlaneOwnershipPlanInputSchema,
+    controlPlaneOwnershipPlanInput,
+  );
+  validateDocument(
+    controlPlaneOwnershipTrustedBindingsSchema,
+    controlPlaneOwnershipTrustedBindings,
+  );
+  validateDocument(
+    controlPlaneOwnershipPlanSchema,
+    controlPlaneOwnershipPlan,
+  );
   assert.equal(
     iacPlanInputSchema.$id,
     "https://aka.ms/sslz/schemas/iac-plan-input.schema.json",
@@ -773,6 +803,14 @@ function main() {
     greenfieldJourneyReport.bindings.programIdentityDigest,
     programLineageEnvelope.programIdentityDigest,
   );
+  assert.equal(
+    greenfieldJourneyReport.controlPlaneOwnership.planDigest,
+    controlPlaneOwnershipPlan.planDigest,
+  );
+  assert.equal(
+    programLineageEnvelope.stages.at(-1).artifactDigest,
+    controlPlaneOwnershipPlan.planDigest,
+  );
   assert.throws(
     () =>
       validateDocument(greenfieldJourneyReportSchema, {
@@ -831,6 +869,9 @@ function main() {
     postgresqlExecutionTrust,
     containerImageCicdPlanInput,
     connectivityPlanInput,
+    controlPlaneOwnershipPlanInput,
+    controlPlaneOwnershipTrustedBindings,
+    controlPlaneOwnershipPlan,
     readyExample,
     blockedExample,
     providerRegistrationApproval,

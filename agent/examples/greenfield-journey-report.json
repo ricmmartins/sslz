@@ -10,6 +10,42 @@
       "status": "pass"
     },
     {
+      "id": "topology",
+      "status": "pass"
+    },
+    {
+      "id": "provider-remediation",
+      "status": "pass"
+    },
+    {
+      "id": "workload-discovery",
+      "status": "pass"
+    },
+    {
+      "id": "regional-planning",
+      "status": "pass"
+    },
+    {
+      "id": "defender-placement",
+      "status": "pass"
+    },
+    {
+      "id": "regional-retry",
+      "status": "pass"
+    },
+    {
+      "id": "iac-plan",
+      "status": "pass"
+    },
+    {
+      "id": "readiness-approval",
+      "status": "pass"
+    },
+    {
+      "id": "deployment-preparation",
+      "status": "pass"
+    },
+    {
       "id": "aks-planning-postcheck",
       "status": "not-observed"
     },
@@ -20,9 +56,319 @@
     {
       "id": "program-lineage",
       "status": "pass"
+    },
+    {
+      "id": "postgresql-migration-planning",
+      "status": "pass"
+    },
+    {
+      "id": "postgresql-rehearsal-planning",
+      "status": "pass"
+    },
+    {
+      "id": "postgresql-execution-contract-planning",
+      "status": "pass"
+    },
+    {
+      "id": "container-image-cicd-planning",
+      "status": "pass"
+    },
+    {
+      "id": "dual-cloud-connectivity-planning",
+      "status": "pass"
+    },
+    {
+      "id": "control-plane-ownership-planning",
+      "status": "pass"
     }
   ],
   "blockerTransitions": [
+    {
+      "checkId": "billing.subscription.credit-association",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:20b93de35408d31952ca6a604c0929afa2d7a5a2c2721ca8256a9e6ef6a9239f"
+        }
+      ]
+    },
+    {
+      "checkId": "billing.target-benefit.topology-confirmed",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:9a98c7f6f5d23d7fd4afb2a669f24cbc85347371275b0aa26012e1d59a8415f2"
+        }
+      ]
+    },
+    {
+      "checkId": "readiness.support.startup-confirmed",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:9a98c7f6f5d23d7fd4afb2a669f24cbc85347371275b0aa26012e1d59a8415f2"
+        }
+      ]
+    },
+    {
+      "checkId": "quota.workload.headroom",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.services.available",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.skus.eligible",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "operations.aks-owner.confirmed",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "network.aks-ingress.decision-explicit",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "network.aks-ingress.provider-parity",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "security.defender.selection-reviewed",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "operations.monitoring.destination-valid",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.policy.allowed-locations",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.data-residency.compatible",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.availability-zones.supported",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.postgresql.edition-version-supported",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.postgresql.extensions-supported",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "quota.postgresql.eligible",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "capacity.postgresql.available",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.postgresql.recovery-supported",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "workload.postgresql.provider-parity",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "region.foundry-model.available",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
+    {
+      "checkId": "workload.managed-model-fit.reviewed",
+      "transitions": [
+        {
+          "status": "unresolved",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a"
+        }
+      ]
+    },
     {
       "checkId": "account.provider.required-registrations",
       "transitions": [
@@ -32,33 +378,91 @@
         },
         {
           "status": "pass",
-          "evidenceDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+          "evidenceDigest": "sha256:00d0e946a67159146104b17eefe6ea97c68fdbce0922e4bbd9d0d224d09f4ac4"
+        }
+      ]
+    },
+    {
+      "checkId": "regional.retry.cleanup-complete",
+      "transitions": [
+        {
+          "status": "blocked",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:2c6feb30759f07aa5562e0800682313123857ba6e9e6c2c2a0f89d30540b62f8"
+        }
+      ]
+    },
+    {
+      "checkId": "regional.retry.binding-current",
+      "transitions": [
+        {
+          "status": "blocked",
+          "evidenceDigest": null
+        },
+        {
+          "status": "pass",
+          "evidenceDigest": "sha256:40f3daa78fc0c1db97074968ed22ab51ae3574687e03536d3ce57d7b7dceb468"
         }
       ]
     }
   ],
   "bindings": {
-    "topologyDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
-    "planDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
-    "approvalDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
-    "programLineageEnvelopeDigest": "sha256:80d4da21c71c2911ca83b9d867666978734a4ac64e342ccb134e27a3fbe0659d",
-    "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a"
+    "topologyDigest": "sha256:20b93de35408d31952ca6a604c0929afa2d7a5a2c2721ca8256a9e6ef6a9239f",
+    "workloadPlanDigest": "sha256:0790930bf4b6fc003016bbdea2cd463c800c25032098ae452b99d69c8be6081a",
+    "regionalPlanDigest": "sha256:4c30d0bca32830228412969a31e662c9c577bc6f903be1cc30ae723834785af2",
+    "postgresqlDecisionDigest": "sha256:c7880cfbd0f655bfffb210409ac62eff4a15c248c98533aaf6094be99b777a77",
+    "defenderDecisionDigest": "sha256:9a6f5fbac39ac81adb850c38ae64ecbfcafa0133c7a5d881626f10da76d3d120",
+    "aksDecisionDigest": "sha256:6eef663c44f415b0e05d74e802f0406c46f97349026a5417291b7df420675660",
+    "providerExecutionDigest": "sha256:d2e2171f0682417baf50c49eeb32709cbf97a3fb4ea4efb3a6b5875438c5dec8",
+    "readinessDigest": "sha256:c73ef25d3ebd4cea602fcc35c6f263d9641ca489744f863d3326b80d6a7d185f",
+    "planDigest": "sha256:4d853262c3b5a8be2d73249e5572bb83134d550e9e620a24e910b3da36d70ecc",
+    "manifestDigest": "sha256:0d5b8e4f5db3c96cfdb1c6c768b5c2be24ce4adae278cff8bff6be2864925b6a",
+    "approvalDigest": "sha256:2c766019e5c4d17d547d0b5cb08f99eaed76a36d275af39f868f54639da9fec4",
+    "acceptanceEvidenceDigest": "sha256:79e7fd0281c443f832700606d2b7ff4d7f000f94c9d27a45000ec2dcb8c1631b",
+    "programLineageEnvelopeDigest": "sha256:07b52c19108387d8340a58c27589a124924a2d15c2735d8e54eafff4e7140129",
+    "programIdentityDigest": "sha256:57134050889e4d9f389a8f838c9cf5220756006454ea9f1ca464214d18a5aed2",
+    "controlPlaneOwnershipPlanDigest": "sha256:203d3f9249ec29676129206c057aec9ea0a30d29de04cea7fc19576d03fd8f5b"
   },
   "artifacts": [
     {
       "provider": "bicep",
+      "environment": "nonprod",
+      "region": "centralus",
+      "digest": "sha256:0864e6a5dee9ea6ba0e10b9168912bf923d4a4852ef7bb6f28a58c60f6381ec6"
+    },
+    {
+      "provider": "bicep",
       "environment": "prod",
       "region": "centralus",
-      "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+      "digest": "sha256:5a35b418f2d7661f17c44411dace6834901a249a334083c835523c084a723fe9"
+    },
+    {
+      "provider": "terraform",
+      "environment": "nonprod",
+      "region": "centralus",
+      "digest": "sha256:9d65f6ce637a0623e5ded869d4348a630ec077c0a66c3b86fa6b1d3d2577f27d"
     },
     {
       "provider": "terraform",
       "environment": "prod",
       "region": "centralus",
-      "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+      "digest": "sha256:04b229808a9f94f5c9d4213ef00b1e64ad536237b17628905345a9590e4493f1"
     }
   ],
   "negativeJourneys": [
+    {
+      "id": "benefits-wrong-subscription",
+      "status": "blocked",
+      "failedAtStage": "preflight",
+      "blockerIds": [
+        "billing.subscription.credit-association"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Available benefit evidence points to a different subscription or billing profile than the workload target."
+    },
     {
       "id": "provider-remediation-not-approved",
       "status": "blocked",
@@ -67,7 +471,207 @@
         "remediation.approval.required"
       ],
       "writePreparationEvents": 0,
-      "diagnostic": "Provider remediation approval is required."
+      "diagnostic": "Apply requires an explicit provider-remediation approval artifact."
+    },
+    {
+      "id": "no-postgresql-fallback",
+      "status": "blocked",
+      "failedAtStage": "regional-planning",
+      "blockerIds": [
+        "region.postgresql.edition-version-supported"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "The exact PostgreSQL edition, tier, SKU, or engine version is unsupported."
+    },
+    {
+      "id": "defender-workspace-denied",
+      "status": "blocked",
+      "failedAtStage": "defender-placement",
+      "blockerIds": [
+        "workspace.region-denied"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "The explicit Defender workspace region is denied."
+    },
+    {
+      "id": "cleanup-incomplete",
+      "status": "blocked",
+      "failedAtStage": "regional-retry",
+      "blockerIds": [
+        "regional.retry.cleanup-complete"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Cleanup failure or pending cleanup blocks regional replan."
+    },
+    {
+      "id": "reused-regional-evidence",
+      "status": "blocked",
+      "failedAtStage": "regional-retry",
+      "blockerIds": [
+        "regional.retry.binding-current"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Changed-region retry cannot reuse the prior regionalEvidenceDigest."
+    },
+    {
+      "id": "stale-approval",
+      "status": "blocked",
+      "failedAtStage": "approval",
+      "blockerIds": [
+        "deployment.approval.expired"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "The approval has expired."
+    },
+    {
+      "id": "mutable-image",
+      "status": "blocked",
+      "failedAtStage": "iac-plan",
+      "blockerIds": [
+        "cool.container-apps.image-immutable"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "The image is mutable or lacks an explicit approval attestation."
+    },
+    {
+      "id": "public-aks-private-mode",
+      "status": "blocked",
+      "failedAtStage": "aks-ingress",
+      "blockerIds": [
+        "network.aks-ingress.architecture-review"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Private AKS ingress supports ClusterIP only and forbids public LoadBalancer or NodePort exposure."
+    },
+    {
+      "id": "unhealthy-postcheck",
+      "status": "blocked",
+      "failedAtStage": "postcheck",
+      "blockerIds": [
+        "network.aks-ingress.postcheck-current"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Fresh observed health and reachability evidence is required for AKS ingress acceptance or recovery."
+    },
+    {
+      "id": "stale-postcheck",
+      "status": "blocked",
+      "failedAtStage": "postcheck",
+      "blockerIds": [
+        "network.aks-ingress.postcheck-current"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Fresh observed health and reachability evidence is required for AKS ingress acceptance or recovery."
+    },
+    {
+      "id": "mismatched-postcheck",
+      "status": "blocked",
+      "failedAtStage": "postcheck",
+      "blockerIds": [
+        "network.aks-ingress.postcheck-current"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "AKS ingress postcheck expectations do not match the reviewed ingress decision."
+    },
+    {
+      "id": "program-upstream-mutation",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.digests-current"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "PostgreSQL migration plan digest does not match its canonical content."
+    },
+    {
+      "id": "program-stale-evidence",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.evidence-current"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "container.sourceAssessment evidence must be observed and unexpired at program generation time."
+    },
+    {
+      "id": "program-artifact-omission",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.artifacts-complete"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Program lineage input is incomplete or invalid: $: missing required property connectivity"
+    },
+    {
+      "id": "program-lineage-replay",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.replay-protected"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Program lineage attempt ordinal and nonce must be new and monotonic."
+    },
+    {
+      "id": "program-duplicate-stage",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.stage-order-valid"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Program stages must be complete, unique, and in canonical order."
+    },
+    {
+      "id": "program-out-of-order-stage",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.stage-order-valid"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Program stages must be complete, unique, and in canonical order."
+    },
+    {
+      "id": "program-target-mismatch",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.target-bound"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "All program artifacts must bind the exact baseline region, environment, and PostgreSQL target aliases."
+    },
+    {
+      "id": "program-lineage-mismatch",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.lineage-bound"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Program stage predecessor and content digests must form one exact chain."
+    },
+    {
+      "id": "program-cross-artifact-substitution",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.cross-program-bound"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Container and connectivity planners must bind the exact baseline and preceding program artifacts."
+    },
+    {
+      "id": "program-ownership-artifact-substitution",
+      "status": "blocked",
+      "failedAtStage": "program-lineage",
+      "blockerIds": [
+        "program.lineage.cross-program-bound"
+      ],
+      "writePreparationEvents": 0,
+      "diagnostic": "Control-plane ownership must reproduce a ready, exact-target, execution-disabled plan bound to the predecessor envelope."
     }
   ],
   "readinessSummary": {
@@ -86,26 +690,55 @@
     "schemaVersion": "1.0.0",
     "status": "ready-for-human-review",
     "evidenceMode": "synthetic",
-    "envelopeDigest": "sha256:80d4da21c71c2911ca83b9d867666978734a4ac64e342ccb134e27a3fbe0659d",
-    "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a"
+    "envelopeDigest": "sha256:07b52c19108387d8340a58c27589a124924a2d15c2735d8e54eafff4e7140129",
+    "programIdentityDigest": "sha256:57134050889e4d9f389a8f838c9cf5220756006454ea9f1ca464214d18a5aed2"
+  },
+  "controlPlaneOwnership": {
+    "schemaVersion": "1.0.0",
+    "status": "ready-for-human-review",
+    "evidenceMode": "synthetic",
+    "sourceProvider": "aws",
+    "predecessorEnvelopeDigest": "sha256:61d4ad3240bc004a56bd26152b8cf73cb789247a2ffccce1c21af66e8e3359a6",
+    "planDigest": "sha256:203d3f9249ec29676129206c057aec9ea0a30d29de04cea7fc19576d03fd8f5b",
+    "executionAllowed": false
   },
   "diagnostics": {
     "sanitized": true,
     "azureWrites": 0,
     "liveTenantDependency": false,
+    "mockedAzureWriteEvents": 1,
     "preflightRunId": "synthetic-greenfield-preflight",
     "deploymentPreparation": {
       "status": "prepared",
       "executionMode": "mock",
       "writeEvents": 0,
-      "writePreparationEvents": 1
+      "writePreparationEvents": 1,
+      "manifestDigest": "sha256:0d5b8e4f5db3c96cfdb1c6c768b5c2be24ce4adae278cff8bff6be2864925b6a",
+      "approvalDigest": "sha256:2c766019e5c4d17d547d0b5cb08f99eaed76a36d275af39f868f54639da9fec4",
+      "productionContract": "buildDeploymentManifest"
     },
     "planningPostcheck": {
-      "status": "not-observed",
-      "liveConnectivityClaimed": false
+      "contractVersion": "1.0.0",
+      "decisionDigest": "sha256:6eef663c44f415b0e05d74e802f0406c46f97349026a5417291b7df420675660",
+      "serviceType": "LoadBalancer",
+      "frontendExposure": "public",
+      "frontendPort": 80,
+      "backendNodePort": 30080,
+      "expectedHealthState": "healthy",
+      "expectedReachability": "reachable",
+      "observedHealthState": "not-observed",
+      "observedReachability": "not-observed",
+      "observedAt": null,
+      "expiresAt": null,
+      "evidenceReference": null,
+      "liveConnectivityClaimed": false,
+      "status": "not-observed"
     },
     "acceptancePostcheck": {
       "status": "pass",
+      "liveConnectivityClaimed": true,
+      "evidenceDigest": "sha256:79e7fd0281c443f832700606d2b7ff4d7f000f94c9d27a45000ec2dcb8c1631b",
+      "approvalDigest": "sha256:36c657492f0e1750f79e9a92f25395c3f0f935aa1576f5d0f6d937bec7ec89fa",
       "signatureAlgorithm": "Ed25519"
     }
   }

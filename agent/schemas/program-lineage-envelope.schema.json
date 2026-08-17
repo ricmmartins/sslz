@@ -74,7 +74,7 @@
         },
         "excludedAuthorities": {
           "type": "array",
-          "minItems": 8,
+          "minItems": 14,
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/reference" }
         },
@@ -167,7 +167,7 @@
     "stages": {
       "type": "array",
       "minItems": 5,
-      "maxItems": 5,
+      "maxItems": 6,
       "items": {
         "type": "object",
         "additionalProperties": false,

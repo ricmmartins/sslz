@@ -25,6 +25,10 @@ import {
   planConnectivity,
   connectivityPlanDigest,
 } from "./startup-connectivity-plan.mjs";
+import {
+  controlPlaneOwnershipDigest,
+  planControlPlaneOwnership,
+} from "./startup-control-plane-ownership-plan.mjs";
 import { validateDocument } from "./validate-agent-contracts.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -50,7 +54,13 @@ const PROGRAM_STAGE_ORDER = Object.freeze([
   "container-image-cicd-planning",
   "dual-cloud-connectivity-planning",
 ]);
+const FINAL_PROGRAM_STAGE_ORDER = Object.freeze([
+  ...PROGRAM_STAGE_ORDER,
+  "control-plane-ownership-planning",
+]);
 const EXCLUDED_AUTHORITIES = Object.freeze([
+  "provider-registration",
+  "platform-deployment",
   "container-image-promotion",
   "database-migration-writes",
   "dns-changes",
@@ -59,6 +69,12 @@ const EXCLUDED_AUTHORITIES = Object.freeze([
   "identity-changes",
   "migration-cutover",
   "migration-rollback-or-failback",
+  "certificate-issuance-or-renewal",
+  "secret-store-or-rotation-writes",
+  "pipeline-or-artifact-promotion-writes",
+  "application-configuration-or-feature-flag-writes",
+  "traffic-database-or-application-writes",
+  "backup-or-restore-operations",
 ]);
 const FUTURE_AUTHORITIES = Object.freeze({
   "postgresql-migration-planning": "postgresql-migration-stage-approvals",
@@ -69,6 +85,8 @@ const FUTURE_AUTHORITIES = Object.freeze({
     "container-promotion-and-pipeline-authorities",
   "dual-cloud-connectivity-planning":
     "connectivity-dns-identity-egress-authorities",
+  "control-plane-ownership-planning":
+    "capability-specific-live-control-plane-authorities",
 });
 
 function load(relativePath) {
@@ -184,10 +202,10 @@ function requireNonExecutable(plan, label) {
   }
 }
 
-function validateStageOrder(stageOrder) {
+function validateStageOrder(stageOrder, expectedOrder = PROGRAM_STAGE_ORDER) {
   if (
-    stageOrder.length !== PROGRAM_STAGE_ORDER.length ||
-    !same(stageOrder, PROGRAM_STAGE_ORDER)
+    stageOrder.length !== expectedOrder.length ||
+    !same(stageOrder, expectedOrder)
   ) {
     fail(
       PROGRAM_LINEAGE_CHECK_IDS.stageOrderValid,
@@ -734,7 +752,13 @@ function validateProgramLineageEnvelope(envelope) {
     PROGRAM_LINEAGE_CHECK_IDS.artifactsComplete,
     "Program lineage envelope",
   );
-  validateStageOrder(envelope.stages.map(({ id }) => id));
+  const envelopeStageOrder = envelope.stages.map(({ id }) => id);
+  validateStageOrder(
+    envelopeStageOrder,
+    envelopeStageOrder.length === FINAL_PROGRAM_STAGE_ORDER.length
+      ? FINAL_PROGRAM_STAGE_ORDER
+      : PROGRAM_STAGE_ORDER,
+  );
   if (
     !same(
       envelope.checks.map(({ id, classification }) => ({
@@ -842,7 +866,7 @@ function validateProgramLineageEnvelope(envelope) {
   return envelope;
 }
 
-function buildProgramLineageEnvelope(
+function buildPredecessorProgramLineageEnvelope(
   input,
   {
     trustedPlannerDigests,
@@ -952,6 +976,97 @@ function buildProgramLineageEnvelope(
   return output;
 }
 
+function buildProgramLineageEnvelope(input, options = {}) {
+  const predecessorEnvelope = buildPredecessorProgramLineageEnvelope(
+    input,
+    options,
+  );
+  if (!options.ownership) return predecessorEnvelope;
+
+  const trustedBindings = {
+    predecessorProgramLineageEnvelopeDigest:
+      predecessorEnvelope.envelopeDigest,
+    programIdentityDigest: predecessorEnvelope.programIdentityDigest,
+    connectivityPlanDigest: input.connectivity.plan.planDigest,
+    postgresqlMigrationPlanDigest:
+      input.postgresql.migrationPlan.planDigest,
+    containerImageCicdPlanDigest: input.container.plan.planDigest,
+    readinessEvidenceDigest:
+      input.baseline.bindings.readinessEvidenceDigest,
+    iacPlanDigest: input.baseline.bindings.iacPlanDigest,
+    deploymentManifestDigest:
+      input.baseline.bindings.deploymentManifestDigest,
+    deploymentApprovalDigest:
+      input.baseline.bindings.deploymentApprovalDigest,
+    environment: input.baseline.target.environment,
+    environmentReference: input.baseline.target.environmentReference,
+    targetReference: input.baseline.target.targetReference,
+  };
+  let canonicalOwnershipPlan;
+  try {
+    canonicalOwnershipPlan = planControlPlaneOwnership(
+      options.ownership.input,
+      { trustedBindings },
+    );
+  } catch (error) {
+    fail(
+      PROGRAM_LINEAGE_CHECK_IDS.crossProgramBound,
+      `Control-plane ownership input is not bound to the predecessor program: ${error.message}`,
+    );
+  }
+  if (
+    canonicalOwnershipPlan.status !== "ready-for-human-review" ||
+    (options.ownership.plan &&
+      !same(options.ownership.plan, canonicalOwnershipPlan)) ||
+    options.ownership.input.target.region !== input.baseline.target.region ||
+    options.ownership.input.evidenceMode !== input.evidenceMode ||
+    options.ownership.input.safety.executionEnabled !== false ||
+    options.ownership.input.safety.executionEligible !== false ||
+    options.ownership.input.safety.executionAllowed !== false
+  ) {
+    fail(
+      PROGRAM_LINEAGE_CHECK_IDS.crossProgramBound,
+      "Control-plane ownership must reproduce a ready, exact-target, execution-disabled plan bound to the predecessor envelope.",
+    );
+  }
+  if (
+    canonicalOwnershipPlan.planDigest !==
+    controlPlaneOwnershipDigest(
+      withoutField(canonicalOwnershipPlan, "planDigest"),
+    )
+  ) {
+    fail(
+      PROGRAM_LINEAGE_CHECK_IDS.digestsCurrent,
+      "Control-plane ownership plan digest does not match canonical content.",
+    );
+  }
+
+  const output = structuredClone(predecessorEnvelope);
+  const ownershipStage = {
+    id: "control-plane-ownership-planning",
+    status: "ready-for-human-review",
+    evidenceMode: input.evidenceMode,
+    artifactDigest: canonicalOwnershipPlan.planDigest,
+    predecessorDigest: output.stages.at(-1).stageDigest,
+    executionEnabled: false,
+    executionEligible: false,
+    executionAllowed: false,
+    requiredFutureAuthority:
+      FUTURE_AUTHORITIES["control-plane-ownership-planning"],
+  };
+  ownershipStage.stageDigest = digest(ownershipStage);
+  output.stages.push(ownershipStage);
+  output.programIdentityDigest = digest({
+    programId: output.programId,
+    baselineBindingDigest: output.baseline.bindingDigest,
+    lineageDigest: output.lineage.lineageDigest,
+    finalStageDigest: ownershipStage.stageDigest,
+  });
+  output.envelopeDigest = digest(withoutField(output, "envelopeDigest"));
+  validateProgramLineageEnvelope(output);
+  return output;
+}
+
 function parseArguments(args) {
   if (args[0] !== "build") {
     throw new Error(
@@ -1014,10 +1129,12 @@ function main() {
 }
 
 export {
+  FINAL_PROGRAM_STAGE_ORDER,
   PROGRAM_LINEAGE_CHECK_IDS,
   PROGRAM_LINEAGE_CHECK_ORDER,
   PROGRAM_STAGE_ORDER,
   ProgramLineageError,
+  buildPredecessorProgramLineageEnvelope,
   buildProgramLineageEnvelope,
   canonicalJson,
   digest as programLineageDigest,

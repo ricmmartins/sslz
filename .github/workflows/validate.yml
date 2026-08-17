@@ -23,6 +23,7 @@ on:
       - 'scripts/startup-container-image-cicd-plan.*'
       - 'scripts/startup-connectivity-plan.*'
       - 'scripts/startup-program-lineage.*'
+      - 'scripts/startup-control-plane-ownership-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -54,6 +55,7 @@ on:
       - 'scripts/startup-container-image-cicd-plan.*'
       - 'scripts/startup-connectivity-plan.*'
       - 'scripts/startup-program-lineage.*'
+      - 'scripts/startup-control-plane-ownership-plan.*'
       - 'scripts/startup-iac-plan.*'
       - 'scripts/startup-cool-foundation-plan.*'
       - 'scripts/startup-container-apps-cool-plan.*'
@@ -115,6 +117,9 @@ jobs:
 
       - name: Test execution-disabled cross-program lineage
         run: node tests/startup-program-lineage.mjs
+
+      - name: Test read-only dual-cloud control-plane ownership planning
+        run: node tests/startup-control-plane-ownership-plan.mjs
 
       - name: Test Defender workspace placement
         run: node tests/defender-workspace-placement.mjs

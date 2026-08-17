@@ -27,6 +27,11 @@ import {
   connectivityPlanDigest,
   planConnectivity,
 } from "../scripts/startup-connectivity-plan.mjs";
+import {
+  CONTROL_PLANE_OWNERSHIP_CHECK_ORDER,
+  planControlPlaneOwnership,
+} from "../scripts/startup-control-plane-ownership-plan.mjs";
+import { createControlPlaneOwnershipFixture } from "./control-plane-ownership-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(
@@ -129,6 +134,18 @@ const connectivityScenarios = JSON.parse(
 const connectivityPlan = planConnectivity(connectivityInput);
 const connectivityRuntimeIds = new Set(
   connectivityPlan.checks.map(({ id }) => id),
+);
+const ownershipFixture = createControlPlaneOwnershipFixture("aws");
+const ownershipPlan = planControlPlaneOwnership(ownershipFixture.input, {
+  trustedBindings: ownershipFixture.trustedBindings,
+});
+const ownershipRuntimeIds = new Set(
+  ownershipPlan.checks.map(({ id }) => id),
+);
+assert.deepEqual(
+  ownershipPlan.requiredChecks,
+  CONTROL_PLANE_OWNERSHIP_CHECK_ORDER,
+  "Control-plane ownership required checks must be emitted by the runtime planner",
 );
 assert.deepEqual(
   postgresqlPlan.requiredChecks,
@@ -347,6 +364,11 @@ for (const check of fixture.checks) {
     assert(
       connectivityRuntimeIds.has(check.id),
       `${check.id}: connectivity, DNS, identity, and egress planner did not emit a runtime check result`,
+    );
+  } else if (check.surface === "control-plane-ownership-planner") {
+    assert(
+      ownershipRuntimeIds.has(check.id),
+      `${check.id}: control-plane ownership planner did not emit a runtime check result`,
     );
   } else {
     const source =

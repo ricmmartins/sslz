@@ -33,6 +33,9 @@ boundaries, synthetic and hosted validation, historical live preview evidence, a
 | `schemas/connectivity-source-assessment.schema.json` | Non-secret dual-cloud private connectivity, DNS, workload identity, and egress source inventory |
 | `schemas/connectivity-plan-input.schema.json` | Source assessment, Azure connectivity/DNS/identity/egress target evidence, requirements, transition decisions, replay lineage, and program integration bindings |
 | `schemas/connectivity-plan.schema.json` | Deterministic execution-disabled dual-cloud connectivity, DNS, identity, and egress migration plan |
+| `schemas/control-plane-ownership-plan-input.schema.json` | Versioned dual-cloud role, RACI, state, handoff, lineage, and exact artifact bindings |
+| `schemas/control-plane-ownership-trusted-bindings.schema.json` | Protected predecessor-envelope, artifact, environment, and target identities |
+| `schemas/control-plane-ownership-plan.schema.json` | Deterministic execution-disabled control-plane ownership and RACI plan |
 | `schemas/program-lineage-input.schema.json` | Canonical baseline identities plus exact PostgreSQL, container, and connectivity planner artifacts |
 | `schemas/program-lineage-envelope.schema.json` | Deterministic execution-disabled cross-program identity, stage chain, readiness separation, and authority boundary |
 | `schemas/program-lineage-trusted-digests.schema.json` | Externally protected PostgreSQL planner trust arguments supplied outside the artifact bundle |
@@ -78,6 +81,7 @@ node tests/startup-postgresql-rehearsal-plan.mjs
 node tests/startup-postgresql-execution-plan.mjs
 node tests/startup-container-image-cicd-plan.mjs
 node tests/startup-connectivity-plan.mjs
+node tests/startup-control-plane-ownership-plan.mjs
 node tests/startup-program-lineage.mjs
 node tests/startup-iac-plan.mjs
 node tests/startup-readiness-evidence.mjs
@@ -280,6 +284,13 @@ rehearsal, execution-contract, container image/CI/CD, and connectivity planner o
 `executionEnabled`, `executionEligible`, and `executionAllowed` false and names a distinct future authority. The Phase 5/6
 approval remains scoped to `greenfield-platform-deployment-only`; it does not authorize database writes, image promotion,
 DNS, network, identity, egress, cutover, rollback, or failback.
+
+The control-plane ownership planner (`scripts/startup-control-plane-ownership-plan.mjs`) defines one accountable role
+and explicit responsible, consulted, informed, and independent approval sets for DNS, certificates, secrets, CI/CD,
+observability, incidents, configuration, deployment, writes, source of truth, recovery, cutover, rollback, and failback.
+It models coexistence through failback with digest-bound accepted handoffs, acyclic escalation, monotonic lineage, exact
+predecessor program and artifact bindings, and AWS, GCP, or generic source metadata. Every planned action remains a
+non-executable representation and all live operations remain disabled.
 
 The builder reruns every planner and compares its complete canonical output, reevaluates evidence expiry at the envelope
 generation time, and rejects self-rehashed substitutions. Attempt 2 and later require an independently supplied

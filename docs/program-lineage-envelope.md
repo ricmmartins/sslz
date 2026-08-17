@@ -29,9 +29,12 @@ baseline approval digests. It then chains the real planner outputs in this fixed
 2. PostgreSQL rehearsal plan;
 3. PostgreSQL execution-contract plan;
 4. container image and CI/CD plan;
-5. dual-cloud connectivity, DNS, identity, and egress plan.
+5. dual-cloud connectivity, DNS, identity, and egress plan;
+6. dual-cloud control-plane ownership and RACI plan.
 
-Object keys are canonicalized recursively and arrays retain their order. Each stage digest includes its predecessor,
+The sixth stage consumes the exact digest of the reproduced five-stage predecessor envelope, avoiding a circular
+envelope digest while making the ownership handoff boundary explicit. Object keys are canonicalized recursively and
+arrays retain their order. Each stage digest includes its predecessor,
 artifact identity, execution-disabled flags, evidence mode, status, and future authority. The program identity binds the
 baseline, lineage nonce and ordinal, and complete stage chain. The envelope digest binds the complete sanitized output.
 The lineage builder reruns every planner from the supplied versioned inputs and requires byte-for-byte canonical JSON
@@ -52,7 +55,8 @@ protected external executor or approval service must retain and supply the trust
 
 The existing signed approval remains scoped to `greenfield-platform-deployment-only`. It cannot authorize database
 migration writes, image promotion, DNS changes, dual-cloud network operations, identity or egress changes, migration
-cutover, rollback, or failback. Those actions require separate future authorities named by each stage.
+cutover, rollback, failback, certificate or secret operations, pipeline changes, application writes, or recovery
+operations. Those actions require separate future authorities named by each stage.
 
 All envelope stages set `executionEnabled`, `executionEligible`, and `executionAllowed` to false. The builder makes no
 network calls, emits no commands, and performs no cloud, database, image, DNS, identity, or IaC operation.
@@ -71,5 +75,5 @@ executor or live migration, image, or connectivity evidence.
 ## Compatibility
 
 The canonical greenfield report is version `2.0.0`. Version 1 reports are rejected because they lack the required program
-identity and readiness separation. The envelope itself starts at version `1.0.0` and is referenced by exact
-`programIdentityDigest` and `envelopeDigest`.
+identity and readiness separation. The envelope itself remains version `1.0.0` and is referenced by exact `programIdentityDigest` and `envelopeDigest`.
+The validator accepts legacy five-stage envelopes. The canonical journey emits the six-stage chain with ownership.
