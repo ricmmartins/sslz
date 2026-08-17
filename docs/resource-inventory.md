@@ -17,7 +17,7 @@ This is the complete inventory of every Azure resource created by the Startup La
 
 | Name Pattern | Azure Resource Type | Purpose | Conditional |
 |---|---|---|---|
-| `rg-{company}-{env}-monitoring` | `Microsoft.Resources/resourceGroups` | Log Analytics workspace and monitoring resources | Created only when an approved existing workspace is not supplied |
+| `rg-{company}-{env}-monitoring` | `Microsoft.Resources/resourceGroups` | Log Analytics workspace and monitoring resources | Created only when an existing workspace is not supplied |
 | `rg-{company}-{env}-networking` | `Microsoft.Resources/resourceGroups` | VNet, subnets, and NSGs | Only when `deployNetworking = true` |
 
 ---
@@ -123,7 +123,7 @@ Each subnet has a dedicated NSG. All NSGs include a **DenyAllInbound** catch-all
 | **Daily quota** | 5 GB (configurable, `-1` = unlimited) |
 | **Resource-only permissions** | Enabled |
 
-The workspace location is explicit and defaults to the selected primary region. Supplying an approved compatible
+The workspace location is explicit and defaults to the selected primary region. Supplying a compatible existing
 workspace resource ID reuses that workspace and suppresses both workspace and monitoring resource-group creation.
 
 ### Activity Log Diagnostic Setting
@@ -260,8 +260,8 @@ Tag governance is enforced via policy:
 | Workflow File | Name | Trigger | Purpose |
 |---|---|---|---|
 | `validate.yml` | Validate IaC | PR and push to `main` on `infra/**` or `examples/**` | Builds and lints all Bicep files; runs `terraform fmt`, TFLint, and `terraform validate` |
-| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Manual dispatch from `main` | On a protected `sslz-deployment` runner, verifies the selected environment/provider and applies only a readiness-bound Phase 6 manifest with a matching signed approval |
-| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Manual dispatch from `main` | On a protected `sslz-deployment` runner, verifies the selected environment/provider, builder provenance, saved plan, readiness binding, and signed approval before Phase 6 apply |
+| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Bicep commands |
+| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Terraform commands |
 | `integration-test.yml` | Integration Test | Manual dispatch or weekly schedule (Monday 06:00 UTC) | Runs Bicep What-If and Terraform Plan against a dedicated integration subscription; optional writes require manual `main` dispatch plus `integration-nonprod`, and teardown is attempted after every started apply |
 | `github-pages.yml` | Deploy to GitHub Pages | Push to `main` or manual dispatch | Builds Jekyll site and deploys to GitHub Pages |
 

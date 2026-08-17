@@ -2,13 +2,6 @@
 
 An AI/ML startup running inference workloads on AKS with GPU node pools, Azure OpenAI, and Blob Storage for model artifacts and training data.
 
-## Status and execution boundary
-
-The Bicep and Terraform examples are direct operator IaC, not Phase 6 agent-approved workload deployments. Current-main
-evidence covers Bicep build/lint plus Terraform format/lint/validation in hosted CI; it does not include example-specific
-Terraform behavioral tests or a retained live deployment, GPU allocation, model-capacity, application-health, or
-recovery record for this example.
-
 ## Architecture
 
 ```

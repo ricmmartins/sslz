@@ -1,17 +1,16 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/container-image-cicd-planning/
 title: "Container Image and CI/CD Migration Planning"
 nav_order: 8.7
 description: "Read-only container image, registry, and CI/CD source assessment and migration planning for Azure Container Registry"
 ---
 
-# Container Image and CI/CD Migration Planning
-
 ## Status
 
 [PR #25](https://github.com/ricmmartins/sslz/pull/25) delivered this planner. It is execution-disabled and validated with
 synthetic fixtures and hosted CI; the repository has no current-main live registry, image, pipeline, promotion, cutover,
-or rollback evidence. See the [implementation and evidence matrix](implementation-status.md).
+or rollback evidence. See the [implementation and evidence matrix](/agent/docs/implementation-status/).
 
 This increment assesses supplied container image, registry, and CI/CD metadata and generates a deterministic plan for
 moving from AWS ECR, GCP Artifact Registry/GCR, or a generic OCI registry — paired with GitHub Actions, AWS CodeBuild,

@@ -1,18 +1,17 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/hot-cool-regional-topology/
 title: "Hot/Cool Regional Topology"
 nav_order: 8.3
 description: "Startup-scale regional capacity and recovery planning"
 ---
-
-# Hot/Cool Regional Topology
 
 ## Status
 
 The regional and capacity evaluator, cool-foundation planner, and Container Apps cool-profile planner are implemented.
 All Phase 7 outputs remain execution-disabled: no secondary-region preview/apply path is accepted by Phase 6, and no
 current-main live recovery evidence exists. See the
-[implementation and evidence matrix](implementation-status.md).
+[implementation and evidence matrix](/agent/docs/implementation-status/).
 
 ## Purpose
 

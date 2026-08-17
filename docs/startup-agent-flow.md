@@ -1,11 +1,10 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/startup-agent-flow/
 title: "Startup Agent Flow"
 nav_order: 8
 description: "Implemented and planned agent-assisted Azure account and SSLZ setup"
 ---
-
-# Startup Agent Flow
 
 ## Status
 
@@ -13,7 +12,7 @@ Phases 0-6 have delivered contract, planning, or narrowly approval-gated impleme
 execution-disabled cool-foundation and Container Apps planning artifacts, but no secondary-region executor. The
 PostgreSQL migration, image/CI, dual-cloud connectivity, and program-lineage surfaces are also delivered as planning and
 validation contracts without execution authority. See the
-[authoritative implementation and evidence matrix](implementation-status.md).
+[authoritative implementation and evidence matrix](/agent/docs/implementation-status/).
 
 The canonical current-`main` validation command is:
 
@@ -77,7 +76,7 @@ selects an appropriate SSLZ configuration. It must not hide or replace Bicep and
    service errors. Provide the official guidance or support route for each blocker.
 6. **Keep existing SSLZ behavior stable.** Agent support must be additive and backward compatible.
 7. **Know when to graduate.** Recommend full Azure Landing Zones when the workload exceeds the boundaries in the
-   [Graduation Guide](graduation-guide.md).
+   [Graduation Guide](/docs/graduation-guide/).
 
 ## Official sources
 
@@ -169,7 +168,7 @@ Ask only questions that change the architecture:
 
 The agent must explain why it selected a profile and what requirement would justify a different one.
 
-See [Startup Workload Profiles](workload-profiles.md) for the complete selection rules.
+See [Startup Workload Profiles](/agent/docs/workload-profiles/) for the complete selection rules.
 
 ## Phase 3: Region and capacity planning
 
@@ -222,7 +221,7 @@ Stay single-region when:
 Use a secondary region as a capacity fallback only after validating that every required service and model is
 available there.
 
-See [Hot/Cool Regional Topology](hot-cool-regional-topology.md) for entry criteria, service-specific recovery, cost
+See [Hot/Cool Regional Topology](/agent/docs/hot-cool-regional-topology/) for entry criteria, service-specific recovery, cost
 controls, and testing requirements.
 
 The regional planner marks only current `single-region-ready` output as executable readiness. A `cool-infrastructure`
@@ -261,7 +260,7 @@ unexpired, single-use approval artifact bound to the plan digest and every actio
 subscription, runs one argument-array Azure CLI command, and verifies `Registered`. It performs no deployment,
 feature registration, policy, role, billing, entitlement, subscription, or domain change.
 
-See [Approved Provider Remediation](provider-remediation.md).
+See [Approved Provider Remediation](/agent/docs/provider-remediation/).
 
 ## Phase 6: Deployment and validation
 
@@ -291,7 +290,7 @@ Post-deployment platform validation includes:
 Application health, database connectivity, secondary-region deployment, and Hot/Cool recovery are workload or Phase 7
 work and are not performed by Phase 6.
 
-See [Approved Deployment Integration](approved-deployment-integration.md).
+See [Approved Deployment Integration](/agent/docs/approved-deployment-integration/).
 
 ## Cross-program planning lineage
 
@@ -318,17 +317,17 @@ readiness and non-executable migration/dual-cloud planning readiness, including 
 
 The canonical greenfield journey report is v2 and requires this envelope identity and readiness separation. A v1 report
 is intentionally rejected rather than accepted with incomplete lineage. See
-[Program Lineage Envelope](program-lineage-envelope.md).
+[Program Lineage Envelope](/agent/docs/program-lineage-envelope/).
 
 ## Agent result contracts
 
 The versioned machine-readable result schemas are implemented. `startup-preflight` produces the `inspect` result;
 scope-limited commands produce the separate provider-remediation, deployment, readiness, regional-attempt,
-greenfield-report, and program-lineage contracts linked from [`agent/README.md`](../agent/README.md). The complete
+greenfield-report, and program-lineage contracts linked from the [agent-aware overview](/agent/). The complete
 shared preflight semantics, including reserved modes without a generic producer, are in the
-[Preflight Result Contract](preflight-result-contract.md). Use the checked-in
-[`ready-container-apps.json`](../agent/examples/ready-container-apps.json) and
-[`blocked-billing.json`](../agent/examples/blocked-billing.json) specimens rather than copying an abbreviated contract.
+[Preflight Result Contract](/agent/docs/preflight-result-contract/). Use the checked-in
+[`ready-container-apps.json`](/agent/examples/ready-container-apps.json) and
+[`blocked-billing.json`](/agent/examples/blocked-billing.json) specimens rather than copying an abbreviated contract.
 
 Do not include access tokens, secrets, full billing records, personal email addresses, or other unnecessary personal
 data in this output.
@@ -363,7 +362,7 @@ separate `integration-test.yml` write path is a manually dispatched disposable-n
 - replacement of the existing SSLZ Bicep or Terraform deployment paths;
 - full Azure Landing Zone architecture.
 
-See the [Startup Agent Implementation Plan](startup-agent-implementation-plan.md) for the phased pull request,
+See the [Startup Agent Implementation Plan](/agent/docs/startup-agent-implementation-plan/) for the phased pull request,
 testing, approval, and rollback sequence.
 
 [azure-landing-zones]: https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/

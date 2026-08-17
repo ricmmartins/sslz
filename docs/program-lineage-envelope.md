@@ -1,11 +1,10 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/program-lineage-envelope/
 title: "Program Lineage Envelope"
 nav_order: 15
 description: "Execution-disabled deterministic lineage across migration and dual-cloud planners"
 ---
-
-# Program Lineage Envelope
 
 The program-lineage envelope is a versioned, non-executable contract that connects the canonical greenfield baseline to
 later migration planning without widening deployment authority. Build and validate it as part of the canonical journey:

@@ -1,15 +1,14 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/implementation-status/
 title: "Implementation and Evidence Status"
 nav_order: 7.9
 description: "Authoritative implementation, execution-authority, and validation status for SSLZ"
 ---
 
-# Implementation and Evidence Status
-
 This page is the authoritative status summary for the repository at
-[`6b361e2`](https://github.com/ricmmartins/sslz/commit/6b361e29031529af78868b46e3a3628b179996ed),
-the `main` merge commit for [PR #29](https://github.com/ricmmartins/sslz/pull/29), as of 2026-08-16 UTC.
+[`8e96bd5`](https://github.com/ricmmartins/sslz/commit/8e96bd5),
+the `main` merge commit for [PR #31](https://github.com/ricmmartins/sslz/pull/31), as of 2026-08-17 UTC.
 It distinguishes implemented code from execution authority and test evidence. A contract or planner can be implemented
 without being allowed to execute the operation it describes.
 
@@ -18,10 +17,10 @@ without being allowed to execute the operation it describes.
 - **Local synthetic:** deterministic fixtures, mocks, generated ephemeral signing identities, schema validation, and
   compiled-template or Terraform tests. It is not evidence about a real tenant, workload, recovery event, or migration.
 - **Hosted CI:** the same repository tests on GitHub-hosted runners. The three `Validate IaC` jobs passed for
-  [PR #29](https://github.com/ricmmartins/sslz/actions/runs/31919769131).
+  [PR #31](https://github.com/ricmmartins/sslz/actions/runs/31987165122).
 - **Live preview:** Azure-authenticated Bicep what-if or Terraform plan. The latest verified successful scheduled run in
   this audit was [2026-08-10 on commit `a7acdbd`](https://github.com/ricmmartins/sslz/actions/runs/31365214740), after
-  PR #9. Both preview jobs passed and the deploy job was skipped. This predates PRs #10-#29 and is not current-`main`
+  PR #9. Both preview jobs passed and the deploy job was skipped. This predates PRs #10-#31 and is not current-`main`
   live evidence.
 - **Live execution:** an Azure, database, registry, pipeline, DNS, identity, network, cutover, rollback, or failback write
   followed by relevant postchecks. No such evidence for the current `main` commit is checked into this repository or
@@ -47,7 +46,7 @@ without being allowed to execute the operation it describes.
 | Defender for Storage V2 | Default-off opt-in delivered by [PR #28](https://github.com/ricmmartins/sslz/pull/28) | Direct operator IaC or an exact reviewed Phase 6 baseline decision | Compiled/template, Terraform, contract, and hosted CI validation; no current-`main` live opt-in evidence | Workload and cost review, explicit approval, live tier readback, and budget monitoring |
 
 The canonical
-[`greenfield-journey-report.schema.json`](../agent/schemas/greenfield-journey-report.schema.json) is version `2.0.0`.
+[`greenfield-journey-report.schema.json`](/agent/schemas/greenfield-journey-report.schema.json) is version `2.0.0`.
 Its `programLineage` summary references the separately emitted envelope by exact `envelopeDigest` and
 `programIdentityDigest`, and it separates baseline deployment readiness from PostgreSQL migration, container
 image/CI/CD, and dual-cloud planning readiness. The checked-in report uses `evidenceMode: "synthetic"` and grants no
@@ -81,7 +80,7 @@ Before making broader claims, complete and retain sanitized evidence for:
 ## Delivery history
 
 The numbered phases are capability labels, not GitHub pull-request numbers. The original conceptual PR table in the
-[implementation plan](startup-agent-implementation-plan.md) predates delivery. Actual merged delivery was:
+[implementation plan](/agent/docs/startup-agent-implementation-plan/) predates delivery. Actual merged delivery was:
 
 | PR | Delivered scope |
 |---|---|
@@ -110,7 +109,8 @@ The numbered phases are capability labels, not GitHub pull-request numbers. The 
 | [#27](https://github.com/ricmmartins/sslz/pull/27) | SaaS private endpoint runtime path |
 | [#28](https://github.com/ricmmartins/sslz/pull/28) | Default-off Defender for Storage opt-in |
 | [#29](https://github.com/ricmmartins/sslz/pull/29) | Cross-program lineage and report v2 |
-| #31 | Dual-cloud control-plane ownership and RACI planning |
+| [#30](https://github.com/ricmmartins/sslz/pull/30) | Implementation and evidence status reconciliation |
+| [#31](https://github.com/ricmmartins/sslz/pull/31) | Dual-cloud control-plane ownership and RACI planning |
 
 [PR #12](https://github.com/ricmmartins/sslz/pull/12) was closed without merge; its intended hardening scope was delivered
 through later merged work, beginning with PR #13.

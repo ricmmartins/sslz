@@ -1,17 +1,16 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/provider-remediation/
 title: "Approved Provider Remediation"
 nav_order: 8.5
 description: "Single-use approval for one allowlisted Azure resource-provider registration"
 ---
 
-# Approved Provider Remediation
-
 ## Status
 
 The narrow approval-gated writer is implemented and covered by local synthetic and hosted CI tests. No current-main live
 provider registration is claimed by repository evidence. See the
-[implementation and evidence matrix](implementation-status.md).
+[implementation and evidence matrix](/agent/docs/implementation-status/).
 
 ## Purpose
 
@@ -22,8 +21,8 @@ configuration.
 
 The contracts are:
 
-- [`provider-remediation-approval.schema.json`](../agent/schemas/provider-remediation-approval.schema.json)
-- [`provider-remediation-result.schema.json`](../agent/schemas/provider-remediation-result.schema.json)
+- [`provider-remediation-approval.schema.json`](/agent/schemas/provider-remediation-approval.schema.json)
+- [`provider-remediation-result.schema.json`](/agent/schemas/provider-remediation-result.schema.json)
 
 ## Reviewed action
 
@@ -73,7 +72,7 @@ Apply requires a separate artifact from the approved review system. The artifact
 
 The artifact stores no approval identity. It must be `approved`, not expired, approved no more than 24 hours before
 expiry, and unused. See
-[`provider-registration-approval.json`](../agent/examples/provider-registration-approval.json) for the schema shape.
+[`provider-registration-approval.json`](/agent/examples/provider-registration-approval.json) for the schema shape.
 The approval system, not this repository, is responsible for authenticating and authorizing the approval decision.
 
 ## Apply

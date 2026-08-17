@@ -2163,9 +2163,10 @@ img {
   .sidebar {
     display: none;
     position: fixed;
-    top: 64px;
+    top: 240px;
     left: 0;
     bottom: 0;
+    height: calc(100vh - 240px);
     width: 280px;
     z-index: 90;
     box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);

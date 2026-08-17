@@ -1,11 +1,10 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/control-plane-ownership-planning/
 title: "Control-Plane Ownership Planning"
 nav_order: 16
 description: "Deterministic read-only ownership and RACI assessment for dual-cloud migration"
 ---
-
-# Control-Plane Ownership Planning
 
 The control-plane ownership planner is a dependency-free local JSON evaluator. It defines who is accountable,
 responsible, consulted, informed, and independently approving each migration control plane. It does not grant any

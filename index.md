@@ -7,10 +7,11 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="hero">
   <a href="{{ site.github_repo }}" class="hero-badge" target="_blank" rel="noopener">Open Source on GitHub</a>
   <h1>Startup-Scale Landing Zone</h1>
-  <p class="tagline">A stripped-down, opinionated, deployable Azure Landing Zone baseline for startups and digital-native teams. Built for companies with 5–50 engineers that need a practical starting point without enterprise complexity.</p>
+  <p class="tagline">A stripped-down, opinionated, production-ready Azure Landing Zone designed for startups and digital-native teams. Built for companies with 5–50 engineers that need to get Azure right from day one without enterprise complexity.</p>
   <div class="hero-ctas">
     <a href="#quick-start" class="btn btn-primary">Quick Start</a>
     <a href="{{ site.github_repo }}" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+    <a href="{{ '/agent/' | relative_url }}" class="btn btn-secondary">Optional Agent-Aware Experience</a>
   </div>
 </section>
 
@@ -52,7 +53,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
     <div class="card">
       <div class="card-icon">&#9889;</div>
       <h3>1 Hour Deploy</h3>
-      <p>From zero to a reviewable Azure baseline with Bicep or Terraform.</p>
+      <p>From zero to production-ready Azure with Bicep or Terraform. No consultants required.</p>
     </div>
     <div class="card">
       <div class="card-icon">&#9878;</div>
@@ -169,7 +170,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 
 <section class="landing-section alt-bg" id="quick-start">
   <h2>Quick Start</h2>
-  <p class="section-subtitle">From zero to a deployable baseline in under an hour.</p>
+  <p class="section-subtitle">From zero to production-ready in under an hour.</p>
   <div class="quick-start-steps">
     <div class="step-card">
       <div class="step-number">1</div>
@@ -312,7 +313,7 @@ az network nsg list --query "[].name" -o tsv</code></pre>
 
 <section class="landing-section" id="day-1-checklist">
   <h2>Day-1 Checklist</h2>
-  <p class="section-subtitle">A 90-minute baseline setup path in three phases.</p>
+  <p class="section-subtitle">90 minutes from zero to production-ready. Three phases, one afternoon.</p>
   <div class="timeline">
     <div class="timeline-phase">
       <div class="timeline-marker">

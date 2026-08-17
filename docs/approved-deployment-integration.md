@@ -1,18 +1,17 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/approved-deployment-integration/
 title: "Approved Deployment Integration"
 nav_order: 8.6
 description: "Signed single-use approval for one immutable existing SSLZ platform deployment"
 ---
-
-# Approved Deployment Integration
 
 ## Evidence status
 
 The write-capable path and workflow gates are implemented and covered by local synthetic and hosted CI tests. This
 repository does not contain or identify a successful approved Phase 6 apply and postcheck record for current `main`.
 Historical Integration Test what-if/plan success predates this path's later hardening and is not live deployment evidence.
-See the [implementation and evidence matrix](implementation-status.md).
+See the [implementation and evidence matrix](/agent/docs/implementation-status/).
 
 ## Purpose
 
@@ -23,17 +22,17 @@ root, or add a second region. Only an approved primary `single-region-ready` pla
 
 The versioned contracts are:
 
-- [`iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json)
-- [`iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json)
-- [`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
-- [`aks-ingress-decision.schema.json`](../agent/schemas/aks-ingress-decision.schema.json)
-- [`aks-ingress-postcheck.schema.json`](../agent/schemas/aks-ingress-postcheck.schema.json)
-- [`subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
-- [`deployment-execution-manifest.schema.json`](../agent/schemas/deployment-execution-manifest.schema.json)
-- [`deployment-approval.schema.json`](../agent/schemas/deployment-approval.schema.json)
-- [`deployment-result.schema.json`](../agent/schemas/deployment-result.schema.json)
-- [`regional-attempt.schema.json`](../agent/schemas/regional-attempt.schema.json)
-- [`terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
+- [`iac-plan-input-v2.schema.json`](/agent/schemas/iac-plan-input-v2.schema.json)
+- [`iac-plan-input-v3.schema.json`](/agent/schemas/iac-plan-input-v3.schema.json)
+- [`readiness-evidence.schema.json`](/agent/schemas/readiness-evidence.schema.json)
+- [`aks-ingress-decision.schema.json`](/agent/schemas/aks-ingress-decision.schema.json)
+- [`aks-ingress-postcheck.schema.json`](/agent/schemas/aks-ingress-postcheck.schema.json)
+- [`subscription-topology-decision.schema.json`](/agent/schemas/subscription-topology-decision.schema.json)
+- [`deployment-execution-manifest.schema.json`](/agent/schemas/deployment-execution-manifest.schema.json)
+- [`deployment-approval.schema.json`](/agent/schemas/deployment-approval.schema.json)
+- [`deployment-result.schema.json`](/agent/schemas/deployment-result.schema.json)
+- [`regional-attempt.schema.json`](/agent/schemas/regional-attempt.schema.json)
+- [`terraform-plan-provenance.schema.json`](/agent/schemas/terraform-plan-provenance.schema.json)
 
 ## Prepare the reviewed Phase 4 artifact
 
