@@ -1,0 +1,36 @@
+name: Validate Commit Attribution
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  reject-copilot-coauthor:
+    name: Reject Copilot Co-Author Trailers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.ref || github.ref }}
+
+      - name: Fetch pull request commits as untrusted data
+        if: github.event_name == 'pull_request_target'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: git fetch --no-tags origin "pull/${PR_NUMBER}/head"
+
+      - name: Test attribution validation
+        run: node tests/no-copilot-coauthor.mjs
+
+      - name: Validate commit attribution
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/validate-no-copilot-coauthor.mjs --base "$BASE_SHA" --head "$HEAD_SHA"

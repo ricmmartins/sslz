@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "baseline": {
+    "commit": "d2d1ea823c33affeb620ec6acbc90536ec646c2d",
+    "tree": "77070a7f81ab85fe2d0d58659f90901668e9b9c7"
+  },
+  "cleanRoot": {
+    "commit": "a4de206d8878f9c012203bee740b46f0b9234e14",
+    "tree": "77070a7f81ab85fe2d0d58659f90901668e9b9c7"
+  },
+  "approvedSourceCommit": "8bcb280335aff507daaff1761cbe4bdc1fe3f132",
+  "allowedChanges": [
+    {
+      "path": ".github/classic-baseline-manifest.json",
+      "status": "A",
+      "reason": "Machine-readable classic recovery allowlist"
+    },
+    {
+      "path": ".github/copilot-instructions.md",
+      "status": "A",
+      "expectedBlob": "59a055e61421a6d9177cae56ce04e1bd6a0a6b90",
+      "reason": "Permanent no-Copilot-attribution repository instruction"
+    },
+    {
+      "path": ".github/workflows/validate-commit-attribution.yml",
+      "status": "A",
+      "expectedBlob": "834874719870178ceafa3c00e38a8d60365002d0",
+      "reason": "Commit attribution CI guard from the approved source commit"
+    },
+    {
+      "path": "README.md",
+      "status": "M",
+      "reason": "Replace manual deployment status badges with branch-main health badges"
+    },
+    {
+      "path": "index.md",
+      "status": "M",
+      "reason": "Add exactly one founder-facing SSLZ Agent CTA"
+    },
+    {
+      "path": "scripts/validate-classic-baseline.mjs",
+      "status": "A",
+      "reason": "Deterministic classic baseline drift validator"
+    },
+    {
+      "path": "scripts/validate-no-copilot-coauthor.mjs",
+      "status": "A",
+      "expectedBlob": "d80938919dcf19994db324b6e048ddc9a87e6fcd",
+      "reason": "Commit attribution validator from the approved source commit with full-history zero-base validation"
+    },
+    {
+      "path": "tests/classic-baseline-manifest.mjs",
+      "status": "A",
+      "reason": "Classic baseline validator tests"
+    },
+    {
+      "path": "tests/no-copilot-coauthor.mjs",
+      "status": "A",
+      "expectedBlob": "8a8fd8b8c2f05936ad29874c32dad462a30ecad4",
+      "reason": "Commit attribution validator tests from the approved source commit with zero-base regression coverage"
+    }
+  ],
+  "readme": {
+    "baselineBlob": "d7790f6feb08fd21006af3127bc869d0e9443b38",
+    "originalBadges": [
+      "[![Validate IaC](https://github.com/ricmmartins/sslz/workflows/Validate%20IaC/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml)",
+      "[![Deploy Landing Zone (Bicep)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Bicep)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-bicep.yml)",
+      "[![Deploy Landing Zone (Terraform)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Terraform)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-terraform.yml)"
+    ],
+    "approvedBadges": [
+      "[![Validate IaC](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml?query=branch%3Amain)",
+      "[![Deploy to GitHub Pages](https://github.com/ricmmartins/sslz/actions/workflows/github-pages.yml/badge.svg?branch=main)](https://github.com/ricmmartins/sslz/actions/workflows/github-pages.yml?query=branch%3Amain)"
+    ]
+  },
+  "homepage": {
+    "baselineBlob": "a83659895b2b9b66c366bf309185fda5f973a3a2",
+    "insertAfter": "    <a href=\"{{ site.github_repo }}\" class=\"btn btn-secondary\" target=\"_blank\" rel=\"noopener\">View on GitHub</a>",
+    "cta": "    <a href=\"https://github.com/ricmmartins/sslz/tree/agent-aware\" class=\"btn btn-secondary\" target=\"_blank\" rel=\"noopener\">Use SSLZ Agent</a>",
+    "label": "Use SSLZ Agent",
+    "url": "https://github.com/ricmmartins/sslz/tree/agent-aware"
+  }
+}

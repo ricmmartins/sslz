@@ -11,6 +11,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   <div class="hero-ctas">
     <a href="#quick-start" class="btn btn-primary">Quick Start</a>
     <a href="{{ site.github_repo }}" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+    <a href="https://github.com/ricmmartins/sslz/tree/agent-aware" class="btn btn-secondary" target="_blank" rel="noopener">Use SSLZ Agent</a>
   </div>
 </section>
 
