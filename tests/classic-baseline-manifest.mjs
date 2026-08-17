@@ -5,6 +5,7 @@ import {
   compareAllowedChanges,
   expectedHomepage,
   expectedReadme,
+  expectedValidateWorkflow,
   parseNameStatus,
   validateClassicBaseline,
 } from "../scripts/validate-classic-baseline.mjs";
@@ -58,6 +59,15 @@ assert.equal(
   }),
   "before\nmarker\ncta\nafter\n",
 );
+assert.equal(
+  expectedValidateWorkflow("name: Validate\n\non:\n  push:\n", {
+    validateWorkflow: {
+      insertAfter: "on:",
+      entry: "  workflow_dispatch:",
+    },
+  }),
+  "name: Validate\n\non:\n  workflow_dispatch:\n  push:\n",
+);
 
 const result = validateClassicBaseline();
 assert.equal(
@@ -68,6 +78,10 @@ assert.equal(
   result.baselineRoot,
   "a4de206d8878f9c012203bee740b46f0b9234e14",
 );
-assert.equal(result.changes.length, 9);
+assert.equal(
+  result.recoveryBase,
+  "b8fe8254c29cdbea3ddd6d4f10bbaa8de3c21223",
+);
+assert.equal(result.changes.length, 10);
 
 console.log("Classic baseline manifest tests passed.");

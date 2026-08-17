@@ -8,6 +8,10 @@
     "commit": "a4de206d8878f9c012203bee740b46f0b9234e14",
     "tree": "77070a7f81ab85fe2d0d58659f90901668e9b9c7"
   },
+  "recoveryBase": {
+    "commit": "b8fe8254c29cdbea3ddd6d4f10bbaa8de3c21223",
+    "tree": "02146c85e1f8d86d747a9cd732992699e3743c12"
+  },
   "approvedSourceCommit": "8bcb280335aff507daaff1761cbe4bdc1fe3f132",
   "allowedChanges": [
     {
@@ -26,6 +30,11 @@
       "status": "A",
       "expectedBlob": "834874719870178ceafa3c00e38a8d60365002d0",
       "reason": "Commit attribution CI guard from the approved source commit"
+    },
+    {
+      "path": ".github/workflows/validate.yml",
+      "status": "M",
+      "reason": "Permit on-demand validation of the branch-main IaC health badge"
     },
     {
       "path": "README.md",
@@ -78,5 +87,10 @@
     "cta": "    <a href=\"https://github.com/ricmmartins/sslz/tree/agent-aware\" class=\"btn btn-secondary\" target=\"_blank\" rel=\"noopener\">Use SSLZ Agent</a>",
     "label": "Use SSLZ Agent",
     "url": "https://github.com/ricmmartins/sslz/tree/agent-aware"
+  },
+  "validateWorkflow": {
+    "baselineBlob": "1b524b6966c84fd43798535d2462606a6ab74165",
+    "insertAfter": "on:",
+    "entry": "  workflow_dispatch:"
   }
 }

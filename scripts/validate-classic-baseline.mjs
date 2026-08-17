@@ -10,6 +10,10 @@ const EXPECTED_BASELINE_COMMIT =
 const EXPECTED_BASELINE_TREE = "77070a7f81ab85fe2d0d58659f90901668e9b9c7";
 const EXPECTED_CLEAN_ROOT_COMMIT =
   "a4de206d8878f9c012203bee740b46f0b9234e14";
+const EXPECTED_RECOVERY_BASE_COMMIT =
+  "b8fe8254c29cdbea3ddd6d4f10bbaa8de3c21223";
+const EXPECTED_RECOVERY_BASE_TREE =
+  "02146c85e1f8d86d747a9cd732992699e3743c12";
 const REPO_ROOT = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const MANIFEST_PATH = resolve(
   REPO_ROOT,
@@ -93,6 +97,17 @@ function expectedHomepage(baselineHomepage, manifest) {
   return baselineHomepage.replace(insertAfter, `${insertAfter}\n${cta}`);
 }
 
+function expectedValidateWorkflow(baselineWorkflow, manifest) {
+  const { entry, insertAfter } = manifest.validateWorkflow;
+  if (countOccurrences(baselineWorkflow, `${insertAfter}\n`) !== 1) {
+    throw new Error("Baseline Validate IaC trigger is not uniquely identifiable.");
+  }
+  return baselineWorkflow.replace(
+    `${insertAfter}\n`,
+    `${insertAfter}\n${entry}\n`,
+  );
+}
+
 function validateClassicBaseline({
   head = "HEAD",
   manifestPath = MANIFEST_PATH,
@@ -106,7 +121,9 @@ function validateClassicBaseline({
     manifest.baseline.commit !== EXPECTED_BASELINE_COMMIT ||
     manifest.baseline.tree !== EXPECTED_BASELINE_TREE ||
     manifest.cleanRoot.commit !== EXPECTED_CLEAN_ROOT_COMMIT ||
-    manifest.cleanRoot.tree !== EXPECTED_BASELINE_TREE
+    manifest.cleanRoot.tree !== EXPECTED_BASELINE_TREE ||
+    manifest.recoveryBase.commit !== EXPECTED_RECOVERY_BASE_COMMIT ||
+    manifest.recoveryBase.tree !== EXPECTED_RECOVERY_BASE_TREE
   ) {
     throw new Error(
       "Classic manifest does not identify the authorized source baseline and clean root.",
@@ -119,10 +136,20 @@ function validateClassicBaseline({
   }).split(/\s+/);
   if (
     headLineage.length !== 2 ||
-    headLineage[1] !== EXPECTED_CLEAN_ROOT_COMMIT
+    headLineage[1] !== EXPECTED_RECOVERY_BASE_COMMIT
   ) {
-    throw new Error("Classic candidate must be one commit above the clean root.");
+    throw new Error(
+      "Classic badge follow-up must be one commit above the recovery base.",
+    );
   }
+  const recoveryBaseLineage = git(
+    ["rev-list", "--parents", "-n", "1", EXPECTED_RECOVERY_BASE_COMMIT],
+    { cwd: repoRoot },
+  ).split(/\s+/);
+  const recoveryBaseTree = git(
+    ["rev-parse", `${EXPECTED_RECOVERY_BASE_COMMIT}^{tree}`],
+    { cwd: repoRoot },
+  );
   const rootLineage = git(
     ["rev-list", "--parents", "-n", "1", EXPECTED_CLEAN_ROOT_COMMIT],
     { cwd: repoRoot },
@@ -132,6 +159,9 @@ function validateClassicBaseline({
     { cwd: repoRoot },
   );
   if (
+    recoveryBaseLineage.length !== 2 ||
+    recoveryBaseLineage[1] !== EXPECTED_CLEAN_ROOT_COMMIT ||
+    recoveryBaseTree !== EXPECTED_RECOVERY_BASE_TREE ||
     rootLineage.length !== 1 ||
     cleanRootTree !== EXPECTED_BASELINE_TREE ||
     git(["cat-file", "-t", EXPECTED_BASELINE_TREE], { cwd: repoRoot }) !== "tree"
@@ -192,9 +222,14 @@ function validateClassicBaseline({
     ["rev-parse", `${EXPECTED_BASELINE_TREE}:index.md`],
     { cwd: repoRoot },
   );
+  const baselineValidateWorkflowBlob = git(
+    ["rev-parse", `${EXPECTED_BASELINE_TREE}:.github/workflows/validate.yml`],
+    { cwd: repoRoot },
+  );
   if (
     baselineReadmeBlob !== manifest.readme.baselineBlob ||
-    baselineHomepageBlob !== manifest.homepage.baselineBlob
+    baselineHomepageBlob !== manifest.homepage.baselineBlob ||
+    baselineValidateWorkflowBlob !== manifest.validateWorkflow.baselineBlob
   ) {
     throw new Error("Classic content baseline blobs do not match the manifest.");
   }
@@ -234,6 +269,29 @@ function validateClassicBaseline({
     );
   }
 
+  const baselineValidateWorkflow = readCommitPath(
+    EXPECTED_BASELINE_TREE,
+    ".github/workflows/validate.yml",
+  );
+  const currentValidateWorkflow = readCommitPath(
+    resolvedHead,
+    ".github/workflows/validate.yml",
+  );
+  const approvedValidateWorkflow = expectedValidateWorkflow(
+    baselineValidateWorkflow,
+    manifest,
+  );
+  if (currentValidateWorkflow !== approvedValidateWorkflow) {
+    throw new Error(
+      "Validate IaC workflow differs from the baseline plus workflow_dispatch.",
+    );
+  }
+  if (countOccurrences(currentValidateWorkflow, "workflow_dispatch:") !== 1) {
+    throw new Error(
+      "Validate IaC workflow must contain exactly one workflow_dispatch trigger.",
+    );
+  }
+
   const paths = git(["ls-tree", "-r", "--name-only", resolvedHead], {
     cwd: repoRoot,
   }).split(/\r?\n/);
@@ -250,6 +308,7 @@ function validateClassicBaseline({
     baseline: EXPECTED_BASELINE_COMMIT,
     baselineRoot: EXPECTED_CLEAN_ROOT_COMMIT,
     baselineTree: EXPECTED_BASELINE_TREE,
+    recoveryBase: EXPECTED_RECOVERY_BASE_COMMIT,
     head: resolvedHead,
     changes,
   };
@@ -281,6 +340,7 @@ export {
   compareAllowedChanges,
   expectedHomepage,
   expectedReadme,
+  expectedValidateWorkflow,
   parseNameStatus,
   validateClassicBaseline,
 };
