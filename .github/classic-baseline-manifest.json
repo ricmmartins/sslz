@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "baseline": {
     "commit": "d2d1ea823c33affeb620ec6acbc90536ec646c2d",
     "tree": "77070a7f81ab85fe2d0d58659f90901668e9b9c7"
@@ -12,7 +12,18 @@
     "commit": "b8fe8254c29cdbea3ddd6d4f10bbaa8de3c21223",
     "tree": "02146c85e1f8d86d747a9cd732992699e3743c12"
   },
+  "integrationBase": {
+    "commit": "ff16a2ce81425507461bba52ec9319ba1ce55020",
+    "tree": "15b4168644e33988e265561a28b28dcb3ef4bd13"
+  },
   "approvedSourceCommit": "8bcb280335aff507daaff1761cbe4bdc1fe3f132",
+  "approvedAgentSource": {
+    "commit": "b0c24640a833e0302e0edc4a542948301f33bbd2",
+    "launcherPath": "use-sslz-agent.md",
+    "launcherBlob": "39c4f0c959b39f0e70a0b8032e35579dce9f28df",
+    "profilePath": ".github/agents/sslz-founder.agent.md",
+    "profileBlob": "6cd3691239ea9d243c837f2eb0507dae455a65f6"
+  },
   "allowedChanges": [
     {
       "path": ".github/classic-baseline-manifest.json",
@@ -67,6 +78,12 @@
       "status": "A",
       "expectedBlob": "8a8fd8b8c2f05936ad29874c32dad462a30ecad4",
       "reason": "Commit attribution validator tests from the approved source commit with zero-base regression coverage"
+    },
+    {
+      "path": "use-sslz-agent.md",
+      "status": "A",
+      "expectedBlob": "442904395b5b6f956f40bfc07b5d573a78b40d37",
+      "reason": "Classic-native public launcher for the separately maintained SSLZ Founder Agent"
     }
   ],
   "readme": {
@@ -84,9 +101,18 @@
   "homepage": {
     "baselineBlob": "a83659895b2b9b66c366bf309185fda5f973a3a2",
     "insertAfter": "    <a href=\"{{ site.github_repo }}\" class=\"btn btn-secondary\" target=\"_blank\" rel=\"noopener\">View on GitHub</a>",
-    "cta": "    <a href=\"https://github.com/ricmmartins/sslz/tree/agent-aware\" class=\"btn btn-secondary\" target=\"_blank\" rel=\"noopener\">Use SSLZ Agent</a>",
+    "cta": "    <a href=\"{{ '/use-sslz-agent/' | relative_url }}\" class=\"btn btn-secondary\">Use SSLZ Agent</a>",
     "label": "Use SSLZ Agent",
-    "url": "https://github.com/ricmmartins/sslz/tree/agent-aware"
+    "url": "{{ '/use-sslz-agent/' | relative_url }}",
+    "legacyUrl": "https://github.com/ricmmartins/sslz/tree/agent-aware"
+  },
+  "launcher": {
+    "path": "use-sslz-agent.md",
+    "expectedBlob": "442904395b5b6f956f40bfc07b5d573a78b40d37",
+    "permalink": "/use-sslz-agent/",
+    "title": "Use SSLZ Agent",
+    "product": "SSLZ Founder Agent",
+    "technicalBranch": "agent-aware"
   },
   "validateWorkflow": {
     "baselineBlob": "1b524b6966c84fd43798535d2462606a6ab74165",
