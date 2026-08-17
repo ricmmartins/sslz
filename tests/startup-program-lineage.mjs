@@ -53,6 +53,7 @@ const {
   input,
   trustedPlannerDigests,
   envelope,
+  ownership,
   negativeJourneys,
 } = runProgramLineageJourney(baseline, { postgresqlRegionalPlanInput });
 assert.equal(envelope.status, "ready-for-human-review");
@@ -71,7 +72,7 @@ assert.equal(envelope.safety.imageOperations, "none");
 assert.equal(envelope.safety.dnsOperations, "none");
 assert.equal(envelope.safety.identityOperations, "none");
 assert.equal(envelope.safety.iacOperations, "none");
-assert.equal(negativeJourneys.length, 9);
+assert.equal(negativeJourneys.length, 10);
 assert(
   negativeJourneys.every(
     (journey) =>
@@ -93,6 +94,7 @@ assert.deepEqual(
     input.postgresql.executionPlan.planDigest,
     input.container.plan.planDigest,
     input.connectivity.plan.planDigest,
+    ownership.plan.planDigest,
   ],
 );
 

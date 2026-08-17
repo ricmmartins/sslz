@@ -1457,6 +1457,11 @@ export async function runGreenfieldJourney() {
     `${JSON.stringify(programLineageJourney.envelope, null, 2)}\n`,
     "utf8",
   );
+  writeFileSync(
+    join(generatedRoot, "control-plane-ownership-plan.json"),
+    `${JSON.stringify(programLineageJourney.ownership.plan, null, 2)}\n`,
+    "utf8",
+  );
 
   const report = {
     schemaVersion: "2.0.0",
@@ -1483,6 +1488,7 @@ export async function runGreenfieldJourney() {
       { id: "postgresql-execution-contract-planning", status: "pass" },
       { id: "container-image-cicd-planning", status: "pass" },
       { id: "dual-cloud-connectivity-planning", status: "pass" },
+      { id: "control-plane-ownership-planning", status: "pass" },
     ],
     blockerTransitions,
     bindings: {
@@ -1502,6 +1508,8 @@ export async function runGreenfieldJourney() {
         programLineageJourney.envelope.envelopeDigest,
       programIdentityDigest:
         programLineageJourney.envelope.programIdentityDigest,
+      controlPlaneOwnershipPlanDigest:
+        programLineageJourney.ownership.plan.planDigest,
     },
     artifacts: iac.artifacts.map(({ provider, environment, region, digest: artifactDigest }) => ({
       provider,
@@ -1529,6 +1537,18 @@ export async function runGreenfieldJourney() {
       envelopeDigest: programLineageJourney.envelope.envelopeDigest,
       programIdentityDigest:
         programLineageJourney.envelope.programIdentityDigest,
+    },
+    controlPlaneOwnership: {
+      schemaVersion: programLineageJourney.ownership.plan.schemaVersion,
+      status: programLineageJourney.ownership.plan.status,
+      evidenceMode: programLineageJourney.ownership.plan.evidenceMode,
+      sourceProvider: programLineageJourney.ownership.plan.sourceProvider,
+      predecessorEnvelopeDigest:
+        programLineageJourney.ownership.plan.bindings
+          .predecessorProgramLineageEnvelopeDigest,
+      planDigest: programLineageJourney.ownership.plan.planDigest,
+      executionAllowed:
+        programLineageJourney.ownership.plan.safety.executionAllowed,
     },
     diagnostics: {
       sanitized: true,
@@ -1566,6 +1586,11 @@ export async function runGreenfieldJourney() {
     report.programLineage.programIdentityDigest ===
       programLineageJourney.envelope.programIdentityDigest,
     "Report lineage identity reference must match the emitted program envelope.",
+  );
+  assert(
+    report.controlPlaneOwnership.planDigest ===
+      programLineageJourney.envelope.stages.at(-1).artifactDigest,
+    "Report ownership plan must match the final program-lineage stage.",
   );
   assert(
     report.negativeJourneys.every(

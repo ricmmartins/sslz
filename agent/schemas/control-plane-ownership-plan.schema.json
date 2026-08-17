@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/control-plane-ownership-plan.schema.json",
+  "title": "SSLZ dual-cloud control-plane ownership plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "planId",
+    "generatedAt",
+    "evidenceMode",
+    "sourceProvider",
+    "target",
+    "status",
+    "requiredChecks",
+    "checks",
+    "authorityMatrix",
+    "transitions",
+    "lineage",
+    "bindings",
+    "plannedActions",
+    "humanConfirmationRequired",
+    "safety",
+    "planDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "evidenceMode": { "enum": ["synthetic", "live"] },
+    "sourceProvider": { "enum": ["aws", "gcp", "generic"] },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment",
+        "environmentReference",
+        "region",
+        "targetReference"
+      ],
+      "properties": {
+        "environment": { "enum": ["prod", "nonprod"] },
+        "environmentReference": { "$ref": "#/$defs/reference" },
+        "region": { "$ref": "#/$defs/region" },
+        "targetReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "status": { "enum": ["ready-for-human-review", "blocked"] },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/checkId" }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "classification", "summary", "evidenceReferences"],
+        "properties": {
+          "id": { "$ref": "#/$defs/checkId" },
+          "classification": { "enum": ["pass", "fail"] },
+          "summary": { "type": "string", "minLength": 1 },
+          "evidenceReferences": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "authorityMatrix": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "type": "object" }
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "type": "object" }
+    },
+    "lineage": { "type": "object" },
+    "bindings": {
+      "type": "object",
+      "minProperties": 16,
+      "additionalProperties": true
+    },
+    "plannedActions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "stateChange",
+          "representation",
+          "requiredFutureAuthority",
+          "executionAllowed"
+        ],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "stateChange": { "$ref": "#/$defs/reference" },
+          "representation": { "const": "non-executable" },
+          "requiredFutureAuthority": {
+            "const": "separate-live-control-plane-approval"
+          },
+          "executionAllowed": { "const": false }
+        }
+      }
+    },
+    "humanConfirmationRequired": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "executionEligible",
+        "executionAllowed",
+        "liveOperations",
+        "networkCalls",
+        "cloudOperations",
+        "dnsOperations",
+        "certificateOperations",
+        "secretOperations",
+        "pipelineOperations",
+        "databaseOperations",
+        "applicationOperations",
+        "recoveryOperations",
+        "iacOperations",
+        "generatedCommands",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "executionEligible": { "const": false },
+        "executionAllowed": { "const": false },
+        "liveOperations": { "const": "disabled" },
+        "networkCalls": { "const": "none" },
+        "cloudOperations": { "const": "none" },
+        "dnsOperations": { "const": "none" },
+        "certificateOperations": { "const": "none" },
+        "secretOperations": { "const": "none" },
+        "pipelineOperations": { "const": "none" },
+        "databaseOperations": { "const": "none" },
+        "applicationOperations": { "const": "none" },
+        "recoveryOperations": { "const": "none" },
+        "iacOperations": { "const": "none" },
+        "generatedCommands": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "planDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "checkId": {
+      "enum": [
+        "control.ownership.artifacts-bound",
+        "control.ownership.raci-complete",
+        "control.ownership.authority-unambiguous",
+        "control.ownership.separation-of-duties",
+        "control.ownership.escalation-acyclic",
+        "control.ownership.source-of-truth-authorized",
+        "control.ownership.rollback-failback-owned",
+        "control.ownership.evidence-current",
+        "control.ownership.handoff-integrity",
+        "control.ownership.replay-protected",
+        "control.ownership.transition-order-valid",
+        "control.ownership.lineage-monotonic",
+        "control.ownership.safety-enforced"
+      ]
+    }
+  }
+}

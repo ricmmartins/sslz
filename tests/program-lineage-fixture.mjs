@@ -23,10 +23,16 @@ import {
 import {
   PROGRAM_LINEAGE_CHECK_IDS,
   PROGRAM_STAGE_ORDER,
+  buildPredecessorProgramLineageEnvelope,
   buildProgramLineageEnvelope,
   programLineageDigest,
   validateProgramLineageEnvelope,
 } from "../scripts/startup-program-lineage.mjs";
+import { planControlPlaneOwnership } from "../scripts/startup-control-plane-ownership-plan.mjs";
+import {
+  createControlPlaneOwnershipFixture,
+  finalizeIntegrity,
+} from "./control-plane-ownership-fixture.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const PROGRAM_GENERATED_AT = "2026-08-12T12:50:00.000Z";
@@ -232,6 +238,42 @@ function createTrustedPlannerDigests(input) {
   };
 }
 
+function createOwnershipProgram(input, trustedPlannerDigests) {
+  const predecessorEnvelope = buildPredecessorProgramLineageEnvelope(input, {
+    trustedPlannerDigests,
+  });
+  const fixture = createControlPlaneOwnershipFixture("aws");
+  const trustedBindings = {
+    predecessorProgramLineageEnvelopeDigest:
+      predecessorEnvelope.envelopeDigest,
+    programIdentityDigest: predecessorEnvelope.programIdentityDigest,
+    connectivityPlanDigest: input.connectivity.plan.planDigest,
+    postgresqlMigrationPlanDigest:
+      input.postgresql.migrationPlan.planDigest,
+    containerImageCicdPlanDigest: input.container.plan.planDigest,
+    readinessEvidenceDigest:
+      input.baseline.bindings.readinessEvidenceDigest,
+    iacPlanDigest: input.baseline.bindings.iacPlanDigest,
+    deploymentManifestDigest:
+      input.baseline.bindings.deploymentManifestDigest,
+    deploymentApprovalDigest:
+      input.baseline.bindings.deploymentApprovalDigest,
+    environment: input.baseline.target.environment,
+    environmentReference: input.baseline.target.environmentReference,
+    targetReference: input.baseline.target.targetReference,
+  };
+  fixture.input.integration = structuredClone(trustedBindings);
+  fixture.input.target = structuredClone(input.baseline.target);
+  fixture.input.planId = "ownership.synthetic.program-lineage.orders.v1";
+  finalizeIntegrity(fixture.input);
+  return {
+    input: fixture.input,
+    plan: planControlPlaneOwnership(fixture.input, { trustedBindings }),
+    trustedBindings,
+    predecessorEnvelope,
+  };
+}
+
 function expectBlocked(id, expectedCheckId, action) {
   let error;
   try {
@@ -251,7 +293,12 @@ function expectBlocked(id, expectedCheckId, action) {
   };
 }
 
-function buildNegativeJourneys(validInput, envelope, trustedPlannerDigests) {
+function buildNegativeJourneys(
+  validInput,
+  envelope,
+  trustedPlannerDigests,
+  ownership,
+) {
   const build = (input) =>
     buildProgramLineageEnvelope(input, { trustedPlannerDigests });
   const upstreamMutation = structuredClone(validInput);
@@ -305,6 +352,10 @@ function buildNegativeJourneys(validInput, envelope, trustedPlannerDigests) {
     crossProgramSubstitution.connectivity.planInput,
   );
 
+  const ownershipSubstitution = structuredClone(ownership);
+  ownershipSubstitution.input.integration.connectivityPlanDigest =
+    `sha256:${"4".repeat(64)}`;
+
   return [
     expectBlocked(
       "program-upstream-mutation",
@@ -351,15 +402,29 @@ function buildNegativeJourneys(validInput, envelope, trustedPlannerDigests) {
       PROGRAM_LINEAGE_CHECK_IDS.crossProgramBound,
       () => build(crossProgramSubstitution),
     ),
+    expectBlocked(
+      "program-ownership-artifact-substitution",
+      PROGRAM_LINEAGE_CHECK_IDS.crossProgramBound,
+      () =>
+        buildProgramLineageEnvelope(validInput, {
+          trustedPlannerDigests,
+          ownership: ownershipSubstitution,
+        }),
+    ),
   ];
 }
 
 function runProgramLineageJourney(baseline, dependencies) {
   const input = createProgramLineageInput(baseline, dependencies);
   const trustedPlannerDigests = createTrustedPlannerDigests(input);
-  const first = buildProgramLineageEnvelope(input, { trustedPlannerDigests });
+  const ownership = createOwnershipProgram(input, trustedPlannerDigests);
+  const first = buildProgramLineageEnvelope(input, {
+    trustedPlannerDigests,
+    ownership,
+  });
   const second = buildProgramLineageEnvelope(structuredClone(input), {
     trustedPlannerDigests,
+    ownership: structuredClone(ownership),
   });
   assert.deepEqual(second, first, "Program lineage must be deterministic.");
   assert(
@@ -375,10 +440,12 @@ function runProgramLineageJourney(baseline, dependencies) {
     input,
     trustedPlannerDigests,
     envelope: first,
+    ownership,
     negativeJourneys: buildNegativeJourneys(
       input,
       first,
       trustedPlannerDigests,
+      ownership,
     ),
   };
 }
@@ -386,6 +453,7 @@ function runProgramLineageJourney(baseline, dependencies) {
 export {
   PROGRAM_GENERATED_AT,
   createProgramLineageInput,
+  createOwnershipProgram,
   createTrustedPlannerDigests,
   runProgramLineageJourney,
 };

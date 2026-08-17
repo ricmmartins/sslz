@@ -1400,6 +1400,97 @@
       "severity": "blocking",
       "automation": "manual",
       "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "control.ownership.artifacts-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.raci-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/plan/prepare-organization-for-cloud"
+    },
+    {
+      "id": "control.ownership.authority-unambiguous",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/organize/cloud-operations"
+    },
+    {
+      "id": "control.ownership.separation-of-duties",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "control.ownership.escalation-acyclic",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response"
+    },
+    {
+      "id": "control.ownership.source-of-truth-authorized",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/migrate/migration-considerations/optimize"
+    },
+    {
+      "id": "control.ownership.rollback-failback-owned",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/disaster-recovery"
+    },
+    {
+      "id": "control.ownership.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/observability"
+    },
+    {
+      "id": "control.ownership.handoff-integrity",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "control.ownership.transition-order-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.lineage-monotonic",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.safety-enforced",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-principles"
     }
   ]
 }
