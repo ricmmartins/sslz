@@ -9,6 +9,9 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 
 > Built for teams of 5-50 engineers who need to get Azure right from day one without spending two months on "cloud foundations."
 
+Want guided setup? [Use the SSLZ Founder Agent](use-sslz-agent.md) to start with founder-friendly questions, read-only
+readiness checks, and an approval-bound infrastructure plan.
+
 ## TL;DR
 
 - **One management group, two subscriptions** (Prod + Non-Prod) is all you need to start. Don't over-engineer your hierarchy.

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0.0",
+  "productName": "SSLZ Founder Agent",
+  "canonicalLaunchUrl": "https://startupscalelanding.zone/use-sslz-agent/",
+  "localAgentName": "sslz-founder",
+  "journeys": [
+    {
+      "id": "synthetic-greenfield",
+      "founderPrompt": "We are launching a new customer API on Azure with PostgreSQL and managed AI inference.",
+      "route": "greenfield",
+      "requiredTopics": [
+        "subscription-topology",
+        "billing-credit-visibility",
+        "provider-registration",
+        "workload-selection",
+        "region-selection",
+        "quota-capacity",
+        "foundry-model-access",
+        "postgresql-regional-capacity",
+        "defender-workspace-policy",
+        "approval-bound-iac"
+      ],
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCallsInFixture": 0,
+      "liveExecution": "guarded-primary-baseline-only"
+    },
+    {
+      "id": "synthetic-migration",
+      "founderPrompt": "Our application already runs in another cloud and must move without losing the rollback path.",
+      "route": "migration",
+      "requiredTopics": [
+        "greenfield-target-readiness",
+        "postgresql-migration-planning",
+        "container-image-cicd-planning",
+        "connectivity-dns-identity-egress",
+        "source-of-truth",
+        "cutover-rollback-failback"
+      ],
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCallsInFixture": 0,
+      "liveExecution": "disabled"
+    },
+    {
+      "id": "synthetic-dual-cloud",
+      "founderPrompt": "We will keep workloads in two clouds and want Azure to own the shared control plane.",
+      "route": "dual-cloud",
+      "requiredTopics": [
+        "greenfield-target-readiness",
+        "connectivity-dns-identity-egress",
+        "control-plane-ownership",
+        "raci",
+        "source-of-truth",
+        "cutover-rollback-failback"
+      ],
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCallsInFixture": 0,
+      "liveExecution": "disabled"
+    }
+  ]
+}

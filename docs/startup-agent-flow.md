@@ -323,7 +323,7 @@ is intentionally rejected rather than accepted with incomplete lineage. See
 
 The versioned machine-readable result schemas are implemented. `startup-preflight` produces the `inspect` result;
 scope-limited commands produce the separate provider-remediation, deployment, readiness, regional-attempt,
-greenfield-report, and program-lineage contracts linked from the [agent-aware overview](/agent/). The complete
+greenfield-report, and program-lineage contracts linked from the [SSLZ Founder Agent overview](/agent/). The complete
 shared preflight semantics, including reserved modes without a generic producer, are in the
 [Preflight Result Contract](/agent/docs/preflight-result-contract/). Use the checked-in
 [`ready-container-apps.json`](/agent/examples/ready-container-apps.json) and

@@ -2,9 +2,15 @@ name: Validate IaC
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, agent-aware]
     paths:
+      - '.github/agents/**'
       - 'agent/**'
+      - 'docs/**'
+      - '_data/**'
+      - '_includes/**'
+      - '_layouts/**'
+      - 'use-sslz-agent.md'
       - '.github/workflows/**'
       - 'infra/**'
       - 'examples/**'
@@ -34,9 +40,15 @@ on:
       - 'scripts/regional-attempt.mjs'
       - 'tests/**'
   push:
-    branches: [main]
+    branches: [main, agent-aware]
     paths:
+      - '.github/agents/**'
       - 'agent/**'
+      - 'docs/**'
+      - '_data/**'
+      - '_includes/**'
+      - '_layouts/**'
+      - 'use-sslz-agent.md'
       - '.github/workflows/**'
       - 'infra/**'
       - 'examples/**'
@@ -78,6 +90,9 @@ jobs:
 
       - name: Validate schemas, catalog, and examples
         run: node scripts/validate-agent-contracts.mjs
+
+      - name: Validate SSLZ Founder Agent profile and journeys
+        run: node tests/sslz-founder-agent.mjs
 
       - name: Test blocking-check catalog coverage
         run: node tests/blocking-check-catalog.mjs
@@ -311,3 +326,15 @@ jobs:
             echo "::error::One or more example Terraform configs failed validation"
             exit 1
           fi
+
+  validate-pages:
+    name: Validate GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
