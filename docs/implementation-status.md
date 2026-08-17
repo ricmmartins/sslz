@@ -9,6 +9,8 @@ description: "Authoritative implementation, execution-authority, and validation 
 This page is the authoritative status summary for the repository at
 [`8e96bd5`](https://github.com/ricmmartins/sslz/commit/8e96bd5),
 the `main` merge commit for [PR #31](https://github.com/ricmmartins/sslz/pull/31), as of 2026-08-17 UTC.
+The SSLZ Founder Agent row below is an additive delivery on the permanent planning branch and does not redefine the
+page's existing `current-main` evidence terms.
 It distinguishes implemented code from execution authority and test evidence. A contract or planner can be implemented
 without being allowed to execute the operation it describes.
 
@@ -30,6 +32,7 @@ without being allowed to execute the operation it describes.
 
 | Capability | Implementation state | Execution authority | Evidence on this baseline | Next gate |
 |---|---|---|---|---|
+| SSLZ Founder Agent profile and launcher | Delivered for local Copilot CLI discovery with greenfield, migration, and dual-cloud routing | Starts with local/read-only work; local artifact writes, live preview, and baseline deployment retain separate approval boundaries; provider-registration diagnosis/dry-run is exposed but live apply is blocked because its approval is not signature-authenticated | Static profile/launcher/journey contract test plus local CLI profile invocation; the profile's broad execute capability is not a shell allowlist, while repository scripts retain the enforceable operation-specific boundaries | Add signature-authenticated provider approval; GitHub UI discovery remains unavailable while the profile is absent from the default branch |
 | Phase 0 contracts and result schemas | Delivered | None; schemas only | Local synthetic and hosted CI | Consumer-specific compatibility testing |
 | Phase 1 account/topology preflight | Delivered read-only `inspect` path | Azure reads under the operator identity; no writes | Local synthetic and hosted CI; no current-`main` tenant-read record retained here | Authorized live read-only pilot with redacted evidence |
 | Phases 2-3 workload, region, capacity, and PostgreSQL fallback planning | Delivered local planners | None; supplied JSON only | Local synthetic and hosted CI | Current workload, regional, quota, capacity, and owner evidence |

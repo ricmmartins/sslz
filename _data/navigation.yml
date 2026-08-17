@@ -25,7 +25,7 @@ resources:
 agent:
   - title: "Start Here"
     items:
-      - title: "Agent-Aware Overview"
+      - title: "Founder Agent Overview"
         url: "/agent/"
       - title: "Flow and Boundaries"
         url: "/agent/docs/startup-agent-flow/"

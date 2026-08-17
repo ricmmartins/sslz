@@ -1,13 +1,15 @@
 ---
 layout: agent
-title: "Agent-Aware SSLZ"
-description: "Optional local planning, evidence, and approval contracts layered on the classic direct-operator landing zone"
+title: "SSLZ Founder Agent"
+description: "Founder-guided Azure readiness, planning, evidence, and approval boundaries"
 permalink: /agent/
 ---
 
-The agent-aware experience is an **optional** layer over the classic Startup-Scale Landing Zone. It provides local
-scripts, machine-readable contracts, deterministic planning, and narrowly approval-gated integrations. It does not
-replace the classic Bicep or Terraform Quick Start.
+The **SSLZ Founder Agent** guides founders from "what are you building?" to a reviewable Azure readiness and landing-zone
+plan. It reuses local scripts, machine-readable contracts, deterministic planning, and narrowly approval-gated
+integrations. It does not replace the classic Bicep or Terraform Quick Start.
+
+[Launch the SSLZ Founder Agent]({{ '/use-sslz-agent/' | relative_url }})
 
 > **Not an autonomous hosted bot:** SSLZ does not embed a chatbot, run a hosted agent, capture your credentials, or make
 > unattended cloud decisions. Operators choose inputs, review artifacts, provide Azure authentication only when needed,
@@ -18,7 +20,7 @@ replace the classic Bicep or Terraform Quick Start.
 | Experience | Best for | Execution model |
 |---|---|---|
 | [Classic SSLZ]({{ '/' | relative_url }}) | Teams that want the original one-hour landing-zone path | Direct operator Bicep or Terraform |
-| Agent-aware SSLZ | Teams that want structured discovery, plans, evidence, and explicit approval boundaries | Local scripts and contracts; writes are absent, disabled, or narrowly approval-gated as documented |
+| SSLZ Founder Agent | Founders who want guided discovery, plans, evidence, and explicit approval boundaries | Local Copilot CLI plus repository scripts and contracts; writes are absent, disabled, or narrowly approval-gated as documented |
 
 ## Flow, contracts, and evidence
 
@@ -68,5 +70,5 @@ These programs remain separate from primary-baseline authority. Their lineage do
   [greenfield journey report schema]({{ '/agent/schemas/greenfield-journey-report.schema.json' | relative_url }}).
 - [Sanitized contract examples]({{ '/agent/examples/ready-container-apps.json' | relative_url }}) show expected shapes
   without tenant secrets.
-- [Planning and validation scripts]({{ site.github_repo }}/tree/main/scripts) are source-controlled and run locally.
-- [Agent contract source]({{ site.github_repo }}/tree/main/agent) contains every schema, profile, example, and check.
+- [Planning and validation scripts]({{ site.github_repo }}/tree/agent-aware/scripts) are source-controlled and run locally.
+- [Agent contract source]({{ site.github_repo }}/tree/agent-aware/agent) contains every schema, profile, example, and check.
