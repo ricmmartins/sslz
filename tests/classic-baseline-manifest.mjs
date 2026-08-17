@@ -6,6 +6,7 @@ import {
   expectedHomepage,
   expectedReadme,
   expectedValidateWorkflow,
+  isAgentPath,
   parseNameStatus,
   validateClassicBaseline,
 } from "../scripts/validate-classic-baseline.mjs";
@@ -15,6 +16,10 @@ assert.deepEqual(parseNameStatus("M\0README.md\0A\0new.txt\0"), [
   { status: "A", path: "new.txt" },
 ]);
 assert.deepEqual(parseNameStatus(""), []);
+assert.equal(isAgentPath("use-sslz-agent.md"), true);
+assert.equal(isAgentPath(".github/agents/sslz-founder.agent.md"), true);
+assert.equal(isAgentPath("agent/checks/check-catalog.json"), true);
+assert.equal(isAgentPath("docs/architecture.md"), false);
 
 assert.deepEqual(
   compareAllowedChanges(
@@ -82,6 +87,10 @@ assert.equal(
   result.recoveryBase,
   "b8fe8254c29cdbea3ddd6d4f10bbaa8de3c21223",
 );
-assert.equal(result.changes.length, 10);
+assert.equal(
+  result.integrationBase,
+  "ff16a2ce81425507461bba52ec9319ba1ce55020",
+);
+assert.equal(result.changes.length, 11);
 
 console.log("Classic baseline manifest tests passed.");
