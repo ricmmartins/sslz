@@ -114,14 +114,26 @@ assert.deepEqual(
   journeys.journeys.map(({ route }) => route),
   ["greenfield", "migration", "dual-cloud"],
 );
+const journeysById = new Map(
+  journeys.journeys.map((journey) => [journey.id, journey]),
+);
+assert.equal(
+  journeysById.size,
+  journeys.journeys.length,
+  "Journey IDs must be unique.",
+);
 for (const journey of journeys.journeys) {
   assert.equal(journey.expectedAzureWritesBeforeApproval, 0);
   assert.equal(journey.expectedExternalNetworkCallsInFixture, 0);
   assert(journey.founderPrompt.length > 20);
   assert(journey.requiredTopics.length >= 6);
 }
-assert.equal(journeys.journeys[1].liveExecution, "disabled");
-assert.equal(journeys.journeys[2].liveExecution, "disabled");
+assert.equal(
+  journeysById.get("synthetic-greenfield")?.liveExecution,
+  "guarded-primary-baseline-only",
+);
+assert.equal(journeysById.get("synthetic-migration")?.liveExecution, "disabled");
+assert.equal(journeysById.get("synthetic-dual-cloud")?.liveExecution, "disabled");
 
 assert(launcher.includes("permalink: /use-sslz-agent/"));
 assert(launcher.includes("copilot --agent sslz-founder"));
