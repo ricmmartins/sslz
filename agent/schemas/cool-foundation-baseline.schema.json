@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/cool-foundation-baseline.schema.json",
+  "title": "SSLZ cool foundation planning baseline",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "classification",
+    "environment",
+    "targetRtoMinutes",
+    "targetRpoMinutes",
+    "secondaryRecurringCostCeilingPercent",
+    "recoveryExerciseCadence",
+    "accountableRoleReference"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "classification": {
+      "const": "provisional-noncritical-nonprod-planning-default"
+    },
+    "environment": {
+      "const": "nonprod"
+    },
+    "targetRtoMinutes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "targetRpoMinutes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "secondaryRecurringCostCeilingPercent": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "recoveryExerciseCadence": {
+      "enum": ["monthly", "quarterly", "semiannual", "annual"]
+    },
+    "accountableRoleReference": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    }
+  }
+}

@@ -17,7 +17,7 @@ This is the complete inventory of every Azure resource created by the Startup La
 
 | Name Pattern | Azure Resource Type | Purpose | Conditional |
 |---|---|---|---|
-| `rg-{company}-{env}-monitoring` | `Microsoft.Resources/resourceGroups` | Log Analytics workspace and monitoring resources | Always created |
+| `rg-{company}-{env}-monitoring` | `Microsoft.Resources/resourceGroups` | Log Analytics workspace and monitoring resources | Created only when an existing workspace is not supplied |
 | `rg-{company}-{env}-networking` | `Microsoft.Resources/resourceGroups` | VNet, subnets, and NSGs | Only when `deployNetworking = true` |
 
 ---
@@ -123,6 +123,9 @@ Each subnet has a dedicated NSG. All NSGs include a **DenyAllInbound** catch-all
 | **Daily quota** | 5 GB (configurable, `-1` = unlimited) |
 | **Resource-only permissions** | Enabled |
 
+The workspace location is explicit and defaults to the selected primary region. Supplying a compatible existing
+workspace resource ID reuses that workspace and suppresses both workspace and monitoring resource-group creation.
+
 ### Activity Log Diagnostic Setting
 
 | Property | Value |
@@ -162,12 +165,18 @@ All plans are `Microsoft.Security/pricings` resources at subscription scope.
 | `OpenSourceRelationalDatabases` | PostgreSQL, MySQL, MariaDB | Standard | Free | — |
 | `KeyVaults` | Key Vault | Standard | Standard | — |
 | `Arm` | ARM control plane | Standard | Standard | — |
-| `StorageAccounts` | Storage | Standard | Standard | DefenderForStorageV2 |
+| `StorageAccounts` | Storage | Free | Free | DefenderForStorageV2 only when explicitly enabled |
 
 > **Notes:**
 > - Defender for Servers, Databases are enabled by default in prod, disabled in nonprod.
 > - Defender for Containers defaults to disabled; enable via parameter if running AKS.
 > - Defender for Key Vault and ARM are always Standard (low cost).
+> - Defender for Storage V2 defaults to Free in both environments. Explicitly set `enableDefenderForStorage` (Bicep)
+>   or `enable_defender_for_storage` (Terraform) to opt into Standard after reviewing current pricing.
+
+When Defender for Servers is enabled, `Microsoft.Security/workspaceSettings/default` (Terraform:
+`azurerm_security_center_workspace.default`) explicitly associates the subscription with the effective Log Analytics
+workspace. It is omitted when Defender for Servers is disabled.
 
 ### Security Contact
 
@@ -251,9 +260,9 @@ Tag governance is enforced via policy:
 | Workflow File | Name | Trigger | Purpose |
 |---|---|---|---|
 | `validate.yml` | Validate IaC | PR and push to `main` on `infra/**` or `examples/**` | Builds and lints all Bicep files; runs `terraform fmt`, TFLint, and `terraform validate` |
-| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Push to `main` on `infra/bicep/**`, PR, or manual dispatch | Validates, runs What-If on PRs (posts result as PR comment), deploys nonprod and prod independently |
-| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Push to `main` on `infra/terraform/**`, PR, or manual dispatch | Plans (posts result as PR comment), applies nonprod and prod independently (prod re-plans before apply) |
-| `integration-test.yml` | Integration Test | Manual dispatch or weekly schedule (Monday 06:00 UTC) | Runs Bicep What-If and Terraform Plan; optionally deploys, validates resources, and tears down |
+| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Bicep commands |
+| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Terraform commands |
+| `integration-test.yml` | Integration Test | Manual dispatch or weekly schedule (Monday 06:00 UTC) | Runs Bicep What-If and Terraform Plan against a dedicated integration subscription; optional writes require manual `main` dispatch plus `integration-nonprod`, and teardown is attempted after every started apply |
 | `github-pages.yml` | Deploy to GitHub Pages | Push to `main` or manual dispatch | Builds Jekyll site and deploys to GitHub Pages |
 
 ---

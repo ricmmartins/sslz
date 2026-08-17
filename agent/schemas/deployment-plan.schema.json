@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/deployment-plan.schema.json",
+  "title": "SSLZ deployment plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "planId",
+    "planDigest",
+    "profile",
+    "environments",
+    "services",
+    "estimatedMonthlyPlatformCost",
+    "iac"
+  ],
+  "properties": {
+    "planId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "profile": {
+      "enum": ["container-apps", "aks"]
+    },
+    "profileExtensions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["foundry", "postgresql", "gpu"]
+      }
+    },
+    "rationale": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "subscriptionId",
+          "primaryRegion",
+          "secondaryRegion",
+          "regionalMode"
+        ],
+        "properties": {
+          "name": {
+            "enum": ["prod", "nonprod"]
+          },
+          "subscriptionId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "primaryRegion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "secondaryRegion": {
+            "type": ["string", "null"]
+          },
+          "regionalMode": {
+            "enum": ["single-region-ready", "cool-infrastructure", "warm-workload"]
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "region", "purpose"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "region": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "estimatedMonthlyPlatformCost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "minimum", "maximum", "assumptions"],
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "minimum": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximum": {
+          "type": "number",
+          "minimum": 0
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "iac": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "previewType", "previewArtifact"],
+      "properties": {
+        "provider": {
+          "enum": ["bicep", "terraform"]
+        },
+        "previewType": {
+          "enum": ["what-if", "plan"]
+        },
+        "previewArtifact": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

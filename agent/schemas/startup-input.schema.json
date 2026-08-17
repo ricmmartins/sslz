@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/startup-input.schema.json",
+  "title": "SSLZ startup planning input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "company",
+    "subscriptions",
+    "workload",
+    "reliability",
+    "budget"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "company": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "stage", "engineeringTeamSize"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "stage": {
+          "enum": ["pre-seed", "seed", "series-a", "other"]
+        },
+        "engineeringTeamSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      }
+    },
+    "subscriptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prodSubscriptionId", "nonprodSubscriptionId"],
+      "properties": {
+        "prodSubscriptionId": {
+          "$ref": "#/$defs/subscriptionId"
+        },
+        "nonprodSubscriptionId": {
+          "$ref": "#/$defs/subscriptionId"
+        }
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "traffic",
+        "requiresKubernetes",
+        "requiresRelationalDatabase",
+        "usesFoundryModels",
+        "requiresCustomerManagedGpu",
+        "incidentOwnerConfirmed"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "traffic": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["http", "event", "scheduled", "mixed"]
+          }
+        },
+        "requiresKubernetes": {
+          "type": "boolean"
+        },
+        "requiresRelationalDatabase": {
+          "type": "boolean"
+        },
+        "usesFoundryModels": {
+          "type": "boolean"
+        },
+        "requiresCustomerManagedGpu": {
+          "type": "boolean"
+        },
+        "incidentOwnerConfirmed": {
+          "type": "boolean"
+        },
+        "usesDocker": {
+          "type": "boolean"
+        },
+        "kubernetesRequirements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "kubernetes-api",
+              "operator",
+              "specialized-networking",
+              "custom-scheduler",
+              "service-mesh",
+              "ecosystem-component"
+            ]
+          }
+        },
+        "managedModelFit": {
+          "enum": ["yes", "no", "unknown"]
+        },
+        "aksIngress": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "aks-ingress-decision.schema.json"
+            }
+          ]
+        }
+      }
+    },
+    "reliability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataResidency",
+        "regionalMode",
+        "rtoMinutes",
+        "rpoMinutes",
+        "failoverOwnerConfirmed"
+      ],
+      "properties": {
+        "dataResidency": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "regionalMode": {
+          "enum": ["single-region-ready", "cool-infrastructure", "warm-workload"]
+        },
+        "rtoMinutes": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "rpoMinutes": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "failoverOwnerConfirmed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "monthlyPlatformMaximum"],
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "monthlyPlatformMaximum": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regulatedControlsBeyondBaseline",
+        "activeActiveMultiRegionWrites",
+        "independentProductionWorkloads",
+        "subscriptionCount",
+        "hybridConnectivity",
+        "centralizedEgressInspection",
+        "automaticFailoverWithoutDataStrategy",
+        "dedicatedPlatformTeamSharedServices",
+        "unsupportedRequirements"
+      ],
+      "properties": {
+        "regulatedControlsBeyondBaseline": {
+          "type": "boolean"
+        },
+        "activeActiveMultiRegionWrites": {
+          "type": "boolean"
+        },
+        "independentProductionWorkloads": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "subscriptionCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hybridConnectivity": {
+          "type": "boolean"
+        },
+        "centralizedEgressInspection": {
+          "type": "boolean"
+        },
+        "automaticFailoverWithoutDataStrategy": {
+          "type": "boolean"
+        },
+        "dedicatedPlatformTeamSharedServices": {
+          "type": "boolean"
+        },
+        "unsupportedRequirements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "subscriptionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    }
+  }
+}

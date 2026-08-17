@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/provider-remediation-approval.schema.json",
+  "title": "SSLZ provider remediation approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "planVersion",
+    "planId",
+    "planDigest",
+    "actionId",
+    "actionType",
+    "operation",
+    "namespace",
+    "subscriptionId",
+    "scope",
+    "approvedAt",
+    "expiresAt",
+    "approvalDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": ["pending", "approved", "declined", "consumed"]
+    },
+    "planVersion": {
+      "const": "1.0.0"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "actionId": {
+      "type": "string",
+      "pattern": "^provider\\.register\\.(prod|nonprod)\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "actionType": {
+      "const": "azureWrite"
+    },
+    "operation": {
+      "const": "provider.register"
+    },
+    "namespace": {
+      "enum": [
+        "Microsoft.App",
+        "Microsoft.CognitiveServices",
+        "Microsoft.Compute",
+        "Microsoft.ContainerService",
+        "Microsoft.DBforPostgreSQL"
+      ]
+    },
+    "subscriptionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approvalDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

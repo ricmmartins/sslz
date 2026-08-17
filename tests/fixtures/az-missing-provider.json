@@ -1,0 +1,6 @@
+{
+  "extends": "az-success.json",
+  "providers": {
+    "nonprod": "missing-microsoft-app"
+  }
+}

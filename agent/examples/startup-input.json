@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "company": {
+    "name": "Contoso",
+    "stage": "seed",
+    "engineeringTeamSize": 8
+  },
+  "subscriptions": {
+    "prodSubscriptionId": "22222222-2222-2222-2222-222222222222",
+    "nonprodSubscriptionId": "33333333-3333-3333-3333-333333333333"
+  },
+  "workload": {
+    "description": "An HTTP API with background processing and relational data.",
+    "traffic": ["http", "event"],
+    "requiresKubernetes": false,
+    "requiresRelationalDatabase": true,
+    "usesFoundryModels": false,
+    "requiresCustomerManagedGpu": false,
+    "incidentOwnerConfirmed": true,
+    "usesDocker": true,
+    "kubernetesRequirements": [],
+    "managedModelFit": "unknown",
+    "aksIngress": null
+  },
+  "reliability": {
+    "dataResidency": "United States",
+    "regionalMode": "single-region-ready",
+    "rtoMinutes": null,
+    "rpoMinutes": null,
+    "failoverOwnerConfirmed": false
+  },
+  "budget": {
+    "currency": "USD",
+    "monthlyPlatformMaximum": 500
+  },
+  "architecture": {
+    "regulatedControlsBeyondBaseline": false,
+    "activeActiveMultiRegionWrites": false,
+    "independentProductionWorkloads": 1,
+    "subscriptionCount": 2,
+    "hybridConnectivity": false,
+    "centralizedEgressInspection": false,
+    "automaticFailoverWithoutDataStrategy": false,
+    "dedicatedPlatformTeamSharedServices": false,
+    "unsupportedRequirements": []
+  }
+}

@@ -1,0 +1,1496 @@
+{
+  "schemaVersion": "1.0.0",
+  "checks": [
+    {
+      "id": "account.authentication.active",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/cli/azure/authenticate-azure-cli"
+    },
+    {
+      "id": "account.subscription.explicit-selection",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/cli/azure/manage-azure-subscriptions-azure-cli"
+    },
+    {
+      "id": "account.subscription.tenant-match",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "account.subscription.topology-supported",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/cli/azure/manage-azure-subscriptions-azure-cli"
+    },
+    {
+      "id": "identity.secondary-admin.present",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "identity.company-domain.verified",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "identity.deployment-role.sufficient",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/role-assignments-list-cli"
+    },
+    {
+      "id": "billing.startup-credit.context-visible",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "billing.subscription.credit-association",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "billing.target-benefit.topology-confirmed",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/other"
+    },
+    {
+      "id": "account.provider.required-registrations",
+      "category": "account",
+      "severity": "blocking",
+      "automation": "approvedWrite",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/resource-providers-and-types"
+    },
+    {
+      "id": "quota.workload.headroom",
+      "category": "quota",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/quotas/quotas-overview"
+    },
+    {
+      "id": "region.services.available",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "region.policy.allowed-locations",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/governance/policy/concepts/effect-deny"
+    },
+    {
+      "id": "region.availability-zones.supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/availability-zones-overview"
+    },
+    {
+      "id": "region.skus.eligible",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-machines/sizes/overview"
+    },
+    {
+      "id": "capacity.workload.available",
+      "category": "capacity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-machines/allocation-failure"
+    },
+    {
+      "id": "region.postgresql.edition-version-supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-supported-versions"
+    },
+    {
+      "id": "region.postgresql.extensions-supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/extensions/concepts-extensions-versions"
+    },
+    {
+      "id": "quota.postgresql.eligible",
+      "category": "quota",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-limits"
+    },
+    {
+      "id": "capacity.postgresql.available",
+      "category": "capacity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-compute"
+    },
+    {
+      "id": "region.postgresql.recovery-supported",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/reliability-postgresql-flexible-server"
+    },
+    {
+      "id": "workload.postgresql.provider-parity",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "migration.postgresql.assessment-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.engine-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.extensions-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/extensions/concepts-extensions-versions"
+    },
+    {
+      "id": "migration.postgresql.encoding-collation-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-collation"
+    },
+    {
+      "id": "migration.postgresql.capacity-headroom",
+      "category": "capacity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-limits"
+    },
+    {
+      "id": "migration.postgresql.availability-compatible",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/reliability-postgresql-flexible-server"
+    },
+    {
+      "id": "migration.postgresql.private-connectivity-ready",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-networking-private"
+    },
+    {
+      "id": "migration.postgresql.identity-auth-mapped",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-azure-ad-authentication"
+    },
+    {
+      "id": "migration.postgresql.tool-available",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.logical-replication-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-logical"
+    },
+    {
+      "id": "migration.postgresql.objects-mappable",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.downtime-compatible",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.source-of-truth-explicit",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.validation-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "migration.postgresql.rollback-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.contracts-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/overview"
+    },
+    {
+      "id": "rehearsal.postgresql.model-prechecks-complete",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.initial-load-evidenced",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.catch-up-permitted",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-logical"
+    },
+    {
+      "id": "rehearsal.postgresql.schema-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.row-counts-within-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.data-verification-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.cutover-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.rollback-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.source-of-truth-safe",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "rehearsal.postgresql.output-sanitized",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/security-overview"
+    },
+    {
+      "id": "execution.postgresql.artifacts-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.lineage-monotonic",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/data-encryption-best-practices"
+    },
+    {
+      "id": "execution.postgresql.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/overview"
+    },
+    {
+      "id": "execution.postgresql.authorities-bound",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "execution.postgresql.signatures-valid",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/data-encryption-best-practices"
+    },
+    {
+      "id": "execution.postgresql.approvals-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.approval-scope-exact",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "execution.postgresql.strategy-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-logical"
+    },
+    {
+      "id": "execution.postgresql.privileges-exact",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "execution.postgresql.stage-order-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/migrate/migration-service/concepts-user-guide"
+    },
+    {
+      "id": "execution.postgresql.rollback-boundaries-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/reliability-postgresql-flexible-server"
+    },
+    {
+      "id": "execution.postgresql.output-sanitized",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/security-overview"
+    },
+    {
+      "id": "region.foundry-model.available",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure"
+    },
+    {
+      "id": "region.data-residency.compatible",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "network.regional-address-space.non-overlapping",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq"
+    },
+    {
+      "id": "network.aks-ingress.decision-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/aks/load-balancer-standard"
+    },
+    {
+      "id": "network.aks-ingress.provider-parity",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/aks/concepts-network"
+    },
+    {
+      "id": "network.aks-ingress.postcheck-current",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/aks/load-balancer-standard"
+    },
+    {
+      "id": "security.defender.selection-reviewed",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/defender-for-cloud/connect-azure-subscription"
+    },
+    {
+      "id": "operations.monitoring.destination-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/fundamentals/monitor-azure-resource"
+    },
+    {
+      "id": "operations.aks-owner.confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/architecture/framework/services/compute/azure-kubernetes-service/operational-excellence"
+    },
+    {
+      "id": "workload.managed-model-fit.reviewed",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure"
+    },
+    {
+      "id": "workload.profile.requirements-supported",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/app-platform/aks/plan"
+    },
+    {
+      "id": "readiness.preflight.authoritative",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/azure-subscription-service-limits"
+    },
+    {
+      "id": "readiness.subscription-topology.exact",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/startups/other"
+    },
+    {
+      "id": "readiness.support.startup-confirmed",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "readiness.review.security-approved",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/security/"
+    },
+    {
+      "id": "readiness.review.azure-architecture-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/architect-role/"
+    },
+    {
+      "id": "readiness.review.iac-parity-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "readiness.failover.owner-confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "readiness.recovery.objectives-measured",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "readiness.recovery.service-tested",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "readiness.recovery.exercise-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "readiness.cost.cool-footprint-provenance",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cost-management-billing/costs/pricing-calculator"
+    },
+    {
+      "id": "readiness.region.evidence-current",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "readiness.foundry.deployment-quota-current",
+      "category": "quota",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/foundry/openai/quotas-limits"
+    },
+    {
+      "id": "deployment.platform.expected-resources",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-cli"
+    },
+    {
+      "id": "deployment.platform.monitoring",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/logs/quick-create-workspace"
+    },
+    {
+      "id": "deployment.platform.activity-log-forwarding",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log"
+    },
+    {
+      "id": "deployment.platform.policy",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/governance/policy/assign-policy-azurecli"
+    },
+    {
+      "id": "deployment.platform.defender",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/defender-for-cloud/connect-azure-subscription"
+    },
+    {
+      "id": "deployment.platform.budget",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
+    },
+    {
+      "id": "deployment.platform.networking",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/manage-virtual-network"
+    },
+    {
+      "id": "cool.foundation.mode-nonprod-only",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "cool.foundation.secondary-region-current",
+      "category": "region",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/regions-list"
+    },
+    {
+      "id": "cool.foundation.network-non-overlapping",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq"
+    },
+    {
+      "id": "cool.foundation.billing-support-confirmed",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "support",
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    },
+    {
+      "id": "cool.foundation.owner-confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "cool.foundation.external-reviews-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/architect-role/"
+    },
+    {
+      "id": "cool.foundation.recovery-objectives-met",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "cool.foundation.recovery-exercise-passed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "cool.foundation.cost-within-ceiling",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cost-management-billing/costs/pricing-calculator"
+    },
+    {
+      "id": "cool.foundation.artifacts-exact",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "cool.foundation.provider-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "cool.foundation.source-plan-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deployment-what-if"
+    },
+    {
+      "id": "cool.foundation.execution-disabled",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deployment-what-if"
+    },
+    {
+      "id": "cool.foundation.failover-modules-excluded",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "cool.container-apps.mode-nonprod-only",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/environments"
+    },
+    {
+      "id": "cool.container-apps.foundation-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/overview"
+    },
+    {
+      "id": "cool.container-apps.attestations-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "cool.container-apps.image-immutable",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-image-lock"
+    },
+    {
+      "id": "cool.container-apps.secrets-reference-only",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/manage-secrets"
+    },
+    {
+      "id": "cool.container-apps.identity-rbac-scoped",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/managed-identity"
+    },
+    {
+      "id": "cool.container-apps.network-profile-matched",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/custom-virtual-networks"
+    },
+    {
+      "id": "cool.container-apps.health-probes-approved",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/health-probes"
+    },
+    {
+      "id": "cool.container-apps.configuration-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/revisions"
+    },
+    {
+      "id": "cool.container-apps.observability-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/log-monitoring"
+    },
+    {
+      "id": "cool.container-apps.cost-within-ceiling",
+      "category": "billing",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-apps/billing"
+    },
+    {
+      "id": "cool.container-apps.recovery-objectives-matched",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/metrics"
+    },
+    {
+      "id": "cool.container-apps.measured-recovery-met",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/testing-strategy"
+    },
+    {
+      "id": "cool.container-apps.artifacts-exact",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview"
+    },
+    {
+      "id": "cool.container-apps.provider-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/developer/terraform/overview"
+    },
+    {
+      "id": "cool.container-apps.execution-disabled",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deploy-what-if"
+    },
+    {
+      "id": "cool.container-apps.failover-capabilities-excluded",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "regional.retry.binding-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-what-if"
+    },
+    {
+      "id": "regional.retry.cleanup-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-resource-manager/management/delete-resource-group"
+    },
+    {
+      "id": "regional.retry.provider-parity",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/developer/terraform/overview"
+    },
+    {
+      "id": "migration.container.assessment-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-intro"
+    },
+    {
+      "id": "migration.container.evidence-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-intro"
+    },
+    {
+      "id": "migration.container.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-intro"
+    },
+    {
+      "id": "migration.container.digest-pinned",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices"
+    },
+    {
+      "id": "migration.container.mutable-tag-untrusted",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-image-lock"
+    },
+    {
+      "id": "migration.container.platforms-compatible",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/push-multi-architecture-images"
+    },
+    {
+      "id": "migration.container.base-image-supported",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tasks-base-images"
+    },
+    {
+      "id": "migration.container.sbom-present",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-oras-artifacts"
+    },
+    {
+      "id": "migration.container.signatures-verified",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push"
+    },
+    {
+      "id": "migration.container.provenance-continuous",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/container-secure-supply-chain/articles/container-secure-supply-chain-overview"
+    },
+    {
+      "id": "migration.container.vulnerability-policy-met",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/defender-for-cloud/defender-for-containers-introduction"
+    },
+    {
+      "id": "migration.container.registry-controls-parity",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices"
+    },
+    {
+      "id": "migration.container.unsigned-promotion-blocked",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push"
+    },
+    {
+      "id": "migration.container.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices"
+    },
+    {
+      "id": "migration.container.source-of-truth-explicit",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-import-images"
+    },
+    {
+      "id": "migration.cicd.source-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-tasks-overview"
+    },
+    {
+      "id": "migration.cicd.triggers-governed",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/security/overview"
+    },
+    {
+      "id": "migration.cicd.runner-least-privilege",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/security/misc"
+    },
+    {
+      "id": "migration.cicd.environment-separation",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/environments"
+    },
+    {
+      "id": "migration.cicd.secret-references-external",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/release/azure-key-vault"
+    },
+    {
+      "id": "migration.cicd.promotion-governed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/approvals"
+    },
+    {
+      "id": "migration.cicd.deployment-targets-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/environments"
+    },
+    {
+      "id": "migration.cicd.dual-publish-ready",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-import-images"
+    },
+    {
+      "id": "migration.cicd.rollback-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/deployment-jobs"
+    },
+    {
+      "id": "migration.connectivity.architecture-supported",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-introduction"
+    },
+    {
+      "id": "migration.connectivity.assessment-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/migrate/migrate-services-overview"
+    },
+    {
+      "id": "migration.connectivity.evidence-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/migrate/migrate-services-overview"
+    },
+    {
+      "id": "migration.connectivity.address-space-no-overlap",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/ip-services/private-ip-addresses"
+    },
+    {
+      "id": "migration.connectivity.route-ownership-exact",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview"
+    },
+    {
+      "id": "migration.connectivity.symmetric-routing",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-optimize-routing"
+    },
+    {
+      "id": "migration.connectivity.no-default-route",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview"
+    },
+    {
+      "id": "migration.connectivity.bgp-asn-acceptable",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-routing"
+    },
+    {
+      "id": "migration.connectivity.mtu-compatible",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/troubleshoot/azure/expressroute/expressroute-troubleshooting-network-performance"
+    },
+    {
+      "id": "migration.connectivity.gateway-redundant",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/designing-for-high-availability-with-expressroute"
+    },
+    {
+      "id": "migration.connectivity.firewall-policy-explicit",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/firewall/overview"
+    },
+    {
+      "id": "migration.connectivity.private-endpoint-ready",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/private-link/private-endpoint-overview"
+    },
+    {
+      "id": "migration.connectivity.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-introduction"
+    },
+    {
+      "id": "migration.connectivity.source-of-truth-explicit",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-howto-coexist-resource-manager"
+    },
+    {
+      "id": "migration.connectivity.integrity-verified",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/network-best-practices"
+    },
+    {
+      "id": "migration.connectivity.target-integrity-verified",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/network-best-practices"
+    },
+    {
+      "id": "migration.connectivity.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "migration.connectivity.owner-confirmed",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/overview"
+    },
+    {
+      "id": "migration.connectivity.telemetry-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/azure-monitor/overview"
+    },
+    {
+      "id": "migration.connectivity.recovery-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/reliability/disaster-recovery-overview"
+    },
+    {
+      "id": "migration.connectivity.transition-bounded",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-howto-coexist-resource-manager"
+    },
+    {
+      "id": "migration.connectivity.rollback-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "migration.dns.authority-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/private-dns-overview"
+    },
+    {
+      "id": "migration.dns.loop-prevented",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/private-resolver-hybrid-dns"
+    },
+    {
+      "id": "migration.dns.resolver-reachable",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/dns-private-resolver-overview"
+    },
+    {
+      "id": "migration.dns.forwarding-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/private-resolver-hybrid-dns"
+    },
+    {
+      "id": "migration.dns.ttl-policy-met",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/dns/dns-zones-records"
+    },
+    {
+      "id": "migration.dns.certificate-sni-bound",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/application-gateway/ssl-overview"
+    },
+    {
+      "id": "migration.identity.oidc-pinned",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/workload-id/workload-identity-federation"
+    },
+    {
+      "id": "migration.identity.no-long-lived-secrets",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/workload-id/workload-identities-overview"
+    },
+    {
+      "id": "migration.identity.least-privilege",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "migration.identity.environment-separation",
+      "category": "identity",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/devops/pipelines/process/environments"
+    },
+    {
+      "id": "migration.egress.bounded-allowlist",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/firewall/rule-processing"
+    },
+    {
+      "id": "migration.egress.default-deny-enforced",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/firewall/rule-processing"
+    },
+    {
+      "id": "migration.egress.nat-proxy-explicit",
+      "category": "network",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/nat-gateway/nat-overview"
+    },
+    {
+      "id": "program.lineage.artifacts-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/"
+    },
+    {
+      "id": "program.lineage.digests-current",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/security/fundamentals/data-encryption-best-practices"
+    },
+    {
+      "id": "program.lineage.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/observability"
+    },
+    {
+      "id": "program.lineage.stage-order-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "program.lineage.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "program.lineage.target-bound",
+      "category": "workload",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org"
+    },
+    {
+      "id": "program.lineage.lineage-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "program.lineage.cross-program-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-principles"
+    },
+    {
+      "id": "program.lineage.authority-separated",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "control.ownership.artifacts-bound",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.raci-complete",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/plan/prepare-organization-for-cloud"
+    },
+    {
+      "id": "control.ownership.authority-unambiguous",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/organize/cloud-operations"
+    },
+    {
+      "id": "control.ownership.separation-of-duties",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/role-based-access-control/best-practices"
+    },
+    {
+      "id": "control.ownership.escalation-acyclic",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response"
+    },
+    {
+      "id": "control.ownership.source-of-truth-authorized",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/migrate/migration-considerations/optimize"
+    },
+    {
+      "id": "control.ownership.rollback-failback-owned",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "manual",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/reliability/disaster-recovery"
+    },
+    {
+      "id": "control.ownership.evidence-current",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/observability"
+    },
+    {
+      "id": "control.ownership.handoff-integrity",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.replay-protected",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "control.ownership.transition-order-valid",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.lineage-monotonic",
+      "category": "operations",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments"
+    },
+    {
+      "id": "control.ownership.safety-enforced",
+      "category": "security",
+      "severity": "blocking",
+      "automation": "readOnly",
+      "documentationUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-principles"
+    }
+  ]
+}

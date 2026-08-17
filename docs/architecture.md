@@ -81,7 +81,7 @@ Why this matters:
 - **Habits form early.** Once your team starts treating resource groups as workload boundaries, it becomes an embedded practice that's expensive to refactor later.
 - **Subscriptions are free.** Adding a subscription costs nothing — the overhead is only in CI/CD and RBAC setup, which takes an hour.
 
-If you find yourself adding a second workload, that's a [graduation signal](graduation-guide.md).
+If you find yourself adding a second workload, that's a [graduation signal](/docs/graduation-guide/).
 
 ### Why Not Three+ Subscriptions?
 
@@ -271,8 +271,8 @@ Key additions when you graduate to multi-region:
 
 ### See Also
 
-- [Graduation Guide](graduation-guide.md) — Full migration path to enterprise-scale
-- [Networking Deep Dive](networking.md) — When to add a hub VNet
-- [Security Baseline](security.md) — Defender, RBAC, logging
-- [Cost Management](cost-management.md) — Budgets and cost optimization
-- [Troubleshooting](troubleshooting.md) — Common deployment errors
+- [Graduation Guide](/docs/graduation-guide/) — Full migration path to enterprise-scale
+- [Networking Deep Dive](/docs/networking/) — When to add a hub VNet
+- [Security Baseline](/docs/security/) — Defender, RBAC, logging
+- [Cost Management](/docs/cost-management/) — Budgets and cost optimization
+- [Troubleshooting](/docs/troubleshooting/) — Common deployment errors

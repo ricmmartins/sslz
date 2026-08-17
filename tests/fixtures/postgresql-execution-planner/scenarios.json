@@ -1,0 +1,369 @@
+[
+  {
+    "name": "tampered source assessment fails closed",
+    "kind": "mutate",
+    "document": "sourceAssessment",
+    "path": "size.usedGiB",
+    "value": 19,
+    "expectedChecks": [
+      "execution.postgresql.artifacts-bound"
+    ]
+  },
+  {
+    "name": "stale live evidence fails closed",
+    "kind": "mutate",
+    "document": "liveEvidence",
+    "path": "attestations.0.expiresAt",
+    "value": "2026-08-12T12:49:59Z",
+    "expectedChecks": [
+      "execution.postgresql.evidence-current",
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "reused nonce fails closed",
+    "kind": "mutate",
+    "document": "approvals",
+    "path": "approvals.1.nonce",
+    "value": "nonce.approval.rehearsal-execution.attempt-1",
+    "expectedChecks": [
+      "execution.postgresql.replay-protected",
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "non-monotonic lineage fails closed",
+    "kind": "mutate",
+    "document": "request",
+    "path": "attemptOrdinal",
+    "value": 2,
+    "expectedChecks": [
+      "execution.postgresql.lineage-monotonic",
+      "execution.postgresql.approval-scope-exact"
+    ]
+  },
+  {
+    "name": "target mismatch fails closed",
+    "kind": "mutate",
+    "document": "request",
+    "path": "targetReference",
+    "value": "target.postgresql.orders.other",
+    "expectedChecks": [
+      "execution.postgresql.target-bound",
+      "execution.postgresql.approval-scope-exact"
+    ]
+  },
+  {
+    "name": "signed evidence cannot be transplanted to another envelope",
+    "kind": "mutate",
+    "document": "liveEvidence",
+    "path": "bindings.targetReference",
+    "value": "target.postgresql.orders.other",
+    "expectedChecks": [
+      "execution.postgresql.target-bound",
+      "execution.postgresql.privileges-exact"
+    ]
+  },
+  {
+    "name": "omitted approval is rejected",
+    "kind": "omit-array-item",
+    "document": "approvals",
+    "path": "approvals",
+    "index": 7,
+    "expectedError": "minimum item count is 8"
+  },
+  {
+    "name": "duplicate approval fails closed",
+    "kind": "duplicate-array-item",
+    "document": "approvals",
+    "path": "approvals",
+    "sourceIndex": 0,
+    "targetIndex": 7,
+    "expectedChecks": [
+      "execution.postgresql.approvals-complete",
+      "execution.postgresql.stage-order-valid"
+    ]
+  },
+  {
+    "name": "out-of-order approval fails closed",
+    "kind": "swap-array-items",
+    "document": "approvals",
+    "path": "approvals",
+    "firstIndex": 2,
+    "secondIndex": 3,
+    "expectedChecks": [
+      "execution.postgresql.approvals-complete",
+      "execution.postgresql.stage-order-valid"
+    ]
+  },
+  {
+    "name": "approval stage substitution fails closed",
+    "kind": "mutate",
+    "document": "approvals",
+    "path": "approvals.0.stage",
+    "value": "initial-load",
+    "expectedChecks": [
+      "execution.postgresql.approvals-complete",
+      "execution.postgresql.authorities-bound",
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "authority substitution fails closed",
+    "kind": "mutate",
+    "document": "approvals",
+    "path": "approvals.0.authorityReference",
+    "value": "authority.stage.initial-load",
+    "expectedChecks": [
+      "execution.postgresql.authorities-bound",
+      "execution.postgresql.approval-scope-exact",
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "tampered signature fails closed",
+    "kind": "mutate",
+    "document": "approvals",
+    "path": "approvals.0.signature",
+    "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+    "expectedChecks": [
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "protected approval digest mismatch fails closed",
+    "kind": "mutate",
+    "document": "trust",
+    "path": "approvalDigests.0.digest",
+    "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "expectedChecks": [
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "privilege widening fails closed",
+    "kind": "mutate",
+    "document": "approvals",
+    "path": "approvals.0.grantedCapabilities",
+    "value": [
+      "rehearsal-execute",
+      "initial-load-write"
+    ],
+    "expectedChecks": [
+      "execution.postgresql.privileges-exact",
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "strategy downgrade fails closed",
+    "kind": "mutate",
+    "document": "request",
+    "path": "strategy",
+    "value": "online-logical-replication",
+    "expectedChecks": [
+      "execution.postgresql.strategy-bound",
+      "execution.postgresql.approval-scope-exact"
+    ]
+  },
+  {
+    "name": "request timestamp mutation invalidates every stage approval",
+    "kind": "mutate",
+    "document": "request",
+    "path": "requestedAt",
+    "value": "2026-08-12T12:39:31Z",
+    "expectedChecks": [
+      "execution.postgresql.approval-scope-exact"
+    ]
+  },
+  {
+    "name": "distinct authorities cannot share signing key material",
+    "kind": "duplicate-key-material",
+    "expectedChecks": [
+      "execution.postgresql.artifacts-bound",
+      "execution.postgresql.authorities-bound"
+    ]
+  },
+  {
+    "name": "idempotency replay fails closed",
+    "kind": "accepted-execution-replay",
+    "expectedChecks": [
+      "execution.postgresql.lineage-monotonic",
+      "execution.postgresql.replay-protected",
+      "execution.postgresql.artifacts-bound"
+    ]
+  },
+  {
+    "name": "expired approval fails closed",
+    "kind": "mutate",
+    "document": "approvals",
+    "path": "approvals.4.expiresAt",
+    "value": "2026-08-12T12:49:59Z",
+    "expectedChecks": [
+      "execution.postgresql.evidence-current",
+      "execution.postgresql.signatures-valid"
+    ]
+  },
+  {
+    "name": "stale current lineage fails closed",
+    "kind": "mutate",
+    "document": "lineage",
+    "path": "expiresAt",
+    "value": "2026-08-12T12:49:59Z",
+    "expectedChecks": [
+      "execution.postgresql.artifacts-bound",
+      "execution.postgresql.evidence-current",
+      "execution.postgresql.target-bound"
+    ]
+  },
+  {
+    "name": "approvals cannot predate current lineage snapshot",
+    "kind": "mutate",
+    "document": "lineage",
+    "path": "observedAt",
+    "value": "2026-08-12T12:45:30Z",
+    "expectedChecks": [
+      "execution.postgresql.artifacts-bound",
+      "execution.postgresql.evidence-current",
+      "execution.postgresql.target-bound"
+    ]
+  },
+  {
+    "name": "rewound lineage current state fails closed",
+    "kind": "lineage-rewind",
+    "expectedChecks": [
+      "execution.postgresql.lineage-monotonic",
+      "execution.postgresql.artifacts-bound"
+    ]
+  },
+  {
+    "name": "omitted evidence attestation is rejected",
+    "kind": "omit-array-item",
+    "document": "liveEvidence",
+    "path": "attestations",
+    "index": 6,
+    "expectedError": "minimum item count is 7"
+  },
+  {
+    "name": "tampered evidence claims fail closed",
+    "kind": "mutate",
+    "document": "liveEvidence",
+    "path": "attestations.3.capabilities",
+    "value": [
+      "network-path-reviewed",
+      "private-connectivity-confirmed",
+      "provider-readiness-confirmed"
+    ],
+    "expectedChecks": [
+      "execution.postgresql.signatures-valid",
+      "execution.postgresql.privileges-exact"
+    ]
+  },
+  {
+    "name": "secret-bearing value is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "postgresql://migration-user:unsafe@example.invalid/orders",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "raw endpoint is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "orders-db.internal:5432",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "raw IPv6 endpoint is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "2001:db8::1",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "bracketed IPv6 endpoint is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "[2001:db8::1]:5432",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "URI with uncommon TLD is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "https://db.example.xyz/path",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "single-label URI is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "https://database/path",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "single-slash URI is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "http:/database/path",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "file URI is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "file:/etc/passwd",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "URN is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "urn:db:orders",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "bare Azure-style FQDN is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "server.postgres.database.azure",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "bare uncommon-TLD FQDN is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "db.example.xyz",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "bare relative path is rejected",
+    "kind": "mutate",
+    "document": "request",
+    "path": "sourceReference",
+    "value": "var/lib/postgresql/data",
+    "expectedError": "postgresql.execution.secret-material"
+  },
+  {
+    "name": "reordered protected nonce ledger fails closed",
+    "kind": "reordered-ledger",
+    "expectedChecks": [
+      "execution.postgresql.artifacts-bound",
+      "execution.postgresql.lineage-monotonic"
+    ]
+  },
+  {
+    "name": "planner source has no operation or network path",
+    "kind": "no-operation-source"
+  }
+]

@@ -7,7 +7,10 @@ description: "Workload Identity Federation, GitHub Actions, and secrets manageme
 
 # CI/CD Setup with GitHub Actions
 
-This guide walks you through setting up GitHub Actions to deploy the landing zone automatically using Workload Identity Federation (WIF). WIF eliminates the need for client secrets — instead, GitHub Actions gets short-lived tokens via OIDC.
+This guide walks you through setting up GitHub Actions authentication and Terraform state for direct operator-managed
+Bicep or Terraform automation using Workload Identity Federation (WIF). WIF eliminates client secrets by issuing
+short-lived tokens through OIDC. The classic SSLZ path remains operator-owned: review `what-if` or `terraform plan`
+output, control the deployment identity and state, and run the provider command yourself.
 
 ## Prerequisites
 
@@ -49,10 +52,11 @@ Save the output — this is the **Object ID** of the service principal.
 
 ## Step 3: Add Federated Credentials for GitHub Actions (5 min)
 
-This tells Entra ID to trust tokens from your specific GitHub repository. You need one credential for the `main` branch (for deployments) and one for pull requests (for plan/what-if).
+This tells Entra ID to trust tokens from your specific GitHub repository. You need one credential for the `main` branch
+and one for pull requests.
 
 ```bash
-# Credential for the main branch (used by deploy workflows)
+# Credential for the main branch
 az ad app federated-credential create --id "$APP_ID" --parameters '{
   "name": "github-actions-main",
   "issuer": "https://token.actions.githubusercontent.com",
@@ -61,17 +65,17 @@ az ad app federated-credential create --id "$APP_ID" --parameters '{
   "description": "GitHub Actions deploy from main branch"
 }'
 
-# Credential for pull requests (used by plan/what-if workflows)
+# Credential for pull requests
 az ad app federated-credential create --id "$APP_ID" --parameters '{
   "name": "github-actions-pr",
   "issuer": "https://token.actions.githubusercontent.com",
   "subject": "repo:'"$GITHUB_ORG/$GITHUB_REPO"':pull_request",
   "audiences": ["api://AzureADTokenExchange"],
-  "description": "GitHub Actions plan on pull requests"
+  "description": "GitHub Actions validation on pull requests"
 }'
 ```
 
-If you use GitHub Environments (recommended for production approvals), add credentials for each environment:
+If you use GitHub Environments, add credentials for each environment:
 
 ```bash
 # Credential for nonprod environment
@@ -91,6 +95,7 @@ az ad app federated-credential create --id "$APP_ID" --parameters '{
   "audiences": ["api://AzureADTokenExchange"],
   "description": "GitHub Actions deploy to prod"
 }'
+
 ```
 
 ## Step 4: Assign Azure Roles (5 min)
@@ -216,10 +221,8 @@ At minimum, update `companyName`, `budgetAlertEmails`, `securityContactEmail`, a
 GitHub Environments add an approval gate before production deployments.
 
 1. Go to **Settings > Environments**
-2. Create **nonprod** environment (no protection rules needed)
-3. Create **prod** environment with:
-   - **Required reviewers:** Add 1-2 team members who must approve production deployments
-   - **Deployment branches:** Restrict to `main` only
+2. Create a **nonprod** environment.
+3. Create a **prod** environment with required reviewers and deployment branches restricted to `main`.
 
 ## Step 8: Test the Setup
 
@@ -234,19 +237,19 @@ git add . && git commit -m "test: verify CI/CD setup"
 git push -u origin test-cicd
 ```
 
-The **Validate IaC** workflow should run automatically on the PR. If you see the Terraform plan and Bicep what-if succeed, your setup is working.
+The **Validate IaC** workflow should run automatically on the PR. It builds and lints Bicep, formats and validates
+Terraform, and runs repository contract tests without deploying Azure resources.
 
-### Deploy via Workflow Dispatch
+### Automate the classic direct-operator path
 
-The deploy workflows are triggered manually (not on push). To run a deployment:
+Use the same commands from the [Quick Start]({{ '/' | relative_url }}#quick-start) in a workflow you own: run
+`az deployment sub what-if` or `terraform plan`, retain the review output, require a protected environment for writes,
+and invoke `az deployment sub create` or `terraform apply` only after human approval. The operator remains responsible
+for identity, state, review, validation, and rollback.
 
-1. Go to **Actions** tab in your GitHub repository
-2. Select **Deploy Bicep** or **Deploy Terraform** from the left sidebar
-3. Click **Run workflow**
-4. Choose the target environment (`prod` or `nonprod`)
-5. Click **Run workflow** to start
-
-If you configured GitHub Environments with required reviewers in Step 7, production deployments will wait for approval before the deploy step runs.
+The repository's bundled approval-bound deployment workflows belong to the
+[optional agent-aware experience]({{ '/agent/docs/approved-deployment-integration/' | relative_url }}); they are not
+required by the classic Quick Start.
 
 ## Troubleshooting
 
@@ -284,7 +287,8 @@ az role assignment list --assignee "$APP_ID" --all --query "[].{role:roleDefinit
 
 ### "Resource provider not registered"
 
-Some providers need to be registered before use. Run `./scripts/validate-prerequisites.sh` to check, or register manually:
+Some providers need to be registered before use. Run `./scripts/validate-prerequisites.sh` to check, or register them
+manually:
 
 ```bash
 az provider register --namespace Microsoft.Insights

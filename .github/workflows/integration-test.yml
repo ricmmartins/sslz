@@ -10,7 +10,6 @@ on:
         type: choice
         options:
           - nonprod
-          - prod
       deploy:
         description: 'Actually deploy resources (not just plan/what-if)'
         required: false
@@ -30,15 +29,16 @@ permissions:
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_INTEGRATION }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   ARM_USE_OIDC: true
-  TF_VAR_subscription_id: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SUBSCRIPTION_ID_PROD || secrets.AZURE_SUBSCRIPTION_ID_NONPROD }}
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID_INTEGRATION }}
   TF_VAR_company_name: "lztest"
   TF_VAR_environment: ${{ github.event.inputs.environment || 'nonprod' }}
   TF_VAR_budget_alert_emails: '["landing-zone-test@contoso.com"]'
   TF_VAR_deploy_networking: "true"
   TF_VAR_security_contact_email: "landing-zone-test@contoso.com"
+  TF_VAR_enable_defender_for_storage: "false"
 
 jobs:
   # ============================================================================
@@ -69,6 +69,7 @@ jobs:
               monthlyBudgetAmount=500 \
               budgetAlertEmails='["landing-zone-test@contoso.com"]' \
               securityContactEmail='landing-zone-test@contoso.com' \
+              enableDefenderForStorage=false \
               budgetStartDate='2026-01-01T00:00:00Z'
 
   # ============================================================================
@@ -127,8 +128,8 @@ jobs:
     name: Deploy, Validate & Teardown
     runs-on: ubuntu-latest
     needs: [bicep-whatif, terraform-plan]
-    if: github.event.inputs.deploy == 'true'
-    environment: ${{ github.event.inputs.environment || 'nonprod' }}
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.event.inputs.deploy == 'true'
+    environment: integration-nonprod
     steps:
       - uses: actions/checkout@v4
 
@@ -163,11 +164,13 @@ jobs:
 
       - name: Terraform Apply
         id: tf-apply
+        continue-on-error: true
         working-directory: infra/terraform
         run: terraform apply -auto-approve -input=false
 
       # --- Validate ---
       - name: Validate resource groups exist
+        if: steps.tf-apply.outcome == 'success'
         run: |
           ENV="${{ env.TF_VAR_environment }}"
           echo "=== Checking resource groups ==="
@@ -177,6 +180,7 @@ jobs:
           echo "  ✓ Networking RG exists"
 
       - name: Validate Log Analytics workspace
+        if: steps.tf-apply.outcome == 'success'
         run: |
           ENV="${{ env.TF_VAR_environment }}"
           echo "=== Checking Log Analytics ==="
@@ -187,6 +191,7 @@ jobs:
           echo "  ✓ Log Analytics workspace exists"
 
       - name: Validate policy assignments
+        if: steps.tf-apply.outcome == 'success'
         run: |
           echo "=== Checking policy assignments ==="
           az policy assignment show --name "mcsb-audit" --query "name" -o tsv
@@ -195,6 +200,7 @@ jobs:
           echo "  ✓ Allowed locations policy assigned"
 
       - name: Validate networking resources
+        if: steps.tf-apply.outcome == 'success'
         run: |
           ENV="${{ env.TF_VAR_environment }}"
           echo "=== Checking VNet and NSGs ==="
@@ -214,6 +220,7 @@ jobs:
           fi
 
       - name: Validate Defender plans
+        if: steps.tf-apply.outcome == 'success'
         run: |
           echo "=== Checking Defender for Cloud ==="
           CSPM=$(az security pricing show --name "CloudPosture" --query "pricingTier" -o tsv 2>/dev/null || echo "unknown")
@@ -225,6 +232,7 @@ jobs:
           echo "  ✓ Defender plans verified"
 
       - name: Validate budget exists
+        if: steps.tf-apply.outcome == 'success'
         run: |
           echo "=== Checking budget ==="
           BUDGET=$(az consumption budget list --query "[?contains(name, 'lztest')].name" -o tsv 2>/dev/null || echo "")
@@ -234,11 +242,32 @@ jobs:
             echo "  ⚠ Budget not found (may take time to propagate)"
           fi
 
-      # --- Teardown (runs if apply succeeded, even if validation fails) ---
+      # --- Teardown (runs after every started apply, including partial failure) ---
       - name: Terraform Destroy
-        if: always() && steps.tf-apply.outcome == 'success'
+        id: tf-destroy
+        if: always() && steps.tf-apply.outcome != 'skipped'
+        continue-on-error: true
         working-directory: infra/terraform
         run: terraform destroy -auto-approve -input=false
+
+      - name: Enforce apply and cleanup outcomes
+        if: always()
+        env:
+          APPLY_OUTCOME: ${{ steps.tf-apply.outcome }}
+          DESTROY_OUTCOME: ${{ steps.tf-destroy.outcome }}
+        run: |
+          failed=0
+          if [ "$APPLY_OUTCOME" = "skipped" ]; then
+            echo "::notice::Terraform apply did not start; inspect the earlier job diagnostics."
+          elif [ "$APPLY_OUTCOME" != "success" ]; then
+            echo "::error::Terraform apply failed; inspect the apply diagnostics first."
+            failed=1
+          fi
+          if [ "$APPLY_OUTCOME" != "skipped" ] && [ "$DESTROY_OUTCOME" != "success" ]; then
+            echo "::error::Terraform teardown also failed; orphan cleanup is required."
+            failed=1
+          fi
+          exit "$failed"
 
   # ============================================================================
   # Summary

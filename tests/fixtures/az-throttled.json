@@ -1,0 +1,6 @@
+{
+  "extends": "az-success.json",
+  "errors": {
+    "policies": "429 Too Many Requests: request was throttled"
+  }
+}

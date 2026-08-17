@@ -11,6 +11,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
   <div class="hero-ctas">
     <a href="#quick-start" class="btn btn-primary">Quick Start</a>
     <a href="{{ site.github_repo }}" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+    <a href="{{ '/agent/' | relative_url }}" class="btn btn-secondary">Optional Agent-Aware Experience</a>
   </div>
 </section>
 

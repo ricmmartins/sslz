@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileVersion": "1.0.0",
+  "status": "ready",
+  "computeProfile": "container-apps",
+  "profileExtensions": ["postgresql"],
+  "aksIngress": null,
+  "rationale": [
+    {
+      "decision": "container-apps",
+      "reason": "Container Apps is the default because no Kubernetes-specific requirement was provided.",
+      "sourceRequirements": ["workload.traffic"]
+    },
+    {
+      "decision": "postgresql",
+      "reason": "The workload requires relational persistence.",
+      "sourceRequirements": ["workload.requiresRelationalDatabase"]
+    }
+  ],
+  "assumptions": [
+    "One primary workload is planned.",
+    "Separate production and nonproduction subscriptions are used.",
+    "Managed Azure services are preferred unless a stated requirement needs direct control.",
+    "The planner does not assume service, model, SKU, quota, or capacity availability."
+  ],
+  "requiredChecks": [
+    "account.provider.required-registrations",
+    "quota.workload.headroom",
+    "region.services.available",
+    "security.defender.selection-reviewed",
+    "operations.monitoring.destination-valid",
+    "region.policy.allowed-locations",
+    "region.data-residency.compatible",
+    "region.availability-zones.supported",
+    "region.postgresql.edition-version-supported",
+    "region.postgresql.extensions-supported",
+    "quota.postgresql.eligible",
+    "capacity.postgresql.available",
+    "region.postgresql.recovery-supported",
+    "workload.postgresql.provider-parity"
+  ],
+  "unresolvedDecisions": [
+    {
+      "id": "reliability.rto.required",
+      "severity": "advisory",
+      "question": "What recovery time objective does the workload require?",
+      "reason": "The input does not define an RTO."
+    },
+    {
+      "id": "reliability.rpo.required",
+      "severity": "advisory",
+      "question": "What recovery point objective does the workload require?",
+      "reason": "The input does not define an RPO."
+    }
+  ],
+  "costAssumptions": {
+    "currency": "USD",
+    "monthlyPlatformMaximum": 500,
+    "items": [
+      "Estimates are deferred until region, sizing, service tier, usage, and availability checks complete.",
+      "Container Apps consumption charges depend on requested CPU, memory, execution time, and replica minimums.",
+      "Nonproduction can scale to zero unless startup latency requires a minimum replica.",
+      "Nonproduction begins with Burstable compute when the workload supports it.",
+      "Production begins with General Purpose compute; high availability is included only when the resilience requirement justifies it.",
+      "Backup storage, retained backups, and cross-region recovery are not priced until retention and recovery decisions are complete."
+    ]
+  },
+  "architectureReview": {
+    "required": false,
+    "reasons": []
+  },
+  "iacGenerated": false,
+  "azureOperations": "none"
+}

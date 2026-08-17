@@ -1,0 +1,20 @@
+{
+  "name": "Primary and secondary candidates receive the same profile checks",
+  "startupOverrides": {
+    "reliability": {
+      "regionalMode": "cool-infrastructure",
+      "rtoMinutes": 240,
+      "rpoMinutes": 60,
+      "failoverOwnerConfirmed": true
+    }
+  },
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": ["centralus"]
+  },
+  "expected": {
+    "status": "review-required",
+    "selectedPrimary": "eastus2",
+    "secondaryRecommendation": "centralus"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Eligible candidates rank deterministically by latency and cost",
+  "requirementOverrides": {
+    "primaryCandidates": ["centralus", "eastus2"],
+    "secondaryCandidates": []
+  },
+  "expected": {
+    "status": "ready",
+    "selectedPrimary": "eastus2",
+    "rankedRegions": ["eastus2", "centralus"]
+  }
+}

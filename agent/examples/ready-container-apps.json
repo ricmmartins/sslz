@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "2.0.0",
+  "runId": "run-ready-example",
+  "generatedAt": "2026-08-07T12:00:00Z",
+  "mode": "plan",
+  "overallStatus": "pass",
+  "target": {
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "prodSubscriptionId": "22222222-2222-2222-2222-222222222222",
+    "nonprodSubscriptionId": "33333333-3333-3333-3333-333333333333",
+    "primaryRegion": "eastus2",
+    "secondaryRegion": null
+  },
+  "topologyDecision": {
+    "schemaVersion": "1.0.0",
+    "decisionId": "topology.run-ready-example",
+    "generatedAt": "2026-08-07T12:00:00Z",
+    "expiresAt": "2026-08-07T16:00:00Z",
+    "status": "ready",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "environments": [
+      {
+        "name": "nonprod",
+        "subscriptionId": "33333333-3333-3333-3333-333333333333"
+      },
+      {
+        "name": "prod",
+        "subscriptionId": "22222222-2222-2222-2222-222222222222"
+      }
+    ],
+    "subscriptionTopology": {
+      "state": "separate-prod-nonprod-subscriptions",
+      "reasonCode": "topology.explicit-prod-nonprod-selected",
+      "selectionMode": "explicit-prod-nonprod",
+      "visibleEnabledSubscriptionCount": 2,
+      "targetSubscriptionCount": 2
+    },
+    "benefitAssociation": {
+      "state": "confirmed-for-exact-target",
+      "reasonCode": "topology.external-confirmation-bound",
+      "authoritativeEvidence": true,
+      "targetBillingScopeDigests": [],
+      "observedBenefitScopeDigests": [],
+      "observedBenefitSubscriptionIds": []
+    },
+    "evidence": {
+      "subscriptionInventoryDigest": "sha256:b72fd226071b37389bc5c86edd43636b54ecbfe3c3abcb1c764d5b0dc98c7cfa",
+      "billingEvidenceDigest": "sha256:8cee8b6a5285ec0a2bdc14dd9633185f63633af890046fc280a1a0105d6660f2"
+    },
+    "supportHandoff": {
+      "required": false,
+      "route": "none",
+      "reference": "support.fixture.001"
+    },
+    "decisionDigest": "sha256:dec4fadadd422644222845c6367e8b252dc58941fb8b18b36ad4447a2dad99ad"
+  },
+  "checks": [
+    {
+      "id": "account.subscription.tenant-match",
+      "category": "account",
+      "status": "pass",
+      "severity": "blocking",
+      "summary": "The selected subscriptions belong to the intended tenant.",
+      "evidence": {
+        "tenantId": "11111111-1111-1111-1111-111111111111",
+        "subscriptionIds": [
+          "22222222-2222-2222-2222-222222222222",
+          "33333333-3333-3333-3333-333333333333"
+        ]
+      },
+      "remediationActionIds": [],
+      "documentationUrl": "https://learn.microsoft.com/startups/build/azure-getting-started/set-up-account"
+    }
+  ],
+  "actions": [],
+  "deploymentPlan": {
+    "planId": "plan-ready-example",
+    "planDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "profile": "container-apps",
+    "profileExtensions": ["postgresql"],
+    "rationale": [
+      "The workload is HTTP based and does not require Kubernetes APIs."
+    ],
+    "environments": [
+      {
+        "name": "prod",
+        "subscriptionId": "22222222-2222-2222-2222-222222222222",
+        "primaryRegion": "eastus2",
+        "secondaryRegion": null,
+        "regionalMode": "single-region-ready"
+      },
+      {
+        "name": "nonprod",
+        "subscriptionId": "33333333-3333-3333-3333-333333333333",
+        "primaryRegion": "eastus2",
+        "secondaryRegion": null,
+        "regionalMode": "single-region-ready"
+      }
+    ],
+    "services": [
+      {
+        "type": "Microsoft.App/managedEnvironments",
+        "region": "eastus2",
+        "purpose": "application compute"
+      },
+      {
+        "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+        "region": "eastus2",
+        "purpose": "relational data"
+      }
+    ],
+    "estimatedMonthlyPlatformCost": {
+      "currency": "USD",
+      "minimum": 20,
+      "maximum": 150,
+      "assumptions": [
+        "Application usage and model token charges are excluded."
+      ]
+    },
+    "iac": {
+      "provider": "bicep",
+      "previewType": "what-if",
+      "previewArtifact": "artifacts/plan-ready-example.summary.json"
+    }
+  },
+  "approval": {
+    "required": true,
+    "status": "pending",
+    "planId": "plan-ready-example",
+    "planDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "approvedAt": null,
+    "expiresAt": null
+  },
+  "summary": {
+    "checks": {
+      "pass": 1,
+      "warning": 0,
+      "fail": 0,
+      "unknown": 0,
+      "skipped": 0,
+      "error": 0
+    },
+    "actions": {
+      "azureWrite": 0,
+      "manual": 0,
+      "support": 0,
+      "information": 0
+    }
+  }
+}

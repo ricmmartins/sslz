@@ -7,6 +7,22 @@ variable "subscription_id" {
   }
 }
 
+variable "resource_provider_registrations" {
+  description = "AzureRM automatic resource provider registration mode. Manual deployments preserve the AzureRM v4 legacy behavior; approved agent plans set none."
+  type        = string
+  default     = "legacy"
+  validation {
+    condition     = contains(["core", "extended", "all", "legacy", "none"], var.resource_provider_registrations)
+    error_message = "resource_provider_registrations must be core, extended, all, legacy, or none."
+  }
+}
+
+variable "resource_providers_to_register" {
+  description = "Additional Azure resource providers to register automatically. Approved agent plans require an empty list."
+  type        = list(string)
+  default     = []
+}
+
 variable "location" {
   description = "Primary Azure region"
   type        = string
@@ -14,6 +30,26 @@ variable "location" {
   validation {
     condition     = can(regex("^[a-z]+[a-z0-9]*$", var.location))
     error_message = "location must be a valid Azure region name (e.g., eastus2, westeurope)."
+  }
+}
+
+variable "regional_attempt_suffix" {
+  description = "Deterministic suffix for a regional retry attempt; empty preserves first-attempt names"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.regional_attempt_suffix == "" || can(regex("^-a[0-9]{2}-[a-z0-9]+-[0-9a-f]{10}$", var.regional_attempt_suffix))
+    error_message = "regional_attempt_suffix must be empty or a deterministic regional attempt suffix."
+  }
+}
+
+variable "policy_assignment_prefix" {
+  description = "Deterministic prefix for retry-owned policy assignments; empty preserves first-attempt names"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.policy_assignment_prefix == "" || can(regex("^a[0-9]{2}-[a-z0-9]+-[0-9a-f]{10}-$", var.policy_assignment_prefix))
+    error_message = "policy_assignment_prefix must be empty or a deterministic regional attempt prefix."
   }
 }
 
@@ -63,6 +99,36 @@ variable "log_daily_quota_gb" {
   default     = 5
 }
 
+variable "log_analytics_workspace_location" {
+  description = "Explicit effective Log Analytics workspace region"
+  type        = string
+  default     = ""
+}
+
+variable "existing_log_analytics_workspace_id" {
+  description = "Approved existing Log Analytics workspace resource ID; empty creates the deterministic regional workspace"
+  type        = string
+  default     = ""
+}
+
+variable "configure_defender_workspace" {
+  description = "Bind Defender for Servers to the explicit workspace"
+  type        = bool
+  default     = null
+}
+
+variable "defender_workspace_association_managed_externally" {
+  description = "Use the approved workspace association owned by another environment artifact in the same subscription"
+  type        = bool
+  default     = false
+}
+
+variable "defender_workspace_shared_subscription" {
+  description = "Whether prod and nonprod share one subscription and must reuse one approved existing Defender workspace"
+  type        = bool
+  default     = false
+}
+
 variable "vnet_address_prefix" {
   description = "VNet address prefix (overrides default per-environment prefix)"
   type        = string
@@ -77,6 +143,46 @@ variable "app_subnet_delegation" {
   description = "Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)"
   type        = string
   default     = "Microsoft.Web/serverFarms"
+}
+
+variable "aks_ingress_mode" {
+  description = "Explicit AKS ingress mode. not-applicable preserves legacy subnet behavior when AKS is absent."
+  type        = string
+  default     = "not-applicable"
+  validation {
+    condition     = contains(["not-applicable", "private", "public-azure-load-balancer"], var.aks_ingress_mode)
+    error_message = "aks_ingress_mode must be not-applicable, private, or public-azure-load-balancer."
+  }
+}
+
+variable "aks_ingress_frontend_port" {
+  description = "Reviewed AKS public frontend port; zero when not applicable"
+  type        = number
+  default     = 0
+}
+
+variable "aks_ingress_backend_node_port" {
+  description = "Exact AKS backend NodePort; zero for private or absent AKS"
+  type        = number
+  default     = 0
+}
+
+variable "aks_ingress_health_probe_source_prefix" {
+  description = "Azure Load Balancer health probe service tag; empty when public ingress is not selected"
+  type        = string
+  default     = ""
+}
+
+variable "aks_ingress_source_prefixes" {
+  description = "Reviewed public client source prefixes for the exact AKS NodePort"
+  type        = list(string)
+  default     = []
+}
+
+variable "aks_ingress_reserved_nsg_priorities" {
+  description = "Existing AKS NSG priorities that generated rules must not collide with"
+  type        = list(number)
+  default     = []
 }
 
 variable "monthly_budget_amount" {
@@ -139,6 +245,12 @@ variable "enable_defender_for_key_vault" {
   default     = true
 }
 
+variable "enable_defender_for_storage" {
+  description = "Enable the paid Defender for Storage V2 plan. Disabled by default for startup cost control."
+  type        = bool
+  default     = false
+}
+
 variable "allowed_locations" {
   description = "Allowed Azure regions for resource deployment (defaults to the primary location)"
   type        = list(string)
@@ -152,7 +264,7 @@ variable "tags" {
 }
 
 locals {
-  prefix = var.prefix != "" ? var.prefix : "${var.company_name}-${var.environment}"
+  prefix = var.prefix != "" ? var.prefix : "${var.company_name}-${var.environment}${var.regional_attempt_suffix}"
 
   # Defender defaults: enable Servers and Databases for prod (matches Bicep behavior)
   enable_defender_for_servers   = var.enable_defender_for_servers != null ? var.enable_defender_for_servers : var.environment == "prod"
@@ -162,6 +274,15 @@ locals {
 
   # Allowed locations: defaults to [var.location] to match Bicep's [location] behavior
   allowed_locations = length(var.allowed_locations) > 0 ? var.allowed_locations : [var.location]
+
+  log_analytics_workspace_location       = var.log_analytics_workspace_location != "" ? var.log_analytics_workspace_location : var.location
+  create_log_analytics_workspace         = var.existing_log_analytics_workspace_id == ""
+  configure_defender_workspace           = var.configure_defender_workspace != null ? var.configure_defender_workspace : local.enable_defender_for_servers
+  existing_workspace_reference_valid     = can(regex("(?i)^/subscriptions/[0-9a-f-]{36}/resourceGroups/[^/]+/providers/Microsoft\\.OperationalInsights/workspaces/[^/]+$", var.existing_log_analytics_workspace_id))
+  safe_existing_workspace_id             = local.existing_workspace_reference_valid ? var.existing_log_analytics_workspace_id : "/subscriptions/${var.subscription_id}/resourceGroups/invalid/providers/Microsoft.OperationalInsights/workspaces/invalid"
+  effective_log_analytics_workspace_id   = local.create_log_analytics_workspace ? module.log_analytics[0].workspace_id : local.safe_existing_workspace_id
+  effective_log_analytics_workspace_name = local.create_log_analytics_workspace ? module.log_analytics[0].workspace_name : element(reverse(split("/", local.safe_existing_workspace_id)), 0)
+  effective_monitoring_resource_group    = local.create_log_analytics_workspace ? azurerm_resource_group.monitoring[0].name : split("/", local.safe_existing_workspace_id)[4]
 
   vnet_address_prefix = var.vnet_address_prefix != "" ? var.vnet_address_prefix : (var.environment == "prod" ? "10.0.0.0/16" : "10.1.0.0/16")
 

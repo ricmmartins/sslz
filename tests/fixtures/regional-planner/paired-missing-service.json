@@ -1,0 +1,26 @@
+{
+  "name": "Paired region without a selected-profile service is rejected",
+  "startupOverrides": {
+    "reliability": {
+      "regionalMode": "cool-infrastructure",
+      "rtoMinutes": 240,
+      "rpoMinutes": 60,
+      "failoverOwnerConfirmed": true
+    }
+  },
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": ["centralus"]
+  },
+  "regionEvidenceOverrides": {
+    "centralus": {
+      "availableServices": ["Microsoft.App/managedEnvironments"]
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "selectedPrimary": "eastus2",
+    "secondaryDisposition": "rejected",
+    "secondaryFailedCheck": "region.services.available"
+  }
+}

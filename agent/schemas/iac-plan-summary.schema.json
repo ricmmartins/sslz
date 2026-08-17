@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/iac-plan-summary.schema.json",
+  "title": "SSLZ sanitized IaC plan summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "generatedBy",
+    "planId",
+    "planDigest",
+    "decisionModel",
+    "readinessEvidence",
+    "approval",
+    "artifacts",
+    "previews",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "plannerVersion": {
+      "const": "1.0.0"
+    },
+    "inputContractVersion": {
+      "enum": ["1.0.0", "2.0.0", "3.0.0"]
+    },
+    "generatedBy": {
+      "const": "startup-iac-plan.mjs"
+    },
+    "planId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "decisionModel": {
+      "type": "object"
+    },
+    "readinessEvidence": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "readiness-evidence.schema.json"
+        }
+      ]
+    },
+    "approval": {
+      "$ref": "#/$defs/approval"
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "previews": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/preview"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "azureOperations",
+        "bicepDeploymentMode",
+        "terraformBackend",
+        "contactValues",
+        "rawArtifacts"
+      ],
+      "properties": {
+        "azureOperations": {
+          "enum": ["none", "read-only-preview"]
+        },
+        "bicepDeploymentMode": {
+          "const": "incremental-only"
+        },
+        "terraformBackend": {
+          "const": "remote-required"
+        },
+        "contactValues": {
+          "const": "sanitized-placeholders"
+        },
+        "rawArtifacts": {
+          "enum": ["not-retained", "explicit-local-path"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "status",
+        "planId",
+        "planDigest",
+        "approvedAt",
+        "expiresAt",
+        "reapprovalRequired",
+        "invalidationReason"
+      ],
+      "properties": {
+        "required": {
+          "const": true
+        },
+        "status": {
+          "enum": ["pending", "approved"]
+        },
+        "planId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "approvedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "reapprovalRequired": {
+          "type": "boolean"
+        },
+        "invalidationReason": {
+          "enum": [
+            "plan-id-changed",
+            "plan-digest-changed",
+            "approval-expired",
+            "readiness-evidence-required",
+            null
+          ]
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "environment",
+        "regionRole",
+        "region",
+        "path",
+        "digest",
+        "decisionDigest",
+        "sourcePath",
+        "stateKey",
+        "previewEligible"
+      ],
+      "properties": {
+        "provider": {
+          "enum": ["bicep", "terraform"]
+        },
+        "environment": {
+          "enum": ["prod", "nonprod"]
+        },
+        "regionRole": {
+          "enum": ["primary", "secondary"]
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^\\.sslz/generated/"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "decisionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "sourcePath": {
+          "enum": [
+            "infra/bicep/main.bicep",
+            "infra/terraform",
+            "infra/bicep/cool-foundation.bicep",
+            "infra/terraform/cool-foundation"
+          ]
+        },
+        "stateKey": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z0-9][a-z0-9.-]*\\.tfstate$"
+        },
+        "previewEligible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "environment",
+        "regionRole",
+        "region",
+        "source",
+        "status",
+        "changes",
+        "destructiveChanges",
+        "errorClass",
+        "message",
+        "rawArtifact"
+      ],
+      "properties": {
+        "provider": {
+          "enum": ["bicep", "terraform"]
+        },
+        "environment": {
+          "enum": ["prod", "nonprod"]
+        },
+        "regionRole": {
+          "enum": ["primary", "secondary"]
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "enum": ["none", "fixture", "command"]
+        },
+        "status": {
+          "enum": ["not-run", "representation-only", "succeeded", "blocked", "failed"]
+        },
+        "changes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["create", "modify", "remove"],
+          "properties": {
+            "create": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "modify": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "remove": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "destructiveChanges": {
+          "type": "boolean"
+        },
+        "errorClass": {
+          "enum": ["authentication", "backend", "configuration", "provider", "unknown", null]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rawArtifact": {
+          "type": ["string", "null"]
+        },
+        "provenanceArtifact": {
+          "type": ["string", "null"]
+        },
+        "planJsonArtifact": {
+          "type": ["string", "null"]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "generatedBy": "startup-deployment-integration.mjs",
+  "manifestDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "plan": {
+    "version": "1.0.0",
+    "id": "startup-primary-baseline",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "artifactPath": ".sslz/generated/startup-primary-baseline/a01-eastus2-bbbbbbbbbb/plan-summary.json",
+    "artifactDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "approvalExpiresAt": "2026-08-09T13:00:00Z"
+  },
+  "readinessEvidence": {
+    "version": "3.0.0",
+    "id": "readiness.startup-primary-baseline.001",
+    "digest": "sha256:6ad411cbb29c501268725ac70c80bb60c4eea86c7592b1a02cfc09837726bf3e",
+    "expiresAt": "2026-08-09T13:00:00Z",
+    "topologyDecisionId": "topology.startup-primary-baseline.preflight",
+    "topologyDecisionDigest": "sha256:9c1743fbe6581e15b3c860d9af6702590644c4c95991d145a9f1fabe224609a9",
+    "topologyDecisionExpiresAt": "2026-08-09T13:00:00Z",
+    "postgresqlDecisionDigest": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+    "postgresqlSelectedEvidenceDigest": "sha256:1313131313131313131313131313131313131313131313131313131313131313"
+  },
+  "regionalAttempt": {
+    "schemaVersion": "1.0.0",
+    "chainId": "startup-primary",
+    "attemptId": "startup-primary-a01-eastus2-e8212bc139",
+    "attemptNumber": 1,
+    "previousAttemptDigest": null,
+    "originalRegion": "eastus2",
+    "targetRegion": "eastus2",
+    "cleanupEvidenceDigest": null,
+    "safeSameRegionRetry": false,
+    "previousAttemptKey": null,
+    "previousTargetRegion": null,
+    "previousBindings": null,
+    "retiredPolicyAssignmentNames": [],
+    "identityDigest": "sha256:e8212bc1397060710298ba6f0d3fcc0f8abe1058eacbf9eb57ba39602f0b9baa",
+    "attemptKey": "a01-eastus2-e8212bc139",
+    "resourceSuffix": "",
+    "deploymentName": "sslz-nonprod-bbbbbbbbbbbb",
+    "previewDeploymentName": "sslz-preview-nonprod-eastus2",
+    "stateKey": "startup-primary-nonprod-primary.tfstate",
+    "workspaceName": "startup-primary-nonprod-a01-eastus2-e8212bc139",
+    "artifactRoot": ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-bbbbbbbbbb/bicep",
+    "policyIdentityLifecycle": {
+      "type": "SystemAssigned",
+      "locationBound": true,
+      "mode": "cleanup-and-recreate",
+      "reuseAcrossChangedRegion": false
+    }
+  },
+  "defenderWorkspacePlacement": {
+    "decisionId": "workspace.startup-primary-baseline.nonprod",
+    "decisionDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "status": "ready",
+    "placementMode": "new",
+    "workspaceRegion": "eastus2",
+    "workspaceScopeDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "workspaceReferenceDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "policyEvidenceDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "policyEvidenceFreshness": "current",
+    "paidPlanSelectionDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "aksIngress": {
+    "mode": "not-applicable",
+    "decisionDigest": null,
+    "postcheckDigest": null
+  },
+  "execution": {
+    "operation": "platform-baseline.deploy",
+    "provider": "bicep",
+    "environment": "nonprod",
+    "regionRole": "primary",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "subscriptionId": "33333333-3333-3333-3333-333333333333",
+    "scope": "/subscriptions/33333333-3333-3333-3333-333333333333",
+    "region": "eastus2",
+    "stateStoreId": "77777777-7777-4777-8777-777777777777",
+    "terraformAuthMode": null
+  },
+  "artifacts": {
+    "parameter": {
+      "path": ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-bbbbbbbbbb/bicep/nonprod-primary.local.bicepparam",
+      "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "source": {
+      "path": "infra/bicep",
+      "digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "fileCount": 8
+    },
+    "savedPlan": null,
+    "provenance": null,
+    "planJson": null
+  },
+  "preview": {
+    "reviewedSummaryDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "source": "command",
+    "status": "succeeded",
+    "changes": {
+      "create": 12,
+      "modify": 0,
+      "remove": 0
+    },
+    "rawOutputDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "terraformVersion": null,
+    "terraformPlatform": null,
+    "terraformExecutableDigest": null,
+    "bicepAttestation": {
+      "compiledTemplateDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "compiledParametersDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "notificationContactsDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "resourceGraphDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "terraformAttestation": null
+  },
+  "commands": {
+    "preparation": null,
+    "deployment": {
+      "executable": "az",
+      "arguments": [
+        "deployment",
+        "sub",
+        "create",
+        "--subscription",
+        "33333333-3333-3333-3333-333333333333",
+        "--location",
+        "eastus2",
+        "--template-file",
+        "infra/bicep/main.bicep",
+        "--parameters",
+        ".sslz/generated/startup-primary-baseline/a01-eastus2-e8212bc139-bbbbbbbbbb/bicep/nonprod-primary.local.bicepparam",
+        "--name",
+        "sslz-nonprod-bbbbbbbbbbbb",
+        "--output",
+        "none"
+      ]
+    }
+  },
+  "validationCheckIds": [
+    "deployment.platform.expected-resources",
+    "deployment.platform.monitoring",
+    "deployment.platform.activity-log-forwarding",
+    "deployment.platform.policy",
+    "deployment.platform.defender",
+    "deployment.platform.budget",
+    "deployment.platform.networking"
+  ],
+  "safety": {
+    "previewWrites": 0,
+    "bicepMode": "Incremental",
+    "terraformSavedPlanOnly": false,
+    "secondaryRegionDeployment": false,
+    "workloadDeployment": false,
+    "rawOutputRetained": false,
+    "personalDataRetained": false
+  }
+}

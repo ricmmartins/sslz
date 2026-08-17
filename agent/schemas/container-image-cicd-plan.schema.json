@@ -1,0 +1,377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/container-image-cicd-plan.schema.json",
+  "title": "SSLZ container image and CI/CD migration plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "planId",
+    "status",
+    "sourceAssessment",
+    "sourceAssessmentDigest",
+    "target",
+    "requiredChecks",
+    "checks",
+    "transition",
+    "stages",
+    "transitionPlan",
+    "identityBindings",
+    "humanConfirmationRequired",
+    "safety",
+    "planDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "status": { "enum": ["ready", "blocked"] },
+    "sourceAssessment": {
+      "$ref": "container-image-cicd-source-assessment.schema.json"
+    },
+    "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registryReference",
+        "region",
+        "residency",
+        "sku",
+        "registryEvidenceDigest",
+        "registryEvidenceFreshness",
+        "cicdReference",
+        "cicdProvider",
+        "cicdEvidenceDigest",
+        "cicdEvidenceFreshness"
+      ],
+      "properties": {
+        "registryReference": { "$ref": "#/$defs/reference" },
+        "region": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "residency": { "$ref": "#/$defs/value" },
+        "sku": { "enum": ["Basic", "Standard", "Premium"] },
+        "registryEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "registryEvidenceFreshness": { "enum": ["current", "stale"] },
+        "cicdReference": { "$ref": "#/$defs/reference" },
+        "cicdProvider": { "enum": ["github-actions", "azure-devops"] },
+        "cicdEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "cicdEvidenceFreshness": { "enum": ["current", "stale"] }
+      }
+    },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/checkId" }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "selected",
+        "rationale",
+        "dualPublishWindowMinutes"
+      ],
+      "properties": {
+        "requested": { "enum": ["auto", "dual-publish-cutover"] },
+        "selected": {
+          "enum": ["dual-publish-cutover", "blocked-manual-review"]
+        },
+        "rationale": { "$ref": "#/$defs/nonEmptyStrings" },
+        "dualPublishWindowMinutes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "status", "gate", "executionAllowed", "strategy"],
+        "properties": {
+          "state": {
+            "enum": [
+              "assess",
+              "prepare-registry",
+              "configure-pipeline",
+              "dual-publish",
+              "validate",
+              "cutover",
+              "verify",
+              "rollback-required",
+              "completed"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "blocked",
+              "pending-human-confirmation",
+              "not-triggered"
+            ]
+          },
+          "gate": { "type": "string", "minLength": 1 },
+          "executionAllowed": { "const": false },
+          "strategy": {
+            "enum": ["dual-publish-cutover", "blocked-manual-review"]
+          }
+        }
+      }
+    },
+    "transitionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prerequisites",
+        "unsupportedFindings",
+        "requiredRemediations",
+        "registryConfiguration",
+        "pipelineConfiguration",
+        "imagePromotion",
+        "validation",
+        "cutover",
+        "rollback",
+        "sourceOfTruthRules",
+        "cleanup",
+        "unresolvedDecisions"
+      ],
+      "properties": {
+        "prerequisites": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unsupportedFindings": { "$ref": "#/$defs/strings" },
+        "requiredRemediations": { "$ref": "#/$defs/strings" },
+        "registryConfiguration": { "$ref": "#/$defs/nonEmptyStrings" },
+        "pipelineConfiguration": { "$ref": "#/$defs/nonEmptyStrings" },
+        "imagePromotion": { "$ref": "#/$defs/nonEmptyStrings" },
+        "validation": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cutover": { "$ref": "#/$defs/nonEmptyStrings" },
+        "rollback": { "$ref": "#/$defs/nonEmptyStrings" },
+        "sourceOfTruthRules": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cleanup": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unresolvedDecisions": { "$ref": "#/$defs/strings" }
+      }
+    },
+    "identityBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "sourceAssessmentObservedAt",
+        "sourceAssessmentExpiresAt",
+        "sourceAssessmentFreshness",
+        "registryEvidenceDigest",
+        "cicdEvidenceDigest",
+        "regionPolicyDigest",
+        "requirementsDigest",
+        "transitionDigest",
+        "scopeDigest",
+        "ownerDigest",
+        "lineageDigest",
+        "integrationDigest",
+        "targetRegion",
+        "targetResidency",
+        "registrySku",
+        "cicdProvider",
+        "strategy",
+        "containerIdentityDigest",
+        "readiness",
+        "iac",
+        "manifest",
+        "approval"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "sourceAssessmentObservedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceAssessmentExpiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceAssessmentFreshness": { "enum": ["current", "stale"] },
+        "registryEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "cicdEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "regionPolicyDigest": { "$ref": "#/$defs/digest" },
+        "requirementsDigest": { "$ref": "#/$defs/digest" },
+        "transitionDigest": { "$ref": "#/$defs/digest" },
+        "scopeDigest": { "$ref": "#/$defs/digest" },
+        "ownerDigest": { "$ref": "#/$defs/digest" },
+        "lineageDigest": { "$ref": "#/$defs/digest" },
+        "integrationDigest": { "$ref": "#/$defs/digest" },
+        "targetRegion": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "targetResidency": { "$ref": "#/$defs/value" },
+        "registrySku": { "enum": ["Basic", "Standard", "Premium"] },
+        "cicdProvider": { "enum": ["github-actions", "azure-devops"] },
+        "strategy": {
+          "enum": ["dual-publish-cutover", "blocked-manual-review"]
+        },
+        "containerIdentityDigest": { "$ref": "#/$defs/digest" },
+        "readiness": { "$ref": "#/$defs/artifactBinding" },
+        "iac": { "$ref": "#/$defs/artifactBinding" },
+        "manifest": { "$ref": "#/$defs/artifactBinding" },
+        "approval": { "$ref": "#/$defs/artifactBinding" }
+      }
+    },
+    "humanConfirmationRequired": { "$ref": "#/$defs/nonEmptyStrings" },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "executionEligible",
+        "sourceRegistryActions",
+        "targetRegistryActions",
+        "imagePushPull",
+        "pipelineWrites",
+        "cloudOperations",
+        "iacActions",
+        "dnsActions",
+        "credentialActions",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "executionEligible": { "const": false },
+        "sourceRegistryActions": { "const": "none" },
+        "targetRegistryActions": { "const": "none" },
+        "imagePushPull": { "const": "none" },
+        "pipelineWrites": { "const": "none" },
+        "cloudOperations": { "const": "none" },
+        "iacActions": { "const": "none" },
+        "dnsActions": { "const": "none" },
+        "credentialActions": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "planDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "checkId": {
+      "enum": [
+        "migration.container.assessment-current",
+        "migration.container.evidence-complete",
+        "migration.container.target-bound",
+        "migration.container.digest-pinned",
+        "migration.container.mutable-tag-untrusted",
+        "migration.container.platforms-compatible",
+        "migration.container.base-image-supported",
+        "migration.container.sbom-present",
+        "migration.container.signatures-verified",
+        "migration.container.provenance-continuous",
+        "migration.container.vulnerability-policy-met",
+        "migration.container.registry-controls-parity",
+        "migration.container.unsigned-promotion-blocked",
+        "migration.container.replay-protected",
+        "migration.container.source-of-truth-explicit",
+        "migration.cicd.source-bound",
+        "migration.cicd.triggers-governed",
+        "migration.cicd.runner-least-privilege",
+        "migration.cicd.environment-separation",
+        "migration.cicd.secret-references-external",
+        "migration.cicd.promotion-governed",
+        "migration.cicd.deployment-targets-bound",
+        "migration.cicd.dual-publish-ready",
+        "migration.cicd.rollback-complete"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "freshness",
+        "summary",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/checkId" },
+        "classification": { "enum": ["pass", "fail", "unresolved"] },
+        "freshness": { "enum": ["current", "stale", "not-applicable"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "evidenceReferences": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    },
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "containerIdentityDigest",
+        "sourceAssessmentDigest",
+        "registryEvidenceDigest",
+        "cicdEvidenceDigest",
+        "regionPolicyDigest",
+        "requirementsDigest",
+        "transitionDigest",
+        "scopeDigest",
+        "ownerDigest",
+        "lineageDigest",
+        "integrationDigest",
+        "strategy",
+        "executionEligible"
+      ],
+      "properties": {
+        "containerIdentityDigest": { "$ref": "#/$defs/digest" },
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "registryEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "cicdEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "regionPolicyDigest": { "$ref": "#/$defs/digest" },
+        "requirementsDigest": { "$ref": "#/$defs/digest" },
+        "transitionDigest": { "$ref": "#/$defs/digest" },
+        "scopeDigest": { "$ref": "#/$defs/digest" },
+        "ownerDigest": { "$ref": "#/$defs/digest" },
+        "lineageDigest": { "$ref": "#/$defs/digest" },
+        "integrationDigest": { "$ref": "#/$defs/digest" },
+        "strategy": {
+          "enum": ["dual-publish-cutover", "blocked-manual-review"]
+        },
+        "executionEligible": { "const": false }
+      }
+    }
+  }
+}

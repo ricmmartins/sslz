@@ -26,7 +26,7 @@ locals {
 # ==============================================================================
 
 resource "azurerm_subscription_policy_assignment" "mcsb" {
-  name                 = "mcsb-audit"
+  name                 = "${var.policy_assignment_prefix}mcsb-audit"
   display_name         = "Microsoft Cloud Security Benchmark (Audit)"
   description          = "Audit resources against Microsoft Cloud Security Benchmark. Does not block deployments."
   subscription_id      = local.subscription_scope
@@ -39,7 +39,7 @@ resource "azurerm_subscription_policy_assignment" "mcsb" {
 # ==============================================================================
 
 resource "azurerm_subscription_policy_assignment" "allowed_locations" {
-  name                 = "allowed-locations"
+  name                 = "${var.policy_assignment_prefix}allowed-locations"
   display_name         = "Allowed Locations"
   description          = "Restrict resource deployment to approved regions only."
   subscription_id      = local.subscription_scope
@@ -52,7 +52,7 @@ resource "azurerm_subscription_policy_assignment" "allowed_locations" {
 }
 
 resource "azurerm_subscription_policy_assignment" "allowed_locations_rg" {
-  name                 = "allowed-locations-rg"
+  name                 = "${var.policy_assignment_prefix}allowed-locations-rg"
   display_name         = "Allowed Locations for Resource Groups"
   description          = "Restrict resource group creation to approved regions only."
   subscription_id      = local.subscription_scope
@@ -69,7 +69,7 @@ resource "azurerm_subscription_policy_assignment" "allowed_locations_rg" {
 # ==============================================================================
 
 resource "azurerm_subscription_policy_assignment" "require_env_tag" {
-  name                 = "require-env-tag-rg"
+  name                 = "${var.policy_assignment_prefix}require-env-tag-rg"
   display_name         = "Require environment tag on resource groups"
   description          = "All resource groups must have an environment tag for cost tracking."
   subscription_id      = local.subscription_scope
@@ -82,7 +82,7 @@ resource "azurerm_subscription_policy_assignment" "require_env_tag" {
 }
 
 resource "azurerm_subscription_policy_assignment" "require_team_tag" {
-  name                 = "require-team-tag-rg"
+  name                 = "${var.policy_assignment_prefix}require-team-tag-rg"
   display_name         = "Require team tag on resource groups"
   description          = "All resource groups must have a team tag for ownership tracking."
   subscription_id      = local.subscription_scope
@@ -99,7 +99,7 @@ resource "azurerm_subscription_policy_assignment" "require_team_tag" {
 # ==============================================================================
 
 resource "azurerm_subscription_policy_assignment" "inherit_env_tag" {
-  name                 = "inherit-env-tag"
+  name                 = "${var.policy_assignment_prefix}inherit-env-tag"
   display_name         = "Inherit environment tag from resource group"
   description          = "Automatically propagate the environment tag from resource groups to child resources."
   subscription_id      = local.subscription_scope
@@ -117,7 +117,7 @@ resource "azurerm_subscription_policy_assignment" "inherit_env_tag" {
 }
 
 resource "azurerm_subscription_policy_assignment" "inherit_team_tag" {
-  name                 = "inherit-team-tag"
+  name                 = "${var.policy_assignment_prefix}inherit-team-tag"
   display_name         = "Inherit team tag from resource group"
   description          = "Automatically propagate the team tag from resource groups to child resources."
   subscription_id      = local.subscription_scope
@@ -139,7 +139,7 @@ resource "azurerm_subscription_policy_assignment" "inherit_team_tag" {
 # ==============================================================================
 
 resource "azurerm_subscription_policy_assignment" "activity_log_diag" {
-  name                 = "activity-log-diag"
+  name                 = "${var.policy_assignment_prefix}activity-log-diag"
   display_name         = "Deploy Activity Log diagnostics to Log Analytics"
   description          = "Automatically configure Activity Log to stream to Log Analytics workspace."
   subscription_id      = local.subscription_scope

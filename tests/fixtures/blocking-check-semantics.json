@@ -1,0 +1,1496 @@
+{
+  "schemaVersion": "1.0.0",
+  "checks": [
+    {
+      "id": "account.authentication.active",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "account.subscription.explicit-selection",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "account.subscription.tenant-match",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "account.subscription.topology-supported",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "identity.secondary-admin.present",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "identity.company-domain.verified",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "identity.deployment-role.sufficient",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "billing.startup-credit.context-visible",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "unknown", "error"]
+    },
+    {
+      "id": "billing.subscription.credit-association",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "unknown", "error"]
+    },
+    {
+      "id": "billing.target-benefit.topology-confirmed",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["mismatched", "unknown", "unavailable", "stale"]
+    },
+    {
+      "id": "account.provider.required-registrations",
+      "surface": "preflight",
+      "source": "scripts/startup-preflight.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unknown", "error"]
+    },
+    {
+      "id": "quota.workload.headroom",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.services.available",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.policy.allowed-locations",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.availability-zones.supported",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.skus.eligible",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "capacity.workload.available",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.postgresql.edition-version-supported",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.postgresql.extensions-supported",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "quota.postgresql.eligible",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "capacity.postgresql.available",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.postgresql.recovery-supported",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "workload.postgresql.provider-parity",
+      "surface": "postgresql-regional-planner",
+      "source": "scripts/startup-postgresql-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.assessment-current",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.target-bound",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.engine-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.extensions-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.encoding-collation-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.capacity-headroom",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.availability-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.private-connectivity-ready",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.identity-auth-mapped",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.tool-available",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.logical-replication-ready",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.objects-mappable",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.downtime-compatible",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.source-of-truth-explicit",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.validation-complete",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.postgresql.rollback-complete",
+      "surface": "postgresql-migration-planner",
+      "source": "scripts/startup-postgresql-migration-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.contracts-bound",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.evidence-current",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.replay-protected",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.target-bound",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.model-prechecks-complete",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.initial-load-evidenced",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.catch-up-permitted",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.schema-compatible",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.row-counts-within-bound",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.data-verification-complete",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.cutover-ready",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.rollback-ready",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.source-of-truth-safe",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "rehearsal.postgresql.output-sanitized",
+      "surface": "postgresql-rehearsal-planner",
+      "source": "scripts/startup-postgresql-rehearsal-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.artifacts-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.lineage-monotonic",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.replay-protected",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.evidence-current",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.target-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.authorities-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.signatures-valid",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.approvals-complete",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.approval-scope-exact",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.strategy-bound",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.privileges-exact",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.stage-order-valid",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.rollback-boundaries-complete",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "execution.postgresql.output-sanitized",
+      "surface": "postgresql-execution-contract",
+      "source": "scripts/startup-postgresql-execution-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.foundry-model.available",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "region.data-residency.compatible",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "network.regional-address-space.non-overlapping",
+      "surface": "regional-planner",
+      "source": "scripts/startup-regional-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "network.aks-ingress.decision-explicit",
+      "surface": "workload-planner",
+      "source": "scripts/startup-workload-plan.mjs",
+      "passState": "explicit",
+      "blockingStates": ["missing", "unsupported", "mismatched"]
+    },
+    {
+      "id": "network.aks-ingress.provider-parity",
+      "surface": "workload-profile",
+      "source": "agent/profiles/aks.json",
+      "passState": "equivalent",
+      "blockingStates": ["mismatch", "unproven"]
+    },
+    {
+      "id": "network.aks-ingress.postcheck-current",
+      "surface": "postcheck-contract",
+      "source": "scripts/aks-ingress-contract.mjs",
+      "passState": "current",
+      "blockingStates": ["missing", "stale", "mismatched", "not-observed"]
+    },
+    {
+      "id": "security.defender.selection-reviewed",
+      "surface": "workload-planner",
+      "source": "agent/profiles/container-apps.json",
+      "passState": "reviewed",
+      "blockingStates": ["pending", "rejected"]
+    },
+    {
+      "id": "operations.monitoring.destination-valid",
+      "surface": "iac-planner",
+      "source": "scripts/defender-workspace-placement.mjs",
+      "passState": "ready",
+      "blockingStates": ["blocked"]
+    },
+    {
+      "id": "operations.aks-owner.confirmed",
+      "surface": "workload-planner",
+      "source": "agent/profiles/aks.json",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected"]
+    },
+    {
+      "id": "workload.managed-model-fit.reviewed",
+      "surface": "workload-planner",
+      "source": "agent/profiles/foundry.json",
+      "passState": "reviewed",
+      "blockingStates": ["pending", "rejected"]
+    },
+    {
+      "id": "workload.profile.requirements-supported",
+      "surface": "workload-planner",
+      "source": "scripts/startup-workload-plan.mjs",
+      "passState": "supported",
+      "blockingStates": ["unsupported", "unresolved"]
+    },
+    {
+      "id": "readiness.preflight.authoritative",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "stale", "missing"]
+    },
+    {
+      "id": "readiness.subscription-topology.exact",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "exact",
+      "blockingStates": ["missing", "mutated", "stale", "mismatched", "ambiguous"]
+    },
+    {
+      "id": "readiness.support.startup-confirmed",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.review.security-approved",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "approved",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.review.azure-architecture-approved",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "approved",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.review.iac-parity-approved",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "approved",
+      "blockingStates": ["pending", "rejected", "stale"]
+    },
+    {
+      "id": "readiness.failover.owner-confirmed",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "readiness.recovery.objectives-measured",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "met",
+      "blockingStates": ["unmet", "not-measured", "stale"]
+    },
+    {
+      "id": "readiness.recovery.service-tested",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-tested", "stale"]
+    },
+    {
+      "id": "readiness.recovery.exercise-current",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-tested", "missing", "stale"]
+    },
+    {
+      "id": "readiness.cost.cool-footprint-provenance",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "confirmed",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "readiness.region.evidence-current",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "missing", "stale"]
+    },
+    {
+      "id": "readiness.foundry.deployment-quota-current",
+      "surface": "readiness",
+      "source": "scripts/startup-iac-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "missing", "stale"]
+    },
+    {
+      "id": "deployment.platform.expected-resources",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.monitoring",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.activity-log-forwarding",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.policy",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.defender",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.budget",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "deployment.platform.networking",
+      "surface": "deployment-postcheck",
+      "source": "scripts/startup-deployment-integration.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-run"]
+    },
+    {
+      "id": "cool.foundation.mode-nonprod-only",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked"]
+    },
+    {
+      "id": "cool.foundation.secondary-region-current",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "expired", "mismatched"]
+    },
+    {
+      "id": "cool.foundation.network-non-overlapping",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "overlap"]
+    },
+    {
+      "id": "cool.foundation.billing-support-confirmed",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.owner-confirmed",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "missing", "stale", "mismatched"]
+    },
+    {
+      "id": "cool.foundation.external-reviews-approved",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.recovery-objectives-met",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["unmet", "not-measured", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.recovery-exercise-passed",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "not-tested", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.cost-within-ceiling",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["exceeded", "pending", "missing", "stale"]
+    },
+    {
+      "id": "cool.foundation.artifacts-exact",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mutated", "replayed"]
+    },
+    {
+      "id": "cool.foundation.provider-parity",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["mismatched", "missing-review"]
+    },
+    {
+      "id": "cool.foundation.source-plan-approved",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "expired", "mutated"]
+    },
+    {
+      "id": "cool.foundation.execution-disabled",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["enabled"]
+    },
+    {
+      "id": "cool.foundation.failover-modules-excluded",
+      "surface": "cool-foundation-planner",
+      "source": "scripts/startup-cool-foundation-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["present"]
+    },
+    {
+      "id": "cool.container-apps.mode-nonprod-only",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "production"]
+    },
+    {
+      "id": "cool.container-apps.foundation-bound",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["blocked", "mutated", "replayed"]
+    },
+    {
+      "id": "cool.container-apps.attestations-current",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "stale", "future", "invalid"]
+    },
+    {
+      "id": "cool.container-apps.image-immutable",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["mutable", "unapproved"]
+    },
+    {
+      "id": "cool.container-apps.secrets-reference-only",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["material-present", "unversioned", "unresolved"]
+    },
+    {
+      "id": "cool.container-apps.identity-rbac-scoped",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["principal-mismatch", "role-mismatch", "scope-mismatch"]
+    },
+    {
+      "id": "cool.container-apps.network-profile-matched",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["region-mismatch", "profile-mismatch", "overlap"]
+    },
+    {
+      "id": "cool.container-apps.health-probes-approved",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mismatched", "unhealthy"]
+    },
+    {
+      "id": "cool.container-apps.configuration-parity",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "rejected", "mismatched"]
+    },
+    {
+      "id": "cool.container-apps.observability-bound",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "workspace-mismatch", "category-missing"]
+    },
+    {
+      "id": "cool.container-apps.cost-within-ceiling",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["pending", "exceeded", "scale-mismatch"]
+    },
+    {
+      "id": "cool.container-apps.recovery-objectives-matched",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["rto-mismatch", "rpo-mismatch", "cadence-mismatch", "owner-mismatch"]
+    },
+    {
+      "id": "cool.container-apps.measured-recovery-met",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["not-measured", "unmet", "stale"]
+    },
+    {
+      "id": "cool.container-apps.artifacts-exact",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mutated", "replayed"]
+    },
+    {
+      "id": "cool.container-apps.provider-parity",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "mismatched"]
+    },
+    {
+      "id": "cool.container-apps.execution-disabled",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["enabled"]
+    },
+    {
+      "id": "cool.container-apps.failover-capabilities-excluded",
+      "surface": "cool-container-apps-planner",
+      "source": "scripts/startup-container-apps-cool-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["present"]
+    },
+    {
+      "id": "regional.retry.binding-current",
+      "surface": "regional-attempt-ledger",
+      "source": "scripts/regional-attempt.mjs",
+      "passState": "current",
+      "blockingStates": ["missing", "stale", "mismatched", "replayed"]
+    },
+    {
+      "id": "regional.retry.cleanup-complete",
+      "surface": "regional-attempt-ledger",
+      "source": "scripts/regional-attempt.mjs",
+      "passState": "succeeded",
+      "blockingStates": ["required", "pending", "failed"]
+    },
+    {
+      "id": "regional.retry.provider-parity",
+      "surface": "regional-attempt-ledger",
+      "source": "scripts/regional-attempt.mjs",
+      "passState": "matched",
+      "blockingStates": ["missing", "mismatched"]
+    },
+    {
+      "id": "migration.container.assessment-current",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.evidence-complete",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.target-bound",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.digest-pinned",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.mutable-tag-untrusted",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.platforms-compatible",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.base-image-supported",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.sbom-present",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.signatures-verified",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.provenance-continuous",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.vulnerability-policy-met",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.registry-controls-parity",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.unsigned-promotion-blocked",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.replay-protected",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.container.source-of-truth-explicit",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.source-bound",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.triggers-governed",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.runner-least-privilege",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.environment-separation",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.secret-references-external",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.promotion-governed",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.deployment-targets-bound",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.dual-publish-ready",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.cicd.rollback-complete",
+      "surface": "container-image-cicd-planner",
+      "source": "scripts/startup-container-image-cicd-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.architecture-supported",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.assessment-current",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.evidence-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.address-space-no-overlap",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.route-ownership-exact",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.symmetric-routing",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.no-default-route",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.bgp-asn-acceptable",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.mtu-compatible",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.gateway-redundant",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.firewall-policy-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.private-endpoint-ready",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.target-bound",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.source-of-truth-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.integrity-verified",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.target-integrity-verified",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.replay-protected",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.owner-confirmed",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.telemetry-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.recovery-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.transition-bounded",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.connectivity.rollback-complete",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.authority-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.loop-prevented",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.resolver-reachable",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.forwarding-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.ttl-policy-met",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.dns.certificate-sni-bound",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.oidc-pinned",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.no-long-lived-secrets",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.least-privilege",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.identity.environment-separation",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.egress.bounded-allowlist",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.egress.default-deny-enforced",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "migration.egress.nat-proxy-explicit",
+      "surface": "connectivity-planner",
+      "source": "scripts/startup-connectivity-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["fail", "unresolved"]
+    },
+    {
+      "id": "program.lineage.artifacts-complete",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing", "invalid"]
+    },
+    {
+      "id": "program.lineage.digests-current",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["mismatch", "mutated"]
+    },
+    {
+      "id": "program.lineage.evidence-current",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["stale", "blocked"]
+    },
+    {
+      "id": "program.lineage.stage-order-valid",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["omitted", "duplicate", "out-of-order"]
+    },
+    {
+      "id": "program.lineage.replay-protected",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["reused-nonce", "non-monotonic"]
+    },
+    {
+      "id": "program.lineage.target-bound",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["environment-mismatch", "region-mismatch", "target-mismatch"]
+    },
+    {
+      "id": "program.lineage.lineage-bound",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["predecessor-mismatch", "artifact-lineage-mismatch"]
+    },
+    {
+      "id": "program.lineage.cross-program-bound",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["artifact-substitution", "baseline-substitution"]
+    },
+    {
+      "id": "program.lineage.authority-separated",
+      "surface": "program-lineage",
+      "source": "scripts/startup-program-lineage.mjs",
+      "passState": "pass",
+      "blockingStates": ["execution-enabled", "approval-scope-widened"]
+    },
+    {
+      "id": "control.ownership.artifacts-bound",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["tampered", "environment-mismatch", "target-mismatch", "artifact-substitution"]
+    },
+    {
+      "id": "control.ownership.raci-complete",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["missing-accountable", "missing-responsible", "omitted", "duplicate"]
+    },
+    {
+      "id": "control.ownership.authority-unambiguous",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["ambiguous", "authority-substitution", "conflicting-owner"]
+    },
+    {
+      "id": "control.ownership.separation-of-duties",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["self-approval", "missing-approval-authority"]
+    },
+    {
+      "id": "control.ownership.escalation-acyclic",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["circular", "self-escalation"]
+    },
+    {
+      "id": "control.ownership.source-of-truth-authorized",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["unapproved-transfer", "missing-handoff"]
+    },
+    {
+      "id": "control.ownership.rollback-failback-owned",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["ownerless-rollback", "ownerless-failback"]
+    },
+    {
+      "id": "control.ownership.evidence-current",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["stale", "expired", "future-dated"]
+    },
+    {
+      "id": "control.ownership.handoff-integrity",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["tampered", "unaccepted", "offered-by-mismatch", "accepted-by-mismatch"]
+    },
+    {
+      "id": "control.ownership.replay-protected",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["replayed-attempt", "replayed-handoff", "duplicate-evidence"]
+    },
+    {
+      "id": "control.ownership.transition-order-valid",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["omitted", "duplicate", "out-of-order"]
+    },
+    {
+      "id": "control.ownership.lineage-monotonic",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["gap", "non-monotonic"]
+    },
+    {
+      "id": "control.ownership.safety-enforced",
+      "surface": "control-plane-ownership-planner",
+      "source": "scripts/startup-control-plane-ownership-plan.mjs",
+      "passState": "pass",
+      "blockingStates": ["execution-enabled", "live-operations-enabled"]
+    }
+  ]
+}

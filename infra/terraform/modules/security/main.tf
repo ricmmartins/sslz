@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.5.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -50,11 +52,11 @@ resource "azurerm_security_center_subscription_pricing" "arm" {
   resource_type = "Arm"
 }
 
-# Defender for Storage — detect malicious uploads and anomalous access
+# Defender for Storage V2 — opt in only when the workload justifies the added cost
 resource "azurerm_security_center_subscription_pricing" "storage" {
-  tier          = "Standard"
+  tier          = var.enable_defender_for_storage ? "Standard" : "Free"
   resource_type = "StorageAccounts"
-  subplan       = "DefenderForStorageV2"
+  subplan       = var.enable_defender_for_storage ? "DefenderForStorageV2" : null
 }
 
 # Security contact

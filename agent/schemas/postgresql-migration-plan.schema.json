@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-migration-plan.schema.json",
+  "title": "SSLZ PostgreSQL migration plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "planId",
+    "status",
+    "sourceAssessment",
+    "sourceAssessmentDigest",
+    "target",
+    "requiredChecks",
+    "checks",
+    "strategy",
+    "stages",
+    "migrationPlan",
+    "identityBindings",
+    "humanConfirmationRequired",
+    "safety",
+    "planDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "status": { "enum": ["ready", "blocked"] },
+    "sourceAssessment": {
+      "$ref": "postgresql-source-assessment.schema.json"
+    },
+    "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "region",
+        "engine",
+        "regionalPlanStatus",
+        "regionalPlanDecisionDigest",
+        "selectedEvidenceDigest",
+        "migrationEvidenceDigest",
+        "migrationEvidenceFreshness",
+        "evidenceReference"
+      ],
+      "properties": {
+        "region": {
+          "oneOf": [
+            { "$ref": "#/$defs/region" },
+            { "type": "null" }
+          ]
+        },
+        "engine": { "$ref": "#/$defs/engine" },
+        "regionalPlanStatus": {
+          "enum": ["ready", "fallback-required", "blocked"]
+        },
+        "regionalPlanDecisionDigest": { "$ref": "#/$defs/digest" },
+        "selectedEvidenceDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        },
+        "migrationEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "migrationEvidenceFreshness": { "enum": ["current", "stale"] },
+        "evidenceReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/checkId" }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "selected",
+        "rationale",
+        "estimatedDowntimeMinutes",
+        "estimatedDataLossMinutes",
+        "offlineEstimateMinutes",
+        "onlineEstimateMinutes",
+        "toleratedDowntimeMinutes"
+      ],
+      "properties": {
+        "requested": {
+          "enum": [
+            "auto",
+            "offline-dump-restore",
+            "online-logical-replication"
+          ]
+        },
+        "selected": {
+          "enum": [
+            "offline-dump-restore",
+            "online-logical-replication",
+            "blocked-manual-architecture-review"
+          ]
+        },
+        "rationale": { "$ref": "#/$defs/nonEmptyStrings" },
+        "estimatedDowntimeMinutes": { "type": "integer", "minimum": 0 },
+        "estimatedDataLossMinutes": { "type": "integer", "minimum": 0 },
+        "offlineEstimateMinutes": { "type": "integer", "minimum": 0 },
+        "onlineEstimateMinutes": { "type": "integer", "minimum": 0 },
+        "toleratedDowntimeMinutes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state",
+          "status",
+          "gate",
+          "executionAllowed",
+          "strategy"
+        ],
+        "properties": {
+          "state": {
+            "enum": [
+              "assess",
+              "prepare",
+              "rehearse",
+              "initial-load",
+              "catch-up",
+              "validate",
+              "cutover-ready",
+              "cutover",
+              "verify",
+              "rollback-required",
+              "completed"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "blocked",
+              "pending-human-confirmation",
+              "not-triggered"
+            ]
+          },
+          "gate": { "type": "string", "minLength": 1 },
+          "executionAllowed": { "const": false },
+          "strategy": {
+            "enum": [
+              "offline-dump-restore",
+              "online-logical-replication",
+              "blocked-manual-architecture-review"
+            ]
+          }
+        }
+      }
+    },
+    "migrationPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prerequisites",
+        "unsupportedObjects",
+        "requiredTransformations",
+        "schemaPreparation",
+        "initialLoad",
+        "cdc",
+        "validation",
+        "cutover",
+        "rollback",
+        "sourceOfTruthRules",
+        "cleanup",
+        "unresolvedDecisions"
+      ],
+      "properties": {
+        "prerequisites": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unsupportedObjects": { "$ref": "#/$defs/strings" },
+        "requiredTransformations": { "$ref": "#/$defs/strings" },
+        "schemaPreparation": { "$ref": "#/$defs/nonEmptyStrings" },
+        "initialLoad": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cdc": { "$ref": "#/$defs/nonEmptyStrings" },
+        "validation": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cutover": { "$ref": "#/$defs/nonEmptyStrings" },
+        "rollback": { "$ref": "#/$defs/nonEmptyStrings" },
+        "sourceOfTruthRules": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cleanup": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unresolvedDecisions": { "$ref": "#/$defs/strings" }
+      }
+    },
+    "identityBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "sourceAssessmentObservedAt",
+        "sourceAssessmentExpiresAt",
+        "sourceAssessmentFreshness",
+        "targetPostgresqlDecisionDigest",
+        "targetPostgresqlSelectedEvidenceDigest",
+        "targetMigrationEvidenceDigest",
+        "targetRegion",
+        "targetEngineVersion",
+        "strategy",
+        "scopeDigest",
+        "ownerDigest",
+        "recoveryObjectivesDigest",
+        "validationPlanDigest",
+        "rollbackPlanDigest",
+        "requirementsDigest",
+        "decisionsDigest",
+        "migrationIdentityDigest",
+        "readiness",
+        "iac",
+        "manifest",
+        "approval"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "sourceAssessmentObservedAt": { "type": "string", "format": "date-time" },
+        "sourceAssessmentExpiresAt": { "type": "string", "format": "date-time" },
+        "sourceAssessmentFreshness": { "enum": ["current", "stale"] },
+        "targetPostgresqlDecisionDigest": { "$ref": "#/$defs/digest" },
+        "targetPostgresqlSelectedEvidenceDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        },
+        "targetMigrationEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "targetRegion": {
+          "oneOf": [
+            { "$ref": "#/$defs/region" },
+            { "type": "null" }
+          ]
+        },
+        "targetEngineVersion": { "$ref": "#/$defs/engine" },
+        "strategy": {
+          "enum": [
+            "offline-dump-restore",
+            "online-logical-replication",
+            "blocked-manual-architecture-review"
+          ]
+        },
+        "scopeDigest": { "$ref": "#/$defs/digest" },
+        "ownerDigest": { "$ref": "#/$defs/digest" },
+        "recoveryObjectivesDigest": { "$ref": "#/$defs/digest" },
+        "validationPlanDigest": { "$ref": "#/$defs/digest" },
+        "rollbackPlanDigest": { "$ref": "#/$defs/digest" },
+        "requirementsDigest": { "$ref": "#/$defs/digest" },
+        "decisionsDigest": { "$ref": "#/$defs/digest" },
+        "migrationIdentityDigest": { "$ref": "#/$defs/digest" },
+        "readiness": { "$ref": "#/$defs/artifactBinding" },
+        "iac": { "$ref": "#/$defs/artifactBinding" },
+        "manifest": { "$ref": "#/$defs/artifactBinding" },
+        "approval": { "$ref": "#/$defs/artifactBinding" }
+      }
+    },
+    "humanConfirmationRequired": { "$ref": "#/$defs/nonEmptyStrings" },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "sourceConnections",
+        "sourceWrites",
+        "azureOperations",
+        "azureWrites",
+        "migrationToolActions",
+        "dumpRestoreActions",
+        "cdcActions",
+        "dnsActions",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "sourceConnections": { "const": "none" },
+        "sourceWrites": { "const": "none" },
+        "azureOperations": { "const": "none" },
+        "azureWrites": { "const": "none" },
+        "migrationToolActions": { "const": "none" },
+        "dumpRestoreActions": { "const": "none" },
+        "cdcActions": { "const": "none" },
+        "dnsActions": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "planDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "major", "minor"],
+      "properties": {
+        "family": { "const": "postgresql" },
+        "major": { "type": "integer", "minimum": 11, "maximum": 99 },
+        "minor": { "type": "integer", "minimum": 0, "maximum": 99 }
+      }
+    },
+    "checkId": {
+      "enum": [
+        "migration.postgresql.assessment-current",
+        "migration.postgresql.target-bound",
+        "migration.postgresql.engine-compatible",
+        "migration.postgresql.extensions-compatible",
+        "migration.postgresql.encoding-collation-compatible",
+        "migration.postgresql.capacity-headroom",
+        "migration.postgresql.availability-compatible",
+        "migration.postgresql.private-connectivity-ready",
+        "migration.postgresql.identity-auth-mapped",
+        "migration.postgresql.tool-available",
+        "migration.postgresql.logical-replication-ready",
+        "migration.postgresql.objects-mappable",
+        "migration.postgresql.downtime-compatible",
+        "migration.postgresql.source-of-truth-explicit",
+        "migration.postgresql.validation-complete",
+        "migration.postgresql.rollback-complete"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "freshness",
+        "summary",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/checkId" },
+        "classification": { "enum": ["pass", "fail", "unresolved"] },
+        "freshness": { "enum": ["current", "stale", "not-applicable"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "evidenceReferences": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    },
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrationIdentityDigest",
+        "sourceAssessmentDigest",
+        "targetPostgresqlDecisionDigest",
+        "targetPostgresqlSelectedEvidenceDigest",
+        "targetMigrationEvidenceDigest",
+        "strategy",
+        "scopeDigest",
+        "ownerDigest",
+        "recoveryObjectivesDigest",
+        "validationPlanDigest",
+        "rollbackPlanDigest",
+        "requirementsDigest",
+        "decisionsDigest",
+        "migrationExecutionEligible"
+      ],
+      "properties": {
+        "migrationIdentityDigest": { "$ref": "#/$defs/digest" },
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "targetPostgresqlDecisionDigest": { "$ref": "#/$defs/digest" },
+        "targetPostgresqlSelectedEvidenceDigest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        },
+        "targetMigrationEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "strategy": {
+          "enum": [
+            "offline-dump-restore",
+            "online-logical-replication",
+            "blocked-manual-architecture-review"
+          ]
+        },
+        "scopeDigest": { "$ref": "#/$defs/digest" },
+        "ownerDigest": { "$ref": "#/$defs/digest" },
+        "recoveryObjectivesDigest": { "$ref": "#/$defs/digest" },
+        "validationPlanDigest": { "$ref": "#/$defs/digest" },
+        "rollbackPlanDigest": { "$ref": "#/$defs/digest" },
+        "requirementsDigest": { "$ref": "#/$defs/digest" },
+        "decisionsDigest": { "$ref": "#/$defs/digest" },
+        "migrationExecutionEligible": { "const": false }
+      }
+    }
+  }
+}

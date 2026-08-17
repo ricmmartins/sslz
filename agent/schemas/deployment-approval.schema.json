@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/deployment-approval.schema.json",
+  "title": "SSLZ signed deployment approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "manifestVersion",
+    "manifestDigest",
+    "planVersion",
+    "planId",
+    "planDigest",
+    "regionalAttemptId",
+    "regionalAttemptDigest",
+    "regionalAttemptNumber",
+    "originalRegion",
+    "targetRegion",
+    "regionalStateKey",
+    "readinessEvidenceVersion",
+    "readinessEvidenceId",
+    "readinessEvidenceDigest",
+    "readinessEvidenceExpiresAt",
+    "topologyDecisionId",
+    "topologyDecisionDigest",
+    "topologyDecisionExpiresAt",
+    "postgresqlDecisionDigest",
+    "postgresqlSelectedEvidenceDigest",
+    "defenderWorkspacePlacementDecisionId",
+    "defenderWorkspacePlacementDecisionDigest",
+    "defenderWorkspaceRegion",
+    "defenderWorkspaceScopeDigest",
+    "defenderWorkspaceReferenceDigest",
+    "defenderWorkspacePolicyEvidenceDigest",
+    "defenderWorkspacePolicyEvidenceFreshness",
+    "defenderPaidPlanSelectionDigest",
+    "aksIngressMode",
+    "aksIngressDecisionDigest",
+    "aksIngressPostcheckDigest",
+    "operation",
+    "provider",
+    "environment",
+    "regionRole",
+    "tenantId",
+    "subscriptionId",
+    "scope",
+    "region",
+    "stateStoreId",
+    "parameterDigest",
+    "sourceDigest",
+    "savedPlanDigest",
+    "planJsonDigest",
+    "notificationContactsDigest",
+    "terraformAuthMode",
+    "nonce",
+    "approvedAt",
+    "expiresAt",
+    "signatureAlgorithm",
+    "keyId",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": ["pending", "approved", "declined", "consumed"]
+    },
+    "manifestVersion": {
+      "const": "1.0.0"
+    },
+    "manifestDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "planVersion": {
+      "const": "1.0.0"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "planDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "regionalAttemptId": {
+      "$ref": "#/$defs/reference"
+    },
+    "regionalAttemptDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "regionalAttemptNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 99
+    },
+    "originalRegion": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    },
+    "targetRegion": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    },
+    "regionalStateKey": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9.-]*\\.tfstate$"
+    },
+    "readinessEvidenceVersion": {
+      "const": "3.0.0"
+    },
+    "readinessEvidenceId": {
+      "$ref": "#/$defs/reference"
+    },
+    "readinessEvidenceDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "readinessEvidenceExpiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "topologyDecisionId": {
+      "$ref": "#/$defs/reference"
+    },
+    "topologyDecisionDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "topologyDecisionExpiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "postgresqlDecisionDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "postgresqlSelectedEvidenceDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "defenderWorkspacePlacementDecisionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "defenderWorkspacePlacementDecisionDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "defenderWorkspaceRegion": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspaceScopeDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspaceReferenceDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspacePolicyEvidenceDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defenderWorkspacePolicyEvidenceFreshness": {
+      "enum": ["current", "not-required"]
+    },
+    "defenderPaidPlanSelectionDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "aksIngressMode": {
+      "enum": ["not-applicable", "private", "public-azure-load-balancer"]
+    },
+    "aksIngressDecisionDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "aksIngressPostcheckDigest": {
+      "anyOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "operation": {
+      "const": "platform-baseline.deploy"
+    },
+    "provider": {
+      "enum": ["bicep", "terraform"]
+    },
+    "environment": {
+      "enum": ["prod", "nonprod"]
+    },
+    "regionRole": {
+      "const": "primary"
+    },
+    "tenantId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "subscriptionId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "stateStoreId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "parameterDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "sourceDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "savedPlanDigest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "planJsonDigest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "notificationContactsDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "terraformAuthMode": {
+      "enum": ["cli", "oidc", null]
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signatureAlgorithm": {
+      "const": "Ed25519"
+    },
+    "keyId": {
+      "$ref": "#/$defs/digest"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$"
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+    ,
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    }
+  }
+}

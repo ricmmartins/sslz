@@ -15,6 +15,28 @@ param vnetAddressPrefix string
 @description('Service delegation for the app subnet (e.g., Microsoft.Web/serverFarms for App Service, Microsoft.App/environments for Container Apps)')
 param appSubnetDelegation string = 'Microsoft.Web/serverFarms'
 
+@description('Include the dedicated nonproduction Container Apps cool-profile subnet')
+param includeContainerAppsSubnet bool = false
+
+@description('Explicit AKS ingress mode')
+@allowed(['not-applicable', 'private', 'public-azure-load-balancer'])
+param aksIngressMode string = 'not-applicable'
+
+@description('Reviewed public frontend port; zero when AKS public ingress is not selected')
+param aksIngressFrontendPort int = 0
+
+@description('Exact AKS backend NodePort; zero when AKS public ingress is not selected')
+param aksIngressBackendNodePort int = 0
+
+@description('Azure Load Balancer health probe service tag; empty when public ingress is not selected')
+param aksIngressHealthProbeSourcePrefix string = ''
+
+@description('Reviewed public client source prefixes for the exact NodePort')
+param aksIngressSourcePrefixes string[] = []
+
+@description('Existing AKS NSG priorities that generated rules must not collide with')
+param aksIngressReservedNsgPriorities int[] = []
+
 @description('Resource tags')
 param tags object
 
@@ -30,7 +52,7 @@ var secondOctet = split(vnetAddressPrefix, '.')[1]
   If AKS subnet is /20 starting at x.y.0.0/20, it covers x.y.0.0 - x.y.15.255.
   Therefore, app/data/shared must start at x.y.16.0+ to avoid overlap.
 */
-var subnets = {
+var baseSubnets = {
   aks: {
     name: 'snet-aks'
     addressPrefix: '${baseOctet}.${secondOctet}.0.0/20'     // 10.x.0.0/20
@@ -48,57 +70,177 @@ var subnets = {
     addressPrefix: '${baseOctet}.${secondOctet}.24.0/24'    // 10.x.24.0/24
   }
 }
+var subnets = union(baseSubnets, includeContainerAppsSubnet ? {
+  containerApps: {
+    name: 'snet-container-apps'
+    addressPrefix: '${baseOctet}.${secondOctet}.32.0/23'    // 10.x.32.0/23
+  }
+} : {})
+var aksPublicIngress = aksIngressMode == 'public-azure-load-balancer'
+var aksPrivateIngress = aksIngressMode == 'private'
+var aksIngressPriorityCollision = contains(aksIngressReservedNsgPriorities, 120) || contains(aksIngressReservedNsgPriorities, 4096) || (aksPublicIngress && (contains(aksIngressReservedNsgPriorities, 100) || contains(aksIngressReservedNsgPriorities, 110)))
+var validAksReservedPriorities = filter(
+  aksIngressReservedNsgPriorities,
+  priority => priority >= 100 && priority <= 4096
+)
+var aksReservedPrioritiesValid = length(union(aksIngressReservedNsgPriorities, aksIngressReservedNsgPriorities)) == length(aksIngressReservedNsgPriorities) && length(validAksReservedPriorities) == length(aksIngressReservedNsgPriorities)
+var parsedAksSourcePrefixes = map(
+  aksIngressSourcePrefixes,
+  prefix => prefix == 'Internet' ? 'Internet' : parseCidr(prefix).netmask
+)
+var provenAksSourcePrefixes = filter(
+  aksIngressSourcePrefixes,
+  prefix => prefix == 'Internet' || (contains(prefix, '.') && contains(prefix, '/'))
+)
+var uniqueAksSourcePrefixes = union(aksIngressSourcePrefixes, aksIngressSourcePrefixes)
+var publicAksIngressShapeValid = (aksIngressFrontendPort == 80 || aksIngressFrontendPort == 443) && aksIngressBackendNodePort >= 30000 && aksIngressBackendNodePort <= 32767 && !empty(aksIngressSourcePrefixes) && length(uniqueAksSourcePrefixes) == length(aksIngressSourcePrefixes) && aksIngressHealthProbeSourcePrefix == 'AzureLoadBalancer' && length(parsedAksSourcePrefixes) == length(aksIngressSourcePrefixes) && length(provenAksSourcePrefixes) == length(aksIngressSourcePrefixes)
+var aksIngressShapeValid = aksIngressMode == 'not-applicable'
+  ? aksIngressFrontendPort == 0 && aksIngressBackendNodePort == 0 && empty(aksIngressHealthProbeSourcePrefix) && empty(aksIngressSourcePrefixes)
+  : aksPrivateIngress
+    ? aksIngressFrontendPort == 0 && aksIngressBackendNodePort == 0 && empty(aksIngressHealthProbeSourcePrefix) && empty(aksIngressSourcePrefixes)
+    : publicAksIngressShapeValid
+var aksIngressGuard = aksIngressShapeValid && aksReservedPrioritiesValid && !aksIngressPriorityCollision
+  ? ''
+  : fail('AKS ingress must use the supported private or exact public Azure Load Balancer contract with collision-free NSG priorities.')
+var legacyAksRules = [
+  {
+    name: 'AllowAzureLoadBalancerInbound'
+    properties: {
+      priority: 110
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: '*'
+      sourceAddressPrefix: 'AzureLoadBalancer'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '*'
+    }
+  }
+  {
+    name: 'AllowVNetInbound'
+    properties: {
+      priority: 120
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: '*'
+      sourceAddressPrefix: 'VirtualNetwork'
+      sourcePortRange: '*'
+      destinationAddressPrefix: 'VirtualNetwork'
+      destinationPortRange: '*'
+    }
+  }
+  {
+    name: 'DenyAllInbound'
+    properties: {
+      priority: 4096
+      direction: 'Inbound'
+      access: 'Deny'
+      protocol: '*'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '*'
+    }
+  }
+]
+var privateAksRules = [
+  {
+    name: 'AllowVNetInbound'
+    properties: {
+      priority: 120
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: '*'
+      sourceAddressPrefix: 'VirtualNetwork'
+      sourcePortRange: '*'
+      destinationAddressPrefix: 'VirtualNetwork'
+      destinationPortRange: '*'
+    }
+  }
+  {
+    name: 'DenyAllInbound'
+    properties: {
+      priority: 4096
+      direction: 'Inbound'
+      access: 'Deny'
+      protocol: '*'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '*'
+    }
+  }
+]
+var publicAksRules = [
+  {
+    name: 'AllowAzureLoadBalancerHealthProbe'
+    properties: {
+      priority: 100
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: 'Tcp'
+      sourceAddressPrefix: 'AzureLoadBalancer'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: string(aksIngressBackendNodePort)
+    }
+  }
+  {
+    name: 'AllowApprovedPublicIngress'
+    properties: {
+      priority: 110
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: 'Tcp'
+      sourceAddressPrefixes: sort(aksIngressSourcePrefixes, (left, right) => left < right)
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: string(aksIngressBackendNodePort)
+    }
+  }
+  {
+    name: 'AllowVNetInbound'
+    properties: {
+      priority: 120
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: '*'
+      sourceAddressPrefix: 'VirtualNetwork'
+      sourcePortRange: '*'
+      destinationAddressPrefix: 'VirtualNetwork'
+      destinationPortRange: '*'
+    }
+  }
+  {
+    name: 'DenyAllInbound'
+    properties: {
+      priority: 4096
+      direction: 'Inbound'
+      access: 'Deny'
+      protocol: '*'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '*'
+    }
+  }
+]
+var aksSecurityRules = aksIngressMode == 'not-applicable'
+  ? legacyAksRules
+  : aksPrivateIngress
+    ? privateAksRules
+    : publicAksRules
 
 // ============================================================================
 // NSGs — One per subnet, deny-all-inbound by default
 // ============================================================================
 
 resource nsgAks 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
-  name: 'nsg-${subnets.aks.name}'
+  name: 'nsg-${subnets.aks.name}${aksIngressGuard}'
   location: location
   tags: tags
   properties: {
-    securityRules: [
-      {
-        name: 'AllowAzureLoadBalancerInbound'
-        properties: {
-          priority: 110
-          direction: 'Inbound'
-          access: 'Allow'
-          protocol: '*'
-          sourceAddressPrefix: 'AzureLoadBalancer'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '*'
-        }
-      }
-      {
-        name: 'AllowVNetInbound'
-        properties: {
-          priority: 120
-          direction: 'Inbound'
-          access: 'Allow'
-          protocol: '*'
-          sourceAddressPrefix: 'VirtualNetwork'
-          sourcePortRange: '*'
-          destinationAddressPrefix: 'VirtualNetwork'
-          destinationPortRange: '*'
-        }
-      }
-      {
-        name: 'DenyAllInbound'
-        properties: {
-          priority: 4096
-          direction: 'Inbound'
-          access: 'Deny'
-          protocol: '*'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '*'
-        }
-      }
-    ]
+    securityRules: aksSecurityRules
   }
 }
 
@@ -197,6 +339,55 @@ resource nsgShared 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
   }
 }
 
+resource nsgContainerApps 'Microsoft.Network/networkSecurityGroups@2024-01-01' = if (includeContainerAppsSubnet) {
+  name: 'nsg-${subnets.containerApps.name}'
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAzureLoadBalancerInbound'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'AllowVNetInbound'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'VirtualNetwork'
+          destinationPortRange: '*'
+        }
+      }
+      {
+        name: 'DenyAllInbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
 // ============================================================================
 // VNet with Subnets
 // ============================================================================
@@ -209,7 +400,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
     addressSpace: {
       addressPrefixes: [vnetAddressPrefix]
     }
-    subnets: [
+    subnets: concat([
       {
         name: subnets.aks.name
         properties: {
@@ -246,7 +437,15 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
           networkSecurityGroup: { id: nsgShared.id }
         }
       }
-    ]
+    ], includeContainerAppsSubnet ? [
+      {
+        name: subnets.containerApps.name
+        properties: {
+          addressPrefix: subnets.containerApps.addressPrefix
+          networkSecurityGroup: { id: nsgContainerApps.id }
+        }
+      }
+    ] : [])
   }
 }
 
@@ -260,3 +459,7 @@ output aksSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnet
 output appSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.app.name)
 output dataSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.data.name)
 output sharedSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.shared.name)
+output containerAppsSubnetId string = includeContainerAppsSubnet
+  ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnets.containerApps.name)
+  : ''
+output aksIngressNsgRules array = aksSecurityRules

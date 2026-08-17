@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-execution-approval.schema.json",
+  "title": "SSLZ PostgreSQL migration stage approvals",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "approvalSetId", "approvals"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "approvalSetId": { "$ref": "#/$defs/reference" },
+    "approvals": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "approvalId",
+          "stage",
+          "decision",
+          "issuedAt",
+          "expiresAt",
+          "nonce",
+          "authorityReference",
+          "signerKeyId",
+          "environmentReference",
+          "targetReference",
+          "strategy",
+          "predecessorState",
+          "successorState",
+          "idempotencyKey",
+          "bindings",
+          "grantedCapabilities",
+          "signature"
+        ],
+        "properties": {
+          "approvalId": { "$ref": "#/$defs/reference" },
+          "stage": { "$ref": "#/$defs/stage" },
+          "decision": { "enum": ["approve", "not-applicable"] },
+          "issuedAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "nonce": { "$ref": "#/$defs/reference" },
+          "authorityReference": { "$ref": "#/$defs/reference" },
+          "signerKeyId": { "$ref": "#/$defs/reference" },
+          "environmentReference": { "$ref": "#/$defs/reference" },
+          "targetReference": { "$ref": "#/$defs/reference" },
+          "strategy": { "$ref": "#/$defs/strategy" },
+          "predecessorState": { "const": "rehearsal-reviewed" },
+          "successorState": { "const": "execution-planned" },
+          "idempotencyKey": { "$ref": "#/$defs/reference" },
+          "bindings": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceAssessmentDigest",
+              "migrationPlanDigest",
+              "rehearsalPlanDigest",
+              "liveEvidenceDigest",
+              "currentLineageDigest",
+              "requestDigest",
+              "actionDigest",
+              "privilegeDigest"
+            ],
+            "properties": {
+              "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+              "migrationPlanDigest": { "$ref": "#/$defs/digest" },
+              "rehearsalPlanDigest": { "$ref": "#/$defs/digest" },
+              "liveEvidenceDigest": { "$ref": "#/$defs/digest" },
+              "currentLineageDigest": { "$ref": "#/$defs/digest" },
+              "requestDigest": { "$ref": "#/$defs/digest" },
+              "actionDigest": { "$ref": "#/$defs/digest" },
+              "privilegeDigest": { "$ref": "#/$defs/digest" }
+            }
+          },
+          "grantedCapabilities": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/capability" }
+          },
+          "signature": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "strategy": {
+      "enum": ["offline-dump-restore", "online-logical-replication"]
+    },
+    "stage": {
+      "enum": [
+        "rehearsal-execution",
+        "initial-load",
+        "cdc-catch-up",
+        "write-freeze-connection-drain",
+        "cutover-readiness",
+        "source-of-truth-transfer",
+        "rollback",
+        "failback"
+      ]
+    },
+    "capability": {
+      "enum": [
+        "rehearsal-execute",
+        "initial-load-write",
+        "cdc-catch-up",
+        "write-freeze",
+        "connection-drain",
+        "cutover-readiness-declare",
+        "source-authority-transfer",
+        "rollback-initiate",
+        "failback-initiate"
+      ]
+    }
+  }
+}

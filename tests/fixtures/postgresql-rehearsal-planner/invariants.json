@@ -1,0 +1,214 @@
+[
+  {
+    "name": "tampered migration target is rejected",
+    "kind": "tampered-plan",
+    "path": "target.region",
+    "value": "eastus2",
+    "expectedChecks": [
+      "rehearsal.postgresql.contracts-bound",
+      "rehearsal.postgresql.target-bound"
+    ]
+  },
+  {
+    "name": "coherently rehashed target cannot retain another migration identity",
+    "kind": "coherent-target-tamper",
+    "path": "target.region",
+    "value": "eastus2",
+    "expectedChecks": [
+      "rehearsal.postgresql.contracts-bound"
+    ]
+  },
+  {
+    "name": "coherently mutated migration input and plan cannot replace trusted review",
+    "kind": "coherent-bundle-tamper",
+    "expectedChecks": [
+      "rehearsal.postgresql.contracts-bound"
+    ]
+  },
+  {
+    "name": "mismatched source assessment is rejected",
+    "kind": "mismatched-source",
+    "path": "size.usedGiB",
+    "value": 19,
+    "expectedChecks": [
+      "rehearsal.postgresql.contracts-bound",
+      "rehearsal.postgresql.target-bound"
+    ]
+  },
+  {
+    "name": "required row-count evidence cannot be omitted",
+    "kind": "omission",
+    "path": "validation.rowCounts",
+    "expectedError": "missing required property rowCounts"
+  },
+  {
+    "name": "exact evidence-set reuse is rejected by accepted lineage",
+    "kind": "exact-replay",
+    "expectedChecks": [
+      "rehearsal.postgresql.replay-protected",
+      "rehearsal.postgresql.target-bound"
+    ]
+  },
+  {
+    "name": "source assessment expiry is reevaluated",
+    "kind": "evaluation-time",
+    "value": "2026-08-13T10:00:01Z",
+    "expectedStatus": "manual-review-required",
+    "expectedStaleEvidence": [
+      "sourceAssessment",
+      "selectedRegionalEvidence"
+    ],
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "target migration evidence expiry is reevaluated",
+    "kind": "evaluation-time",
+    "value": "2026-08-13T10:30:01Z",
+    "expectedStatus": "manual-review-required",
+    "expectedStaleEvidence": [
+      "sourceAssessment",
+      "selectedRegionalEvidence",
+      "targetMigrationEvidence"
+    ],
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "future upstream evidence is reevaluated",
+    "kind": "evaluation-time",
+    "value": "2026-08-12T09:00:00Z",
+    "expectedStatus": "manual-review-required",
+    "expectedStaleEvidence": [
+      "rehearsal",
+      "migrationPlanning",
+      "regionalPlanning",
+      "sourceAssessment",
+      "targetMigrationEvidence",
+      "acceptedLineage"
+    ],
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "rehearsal evidence cannot predate its migration plans",
+    "kind": "evidence-value",
+    "path": "observedAt",
+    "value": "2026-08-12T11:30:00Z",
+    "expectedStatus": "manual-review-required",
+    "expectedStaleEvidence": ["rehearsal"],
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "zero-row checksum evidence cannot cover populated tables",
+    "kind": "evidence-value",
+    "path": "validation.dataVerification.sampleRows",
+    "value": 0,
+    "expectedChecks": [
+      "rehearsal.postgresql.data-verification-complete",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "offset-less evaluation time is rejected",
+    "kind": "evaluation-time",
+    "value": "2026-08-12T12:00:00",
+    "expectedError": "RFC 3339 date-time"
+  },
+  {
+    "name": "invalid calendar evaluation time is rejected",
+    "kind": "evaluation-time",
+    "value": "2026-02-30T12:00:00Z",
+    "expectedError": "valid RFC 3339 calendar date-time"
+  },
+  {
+    "name": "offset-less upstream timestamp is rejected",
+    "kind": "migration-input",
+    "path": "target.regionalPlanningInput.evidence.1.source.observedAt",
+    "value": "2026-08-11T17:35:00",
+    "expectedError": "RFC 3339 date-time"
+  },
+  {
+    "name": "selected regional evidence age is reevaluated",
+    "kind": "evaluation-time",
+    "value": "2026-08-12T17:35:01Z",
+    "expectedStatus": "manual-review-required",
+    "expectedStaleEvidence": ["selectedRegionalEvidence"],
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "evidence-defined row tolerance is rejected",
+    "kind": "row-tolerance",
+    "path": "validation.rowCounts.0.allowedDifferenceRows",
+    "value": 1250000,
+    "expectedChecks": [
+      "rehearsal.postgresql.row-counts-within-bound",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "rehearsal source counts must match the bound assessment",
+    "kind": "evidence-values",
+    "mutations": [
+      ["validation.rowCounts.0.sourceRows", 0],
+      ["validation.rowCounts.0.targetRows", 0]
+    ],
+    "expectedChecks": [
+      "rehearsal.postgresql.row-counts-within-bound",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "secret-bearing key is rejected",
+    "kind": "secret-key",
+    "path": "prechecks.password",
+    "value": "not-allowed",
+    "expectedError": "postgresql.rehearsal.secret-material"
+  },
+  {
+    "name": "credential-bearing PostgreSQL URI is rejected",
+    "kind": "secret-value",
+    "path": "environmentReference",
+    "value": "postgresql://rehearsal:raw-password@example/database",
+    "expectedError": "postgresql.rehearsal.secret-material"
+  },
+  {
+    "name": "PAT-shaped opaque reference is rejected",
+    "kind": "secret-value",
+    "path": "environmentReference",
+    "value": "github_pat_000000000000000000000000000000",
+    "expectedError": "postgresql.rehearsal.secret-material"
+  },
+  {
+    "name": "credential-free database endpoint is rejected",
+    "kind": "secret-value",
+    "path": "environmentReference",
+    "value": "postgresql://internal-db.example.com/prod",
+    "expectedError": "postgresql.rehearsal.secret-material"
+  },
+  {
+    "name": "raw hostname and port endpoint is rejected",
+    "kind": "secret-value",
+    "path": "environmentReference",
+    "value": "db-prod:5432",
+    "expectedError": "postgresql.rehearsal.secret-material"
+  },
+  {
+    "name": "development TLD database hostname is rejected",
+    "kind": "secret-value",
+    "path": "environmentReference",
+    "value": "db.contoso.dev",
+    "expectedError": "postgresql.rehearsal.secret-material"
+  },
+  {
+    "name": "planner source has no network write command or file-write path",
+    "kind": "no-write-source"
+  }
+]

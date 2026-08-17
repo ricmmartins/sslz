@@ -1,0 +1,19 @@
+<aside class="sidebar" id="sidebar">
+  <nav class="sidebar-nav" aria-label="Agent-aware documentation">
+    {% for section in site.data.navigation.agent %}
+    <div class="sidebar-section">
+      <h3>{{ section.title }}</h3>
+      <ul>
+        {% for item in section.items %}
+        <li>
+          <a href="{{ item.url | relative_url }}"
+             {% if page.url == item.url %}class="active" aria-current="page"{% endif %}>
+            {{ item.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </nav>
+</aside>
