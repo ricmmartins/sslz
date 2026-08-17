@@ -32,29 +32,6 @@ subscription-wide opt-in to `Standard` with `DefenderForStorageV2`; review the c
 account in the subscription before enabling it. This default-off behavior was delivered by
 [PR #28](https://github.com/ricmmartins/sslz/pull/28); repository validation does not prove a live subscription tier.
 
-### Defender workspace placement
-
-Defender for Servers depends on a Log Analytics workspace. SSLZ never accepts the Azure-generated default workspace
-location: the workspace decision must be explicit before IaC is generated. A new workspace is placed in the selected
-primary region only after current Allowed Locations, service-support, and data-residency evidence all permit that region.
-Policy and residency evidence must identify the same tenant and exact target-subscription set as the decision.
-An approved existing workspace can be reused without creating a duplicate; a same-subscription cross-region shared
-workspace additionally requires current central-workspace evidence bound to the same tenant, subscription, target
-subscriptions, and workspace reference digest. Cross-subscription placement is unsupported by these provider roots and
-blocks planning. Missing, stale, ambiguous, mismatched, or unsupported evidence also blocks.
-When prod and nonprod share one subscription, planning requires one approved existing workspace: the prod artifact owns
-the subscription singleton and the nonprod artifact consumes the same digest-bound reference without owning it.
-Generated Bicep and Terraform inputs carry this topology explicitly and reject a new workspace, nonprod ownership, or
-an external-management claim outside that shared-subscription model. Both roots also resolve an existing workspace and
-fail when its actual resource ID or region differs from the declared placement; approved apply repeats that read before
-the first deployment write and additionally requires a successful provisioning state.
-
-Both Bicep and Terraform pass the exact effective workspace resource ID to the subscription-level Defender workspace
-association. Bicep uses the supported `2017-08-01-preview` workspace-settings API. Terraform confines its existing-resource
-overwrite capability to a dedicated provider alias used only by this singleton association, so an Azure-created setting can
-be reconciled without granting overwrite behavior to the rest of the root. Disabling Defender for Servers creates no
-association; an already managed association is retained and requires a separate destructive decision to remove.
-
 ### Secure Score
 
 Don't chase a perfect score. A score of 60-70% with the high-severity items resolved is fine for a startup. Focus on:
@@ -80,7 +57,7 @@ Don't chase a perfect score. A score of 60-70% with the high-severity items reso
 1. **Never assign roles to individual users.** Always use groups. When someone leaves, you remove them from the group, not from 15 role assignments.
 2. **Developers don't get Contributor on prod.** Deployments go through CI/CD. Debug with Reader + Log Analytics + Application Insights.
 3. **No Owner at subscription level for non-admins.** Owner can modify RBAC, which means one compromised account can grant itself anything.
-4. **Service Principals need elevated roles for policy enforcement.** CI/CD needs User Access Administrator because DINE/Modify policies create managed identities with role assignments. See the [CI/CD Setup guide](ci-cd-setup.md#step-4-assign-azure-roles-5-min) for details.
+4. **Service Principals need elevated roles for policy enforcement.** CI/CD needs User Access Administrator because DINE/Modify policies create managed identities with role assignments. See the [CI/CD Setup guide](/docs/ci-cd-setup/#step-4-assign-azure-roles-5-min) for details.
 
 ### Emergency Access
 
@@ -204,10 +181,6 @@ Set up these alerts on your Log Analytics workspace:
 3. **TLS everywhere** — Enforce HTTPS on all public endpoints (App Service: HTTPS Only = On)
 4. **No public IPs on databases** — Use Private Endpoints or service firewall to restrict access
 
-AKS requires an explicit ingress mode. Private mode has no public NSG allow. Public Azure Load Balancer mode permits only
-the Azure health-probe service tag and approved client sources to one exact backend NodePort; broad NodePort ranges and
-generic Internet-to-HTTP rules are rejected.
-
 ### What You Can Skip
 
 - **Azure Firewall** — $900+/month. Use NSGs until compliance says otherwise.
@@ -240,7 +213,7 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 
 ## See Also
 
-- [Networking Deep Dive](networking.md) — NSG rules, Private Endpoints, VNet design
-- [CI/CD Setup](ci-cd-setup.md) — Workload Identity Federation configuration
-- [Architecture Decisions](architecture.md) — Policy baseline, management groups, identity
-- [Troubleshooting](troubleshooting.md) — Common deployment errors and fixes
+- [Networking Deep Dive](/docs/networking/) — NSG rules, Private Endpoints, VNet design
+- [CI/CD Setup](/docs/ci-cd-setup/) — Workload Identity Federation configuration
+- [Architecture Decisions](/docs/architecture/) — Policy baseline, management groups, identity
+- [Troubleshooting](/docs/troubleshooting/) — Common deployment errors and fixes

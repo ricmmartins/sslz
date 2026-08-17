@@ -1,18 +1,17 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/startup-agent-implementation-plan/
 title: "Startup Agent Implementation Plan"
 nav_order: 8.4
 description: "Phased, backward-compatible delivery plan for agent-assisted SSLZ"
 ---
-
-# Startup Agent Implementation Plan
 
 ## Current status
 
 This document preserves the phased design and review gates, but it is no longer a literal PR-number roadmap. Phases 0-6
 have delivered contract, planning, or approval-gated implementations. Phase 7 has delivered execution-disabled planning
 artifacts only. The PostgreSQL migration, image/CI, dual-cloud, and program-lineage work delivered after the original plan
-is also execution-disabled. See the [authoritative status matrix and actual PR history](implementation-status.md).
+is also execution-disabled. See the [authoritative status matrix and actual PR history](/agent/docs/implementation-status/).
 
 ## Goal
 
@@ -373,7 +372,7 @@ The following was the original conceptual sequence, not GitHub PR numbering:
 | Hot/Cool foundation and profile | [#14](https://github.com/ricmmartins/sslz/pull/14) and [#15](https://github.com/ricmmartins/sslz/pull/15) | No; execution disabled |
 | Migration and dual-cloud programs | [#22](https://github.com/ricmmartins/sslz/pull/22), [#23](https://github.com/ricmmartins/sslz/pull/23), [#24](https://github.com/ricmmartins/sslz/pull/24), [#25](https://github.com/ricmmartins/sslz/pull/25), [#26](https://github.com/ricmmartins/sslz/pull/26), and [#29](https://github.com/ricmmartins/sslz/pull/29) | No; execution disabled |
 
-The [status matrix](implementation-status.md#delivery-history) lists every merged PR from #4 through #29. PR #12 was
+The [status matrix](/agent/docs/implementation-status/#delivery-history) lists every merged PR from #4 through #29. PR #12 was
 closed without merge. Read-only planning and write automation remain separate surfaces.
 
 ## Review gates

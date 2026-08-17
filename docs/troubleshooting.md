@@ -88,47 +88,13 @@ description: "Common deployment errors and fixes"
 
 **Fix:**
 ```bash
-./scripts/startup-provider-remediation.sh dry-run \
-  --plan .sslz/generated/my-plan/<attempt>/plan-summary.json \
-  --action provider.register.prod.microsoft-app
+az provider register --namespace Microsoft.Insights
+az provider register --namespace Microsoft.Security
+az provider register --namespace Microsoft.PolicyInsights
+az provider register --namespace Microsoft.App
 ```
 
-After review, use `apply` with the separate approval artifact as documented in
-[Approved Provider Remediation](provider-remediation.md). The command only accepts namespaces required by the selected
-workload profiles. Run `scripts/validate-prerequisites.sh` to check other baseline providers and remediate them
-manually.
-
-### Approved deployment rejected or baseline unhealthy
-
-**Cause:** The Phase 4 approval expired, an artifact/provider/target changed, the trusted signature failed, the approval
-was already consumed locally, deployment failed, or a required platform check did not match the reviewed state.
-
-**Fix:**
-
-1. Use the result `code` and failed check IDs; raw Azure or Terraform output is intentionally not retained.
-2. Confirm the protected `SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE` and exact tenant/subscription.
-3. For Terraform, confirm the reviewed saved `.tfplan`, remote backend, Terraform version/platform, and lock file still
-   match.
-4. Correct or roll back the platform through a newly reviewed and signed Phase 6 IaC path.
-5. Generate a new Phase 4 preview, Phase 6 manifest, and signed approval. Never reuse consumed state.
-
-Workload deployment remains blocked when any post-deployment check fails. See
-[Approved Deployment Integration](approved-deployment-integration.md).
-
-### AKS public LoadBalancer resets or ingress planning is blocked
-
-**Cause:** The subnet deny-all rule has no reviewed exact load-balancer path, or the requested service does not match the
-signed ingress decision. Common blockers are a missing decision, `LoadBalancer` under private mode, an arbitrary NodePort
-range, a probe that is not sourced from `AzureLoadBalancer`, a probe/backend port mismatch, an unproven client source, or
-an NSG priority collision.
-
-**Fix:**
-
-1. Choose `private` with `ClusterIP`, or `public-azure-load-balancer` with frontend 80/443 and one exact NodePort.
-2. For public mode, bind the `AzureLoadBalancer` probe and reviewed client prefixes to that NodePort.
-3. Regenerate workload, regional, IaC, readiness, manifest, and approval artifacts; do not hand-add broad test rules.
-4. After deployment, supply fresh service type, frontend, backend mapping, health, and HTTP/TCP reachability evidence.
-   Missing live evidence blocks acceptance/recovery and must not be reported as successful connectivity.
+Or run `scripts/validate-prerequisites.sh` to check all required providers.
 
 ### Subscription Tenant Mismatch
 

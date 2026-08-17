@@ -250,6 +250,6 @@ resources
 
 ## See Also
 
-- [Architecture Decisions](architecture.md) — Why two subscriptions, budget design
-- [Troubleshooting](troubleshooting.md) — Budget start date format errors
-- [Graduation Guide](graduation-guide.md) — When to add cost management tooling
+- [Architecture Decisions](/docs/architecture/) — Why two subscriptions, budget design
+- [Troubleshooting](/docs/troubleshooting/) — Budget start date format errors
+- [Graduation Guide](/docs/graduation-guide/) — When to add cost management tooling

@@ -1,11 +1,10 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/postgresql-migration-planning/
 title: "PostgreSQL Migration Planning"
 nav_order: 8.4
 description: "Read-only source assessment and migration planning for Azure Database for PostgreSQL"
 ---
-
-# PostgreSQL Migration Planning
 
 ## Status
 
@@ -14,7 +13,7 @@ PRs [#22](https://github.com/ricmmartins/sslz/pull/22),
 [#24](https://github.com/ricmmartins/sslz/pull/24) delivered migration, rehearsal, and approval-bound execution-contract
 planners. Every operation remains execution-disabled. Validation is synthetic and hosted; no current-main live database,
 rehearsal, cutover, rollback, or failback evidence is claimed. See the
-[implementation and evidence matrix](implementation-status.md).
+[implementation and evidence matrix](/agent/docs/implementation-status/).
 
 The first migration increment assesses supplied PostgreSQL metadata and generates a deterministic plan for moving from
 AWS RDS, Google Cloud SQL, or self-managed PostgreSQL to Azure Database for PostgreSQL Flexible Server. It has no source

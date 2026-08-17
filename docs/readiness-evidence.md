@@ -1,21 +1,20 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/readiness-evidence/
 title: "Readiness Evidence Contract"
 nav_order: 8.35
 description: "Privacy-preserving evidence bound to IaC and deployment approval"
 ---
 
-# Readiness Evidence Contract
-
 ## Status
 
 The contract and validator are implemented, but checked-in evidence is synthetic. Contract validity does not prove that
 the referenced tenant, billing, review, owner, capacity, recovery, or workload evidence exists in a protected live
-system. See the [implementation and evidence matrix](implementation-status.md).
+system. See the [implementation and evidence matrix](/agent/docs/implementation-status/).
 
 ## Purpose
 
-[`readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json) is the no-write `3.0.0` contract that
+[`readiness-evidence.schema.json`](/agent/schemas/readiness-evidence.schema.json) is the no-write `3.0.0` contract that
 must accompany an IaC v3 plan. It does not collect evidence, call Azure, confirm a human action, register a provider, or
 deploy anything. It records only supplied status, opaque references, timestamps, bounded measurements, and SHA-256
 digests needed to decide whether a reviewed plan is eligible for approval.

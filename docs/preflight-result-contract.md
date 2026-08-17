@@ -1,29 +1,28 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/preflight-result-contract/
 title: "Preflight Result Contract"
 nav_order: 8.1
 description: "Machine-readable contract for agent-assisted SSLZ planning"
 ---
 
-# Preflight Result Contract
-
 ## Status
 
-The JSON schemas, check catalog, and sanitized examples are implemented under [`agent/`](../agent/).
-[`scripts/startup-preflight.sh`](../scripts/startup-preflight.sh) implements the additive, read-only `inspect` mode.
+The JSON schemas, check catalog, and sanitized examples are implemented under [`agent/`](/agent/).
+[`scripts/startup-preflight.sh`](https://github.com/ricmmartins/sslz/blob/main/scripts/startup-preflight.sh) implements the additive, read-only `inspect` mode.
 It emits the `2.0.0` preflight contract and embeds a versioned
-[`subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json) decision.
-[`scripts/startup-workload-plan.sh`](../scripts/startup-workload-plan.sh) implements the local-only workload profile
+[`subscription-topology-decision.schema.json`](/agent/schemas/subscription-topology-decision.schema.json) decision.
+[`scripts/startup-workload-plan.sh`](https://github.com/ricmmartins/sslz/blob/main/scripts/startup-workload-plan.sh) implements the local-only workload profile
 planner defined by
-[`workload-profile-plan.schema.json`](../agent/schemas/workload-profile-plan.schema.json).
-[`scripts/startup-regional-plan.sh`](../scripts/startup-regional-plan.sh) evaluates supplied, timestamped regional
+[`workload-profile-plan.schema.json`](/agent/schemas/workload-profile-plan.schema.json).
+[`scripts/startup-regional-plan.sh`](https://github.com/ricmmartins/sslz/blob/main/scripts/startup-regional-plan.sh) evaluates supplied, timestamped regional
 evidence against
-[`regional-capacity-plan.schema.json`](../agent/schemas/regional-capacity-plan.schema.json).
-[`scripts/startup-iac-plan.sh`](../scripts/startup-iac-plan.sh) converts ready profile and regional decisions into
+[`regional-capacity-plan.schema.json`](/agent/schemas/regional-capacity-plan.schema.json).
+[`scripts/startup-iac-plan.sh`](https://github.com/ricmmartins/sslz/blob/main/scripts/startup-iac-plan.sh) converts ready profile and regional decisions into
 ignored local Bicep or Terraform review inputs and a digest-bound sanitized summary.
-[`scripts/startup-provider-remediation.sh`](../scripts/startup-provider-remediation.sh) can apply exactly one unchanged,
+[`scripts/startup-provider-remediation.sh`](https://github.com/ricmmartins/sslz/blob/main/scripts/startup-provider-remediation.sh) can apply exactly one unchanged,
 profile-allowlisted provider-registration action with a separate unexpired, single-use approval artifact.
-[`scripts/startup-deployment-integration.sh`](../scripts/startup-deployment-integration.sh) can preview and apply one
+[`scripts/startup-deployment-integration.sh`](https://github.com/ricmmartins/sslz/blob/main/scripts/startup-deployment-integration.sh) can preview and apply one
 immutable primary platform baseline through the existing SSLZ Bicep or Terraform root with a trusted signed approval.
 The existing SSLZ prerequisite command remains unchanged.
 
@@ -47,8 +46,8 @@ keeps quota and point-in-time capacity as distinct classifications, and reports 
 `azureOperations: "none"`. A capacity observation is not a reservation.
 
 Phase 4 uses
-[`iac-plan-input.schema.json`](../agent/schemas/iac-plan-input.schema.json) and
-[`iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json). Its canonical decision model binds
+[`iac-plan-input.schema.json`](/agent/schemas/iac-plan-input.schema.json) and
+[`iac-plan-summary.schema.json`](/agent/schemas/iac-plan-summary.schema.json). Its canonical decision model binds
 the tenant, subscriptions, profile and extensions, regions and regional mode, services, paid plans, cost assumptions,
 proposed actions, and Terraform backend to one SHA-256 digest. Object key order does not affect the digest. A supplied
 approval remains approved only when both its plan ID and digest match; otherwise the summary explicitly requires
@@ -284,7 +283,7 @@ The result must not store personal approval identity unless the surrounding plat
 The agent should rely on that platform for authentication and audit records.
 
 Provider-remediation approval uses the separate
-[`provider-remediation-approval.schema.json`](../agent/schemas/provider-remediation-approval.schema.json) contract. It
+[`provider-remediation-approval.schema.json`](/agent/schemas/provider-remediation-approval.schema.json) contract. It
 requires non-null approval and expiry timestamps, limits the validity window to 24 hours, binds every action and plan
 field, and is consumed in ignored local state before Azure execution. The result contains no personal approval
 identity.

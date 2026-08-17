@@ -2,12 +2,6 @@
 
 A multi-tenant SaaS application running on Azure Container Apps with Azure SQL.
 
-## Status and execution boundary
-
-The Bicep and Terraform examples are direct operator IaC, not Phase 6 agent-approved workload deployments. Current-main
-evidence covers compilation, Terraform validation/tests, and hosted CI. It does not include a retained live deployment or
-end-to-end private DNS/connectivity test for this example.
-
 ## Architecture
 
 ```

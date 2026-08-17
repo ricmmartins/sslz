@@ -1,11 +1,10 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/workload-profiles/
 title: "Startup Workload Profiles"
 nav_order: 8.2
 description: "Opinionated workload choices for agent-assisted SSLZ planning"
 ---
-
-# Startup Workload Profiles
 
 ## Status
 
@@ -21,12 +20,12 @@ Run the planner with a local startup input:
 ```
 
 The output conforms to
-[`agent/schemas/workload-profile-plan.schema.json`](../agent/schemas/workload-profile-plan.schema.json). It includes
+[`agent/schemas/workload-profile-plan.schema.json`](/agent/schemas/workload-profile-plan.schema.json). It includes
 the profile version, selection rationale, assumptions, required checks, unresolved decisions, and cost assumptions.
 The command makes no Azure calls, writes no files, and always reports `iacGenerated: false`.
 
 A ready workload profile can be passed with timestamped evidence to the
-[regional and capacity planner](preflight-result-contract.md). That planner consumes the versioned profile selection;
+[regional and capacity planner](/agent/docs/preflight-result-contract/). That planner consumes the versioned profile selection;
 it does not change the selected compute profile or extensions.
 
 ## Profile selection rules
@@ -239,7 +238,7 @@ The agent stops for architecture review when any of these apply:
 - a dedicated platform team requesting enterprise-wide shared services;
 - the architecture requires services that no current profile covers.
 
-These are signals to use the [Graduation Guide](graduation-guide.md), not reasons to keep expanding the startup
+These are signals to use the [Graduation Guide](/docs/graduation-guide/), not reasons to keep expanding the startup
 profiles.
 
 ## Official guidance

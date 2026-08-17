@@ -1,17 +1,16 @@
 ---
-layout: page
+layout: agent
+permalink: /agent/docs/iac-plan-generation/
 title: "IaC Plan Generation"
 nav_order: 8.4
 description: "Digest-bound local Bicep and Terraform review inputs"
 ---
 
-# IaC Plan Generation
-
 ## Status
 
 The local generator and optional non-deploying preview path are implemented. Repository tests and hosted CI validate the
 generator. Historical Azure-authenticated what-if/plan success predates later hardening; no current-main live preview or
-apply evidence is claimed here. See the [implementation and evidence matrix](implementation-status.md).
+apply evidence is claimed here. See the [implementation and evidence matrix](/agent/docs/implementation-status/).
 
 ## Purpose
 
@@ -22,25 +21,25 @@ artifacts, and Terraform can acquire and release a remote-state backend lease.
 
 The input and output contracts are:
 
-- [`agent/schemas/iac-plan-input.schema.json`](../agent/schemas/iac-plan-input.schema.json) for compatible Phase 4 v1 inputs
-- [`agent/schemas/iac-plan-input-v2.schema.json`](../agent/schemas/iac-plan-input-v2.schema.json) for Phase 6-capable plans with an exact backend subscription
-- [`agent/schemas/iac-plan-input-v3.schema.json`](../agent/schemas/iac-plan-input-v3.schema.json) for approval-capable plans with readiness evidence
-- [`agent/schemas/readiness-evidence.schema.json`](../agent/schemas/readiness-evidence.schema.json)
-- [`agent/schemas/aks-ingress-decision.schema.json`](../agent/schemas/aks-ingress-decision.schema.json)
-- [`agent/schemas/aks-ingress-postcheck.schema.json`](../agent/schemas/aks-ingress-postcheck.schema.json)
-- [`agent/schemas/subscription-topology-decision.schema.json`](../agent/schemas/subscription-topology-decision.schema.json)
-- [`agent/schemas/defender-workspace-placement-decision.schema.json`](../agent/schemas/defender-workspace-placement-decision.schema.json)
-- [`agent/schemas/postgresql-regional-plan-input.schema.json`](../agent/schemas/postgresql-regional-plan-input.schema.json)
-- [`agent/schemas/postgresql-regional-plan.schema.json`](../agent/schemas/postgresql-regional-plan.schema.json)
-- [`agent/schemas/iac-plan-summary.schema.json`](../agent/schemas/iac-plan-summary.schema.json)
-- [`agent/schemas/regional-attempt.schema.json`](../agent/schemas/regional-attempt.schema.json)
-- [`agent/schemas/cool-foundation-baseline.schema.json`](../agent/schemas/cool-foundation-baseline.schema.json)
-- [`agent/schemas/cool-foundation-plan.schema.json`](../agent/schemas/cool-foundation-plan.schema.json)
-- [`agent/schemas/cool-foundation-manifest.schema.json`](../agent/schemas/cool-foundation-manifest.schema.json)
-- [`agent/schemas/container-apps-cool-profile-input.schema.json`](../agent/schemas/container-apps-cool-profile-input.schema.json)
-- [`agent/schemas/container-apps-cool-profile-plan.schema.json`](../agent/schemas/container-apps-cool-profile-plan.schema.json)
-- [`agent/schemas/container-apps-cool-profile-manifest.schema.json`](../agent/schemas/container-apps-cool-profile-manifest.schema.json)
-- [`agent/schemas/terraform-plan-provenance.schema.json`](../agent/schemas/terraform-plan-provenance.schema.json)
+- [`agent/schemas/iac-plan-input.schema.json`](/agent/schemas/iac-plan-input.schema.json) for compatible Phase 4 v1 inputs
+- [`agent/schemas/iac-plan-input-v2.schema.json`](/agent/schemas/iac-plan-input-v2.schema.json) for Phase 6-capable plans with an exact backend subscription
+- [`agent/schemas/iac-plan-input-v3.schema.json`](/agent/schemas/iac-plan-input-v3.schema.json) for approval-capable plans with readiness evidence
+- [`agent/schemas/readiness-evidence.schema.json`](/agent/schemas/readiness-evidence.schema.json)
+- [`agent/schemas/aks-ingress-decision.schema.json`](/agent/schemas/aks-ingress-decision.schema.json)
+- [`agent/schemas/aks-ingress-postcheck.schema.json`](/agent/schemas/aks-ingress-postcheck.schema.json)
+- [`agent/schemas/subscription-topology-decision.schema.json`](/agent/schemas/subscription-topology-decision.schema.json)
+- [`agent/schemas/defender-workspace-placement-decision.schema.json`](/agent/schemas/defender-workspace-placement-decision.schema.json)
+- [`agent/schemas/postgresql-regional-plan-input.schema.json`](/agent/schemas/postgresql-regional-plan-input.schema.json)
+- [`agent/schemas/postgresql-regional-plan.schema.json`](/agent/schemas/postgresql-regional-plan.schema.json)
+- [`agent/schemas/iac-plan-summary.schema.json`](/agent/schemas/iac-plan-summary.schema.json)
+- [`agent/schemas/regional-attempt.schema.json`](/agent/schemas/regional-attempt.schema.json)
+- [`agent/schemas/cool-foundation-baseline.schema.json`](/agent/schemas/cool-foundation-baseline.schema.json)
+- [`agent/schemas/cool-foundation-plan.schema.json`](/agent/schemas/cool-foundation-plan.schema.json)
+- [`agent/schemas/cool-foundation-manifest.schema.json`](/agent/schemas/cool-foundation-manifest.schema.json)
+- [`agent/schemas/container-apps-cool-profile-input.schema.json`](/agent/schemas/container-apps-cool-profile-input.schema.json)
+- [`agent/schemas/container-apps-cool-profile-plan.schema.json`](/agent/schemas/container-apps-cool-profile-plan.schema.json)
+- [`agent/schemas/container-apps-cool-profile-manifest.schema.json`](/agent/schemas/container-apps-cool-profile-manifest.schema.json)
+- [`agent/schemas/terraform-plan-provenance.schema.json`](/agent/schemas/terraform-plan-provenance.schema.json)
 
 ## Generate review inputs
 
@@ -259,4 +258,4 @@ matching provisioned public key.
 - generated parameter artifacts remain ignored and are not committed.
 
 Deployment is a separate signed-approval command. See
-[Approved Deployment Integration](approved-deployment-integration.md).
+[Approved Deployment Integration](/agent/docs/approved-deployment-integration/).
