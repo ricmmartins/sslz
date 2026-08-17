@@ -1,8 +1,9 @@
 # The Startup-Scale Landing Zone
 
-[![Validate IaC](https://github.com/ricmmartins/sslz/workflows/Validate%20IaC/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml)
-[![Deploy Landing Zone (Bicep)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Bicep)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-bicep.yml)
-[![Deploy Landing Zone (Terraform)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Terraform)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-terraform.yml)
+[![Validate IaC](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml?query=branch%3Amain)
+[![Deploy to GitHub Pages](https://github.com/ricmmartins/sslz/actions/workflows/github-pages.yml/badge.svg?branch=main)](https://github.com/ricmmartins/sslz/actions/workflows/github-pages.yml?query=branch%3Amain)
+[![Bicep deploy: manual and approval-gated](https://img.shields.io/badge/Bicep_deploy-manual_%7C_approval--gated-0078D4)](docs/ci-cd-setup.md#automate-the-classic-direct-operator-path)
+[![Terraform deploy: manual and approval-gated](https://img.shields.io/badge/Terraform_deploy-manual_%7C_approval--gated-844FBA)](docs/ci-cd-setup.md#automate-the-classic-direct-operator-path)
 
 A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's [Azure Landing Zone (ALZ)](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/) — formerly Enterprise-Scale Landing Zone (ESLZ) — minus the enterprise complexity.
 

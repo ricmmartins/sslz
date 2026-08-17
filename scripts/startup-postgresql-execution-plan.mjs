@@ -292,6 +292,75 @@ function normalizeEvaluationTime(value) {
   return new Date(parseRfc3339(value, "--as-of")).toISOString();
 }
 
+const P256_ORDER =
+  0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
+const PUBLIC_SIGNATURE_PATH =
+  /^\$\.(?:liveEvidence\.attestations|approvals\.approvals)\[\d+\]\.signature$/;
+
+function canonicalBase64Bytes(value) {
+  if (
+    typeof value !== "string" ||
+    !/^[A-Za-z0-9+/]+={0,2}$/.test(value) ||
+    value.length % 4 === 1
+  ) {
+    return null;
+  }
+  const padded = value.padEnd(Math.ceil(value.length / 4) * 4, "=");
+  const bytes = Buffer.from(padded, "base64");
+  const canonical = bytes.toString("base64");
+  return value === canonical || value === canonical.replace(/=+$/, "")
+    ? bytes
+    : null;
+}
+
+function readP256Integer(bytes, offset) {
+  if (bytes[offset] !== 0x02) {
+    return null;
+  }
+  const length = bytes[offset + 1];
+  const start = offset + 2;
+  const end = start + length;
+  if (!length || length > 33 || end > bytes.length) {
+    return null;
+  }
+  const encoded = bytes.subarray(start, end);
+  if (
+    encoded[0] >= 0x80 ||
+    (length > 1 && encoded[0] === 0 && encoded[1] < 0x80)
+  ) {
+    return null;
+  }
+  const scalar = BigInt(`0x${encoded.toString("hex")}`);
+  return scalar > 0n && scalar < P256_ORDER ? { end } : null;
+}
+
+function isCanonicalP256Signature(bytes) {
+  if (
+    bytes.length < 8 ||
+    bytes.length > 72 ||
+    bytes[0] !== 0x30 ||
+    bytes[1] !== bytes.length - 2
+  ) {
+    return false;
+  }
+  const first = readP256Integer(bytes, 2);
+  const second = first ? readP256Integer(bytes, first.end) : null;
+  return second?.end === bytes.length;
+}
+
+function isSchemaPublicSignature(value, path) {
+  if (!PUBLIC_SIGNATURE_PATH.test(path)) {
+    return false;
+  }
+  const bytes = canonicalBase64Bytes(value);
+  return (
+    bytes !== null &&
+    (bytes.length === 64 ||
+      bytes.length === 256 ||
+      isCanonicalP256Signature(bytes))
+  );
+}
+
 function current(observedAt, expiresAt, asOf, maxAgeHours, label) {
   const observed = parseRfc3339(observedAt, `${label}.observedAt`);
   const expires = parseRfc3339(expiresAt, `${label}.expiresAt`);
@@ -320,6 +389,8 @@ function assertNonSecretMetadata(value, path = "$") {
     /\b(?:localhost|(?:\d{1,3}\.){3}\d{1,3})(?::\d+)?\b/i,
     /(?:^|[\s/])\[?[0-9a-f]{0,4}(?::[0-9a-f]{0,4}){2,7}\]?(?::\d+)?(?:$|[\s/])/i,
     /\b[a-z0-9-]*(?:[.-][a-z0-9-]+)+:\d{2,5}\b/i,
+  ];
+  const pathValue = [
     new RegExp(
       `^(?!${opaqueNamespace}\\.)[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+(?:[/:][a-z0-9._/-]*)?$`,
       "i",
@@ -339,7 +410,9 @@ function assertNonSecretMetadata(value, path = "$") {
     if (
       typeof value === "string" &&
       !/^\d{4}-\d{2}-\d{2}T/.test(value) &&
-      sensitiveValue.some((pattern) => pattern.test(value))
+      (sensitiveValue.some((pattern) => pattern.test(value)) ||
+        (!isSchemaPublicSignature(value, path) &&
+          pathValue.some((pattern) => pattern.test(value))))
     ) {
       throw new Error(
         `postgresql.execution.secret-material: ${path} contains secret or endpoint material; use an opaque reference.`,

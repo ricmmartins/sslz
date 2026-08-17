@@ -80,6 +80,8 @@ const AS_OF = "2026-08-12T12:50:00Z";
 const TRUSTED_EVALUATION_TIME_DIGEST = postgresqlExecutionDigest({
   evaluatedAt: new Date(AS_OF).toISOString(),
 });
+const PATH_LIKE_P256_SIGNATURE =
+  "MEYCIQDQpGN8COHf3BTTBRD9ulJalTURrBX/XQtTiw0pE/akqgIhALnS28JJfonuz4jgL5LDmhnrwdW/POHJKJT83/UdC5T5";
 
 function setPath(value, path, replacement) {
   const parts = path.split(".");
@@ -539,6 +541,71 @@ assert.throws(
       `sha256:${"0".repeat(64)}`,
     ),
   /trusted-evaluation-time-digest/,
+);
+assert.match(
+  PATH_LIKE_P256_SIGNATURE,
+  /^[a-z0-9._-]+(?:\/[a-z0-9._-]+)+$/i,
+  "Regression fixture must continue to reproduce the generic path detector collision.",
+);
+for (const [documentName, collectionName] of [
+  ["approvals", "approvals"],
+  ["liveEvidence", "attestations"],
+]) {
+  const documents = buildDocuments();
+  documents[documentName][collectionName][0].signature =
+    PATH_LIKE_P256_SIGNATURE;
+  const result = planPostgresqlExecution(
+    documents,
+    AS_OF,
+    postgresqlExecutionDigest(documents.trust),
+    TRUSTED_EVALUATION_TIME_DIGEST,
+  );
+  assert.equal(
+    checkById(result, "execution.postgresql.signatures-valid").classification,
+    "fail",
+    `${documentName} path-like P-256 signature must reach cryptographic verification`,
+  );
+}
+const unrelatedSignatureField = buildDocuments();
+unrelatedSignatureField.request.signature = PATH_LIKE_P256_SIGNATURE;
+assert.throws(
+  () =>
+    planPostgresqlExecution(
+      unrelatedSignatureField,
+      AS_OF,
+      postgresqlExecutionDigest(unrelatedSignatureField.trust),
+      TRUSTED_EVALUATION_TIME_DIGEST,
+    ),
+  /postgresql\.execution\.secret-material/,
+  "Only schema-defined public signature fields may bypass generic path detection.",
+);
+const endpointInSignatureField = buildDocuments();
+endpointInSignatureField.approvals.approvals[0].signature =
+  "postgresql://migration-user:credential@orders.internal:5432/orders";
+assert.throws(
+  () =>
+    planPostgresqlExecution(
+      endpointInSignatureField,
+      AS_OF,
+      postgresqlExecutionDigest(endpointInSignatureField.trust),
+      TRUSTED_EVALUATION_TIME_DIGEST,
+    ),
+  /postgresql\.execution\.secret-material/,
+  "A schema signature field must not exempt endpoint or credential material.",
+);
+const credentialMarkerInSignatureField = buildDocuments();
+credentialMarkerInSignatureField.approvals.approvals[0].signature =
+  `AKIA${"A".repeat(16)}/${"A".repeat(65)}==`;
+assert.throws(
+  () =>
+    planPostgresqlExecution(
+      credentialMarkerInSignatureField,
+      AS_OF,
+      postgresqlExecutionDigest(credentialMarkerInSignatureField.trust),
+      TRUSTED_EVALUATION_TIME_DIGEST,
+    ),
+  /postgresql\.execution\.secret-material/,
+  "A canonical signature-shaped value must remain subject to credential detection.",
 );
 const secondAttemptDocuments = buildDocuments(
   "offline-dump-restore",
