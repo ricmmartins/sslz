@@ -517,7 +517,11 @@ function evaluate(options) {
     );
   }
 
-  const providerResults = subscriptions.map((item) => ({
+  const providerTargets = subscriptions.filter(
+    (item, index, items) =>
+      index === items.findIndex((candidate) => candidate.id === item.id),
+  );
+  const providerResults = providerTargets.map((item) => ({
     environment: item.environment,
     id: item.id,
     evidence: readEvidence([
@@ -577,7 +581,9 @@ function evaluate(options) {
         ? "Resource-provider registration states could not be read."
         : missingProviders.length
           ? "One or more required resource providers are not registered."
-          : "Required resource providers are registered in both subscriptions.",
+          : options.selectionMode === "one-subscription"
+            ? "Required resource providers are registered in the selected startup subscription."
+            : "Required resource providers are registered in both subscriptions.",
       {
         selectedProfiles: options.profiles,
         requiredProviders: options.requiredProviders,
@@ -602,6 +608,10 @@ function evaluate(options) {
       provider.environment === "prod"
         ? options.prodSubscriptionId
         : options.nonprodSubscriptionId;
+    const subscriptionDescription =
+      options.selectionMode === "one-subscription"
+        ? "selected startup subscription"
+        : `${provider.environment} subscription`;
     const commandArguments = [
       "az",
       "provider",
@@ -615,7 +625,7 @@ function evaluate(options) {
       makeAction(
         providerActionIds[index],
         "azureWrite",
-        `Register ${provider.namespace} in the ${provider.environment} subscription after explicit approval.`,
+        `Register ${provider.namespace} in the ${subscriptionDescription} after explicit approval.`,
         catalogById.get("account.provider.required-registrations").documentationUrl,
         {
           automatic: true,

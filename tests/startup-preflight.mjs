@@ -127,6 +127,12 @@ assert(
     ({ namespace }) => namespace === "Microsoft.ContainerService",
   ),
 );
+assert.deepEqual(missingAksProviderCheck.evidence.missingProviders, [
+  {
+    environment: "prod",
+    namespace: "Microsoft.ContainerService",
+  },
+]);
 assert(
   missingAksProviderCheck.remediationActionIds.includes(
     "provider.register.prod.microsoft-containerservice",
@@ -134,6 +140,12 @@ assert(
 );
 assert.equal(missingAksProviderCheck.remediationActionIds.length, 1);
 assert.equal(missingAksProvider.json.summary.actions.azureWrite, 1);
+assert.match(
+  missingAksProvider.json.actions.find(
+    ({ id }) => id === "provider.register.prod.microsoft-containerservice",
+  ).summary,
+  /selected startup subscription/,
+);
 
 const throttled = run("az-throttled.json");
 assert.equal(
