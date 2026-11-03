@@ -1,0 +1,69 @@
+name: Validate website launcher
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launcher:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check classic compatibility and launcher instructions
+        run: |
+          node tests/classic-baseline-manifest.mjs
+          node tests/website-launcher.mjs --remote-smoke
+
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build website without publishing
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Check rendered launcher route and homepage link
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class Links(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.hrefs = []
+                  self.text = []
+              def handle_starttag(self, tag, attrs):
+                  if tag == "a":
+                      self.hrefs.append(dict(attrs).get("href"))
+              def handle_data(self, data):
+                  self.text.append(data)
+
+          root = Path("_site")
+          home = Links()
+          home.feed((root / "index.html").read_text())
+          assert "/use-sslz-agent/" in home.hrefs
+          launcher = (root / "use-sslz-agent/index.html").read_text()
+          links = Links()
+          links.feed(launcher)
+          text = "".join(links.text)
+          assert "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22" in text
+          assert "copilot --agent sslz-founder" in text
+          assert "git checkout --detach" in text
+          assert "{{" not in launcher
+          assert "/#quick-start" in links.hrefs
+          print("Rendered homepage CTA, launcher route, pin, commands, and Quick Start link passed.")
+          PY
