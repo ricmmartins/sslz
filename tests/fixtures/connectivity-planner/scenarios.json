@@ -1,0 +1,363 @@
+[
+  {
+    "name": "compatible AWS Direct Connect and ExpressRoute transition",
+    "mutations": [],
+    "expectedStatus": "ready",
+    "expectedStrategy": "phased-connectivity-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible GCP Cloud Interconnect and ExpressRoute transition",
+    "mutations": [
+      ["sourceAssessment.cloud.provider", "gcp"],
+      ["sourceAssessment.cloud.connectivityType", "cloud-interconnect"],
+      ["sourceAssessment.cloud.region", "us-central1"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "phased-connectivity-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "compatible generic on-prem IPsec VPN gateway transition",
+    "mutations": [
+      ["sourceAssessment.cloud.provider", "onprem-generic"],
+      ["sourceAssessment.cloud.connectivityType", "ipsec-vpn"],
+      ["sourceAssessment.cloud.region", "onprem-primary"],
+      ["target.connectivityTargetEvidence.gatewayKind", "vpn-gateway"]
+    ],
+    "expectedStatus": "ready",
+    "expectedStrategy": "phased-connectivity-cutover",
+    "expectedChecks": []
+  },
+  {
+    "name": "unsupported architecture pairing is blocked",
+    "mutations": [
+      ["sourceAssessment.cloud.connectivityType", "cloud-vpn"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.architecture-supported"]
+  },
+  {
+    "name": "stale source assessment",
+    "mutations": [
+      ["sourceAssessment.observedAt", "2026-08-01T10:00:00Z"],
+      ["sourceAssessment.expiresAt", "2026-08-02T10:00:00Z"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.assessment-current"]
+  },
+  {
+    "name": "omitted governance evidence references",
+    "mutations": [
+      ["sourceAssessment.governance.evidenceReferences", []]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.evidence-complete"]
+  },
+  {
+    "name": "overlapping address space without an approved translation",
+    "mutations": [
+      ["sourceAssessment.network.cidrs", ["10.40.0.0/16"]],
+      ["sourceAssessment.network.routing.routeOwners.0.prefix", "10.40.0.0/16"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.address-space-no-overlap"]
+  },
+  {
+    "name": "route ownership does not exactly match the address space",
+    "mutations": [
+      ["sourceAssessment.network.cidrs", ["10.20.0.0/16", "10.21.0.0/16"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.route-ownership-exact"]
+  },
+  {
+    "name": "asymmetric routing on the source side",
+    "mutations": [
+      ["sourceAssessment.network.routing.symmetric", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.symmetric-routing"]
+  },
+  {
+    "name": "a broad default route is advertised",
+    "mutations": [
+      ["sourceAssessment.network.routing.defaultRouteAdvertised", true]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.no-default-route"]
+  },
+  {
+    "name": "BGP ASN outside the acceptable policy",
+    "mutations": [
+      ["sourceAssessment.network.gateways.0.bgpAsn", 65099]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.bgp-asn-acceptable"]
+  },
+  {
+    "name": "gateway MTU does not match the required MTU",
+    "mutations": [
+      ["sourceAssessment.network.gateways.0.mtu", 9000]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.mtu-compatible"]
+  },
+  {
+    "name": "source gateway is not redundant",
+    "mutations": [
+      ["sourceAssessment.network.gateways.0.redundant", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.gateway-redundant"]
+  },
+  {
+    "name": "firewall policy does not deny by default",
+    "mutations": [
+      ["sourceAssessment.network.firewallPolicy.explicitDenyByDefault", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.firewall-policy-explicit"]
+  },
+  {
+    "name": "target is missing a matching private endpoint",
+    "mutations": [
+      ["target.connectivityTargetEvidence.privateEndpoints", []]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.private-endpoint-ready"]
+  },
+  {
+    "name": "target region outside the region policy",
+    "mutations": [
+      ["target.connectivityTargetEvidence.region", "westeurope"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.target-bound"]
+  },
+  {
+    "name": "source of truth is ambiguous before cutover",
+    "mutations": [
+      ["sourceAssessment.governance.sourceOfTruth", "ambiguous"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.source-of-truth-explicit"]
+  },
+  {
+    "name": "tampered source assessment digest",
+    "mutations": [
+      ["sourceAssessment.governance.owner.role", "compromisedowner"]
+    ],
+    "skipSourceDigestRecompute": true,
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.integrity-verified"]
+  },
+  {
+    "name": "target evidence digest mismatch",
+    "mutations": [
+      ["target.connectivityTargetEvidence.ownerReference", "owner.network.azure.compromised"]
+    ],
+    "skipTargetDigestRecompute": true,
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.target-integrity-verified"]
+  },
+  {
+    "name": "replayed assessment and nonce",
+    "mutations": [
+      [
+        "lineage.acceptedAttempts",
+        [
+          {
+            "attemptOrdinal": 1,
+            "assessmentId": "assessment.aws.orders.20260901",
+            "nonce": "nonce.connectivity.orders.0001"
+          }
+        ]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.replay-protected"]
+  },
+  {
+    "name": "owner has not confirmed the assessment",
+    "mutations": [
+      ["sourceAssessment.governance.owner.confirmed", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.owner-confirmed"]
+  },
+  {
+    "name": "telemetry alerting is not configured",
+    "mutations": [
+      ["sourceAssessment.governance.telemetry.alertingConfigured", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.telemetry-complete"]
+  },
+  {
+    "name": "recovery point objective exceeds policy",
+    "mutations": [
+      ["sourceAssessment.governance.recovery.rpoMinutes", 999]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.recovery-complete"]
+  },
+  {
+    "name": "coexistence window is not bounded",
+    "mutations": [
+      ["transition.coexistenceWindowMinutes", 0]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.transition-bounded"]
+  },
+  {
+    "name": "rollback plan is missing",
+    "mutations": [
+      ["transition.rollbackPlan", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.connectivity.rollback-complete"]
+  },
+  {
+    "name": "source-authoritative DNS zone lacks a source of truth reference",
+    "mutations": [
+      ["sourceAssessment.dns.zones.0.sourceOfTruthReference", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.dns.authority-explicit"]
+  },
+  {
+    "name": "a DNS forwarding loop is detected",
+    "mutations": [
+      ["sourceAssessment.dns.forwarding.loopDetected", true]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.dns.loop-prevented"]
+  },
+  {
+    "name": "a DNS resolver is not reachable from the target",
+    "mutations": [
+      ["sourceAssessment.dns.resolvers.0.reachableFromTarget", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.dns.resolver-reachable"]
+  },
+  {
+    "name": "split-horizon DNS is not explicitly configured",
+    "mutations": [
+      ["sourceAssessment.dns.forwarding.splitHorizon", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.dns.forwarding-explicit"]
+  },
+  {
+    "name": "DNS TTL exceeds the configured policy",
+    "mutations": [
+      ["sourceAssessment.dns.ttlPolicy.maxTtlSeconds", 3600]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.dns.ttl-policy-met"]
+  },
+  {
+    "name": "SNI-dependent certificate has an unresolved DNS dependency",
+    "mutations": [
+      ["sourceAssessment.dns.certificates.0.dnsDependencyResolved", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.dns.certificate-sni-bound"]
+  },
+  {
+    "name": "workload identity subject does not match between source and target",
+    "mutations": [
+      [
+        "target.identityTargetEvidence.federation.subject",
+        "repo:contoso/orders:environment:staging"
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.identity.oidc-pinned"]
+  },
+  {
+    "name": "workload identity relies on a long-lived secret",
+    "mutations": [
+      ["sourceAssessment.identity.federation.usesLongLivedSecret", true]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.identity.no-long-lived-secrets"]
+  },
+  {
+    "name": "workload identity privilege is broader than least privilege",
+    "mutations": [
+      ["sourceAssessment.identity.federation.privilege", "broad"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.identity.least-privilege"]
+  },
+  {
+    "name": "identity environments are mixed through a shared federation environment",
+    "mutations": [
+      ["sourceAssessment.identity.federation.environment", "shared"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.identity.environment-separation"]
+  },
+  {
+    "name": "egress allowlist includes an unbounded destination",
+    "mutations": [
+      ["sourceAssessment.egress.allowlist.0.destination", "0.0.0.0/0"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.egress.bounded-allowlist"]
+  },
+  {
+    "name": "default-deny egress is not enforced on the source side",
+    "mutations": [
+      ["sourceAssessment.egress.defaultDeny", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.egress.default-deny-enforced"]
+  },
+  {
+    "name": "an explicit NAT or proxy reference is missing on the source side",
+    "mutations": [
+      ["sourceAssessment.egress.natOrProxyReference", null]
+    ],
+    "expectedStatus": "blocked",
+    "expectedStrategy": "blocked-manual-review",
+    "expectedChecks": ["migration.egress.nat-proxy-explicit"]
+  }
+]

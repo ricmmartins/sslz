@@ -1,0 +1,389 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/connectivity-plan.schema.json",
+  "title": "SSLZ dual-cloud connectivity, DNS, identity, and egress migration plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "planId",
+    "status",
+    "sourceAssessment",
+    "sourceAssessmentDigest",
+    "target",
+    "requiredChecks",
+    "checks",
+    "transition",
+    "stages",
+    "transitionPlan",
+    "identityBindings",
+    "humanConfirmationRequired",
+    "safety",
+    "planDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "status": { "enum": ["ready", "blocked"] },
+    "sourceAssessment": {
+      "$ref": "connectivity-source-assessment.schema.json"
+    },
+    "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "region",
+        "residency",
+        "gatewayKind",
+        "connectivityEvidenceDigest",
+        "connectivityEvidenceFreshness",
+        "dnsEvidenceDigest",
+        "dnsEvidenceFreshness",
+        "identityEvidenceDigest",
+        "identityEvidenceFreshness",
+        "egressEvidenceDigest",
+        "egressEvidenceFreshness"
+      ],
+      "properties": {
+        "region": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "residency": { "$ref": "#/$defs/value" },
+        "gatewayKind": { "enum": ["expressroute", "vpn-gateway"] },
+        "connectivityEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "connectivityEvidenceFreshness": { "enum": ["current", "stale"] },
+        "dnsEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "dnsEvidenceFreshness": { "enum": ["current", "stale"] },
+        "identityEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "identityEvidenceFreshness": { "enum": ["current", "stale"] },
+        "egressEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "egressEvidenceFreshness": { "enum": ["current", "stale"] }
+      }
+    },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 35,
+      "maxItems": 35,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/checkId" }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 35,
+      "maxItems": 35,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "selected",
+        "rationale",
+        "coexistenceWindowMinutes"
+      ],
+      "properties": {
+        "requested": { "enum": ["auto", "phased-connectivity-cutover"] },
+        "selected": {
+          "enum": ["phased-connectivity-cutover", "blocked-manual-review"]
+        },
+        "rationale": { "$ref": "#/$defs/nonEmptyStrings" },
+        "coexistenceWindowMinutes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "status", "gate", "executionAllowed", "strategy"],
+        "properties": {
+          "state": {
+            "enum": [
+              "assess",
+              "provision-connectivity",
+              "configure-dns",
+              "configure-identity",
+              "configure-egress",
+              "validate-coexistence",
+              "cutover",
+              "verify",
+              "rollback-required",
+              "completed"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "blocked",
+              "pending-human-confirmation",
+              "not-triggered"
+            ]
+          },
+          "gate": { "type": "string", "minLength": 1 },
+          "executionAllowed": { "const": false },
+          "strategy": {
+            "enum": ["phased-connectivity-cutover", "blocked-manual-review"]
+          }
+        }
+      }
+    },
+    "transitionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prerequisites",
+        "unsupportedFindings",
+        "requiredRemediations",
+        "connectivityConfiguration",
+        "dnsConfiguration",
+        "identityConfiguration",
+        "egressConfiguration",
+        "validation",
+        "cutover",
+        "rollback",
+        "sourceOfTruthRules",
+        "cleanup",
+        "unresolvedDecisions"
+      ],
+      "properties": {
+        "prerequisites": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unsupportedFindings": { "$ref": "#/$defs/strings" },
+        "requiredRemediations": { "$ref": "#/$defs/strings" },
+        "connectivityConfiguration": { "$ref": "#/$defs/nonEmptyStrings" },
+        "dnsConfiguration": { "$ref": "#/$defs/nonEmptyStrings" },
+        "identityConfiguration": { "$ref": "#/$defs/nonEmptyStrings" },
+        "egressConfiguration": { "$ref": "#/$defs/nonEmptyStrings" },
+        "validation": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cutover": { "$ref": "#/$defs/nonEmptyStrings" },
+        "rollback": { "$ref": "#/$defs/nonEmptyStrings" },
+        "sourceOfTruthRules": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cleanup": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unresolvedDecisions": { "$ref": "#/$defs/strings" }
+      }
+    },
+    "identityBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "sourceAssessmentObservedAt",
+        "sourceAssessmentExpiresAt",
+        "sourceAssessmentFreshness",
+        "connectivityEvidenceDigest",
+        "dnsEvidenceDigest",
+        "identityEvidenceDigest",
+        "egressEvidenceDigest",
+        "regionPolicyDigest",
+        "requirementsDigest",
+        "transitionDigest",
+        "ownerDigest",
+        "lineageDigest",
+        "integrationDigest",
+        "targetRegion",
+        "targetResidency",
+        "gatewayKind",
+        "strategy",
+        "connectivityIdentityDigest",
+        "readiness",
+        "iac",
+        "manifest",
+        "approval"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "sourceAssessmentObservedAt": { "type": "string", "format": "date-time" },
+        "sourceAssessmentExpiresAt": { "type": "string", "format": "date-time" },
+        "sourceAssessmentFreshness": { "enum": ["current", "stale"] },
+        "connectivityEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "dnsEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "identityEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "egressEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "regionPolicyDigest": { "$ref": "#/$defs/digest" },
+        "requirementsDigest": { "$ref": "#/$defs/digest" },
+        "transitionDigest": { "$ref": "#/$defs/digest" },
+        "ownerDigest": { "$ref": "#/$defs/digest" },
+        "lineageDigest": { "$ref": "#/$defs/digest" },
+        "integrationDigest": { "$ref": "#/$defs/digest" },
+        "targetRegion": {
+          "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }]
+        },
+        "targetResidency": { "$ref": "#/$defs/value" },
+        "gatewayKind": { "enum": ["expressroute", "vpn-gateway"] },
+        "strategy": {
+          "enum": ["phased-connectivity-cutover", "blocked-manual-review"]
+        },
+        "connectivityIdentityDigest": { "$ref": "#/$defs/digest" },
+        "readiness": { "$ref": "#/$defs/artifactBinding" },
+        "iac": { "$ref": "#/$defs/artifactBinding" },
+        "manifest": { "$ref": "#/$defs/artifactBinding" },
+        "approval": { "$ref": "#/$defs/artifactBinding" }
+      }
+    },
+    "humanConfirmationRequired": { "$ref": "#/$defs/nonEmptyStrings" },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "executionEligible",
+        "connectivityActions",
+        "dnsActions",
+        "identityActions",
+        "egressActions",
+        "firewallActions",
+        "routeActions",
+        "credentialActions",
+        "iacActions",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "executionEligible": { "const": false },
+        "connectivityActions": { "const": "none" },
+        "dnsActions": { "const": "none" },
+        "identityActions": { "const": "none" },
+        "egressActions": { "const": "none" },
+        "firewallActions": { "const": "none" },
+        "routeActions": { "const": "none" },
+        "credentialActions": { "const": "none" },
+        "iacActions": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "planDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "checkId": {
+      "enum": [
+        "migration.connectivity.architecture-supported",
+        "migration.connectivity.assessment-current",
+        "migration.connectivity.evidence-complete",
+        "migration.connectivity.address-space-no-overlap",
+        "migration.connectivity.route-ownership-exact",
+        "migration.connectivity.symmetric-routing",
+        "migration.connectivity.no-default-route",
+        "migration.connectivity.bgp-asn-acceptable",
+        "migration.connectivity.mtu-compatible",
+        "migration.connectivity.gateway-redundant",
+        "migration.connectivity.firewall-policy-explicit",
+        "migration.connectivity.private-endpoint-ready",
+        "migration.connectivity.target-bound",
+        "migration.connectivity.source-of-truth-explicit",
+        "migration.connectivity.integrity-verified",
+        "migration.connectivity.target-integrity-verified",
+        "migration.connectivity.replay-protected",
+        "migration.connectivity.owner-confirmed",
+        "migration.connectivity.telemetry-complete",
+        "migration.connectivity.recovery-complete",
+        "migration.connectivity.transition-bounded",
+        "migration.connectivity.rollback-complete",
+        "migration.dns.authority-explicit",
+        "migration.dns.loop-prevented",
+        "migration.dns.resolver-reachable",
+        "migration.dns.forwarding-explicit",
+        "migration.dns.ttl-policy-met",
+        "migration.dns.certificate-sni-bound",
+        "migration.identity.oidc-pinned",
+        "migration.identity.no-long-lived-secrets",
+        "migration.identity.least-privilege",
+        "migration.identity.environment-separation",
+        "migration.egress.bounded-allowlist",
+        "migration.egress.default-deny-enforced",
+        "migration.egress.nat-proxy-explicit"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "freshness",
+        "summary",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/checkId" },
+        "classification": { "enum": ["pass", "fail", "unresolved"] },
+        "freshness": { "enum": ["current", "stale", "not-applicable"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "evidenceReferences": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    },
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectivityIdentityDigest",
+        "sourceAssessmentDigest",
+        "connectivityEvidenceDigest",
+        "dnsEvidenceDigest",
+        "identityEvidenceDigest",
+        "egressEvidenceDigest",
+        "regionPolicyDigest",
+        "requirementsDigest",
+        "transitionDigest",
+        "ownerDigest",
+        "lineageDigest",
+        "integrationDigest",
+        "strategy",
+        "executionEligible"
+      ],
+      "properties": {
+        "connectivityIdentityDigest": { "$ref": "#/$defs/digest" },
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "connectivityEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "dnsEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "identityEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "egressEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "regionPolicyDigest": { "$ref": "#/$defs/digest" },
+        "requirementsDigest": { "$ref": "#/$defs/digest" },
+        "transitionDigest": { "$ref": "#/$defs/digest" },
+        "ownerDigest": { "$ref": "#/$defs/digest" },
+        "lineageDigest": { "$ref": "#/$defs/digest" },
+        "integrationDigest": { "$ref": "#/$defs/digest" },
+        "strategy": {
+          "enum": ["phased-connectivity-cutover", "blocked-manual-review"]
+        },
+        "executionEligible": { "const": false }
+      }
+    }
+  }
+}

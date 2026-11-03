@@ -1,0 +1,386 @@
+{
+  "schemaVersion": "1.0.0",
+  "planId": "rds-orders-to-azure-postgresql",
+  "planningAt": "2026-08-12T12:00:00Z",
+  "maxAssessmentAgeHours": 24,
+  "sourceAssessment": {
+    "schemaVersion": "1.0.0",
+    "assessmentId": "assessment.rds.orders.20260812",
+    "observedAt": "2026-08-12T10:00:00Z",
+    "expiresAt": "2026-08-13T10:00:00Z",
+    "provider": "aws-rds",
+    "sourceType": "managed",
+    "engine": {
+      "family": "postgresql",
+      "major": 16,
+      "minor": 4
+    },
+    "size": {
+      "allocatedGiB": 32,
+      "usedGiB": 20,
+      "monthlyGrowthGiB": 2
+    },
+    "databases": [
+      {
+        "reference": "database.orders",
+        "sizeGiB": 20,
+        "encoding": "UTF8",
+        "locale": "en_US.utf8",
+        "collation": "en_US.utf8"
+      }
+    ],
+    "extensions": [
+      {
+        "name": "pgcrypto",
+        "version": "1.3",
+        "databaseReferences": ["database.orders"]
+      },
+      {
+        "name": "uuid-ossp",
+        "version": "1.1",
+        "databaseReferences": ["database.orders"]
+      }
+    ],
+    "inventory": {
+      "schemas": [
+        {
+          "reference": "schema.app",
+          "ownerReference": "role.app_owner"
+        }
+      ],
+      "tables": [
+        {
+          "reference": "table.orders",
+          "schemaReference": "schema.app",
+          "rowCount": 1250000,
+          "sizeGiB": 18,
+          "partitioned": true,
+          "hasGeneratedColumns": true
+        }
+      ],
+      "partitions": [
+        {
+          "tableReference": "table.orders",
+          "count": 12,
+          "types": ["range"]
+        }
+      ],
+      "indexes": [
+        {
+          "tableReference": "table.orders",
+          "count": 5,
+          "types": ["btree", "gin"]
+        }
+      ],
+      "constraints": {
+        "primaryKeys": 1,
+        "foreignKeys": 2,
+        "unique": 1,
+        "check": 2
+      },
+      "sequences": 2,
+      "generatedColumns": ["column.orders.total"],
+      "functions": {
+        "count": 3,
+        "languages": ["sql", "plpgsql"]
+      },
+      "triggers": 2,
+      "largeObjects": {
+        "count": 0,
+        "totalGiB": 0
+      }
+    },
+    "security": {
+      "roles": [
+        {
+          "reference": "role.app_owner",
+          "login": false,
+          "superuser": false,
+          "replication": false
+        },
+        {
+          "reference": "role.app_runtime",
+          "login": true,
+          "superuser": false,
+          "replication": false
+        }
+      ],
+      "ownership": {
+        "ownedObjectCount": 42,
+        "distinctOwnerCount": 1
+      },
+      "rowLevelSecurity": {
+        "enabledTableCount": 1,
+        "policyCount": 2
+      }
+    },
+    "replication": {
+      "walLevel": "logical",
+      "logicalReplicationEnabled": true,
+      "maxReplicationSlots": 10,
+      "availableReplicationSlots": 4,
+      "replicaIdentityReady": true,
+      "slots": ["slot.analytics"],
+      "publications": ["publication.analytics"]
+    },
+    "availability": {
+      "highAvailability": "multi-zone",
+      "readReplicas": 1,
+      "backupRetentionDays": 14,
+      "pointInTimeRecovery": true
+    },
+    "workload": {
+      "maxConnections": 300,
+      "peakConnections": 180,
+      "averageTps": 350,
+      "peakTps": 900,
+      "peakIops": 1800,
+      "maintenanceWindowReference": "window.orders.weekly"
+    },
+    "network": {
+      "exposure": "private",
+      "connectivity": "available",
+      "dnsReference": "dns.rds.orders",
+      "certificateReference": "certificate.rds.orders"
+    },
+    "identity": {
+      "authenticationModes": ["postgresql-native"],
+      "identityProviderReference": "identity.rds.orders",
+      "secretReferences": ["keyvaultref.postgresql.admin"]
+    },
+    "observability": {
+      "metricsReference": "observability.rds.metrics",
+      "logsReference": "observability.rds.logs",
+      "auditReference": "observability.rds.audit"
+    },
+    "governance": {
+      "sourceOfTruth": "source",
+      "dataResidency": "UnitedStates",
+      "compliance": ["soc2", "gdpr"],
+      "toleratedDowntimeMinutes": 120,
+      "rtoMinutes": 60,
+      "rpoMinutes": 15,
+      "owner": {
+        "role": "DatabaseOwner",
+        "reference": "owner.database.platform"
+      },
+      "evidenceReferences": [
+        "evidence.rds.catalog.20260812",
+        "evidence.rds.performance.20260812"
+      ]
+    }
+  },
+  "target": {
+    "regionalPlanningInput": {
+      "schemaVersion": "1.0.0",
+      "planId": "postgresql-eastus2-fallback",
+      "planningAt": "2026-08-12T12:00:00Z",
+      "maxEvidenceAgeHours": 24,
+      "targetRegion": "eastus2",
+      "allowedLocations": ["eastus2", "centralus"],
+      "requirements": {
+        "tier": "GeneralPurpose",
+        "sku": "Standard_D4ds_v5",
+        "engineVersion": {
+          "major": 16,
+          "minor": 4
+        },
+        "extensions": ["pgcrypto", "uuid-ossp"],
+        "zoneRedundant": true,
+        "minimumZones": 2,
+        "rtoMinutes": 60,
+        "rpoMinutes": 15,
+        "dataResidency": "UnitedStates",
+        "monthlyCostCeiling": 750
+      },
+      "evidence": [
+        {
+          "region": "eastus2",
+          "preferenceRank": 1,
+          "serviceAvailability": "available",
+          "supportedEditions": [],
+          "supportedVersions": [],
+          "supportedExtensions": ["pgcrypto", "uuid-ossp"],
+          "zoneSupport": {
+            "available": true,
+            "zones": ["1", "2", "3"]
+          },
+          "quota": {
+            "status": "eligible",
+            "required": 4,
+            "available": 16,
+            "unit": "vCores"
+          },
+          "capacity": {
+            "status": "available"
+          },
+          "allowedByPolicy": true,
+          "residencyBoundaries": ["UnitedStates"],
+          "recovery": {
+            "minimumRtoMinutes": 30,
+            "minimumRpoMinutes": 5
+          },
+          "estimatedMonthlyCost": 640,
+          "source": {
+            "type": "approved-synthetic-fixture",
+            "reference": "fixture.postgresql.eastus2.unsupported",
+            "observedAt": "2026-08-11T17:30:00Z",
+            "expiresAt": "2026-08-13T17:30:00Z"
+          }
+        },
+        {
+          "region": "centralus",
+          "preferenceRank": 2,
+          "serviceAvailability": "available",
+          "supportedEditions": [
+            {
+              "tier": "GeneralPurpose",
+              "sku": "Standard_D4ds_v5"
+            }
+          ],
+          "supportedVersions": [
+            {
+              "major": 16,
+              "minor": 4
+            }
+          ],
+          "supportedExtensions": ["pgcrypto", "uuid-ossp"],
+          "zoneSupport": {
+            "available": true,
+            "zones": ["1", "2", "3"]
+          },
+          "quota": {
+            "status": "eligible",
+            "required": 4,
+            "available": 12,
+            "unit": "vCores"
+          },
+          "capacity": {
+            "status": "available"
+          },
+          "allowedByPolicy": true,
+          "residencyBoundaries": ["UnitedStates"],
+          "recovery": {
+            "minimumRtoMinutes": 30,
+            "minimumRpoMinutes": 5
+          },
+          "estimatedMonthlyCost": 620,
+          "source": {
+            "type": "approved-synthetic-fixture",
+            "reference": "fixture.postgresql.centralus.valid",
+            "observedAt": "2026-08-11T17:35:00Z",
+            "expiresAt": "2026-08-13T17:35:00Z"
+          }
+        }
+      ]
+    },
+    "migrationEvidence": {
+      "schemaVersion": "1.0.0",
+      "observedAt": "2026-08-12T10:30:00Z",
+      "expiresAt": "2026-08-13T10:30:00Z",
+      "reference": "evidence.azure.postgresql.centralus.20260812",
+      "region": "centralus",
+      "engine": {
+        "family": "postgresql",
+        "major": 16,
+        "minor": 4
+      },
+      "extensions": [
+        {
+          "name": "pgcrypto",
+          "versions": ["1.3"]
+        },
+        {
+          "name": "uuid-ossp",
+          "versions": ["1.1"]
+        }
+      ],
+      "features": {
+        "largeObjects": true,
+        "rowLevelSecurity": true,
+        "generatedColumns": true,
+        "logicalReplication": true
+      },
+      "supportedEncodings": ["UTF8"],
+      "supportedCollations": ["en_US.utf8"],
+      "capacity": {
+        "maxStorageGiB": 4096,
+        "provisionedStorageGiB": 64,
+        "maxIops": 5000,
+        "maxConnections": 859,
+        "initialLoadMiBPerSecond": 80
+      },
+      "availability": {
+        "highAvailability": "zone-redundant",
+        "zones": ["1", "2", "3"]
+      },
+      "network": {
+        "privateConnectivity": "ready",
+        "privateDns": "ready",
+        "connectivityReference": "network.azure.postgresql.centralus"
+      },
+      "identity": {
+        "authenticationModes": ["postgresql-native", "entra-id"],
+        "configurationReference": "identity.azure.postgresql.centralus"
+      },
+      "migrationTools": [
+        {
+          "name": "pg-dump-restore",
+          "available": true,
+          "supportsOnline": false
+        },
+        {
+          "name": "native-logical-replication",
+          "available": true,
+          "supportsOnline": true
+        }
+      ]
+    }
+  },
+  "scope": {
+    "databaseReferences": ["database.orders"],
+    "includeLargeObjects": true,
+    "includeRoles": true,
+    "includeOwnership": true,
+    "includeRowLevelSecurity": true,
+    "includeReplicationObjects": false
+  },
+  "requirements": {
+    "strategy": "auto",
+    "minimumStorageHeadroomPercent": 30,
+    "minimumIopsHeadroomPercent": 30,
+    "minimumConnectionHeadroomPercent": 30,
+    "requirePrivateConnectivity": true
+  },
+  "validationPlan": {
+    "ownerReference": "owner.database.validation",
+    "queryReferences": [
+      "validation.catalog.counts",
+      "validation.business.orders"
+    ],
+    "checksums": true,
+    "rowCounts": true,
+    "objectCounts": true,
+    "applicationSmokeTestReferences": ["validation.app.orders.smoke"]
+  },
+  "rollbackPlan": {
+    "ownerReference": "owner.database.rollback",
+    "rollbackWindowMinutes": 60,
+    "conditions": [
+      "rollback.validation.failed",
+      "rollback.application.error-budget"
+    ],
+    "failbackSourceOfTruth": "source",
+    "stepReferences": ["runbook.postgresql.failback.v1"]
+  },
+  "decisions": {
+    "largeObjectHandling": "not-required",
+    "roleMappingReference": "mapping.postgresql.roles.v1",
+    "authenticationMappingReference": "mapping.postgresql.authentication.v1",
+    "rowLevelSecurityValidationReference": "validation.postgresql.rls.v1",
+    "collationMappingReference": null,
+    "dnsCutoverReference": "runbook.dns.orders.v1",
+    "applicationConnectionChangeReference": "runbook.app.connection.orders.v1",
+    "secretRotationReferences": ["keyvaultref.postgresql.orders.rotated"]
+  }
+}

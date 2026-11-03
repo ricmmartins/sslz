@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/control-plane-ownership-trusted-bindings.schema.json",
+  "title": "SSLZ protected control-plane ownership bindings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "predecessorProgramLineageEnvelopeDigest",
+    "programIdentityDigest",
+    "connectivityPlanDigest",
+    "postgresqlMigrationPlanDigest",
+    "containerImageCicdPlanDigest",
+    "readinessEvidenceDigest",
+    "iacPlanDigest",
+    "deploymentManifestDigest",
+    "deploymentApprovalDigest",
+    "environment",
+    "environmentReference",
+    "targetReference"
+  ],
+  "properties": {
+    "predecessorProgramLineageEnvelopeDigest": { "$ref": "#/$defs/digest" },
+    "programIdentityDigest": { "$ref": "#/$defs/digest" },
+    "connectivityPlanDigest": { "$ref": "#/$defs/digest" },
+    "postgresqlMigrationPlanDigest": { "$ref": "#/$defs/digest" },
+    "containerImageCicdPlanDigest": { "$ref": "#/$defs/digest" },
+    "readinessEvidenceDigest": { "$ref": "#/$defs/digest" },
+    "iacPlanDigest": { "$ref": "#/$defs/digest" },
+    "deploymentManifestDigest": { "$ref": "#/$defs/digest" },
+    "deploymentApprovalDigest": { "$ref": "#/$defs/digest" },
+    "environment": { "enum": ["prod", "nonprod"] },
+    "environmentReference": { "$ref": "#/$defs/reference" },
+    "targetReference": { "$ref": "#/$defs/reference" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    }
+  }
+}

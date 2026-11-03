@@ -1,0 +1,2154 @@
+{
+  "schemaVersion": "1.0.0",
+  "plannerVersion": "1.0.0",
+  "planId": "ownership.synthetic.program-lineage.orders.v1",
+  "generatedAt": "2026-08-16T21:00:00Z",
+  "evidenceMode": "synthetic",
+  "sourceProvider": "aws",
+  "target": {
+    "environment": "prod",
+    "environmentReference": "environment.production.orders",
+    "region": "centralus",
+    "targetReference": "target.postgresql.orders.flexible"
+  },
+  "status": "ready-for-human-review",
+  "requiredChecks": [
+    "control.ownership.artifacts-bound",
+    "control.ownership.raci-complete",
+    "control.ownership.authority-unambiguous",
+    "control.ownership.separation-of-duties",
+    "control.ownership.escalation-acyclic",
+    "control.ownership.source-of-truth-authorized",
+    "control.ownership.rollback-failback-owned",
+    "control.ownership.evidence-current",
+    "control.ownership.handoff-integrity",
+    "control.ownership.replay-protected",
+    "control.ownership.transition-order-valid",
+    "control.ownership.lineage-monotonic",
+    "control.ownership.safety-enforced"
+  ],
+  "checks": [
+    {
+      "id": "control.ownership.artifacts-bound",
+      "classification": "pass",
+      "summary": "Exact predecessor lineage, artifact, environment, target, and integrity digests must match protected bindings.",
+      "evidenceReferences": [
+        "sha256:0d5b8e4f5db3c96cfdb1c6c768b5c2be24ce4adae278cff8bff6be2864925b6a",
+        "sha256:2c766019e5c4d17d547d0b5cb08f99eaed76a36d275af39f868f54639da9fec4",
+        "sha256:4d853262c3b5a8be2d73249e5572bb83134d550e9e620a24e910b3da36d70ecc",
+        "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a",
+        "sha256:61d4ad3240bc004a56bd26152b8cf73cb789247a2ffccce1c21af66e8e3359a6",
+        "sha256:66c10f23b2b23d1efffe0c5d1566f276f9f86b5e2ead2d3ddcc406200e5a34ef",
+        "sha256:734ac28c9609ab59b8843c862da3bca9f16099698f5e4c29778e6e6d50cce964",
+        "sha256:8e3634e2684e8de5de7909ff7e6536de1aec3e0cd0568fe0782530b501fecf66",
+        "sha256:c73ef25d3ebd4cea602fcc35c6f263d9641ca489744f863d3326b80d6a7d185f"
+      ]
+    },
+    {
+      "id": "control.ownership.raci-complete",
+      "classification": "pass",
+      "summary": "Every canonical capability and state requires one accountable role plus explicit responsible, consulted, and informed sets.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.authority-unambiguous",
+      "classification": "pass",
+      "summary": "DNS, certificate, CI/CD, deployment, database, application, recovery, and source-of-truth authorities must resolve to one qualified role and scope.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.separation-of-duties",
+      "classification": "pass",
+      "summary": "Sensitive control-plane authorities require an approval role separate from accountable and responsible roles.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.escalation-acyclic",
+      "classification": "pass",
+      "summary": "Escalation routes must be acyclic and cannot self-escalate.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.source-of-truth-authorized",
+      "classification": "pass",
+      "summary": "A source-of-truth authority change requires explicit transfer approval and accepted handoff evidence.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.rollback-failback-owned",
+      "classification": "pass",
+      "summary": "Rollback and failback must retain accountable, responsible, and approval authorities in every state.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.evidence-current",
+      "classification": "pass",
+      "summary": "Handoff evidence must be observed, current, unexpired, and within the configured age at planning time.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.handoff-integrity",
+      "classification": "pass",
+      "summary": "Every ownership change requires one accepted, digest-bound handoff from the prior authority to the successor.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.replay-protected",
+      "classification": "pass",
+      "summary": "Attempt and handoff nonces and evidence digests must be unique and not replay accepted history.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.transition-order-valid",
+      "classification": "pass",
+      "summary": "Ownership transitions must be complete, unique, and in canonical coexistence through failback order.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.lineage-monotonic",
+      "classification": "pass",
+      "summary": "Accepted ownership attempts must form a monotonic, gap-free lineage.",
+      "evidenceReferences": []
+    },
+    {
+      "id": "control.ownership.safety-enforced",
+      "classification": "pass",
+      "summary": "The assessment must keep all execution flags false and all live operations disabled.",
+      "evidenceReferences": []
+    }
+  ],
+  "authorityMatrix": [
+    {
+      "state": "coexistence",
+      "ordinal": 1,
+      "assignments": [
+        {
+          "capabilityId": "dns-zones-records-resolvers",
+          "accountable": "role.network",
+          "responsible": [
+            "role.network"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "certificate-issuance-renewal",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "secret-stores-references-rotation",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "cicd-pipelines-runners",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "artifact-promotion",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "observability-telemetry-alert-routing",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "incidents-oncall-escalation",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "feature-flags-configuration",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "deployment-authority",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "database-writes",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "application-writes",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "source-of-truth-transfer",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "backup-restore",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "cutover",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "rollback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "failback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        }
+      ]
+    },
+    {
+      "state": "pre-cutover",
+      "ordinal": 2,
+      "assignments": [
+        {
+          "capabilityId": "dns-zones-records-resolvers",
+          "accountable": "role.network",
+          "responsible": [
+            "role.network"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "certificate-issuance-renewal",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "secret-stores-references-rotation",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "cicd-pipelines-runners",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "artifact-promotion",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "observability-telemetry-alert-routing",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "incidents-oncall-escalation",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "feature-flags-configuration",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "deployment-authority",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "database-writes",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "application-writes",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "source-of-truth-transfer",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "backup-restore",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "cutover",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "rollback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "failback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        }
+      ]
+    },
+    {
+      "state": "cutover",
+      "ordinal": 3,
+      "assignments": [
+        {
+          "capabilityId": "dns-zones-records-resolvers",
+          "accountable": "role.network",
+          "responsible": [
+            "role.network"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "certificate-issuance-renewal",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "secret-stores-references-rotation",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "cicd-pipelines-runners",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "artifact-promotion",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "observability-telemetry-alert-routing",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "incidents-oncall-escalation",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "feature-flags-configuration",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "deployment-authority",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "database-writes",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "application-writes",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "source-of-truth-transfer",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "backup-restore",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "cutover",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "rollback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "failback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        }
+      ]
+    },
+    {
+      "state": "post-cutover",
+      "ordinal": 4,
+      "assignments": [
+        {
+          "capabilityId": "dns-zones-records-resolvers",
+          "accountable": "role.network",
+          "responsible": [
+            "role.network"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "certificate-issuance-renewal",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "secret-stores-references-rotation",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "cicd-pipelines-runners",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "artifact-promotion",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "observability-telemetry-alert-routing",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "incidents-oncall-escalation",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "feature-flags-configuration",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "deployment-authority",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "database-writes",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "application-writes",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "source-of-truth-transfer",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "backup-restore",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "cutover",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "rollback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "failback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        }
+      ]
+    },
+    {
+      "state": "rollback",
+      "ordinal": 5,
+      "assignments": [
+        {
+          "capabilityId": "dns-zones-records-resolvers",
+          "accountable": "role.network",
+          "responsible": [
+            "role.network"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "certificate-issuance-renewal",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "secret-stores-references-rotation",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "cicd-pipelines-runners",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "artifact-promotion",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "observability-telemetry-alert-routing",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "incidents-oncall-escalation",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "feature-flags-configuration",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "deployment-authority",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "database-writes",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "application-writes",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "source-of-truth-transfer",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "backup-restore",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "cutover",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "rollback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        },
+        {
+          "capabilityId": "failback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "source-cloud"
+        }
+      ]
+    },
+    {
+      "state": "failback",
+      "ordinal": 6,
+      "assignments": [
+        {
+          "capabilityId": "dns-zones-records-resolvers",
+          "accountable": "role.network",
+          "responsible": [
+            "role.network"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "certificate-issuance-renewal",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "secret-stores-references-rotation",
+          "accountable": "role.security",
+          "responsible": [
+            "role.security"
+          ],
+          "consulted": [
+            "role.shared-platform"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.incident",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "cicd-pipelines-runners",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "artifact-promotion",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "observability-telemetry-alert-routing",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "incidents-oncall-escalation",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "feature-flags-configuration",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "shared"
+        },
+        {
+          "capabilityId": "deployment-authority",
+          "accountable": "role.shared-platform",
+          "responsible": [
+            "role.shared-platform"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "database-writes",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "application-writes",
+          "accountable": "role.application",
+          "responsible": [
+            "role.application"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "source-of-truth-transfer",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "backup-restore",
+          "accountable": "role.database",
+          "responsible": [
+            "role.database"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.incident"
+          ],
+          "approvalAuthority": null,
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "cutover",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "rollback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        },
+        {
+          "capabilityId": "failback",
+          "accountable": "role.incident",
+          "responsible": [
+            "role.incident"
+          ],
+          "consulted": [
+            "role.security"
+          ],
+          "informed": [
+            "role.application"
+          ],
+          "approvalAuthority": "role.security",
+          "authorityScope": "azure"
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "sequence": 1,
+      "fromState": "coexistence",
+      "toState": "pre-cutover",
+      "sourceOfTruthTransferApproved": false,
+      "handoffs": []
+    },
+    {
+      "sequence": 2,
+      "fromState": "pre-cutover",
+      "toState": "cutover",
+      "sourceOfTruthTransferApproved": true,
+      "handoffs": [
+        {
+          "reference": "handoff.2.dns-zones-records-resolvers",
+          "capabilityId": "dns-zones-records-resolvers",
+          "offeredBy": "role.network",
+          "acceptedBy": "role.network",
+          "approvalAuthority": null,
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.dns-zones-records-resolvers",
+          "evidenceDigest": "sha256:267e22f6339c346e2a192dbd69d5e9a509874598cf4327711ff191b8c110c5a6"
+        },
+        {
+          "reference": "handoff.2.certificate-issuance-renewal",
+          "capabilityId": "certificate-issuance-renewal",
+          "offeredBy": "role.security",
+          "acceptedBy": "role.security",
+          "approvalAuthority": "role.incident",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.certificate-issuance-renewal",
+          "evidenceDigest": "sha256:49ed42da1812dc8dc38548168bfbce7bb29cdba0328ead39f953bf32d48b2dcd"
+        },
+        {
+          "reference": "handoff.2.secret-stores-references-rotation",
+          "capabilityId": "secret-stores-references-rotation",
+          "offeredBy": "role.security",
+          "acceptedBy": "role.security",
+          "approvalAuthority": "role.incident",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.secret-stores-references-rotation",
+          "evidenceDigest": "sha256:238b0f9c5cabc05e44631177ded79b4ec8d39460b52eaa044826f4ec650800ec"
+        },
+        {
+          "reference": "handoff.2.artifact-promotion",
+          "capabilityId": "artifact-promotion",
+          "offeredBy": "role.shared-platform",
+          "acceptedBy": "role.shared-platform",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.artifact-promotion",
+          "evidenceDigest": "sha256:e95a82e580aea9b0e9cc42548a6454a928596283559e1982542cabd1b95b7b21"
+        },
+        {
+          "reference": "handoff.2.deployment-authority",
+          "capabilityId": "deployment-authority",
+          "offeredBy": "role.shared-platform",
+          "acceptedBy": "role.shared-platform",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.deployment-authority",
+          "evidenceDigest": "sha256:9f93aeb97684238ca4fe95ee273936bcf06923a8ce84777f4def559103eb8eb3"
+        },
+        {
+          "reference": "handoff.2.database-writes",
+          "capabilityId": "database-writes",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.database-writes",
+          "evidenceDigest": "sha256:5ee3f771da1e1fd14153cbafeef17e4c4ae00207092d2c11f371aa511c367b53"
+        },
+        {
+          "reference": "handoff.2.application-writes",
+          "capabilityId": "application-writes",
+          "offeredBy": "role.application",
+          "acceptedBy": "role.application",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.application-writes",
+          "evidenceDigest": "sha256:03ac77f9d8ae868c87ad486fc07892ebeb6a10ec1e88d1f0786787b310ab54ca"
+        },
+        {
+          "reference": "handoff.2.source-of-truth-transfer",
+          "capabilityId": "source-of-truth-transfer",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.source-of-truth-transfer",
+          "evidenceDigest": "sha256:08661ddbd05b3f5f0381596663bf4ac551da11fe6d42bd3a0ee70fb5cd27fe6f"
+        },
+        {
+          "reference": "handoff.2.backup-restore",
+          "capabilityId": "backup-restore",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": null,
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.backup-restore",
+          "evidenceDigest": "sha256:475d495464501caaea99941ac4928c4491c9e339acc6d277b5ff5967b9d17ab9"
+        },
+        {
+          "reference": "handoff.2.cutover",
+          "capabilityId": "cutover",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.cutover",
+          "evidenceDigest": "sha256:bfc1481aa1e1c500d78fc9d9dc0b2f78435e6a5d3e1ad7a0bc20f2071615226f"
+        },
+        {
+          "reference": "handoff.2.rollback",
+          "capabilityId": "rollback",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.rollback",
+          "evidenceDigest": "sha256:a2772cc786297028da53f5a629221e1495b5ecd968d5865fa47ed0d21c570a6e"
+        },
+        {
+          "reference": "handoff.2.failback",
+          "capabilityId": "failback",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.2.failback",
+          "evidenceDigest": "sha256:0afd05d8a1c9c8fab4cfd7eedde108793fc328dbb9b1828df204bd1540e97acd"
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "fromState": "cutover",
+      "toState": "post-cutover",
+      "sourceOfTruthTransferApproved": false,
+      "handoffs": []
+    },
+    {
+      "sequence": 4,
+      "fromState": "post-cutover",
+      "toState": "rollback",
+      "sourceOfTruthTransferApproved": true,
+      "handoffs": [
+        {
+          "reference": "handoff.4.dns-zones-records-resolvers",
+          "capabilityId": "dns-zones-records-resolvers",
+          "offeredBy": "role.network",
+          "acceptedBy": "role.network",
+          "approvalAuthority": null,
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.dns-zones-records-resolvers",
+          "evidenceDigest": "sha256:8afadd4f0ecae7634dc0e421c4e8fd5a7842ee73c4448d226be6772f4309aeeb"
+        },
+        {
+          "reference": "handoff.4.certificate-issuance-renewal",
+          "capabilityId": "certificate-issuance-renewal",
+          "offeredBy": "role.security",
+          "acceptedBy": "role.security",
+          "approvalAuthority": "role.incident",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.certificate-issuance-renewal",
+          "evidenceDigest": "sha256:ecd5e4130d190e6136c0e4723696f9dba5ab01c555d967252cb90a731b49552d"
+        },
+        {
+          "reference": "handoff.4.secret-stores-references-rotation",
+          "capabilityId": "secret-stores-references-rotation",
+          "offeredBy": "role.security",
+          "acceptedBy": "role.security",
+          "approvalAuthority": "role.incident",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.secret-stores-references-rotation",
+          "evidenceDigest": "sha256:7dd6aa3d4320a52c9ebcfcf5130f40405cc5b2d820ac6a20e8febc9034cb47f9"
+        },
+        {
+          "reference": "handoff.4.artifact-promotion",
+          "capabilityId": "artifact-promotion",
+          "offeredBy": "role.shared-platform",
+          "acceptedBy": "role.shared-platform",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.artifact-promotion",
+          "evidenceDigest": "sha256:3e6d0dd91239e1c8234f0da4875c44bf5c873f053eb13f8bdf274925397aebdc"
+        },
+        {
+          "reference": "handoff.4.deployment-authority",
+          "capabilityId": "deployment-authority",
+          "offeredBy": "role.shared-platform",
+          "acceptedBy": "role.shared-platform",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.deployment-authority",
+          "evidenceDigest": "sha256:31d033e6842e8fbadd935d9b5aa2b5154b439a74b50bb8a49ed8eb8ed4f2b84b"
+        },
+        {
+          "reference": "handoff.4.database-writes",
+          "capabilityId": "database-writes",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.database-writes",
+          "evidenceDigest": "sha256:b3cdb250e6ba455e758e9796fcf298ff8c6d5ccfa1c51f281a824c64f12c3f00"
+        },
+        {
+          "reference": "handoff.4.application-writes",
+          "capabilityId": "application-writes",
+          "offeredBy": "role.application",
+          "acceptedBy": "role.application",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.application-writes",
+          "evidenceDigest": "sha256:355d47470dce173c76ef412e6045b055b505b6fff99821073973c8deed1d94cd"
+        },
+        {
+          "reference": "handoff.4.source-of-truth-transfer",
+          "capabilityId": "source-of-truth-transfer",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.source-of-truth-transfer",
+          "evidenceDigest": "sha256:72a3de3f096e44cba674f6b0efaa33dfc4eadf5e669307d66947d80da66035be"
+        },
+        {
+          "reference": "handoff.4.backup-restore",
+          "capabilityId": "backup-restore",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": null,
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.backup-restore",
+          "evidenceDigest": "sha256:10a038195f9686848b2bffeed5d88a9078061651145233976bb75a54bd5da2d0"
+        },
+        {
+          "reference": "handoff.4.cutover",
+          "capabilityId": "cutover",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.cutover",
+          "evidenceDigest": "sha256:7625d935e1548802a7ffca56ecfde2c2ef54cd77f7e5bc2b9139f7e5a1906c09"
+        },
+        {
+          "reference": "handoff.4.rollback",
+          "capabilityId": "rollback",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.rollback",
+          "evidenceDigest": "sha256:fac7b5654e948da5b2d9b28955ee6b6a60b14b6c85313471392b3b3d07ca311c"
+        },
+        {
+          "reference": "handoff.4.failback",
+          "capabilityId": "failback",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.4.failback",
+          "evidenceDigest": "sha256:7644e49c4ae0d3b732f5a2f46b2ccdd7ada554f81938380439056ec410c728d2"
+        }
+      ]
+    },
+    {
+      "sequence": 5,
+      "fromState": "rollback",
+      "toState": "failback",
+      "sourceOfTruthTransferApproved": true,
+      "handoffs": [
+        {
+          "reference": "handoff.5.dns-zones-records-resolvers",
+          "capabilityId": "dns-zones-records-resolvers",
+          "offeredBy": "role.network",
+          "acceptedBy": "role.network",
+          "approvalAuthority": null,
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.dns-zones-records-resolvers",
+          "evidenceDigest": "sha256:eca5ac45c4d097cca0fdaea5eb3948866158b1cb649b7eb82b1e5598b84ed13b"
+        },
+        {
+          "reference": "handoff.5.certificate-issuance-renewal",
+          "capabilityId": "certificate-issuance-renewal",
+          "offeredBy": "role.security",
+          "acceptedBy": "role.security",
+          "approvalAuthority": "role.incident",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.certificate-issuance-renewal",
+          "evidenceDigest": "sha256:55ebd72c103d7c91b9aab767e4bff8482811f95f45710643317023d44cffc456"
+        },
+        {
+          "reference": "handoff.5.secret-stores-references-rotation",
+          "capabilityId": "secret-stores-references-rotation",
+          "offeredBy": "role.security",
+          "acceptedBy": "role.security",
+          "approvalAuthority": "role.incident",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.secret-stores-references-rotation",
+          "evidenceDigest": "sha256:7f17fc88fc07ba0ca4ed1355b790cbd1929d5ef396c44eefa3f0a6046f2a4ba9"
+        },
+        {
+          "reference": "handoff.5.artifact-promotion",
+          "capabilityId": "artifact-promotion",
+          "offeredBy": "role.shared-platform",
+          "acceptedBy": "role.shared-platform",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.artifact-promotion",
+          "evidenceDigest": "sha256:dbfd0b857c7642d7bdc6421a34befa6b7b37347b61a48368e74e1273dd7addc1"
+        },
+        {
+          "reference": "handoff.5.deployment-authority",
+          "capabilityId": "deployment-authority",
+          "offeredBy": "role.shared-platform",
+          "acceptedBy": "role.shared-platform",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.deployment-authority",
+          "evidenceDigest": "sha256:5395b9ec488255eb006dc5425d6ef5f4f9f4c196f510ac8b1f6c5cc4ddb6c91b"
+        },
+        {
+          "reference": "handoff.5.database-writes",
+          "capabilityId": "database-writes",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.database-writes",
+          "evidenceDigest": "sha256:c20da98d504f4710998100cbe9f86ebc05816b05fb045995249fc054c79fd163"
+        },
+        {
+          "reference": "handoff.5.application-writes",
+          "capabilityId": "application-writes",
+          "offeredBy": "role.application",
+          "acceptedBy": "role.application",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.application-writes",
+          "evidenceDigest": "sha256:11b7e5fecb95ef502a71a3e4ef9bdad9838636fce6ad2e755a5d2d599f52762f"
+        },
+        {
+          "reference": "handoff.5.source-of-truth-transfer",
+          "capabilityId": "source-of-truth-transfer",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.source-of-truth-transfer",
+          "evidenceDigest": "sha256:2e2b7e9e208cad2c418d166c936d80494d8c109e095aef8872243df1935fde96"
+        },
+        {
+          "reference": "handoff.5.backup-restore",
+          "capabilityId": "backup-restore",
+          "offeredBy": "role.database",
+          "acceptedBy": "role.database",
+          "approvalAuthority": null,
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.backup-restore",
+          "evidenceDigest": "sha256:3d4e432ca8dca57f4c3225bb497b5d70abae962dea6bd4d7d2f308308ec19ce3"
+        },
+        {
+          "reference": "handoff.5.cutover",
+          "capabilityId": "cutover",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.cutover",
+          "evidenceDigest": "sha256:49c14fc63da8816e5225f862a7adf79cacf313e247df2e84914127b6e4d9936b"
+        },
+        {
+          "reference": "handoff.5.rollback",
+          "capabilityId": "rollback",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.rollback",
+          "evidenceDigest": "sha256:a058992161895dac662714f7237224031297b46fc7c72e634005d64b7b869a02"
+        },
+        {
+          "reference": "handoff.5.failback",
+          "capabilityId": "failback",
+          "offeredBy": "role.incident",
+          "acceptedBy": "role.incident",
+          "approvalAuthority": "role.security",
+          "accepted": true,
+          "observedAt": "2026-08-16T18:00:00Z",
+          "expiresAt": "2026-08-18T18:00:00Z",
+          "nonce": "nonce.handoff.5.failback",
+          "evidenceDigest": "sha256:9c7d67c9e221261a13cd0be074d4506bd5803ce047f66c0794c1089080b31ae1"
+        }
+      ]
+    }
+  ],
+  "lineage": {
+    "attemptOrdinal": 1,
+    "attemptNonce": "nonce.ownership.aws.orders.0001",
+    "acceptedAttempts": []
+  },
+  "bindings": {
+    "predecessorProgramLineageEnvelopeDigest": "sha256:61d4ad3240bc004a56bd26152b8cf73cb789247a2ffccce1c21af66e8e3359a6",
+    "programIdentityDigest": "sha256:521abf57232d5793c86c2238af59d835c8a60c8aa95a0deb3338478243bd2c6a",
+    "connectivityPlanDigest": "sha256:66c10f23b2b23d1efffe0c5d1566f276f9f86b5e2ead2d3ddcc406200e5a34ef",
+    "postgresqlMigrationPlanDigest": "sha256:8e3634e2684e8de5de7909ff7e6536de1aec3e0cd0568fe0782530b501fecf66",
+    "containerImageCicdPlanDigest": "sha256:734ac28c9609ab59b8843c862da3bca9f16099698f5e4c29778e6e6d50cce964",
+    "readinessEvidenceDigest": "sha256:c73ef25d3ebd4cea602fcc35c6f263d9641ca489744f863d3326b80d6a7d185f",
+    "iacPlanDigest": "sha256:4d853262c3b5a8be2d73249e5572bb83134d550e9e620a24e910b3da36d70ecc",
+    "deploymentManifestDigest": "sha256:0d5b8e4f5db3c96cfdb1c6c768b5c2be24ce4adae278cff8bff6be2864925b6a",
+    "deploymentApprovalDigest": "sha256:2c766019e5c4d17d547d0b5cb08f99eaed76a36d275af39f868f54639da9fec4",
+    "environment": "prod",
+    "environmentReference": "environment.production.orders",
+    "targetReference": "target.postgresql.orders.flexible",
+    "roleCatalogDigest": "sha256:391287927172fac997ae7ccd315d37dd60db776525281f8bc54b3712834c3de7",
+    "authorityMatrixDigest": "sha256:c4be7add82a90d9c6d0244e0475e0220980449b56f69f539b156d6100ae502c1",
+    "transitionDigest": "sha256:edbd19d1bfb44cd21d27f4c2968028a13092b1576490811cdacbff905641364d",
+    "inputDigest": "sha256:e062cb5d39887cbebecfe31d79e93cfcb0bd35c71634a895f713222469a0c397"
+  },
+  "plannedActions": [
+    {
+      "sequence": 1,
+      "stateChange": "coexistence-to-pre-cutover",
+      "representation": "non-executable",
+      "requiredFutureAuthority": "separate-live-control-plane-approval",
+      "executionAllowed": false
+    },
+    {
+      "sequence": 2,
+      "stateChange": "pre-cutover-to-cutover",
+      "representation": "non-executable",
+      "requiredFutureAuthority": "separate-live-control-plane-approval",
+      "executionAllowed": false
+    },
+    {
+      "sequence": 3,
+      "stateChange": "cutover-to-post-cutover",
+      "representation": "non-executable",
+      "requiredFutureAuthority": "separate-live-control-plane-approval",
+      "executionAllowed": false
+    },
+    {
+      "sequence": 4,
+      "stateChange": "post-cutover-to-rollback",
+      "representation": "non-executable",
+      "requiredFutureAuthority": "separate-live-control-plane-approval",
+      "executionAllowed": false
+    },
+    {
+      "sequence": 5,
+      "stateChange": "rollback-to-failback",
+      "representation": "non-executable",
+      "requiredFutureAuthority": "separate-live-control-plane-approval",
+      "executionAllowed": false
+    }
+  ],
+  "humanConfirmationRequired": [
+    "Protected systems must replace synthetic evidence with current live evidence.",
+    "Each live handoff and operation requires separate capability-specific approval.",
+    "Rollback and failback ownership must be rehearsed before any cutover."
+  ],
+  "safety": {
+    "executionEnabled": false,
+    "executionEligible": false,
+    "executionAllowed": false,
+    "liveOperations": "disabled",
+    "networkCalls": "none",
+    "cloudOperations": "none",
+    "dnsOperations": "none",
+    "certificateOperations": "none",
+    "secretOperations": "none",
+    "pipelineOperations": "none",
+    "databaseOperations": "none",
+    "applicationOperations": "none",
+    "recoveryOperations": "none",
+    "iacOperations": "none",
+    "generatedCommands": "none",
+    "generatedArtifacts": "stdout-only"
+  },
+  "planDigest": "sha256:203d3f9249ec29676129206c057aec9ea0a30d29de04cea7fc19576d03fd8f5b"
+}

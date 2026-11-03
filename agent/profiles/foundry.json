@@ -1,0 +1,25 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "foundry",
+  "kind": "extension",
+  "providerNamespaces": [
+    "Microsoft.CognitiveServices"
+  ],
+  "requiredChecks": [
+    "region.foundry-model.available",
+    "quota.workload.headroom",
+    "workload.managed-model-fit.reviewed"
+  ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.CognitiveServices/accounts"
+    ],
+    "computeSkuEvidence": false,
+    "gpuSkuEvidence": false,
+    "foundryDeploymentEvidence": true
+  },
+  "costAssumptions": [
+    "Model token, provisioned throughput, evaluation, and content-safety charges depend on the selected model and deployment type.",
+    "No model, deployment type, regional availability, quota, or capacity is assumed."
+  ]
+}

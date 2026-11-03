@@ -1,0 +1,12 @@
+{
+  "bicep": {
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "Authorization failed for founder@example.com with Bearer fixture-token-value"
+  },
+  "terraform": {
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "Backend error: AccountKey=fixture-secret-value"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/aks-ingress-decision.schema.json",
+  "title": "SSLZ AKS ingress decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "serviceType",
+    "frontendExposure",
+    "protocol",
+    "frontendPort",
+    "backendNodePort",
+    "healthProbe",
+    "dataSourcePrefixes",
+    "reservedNsgPriorities"
+  ],
+  "properties": {
+    "mode": {
+      "enum": ["private", "public-azure-load-balancer"]
+    },
+    "serviceType": {
+      "enum": ["ClusterIP", "LoadBalancer", "NodePort"]
+    },
+    "frontendExposure": {
+      "enum": ["private", "public"]
+    },
+    "protocol": {
+      "const": "Tcp"
+    },
+    "frontendPort": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "backendNodePort": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "healthProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourcePrefix", "port"],
+      "properties": {
+        "sourcePrefix": {
+          "type": ["string", "null"]
+        },
+        "port": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "dataSourcePrefixes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "reservedNsgPriorities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 100,
+        "maximum": 4096
+      }
+    }
+  }
+}

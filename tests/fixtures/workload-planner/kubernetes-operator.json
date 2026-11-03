@@ -1,0 +1,29 @@
+{
+  "name": "Kubernetes operator requirement selects AKS",
+  "overrides": {
+    "workload": {
+      "description": "An application that depends on a Kubernetes operator.",
+      "traffic": ["mixed"],
+      "requiresKubernetes": false,
+      "requiresRelationalDatabase": false,
+      "kubernetesRequirements": ["operator"],
+      "incidentOwnerConfirmed": true,
+      "aksIngress": {
+        "mode": "private",
+        "serviceType": "ClusterIP",
+        "frontendExposure": "private",
+        "protocol": "Tcp",
+        "frontendPort": null,
+        "backendNodePort": null,
+        "healthProbe": { "sourcePrefix": null, "port": null },
+        "dataSourcePrefixes": [],
+        "reservedNsgPriorities": []
+      }
+    }
+  },
+  "expected": {
+    "status": "ready",
+    "computeProfile": "aks",
+    "profileExtensions": []
+  }
+}

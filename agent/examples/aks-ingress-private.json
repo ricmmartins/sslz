@@ -1,0 +1,14 @@
+{
+  "mode": "private",
+  "serviceType": "ClusterIP",
+  "frontendExposure": "private",
+  "protocol": "Tcp",
+  "frontendPort": null,
+  "backendNodePort": null,
+  "healthProbe": {
+    "sourcePrefix": null,
+    "port": null
+  },
+  "dataSourcePrefixes": [],
+  "reservedNsgPriorities": []
+}

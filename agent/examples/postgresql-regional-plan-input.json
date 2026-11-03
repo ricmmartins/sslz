@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0.0",
+  "planId": "postgresql-eastus2-fallback",
+  "planningAt": "2026-08-11T18:00:00Z",
+  "maxEvidenceAgeHours": 24,
+  "targetRegion": "eastus2",
+  "allowedLocations": ["eastus2", "centralus"],
+  "requirements": {
+    "tier": "GeneralPurpose",
+    "sku": "Standard_D4ds_v5",
+    "engineVersion": { "major": 16, "minor": 4 },
+    "extensions": ["pgcrypto", "uuid-ossp"],
+    "zoneRedundant": true,
+    "minimumZones": 2,
+    "rtoMinutes": 60,
+    "rpoMinutes": 15,
+    "dataResidency": "UnitedStates",
+    "monthlyCostCeiling": 750
+  },
+  "evidence": [
+    {
+      "region": "eastus2",
+      "preferenceRank": 1,
+      "serviceAvailability": "available",
+      "supportedEditions": [],
+      "supportedVersions": [],
+      "supportedExtensions": ["pgcrypto", "uuid-ossp"],
+      "zoneSupport": { "available": true, "zones": ["1", "2", "3"] },
+      "quota": { "status": "eligible", "required": 4, "available": 16, "unit": "vCores" },
+      "capacity": { "status": "available" },
+      "allowedByPolicy": true,
+      "residencyBoundaries": ["UnitedStates"],
+      "recovery": { "minimumRtoMinutes": 30, "minimumRpoMinutes": 5 },
+      "estimatedMonthlyCost": 640,
+      "source": {
+        "type": "approved-synthetic-fixture",
+        "reference": "fixture.postgresql.eastus2.unsupported",
+        "observedAt": "2026-08-11T17:30:00Z",
+        "expiresAt": "2026-08-12T17:30:00Z"
+      }
+    },
+    {
+      "region": "centralus",
+      "preferenceRank": 2,
+      "serviceAvailability": "available",
+      "supportedEditions": [
+        { "tier": "GeneralPurpose", "sku": "Standard_D4ds_v5" }
+      ],
+      "supportedVersions": [{ "major": 16, "minor": 4 }],
+      "supportedExtensions": ["pgcrypto", "uuid-ossp"],
+      "zoneSupport": { "available": true, "zones": ["1", "2", "3"] },
+      "quota": { "status": "eligible", "required": 4, "available": 12, "unit": "vCores" },
+      "capacity": { "status": "available" },
+      "allowedByPolicy": true,
+      "residencyBoundaries": ["UnitedStates"],
+      "recovery": { "minimumRtoMinutes": 30, "minimumRpoMinutes": 5 },
+      "estimatedMonthlyCost": 620,
+      "source": {
+        "type": "approved-synthetic-fixture",
+        "reference": "fixture.postgresql.centralus.valid",
+        "observedAt": "2026-08-11T17:35:00Z",
+        "expiresAt": "2026-08-12T17:35:00Z"
+      }
+    }
+  ]
+}

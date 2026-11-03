@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestId": "trust.execution.orders.offline",
+  "artifactDigests": {
+    "sourceAssessment": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "migrationPlanInput": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "migrationPlan": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "rehearsalEvidence": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "rehearsalPlan": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "currentLineage": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "evidenceDigests": [
+    { "id": "evidence.live.source-catalog.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "evidence.live.target-region-capacity.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "evidence.live.secret-reference-metadata.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "evidence.live.private-connectivity.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "evidence.live.dns-application-readiness.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "evidence.live.recovery-maintenance-owners.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "evidence.live.provider-iac-readiness.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" }
+  ],
+  "approvalDigests": [
+    { "id": "approval.stage.rehearsal-execution.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.initial-load.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.cdc-catch-up.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.write-freeze-connection-drain.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.cutover-readiness.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.source-of-truth-transfer.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.rollback.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "id": "approval.stage.failback.1", "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" }
+  ],
+  "keys": [
+    { "keyId": "key.evidence.source-catalog", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.source-catalog", "allowedStages": [], "allowedEvidenceKinds": ["source-catalog"] },
+    { "keyId": "key.evidence.target-region-capacity", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.target-region-capacity", "allowedStages": [], "allowedEvidenceKinds": ["target-region-capacity"] },
+    { "keyId": "key.evidence.secret-reference-metadata", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.secret-reference-metadata", "allowedStages": [], "allowedEvidenceKinds": ["secret-reference-metadata"] },
+    { "keyId": "key.evidence.private-connectivity", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.private-connectivity", "allowedStages": [], "allowedEvidenceKinds": ["private-connectivity"] },
+    { "keyId": "key.evidence.dns-application-readiness", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.dns-application-readiness", "allowedStages": [], "allowedEvidenceKinds": ["dns-application-readiness"] },
+    { "keyId": "key.evidence.recovery-maintenance-owners", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.recovery-maintenance-owners", "allowedStages": [], "allowedEvidenceKinds": ["recovery-maintenance-owners"] },
+    { "keyId": "key.evidence.provider-iac-readiness", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.evidence.provider-iac-readiness", "allowedStages": [], "allowedEvidenceKinds": ["provider-iac-readiness"] },
+    { "keyId": "key.stage.rehearsal-execution", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.rehearsal-execution", "allowedStages": ["rehearsal-execution"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.initial-load", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.initial-load", "allowedStages": ["initial-load"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.cdc-catch-up", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.cdc-catch-up", "allowedStages": ["cdc-catch-up"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.write-freeze-connection-drain", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.write-freeze-connection-drain", "allowedStages": ["write-freeze-connection-drain"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.cutover-readiness", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.cutover-readiness", "allowedStages": ["cutover-readiness"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.source-of-truth-transfer", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.source-of-truth-transfer", "allowedStages": ["source-of-truth-transfer"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.rollback", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.rollback", "allowedStages": ["rollback"], "allowedEvidenceKinds": [] },
+    { "keyId": "key.stage.failback", "algorithm": "Ed25519", "publicKeySpkiBase64": "AA==", "authorityReference": "authority.stage.failback", "allowedStages": ["failback"], "allowedEvidenceKinds": [] }
+  ]
+}

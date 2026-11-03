@@ -1,0 +1,414 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/container-image-cicd-plan-input.schema.json",
+  "title": "SSLZ container image and CI/CD migration planning input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "planId",
+    "planningAt",
+    "maxAssessmentAgeHours",
+    "sourceAssessment",
+    "target",
+    "scope",
+    "requirements",
+    "transition",
+    "lineage",
+    "integration"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "planningAt": { "type": "string", "format": "date-time" },
+    "maxAssessmentAgeHours": { "type": "integer", "minimum": 1, "maximum": 168 },
+    "sourceAssessment": {
+      "$ref": "container-image-cicd-source-assessment.schema.json"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regionPolicy",
+        "registryTargetEvidence",
+        "cicdTargetEvidence"
+      ],
+      "properties": {
+        "regionPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowedRegions", "residency"],
+          "properties": {
+            "allowedRegions": { "$ref": "#/$defs/regionList" },
+            "residency": { "$ref": "#/$defs/value" }
+          }
+        },
+        "registryTargetEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schemaVersion",
+            "observedAt",
+            "expiresAt",
+            "reference",
+            "region",
+            "residency",
+            "sku",
+            "supportedPlatforms",
+            "tagImmutability",
+            "replication",
+            "retention",
+            "encryption",
+            "network",
+            "capabilities",
+            "promotion"
+          ],
+          "properties": {
+            "schemaVersion": { "const": "1.0.0" },
+            "observedAt": { "type": "string", "format": "date-time" },
+            "expiresAt": { "type": "string", "format": "date-time" },
+            "reference": { "$ref": "#/$defs/reference" },
+            "region": { "$ref": "#/$defs/region" },
+            "residency": { "$ref": "#/$defs/value" },
+            "sku": { "enum": ["Basic", "Standard", "Premium"] },
+            "supportedPlatforms": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/platform" }
+            },
+            "tagImmutability": { "enum": ["enabled", "disabled"] },
+            "replication": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "regions"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "regions": { "$ref": "#/$defs/regionList" }
+              }
+            },
+            "retention": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "days"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "days": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "encryption": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["atRest"],
+              "properties": {
+                "atRest": { "enum": ["provider-managed", "customer-managed"] }
+              }
+            },
+            "network": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["publicAccess", "privateEndpoint"],
+              "properties": {
+                "publicAccess": { "enum": ["enabled", "disabled"] },
+                "privateEndpoint": { "enum": ["ready", "planned", "missing"] }
+              }
+            },
+            "capabilities": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "signatureVerification",
+                "sbom",
+                "provenance",
+                "quarantine"
+              ],
+              "properties": {
+                "signatureVerification": { "type": "boolean" },
+                "sbom": { "type": "boolean" },
+                "provenance": { "type": "boolean" },
+                "quarantine": { "type": "boolean" }
+              }
+            },
+            "promotion": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["preservesDigest"],
+              "properties": {
+                "preservesDigest": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "cicdTargetEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schemaVersion",
+            "observedAt",
+            "expiresAt",
+            "reference",
+            "provider",
+            "oidcFederation",
+            "environments",
+            "protectedBranches",
+            "runnerIdentity",
+            "secretStore"
+          ],
+          "properties": {
+            "schemaVersion": { "const": "1.0.0" },
+            "observedAt": { "type": "string", "format": "date-time" },
+            "expiresAt": { "type": "string", "format": "date-time" },
+            "reference": { "$ref": "#/$defs/reference" },
+            "provider": { "enum": ["github-actions", "azure-devops"] },
+            "oidcFederation": { "type": "boolean" },
+            "environments": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/value" }
+            },
+            "protectedBranches": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/value" }
+            },
+            "runnerIdentity": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["leastPrivilege", "egress"],
+              "properties": {
+                "leastPrivilege": { "type": "boolean" },
+                "egress": { "enum": ["allowlist", "open"] }
+              }
+            },
+            "secretStore": {
+              "enum": ["external-managed", "pipeline-native"]
+            }
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "imageReferences",
+        "environments",
+        "includeBaseImages",
+        "includeAttestations"
+      ],
+      "properties": {
+        "imageReferences": { "$ref": "#/$defs/nonEmptyReferences" },
+        "environments": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/value" }
+        },
+        "includeBaseImages": { "type": "boolean" },
+        "includeAttestations": { "const": true }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requireMultiArch",
+        "requiredPlatforms",
+        "requireSignatures",
+        "requireSbom",
+        "requireProvenance",
+        "maxCriticalVulnerabilities",
+        "maxHighVulnerabilities",
+        "requirePrivateRegistry",
+        "requireImmutableTags",
+        "requireReplication",
+        "minRetentionDays",
+        "requireEncryptionAtRest",
+        "requireCustomerManagedKey",
+        "blockUnsignedPromotion"
+      ],
+      "properties": {
+        "requireMultiArch": { "type": "boolean" },
+        "requiredPlatforms": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/platform" }
+        },
+        "requireSignatures": { "type": "boolean" },
+        "requireSbom": { "type": "boolean" },
+        "requireProvenance": { "type": "boolean" },
+        "maxCriticalVulnerabilities": { "type": "integer", "minimum": 0 },
+        "maxHighVulnerabilities": { "type": "integer", "minimum": 0 },
+        "requirePrivateRegistry": { "type": "boolean" },
+        "requireImmutableTags": { "const": true },
+        "requireReplication": { "type": "boolean" },
+        "minRetentionDays": { "type": "integer", "minimum": 0 },
+        "requireEncryptionAtRest": { "type": "boolean" },
+        "requireCustomerManagedKey": { "type": "boolean" },
+        "blockUnsignedPromotion": { "type": "boolean" }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy",
+        "dualPublish",
+        "cutoverReference",
+        "trafficShiftReference",
+        "promotion",
+        "secretRotationReferences",
+        "rollbackPlan"
+      ],
+      "properties": {
+        "strategy": { "enum": ["auto", "dual-publish-cutover"] },
+        "dualPublish": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enabled",
+            "windowMinutes",
+            "sourceRegistryReference",
+            "targetRegistryReference"
+          ],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "windowMinutes": { "type": "integer", "minimum": 0 },
+            "sourceRegistryReference": { "$ref": "#/$defs/reference" },
+            "targetRegistryReference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        "cutoverReference": { "$ref": "#/$defs/reference" },
+        "trafficShiftReference": { "$ref": "#/$defs/reference" },
+        "promotion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["approvalReference", "gateReferences"],
+          "properties": {
+            "approvalReference": {
+              "oneOf": [{ "$ref": "#/$defs/reference" }, { "type": "null" }]
+            },
+            "gateReferences": { "$ref": "#/$defs/referenceList" }
+          }
+        },
+        "secretRotationReferences": { "$ref": "#/$defs/nonEmptyReferences" },
+        "rollbackPlan": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ownerReference",
+                "rollbackWindowMinutes",
+                "conditions",
+                "failbackSourceOfTruth",
+                "stepReferences"
+              ],
+              "properties": {
+                "ownerReference": { "$ref": "#/$defs/reference" },
+                "rollbackWindowMinutes": { "type": "integer", "minimum": 1 },
+                "conditions": { "$ref": "#/$defs/nonEmptyReferences" },
+                "failbackSourceOfTruth": { "const": "source-registry" },
+                "stepReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lineageId",
+        "observedAt",
+        "expiresAt",
+        "attemptOrdinal",
+        "attemptNonce",
+        "acceptedAttempts"
+      ],
+      "properties": {
+        "lineageId": { "$ref": "#/$defs/reference" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "attemptOrdinal": { "type": "integer", "minimum": 1 },
+        "attemptNonce": { "$ref": "#/$defs/reference" },
+        "acceptedAttempts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attemptOrdinal", "assessmentId", "nonce"],
+            "properties": {
+              "attemptOrdinal": { "type": "integer", "minimum": 1 },
+              "assessmentId": { "$ref": "#/$defs/reference" },
+              "nonce": { "$ref": "#/$defs/reference" }
+            }
+          }
+        }
+      }
+    },
+    "integration": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "workloadProfilePlanDigest": { "$ref": "#/$defs/digest" },
+            "regionalPlanDigest": { "$ref": "#/$defs/digest" },
+            "iacPlanDigest": { "$ref": "#/$defs/digest" },
+            "readinessEvidenceDigest": { "$ref": "#/$defs/digest" },
+            "deploymentManifestDigest": { "$ref": "#/$defs/digest" },
+            "deploymentApprovalDigest": { "$ref": "#/$defs/digest" },
+            "postgresqlMigrationIdentityDigest": { "$ref": "#/$defs/digest" }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "referenceList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "nonEmptyReferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "regionList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/region" }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "platform": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]+/[a-z0-9]+(?:/[a-z0-9]+)?$"
+    }
+  }
+}

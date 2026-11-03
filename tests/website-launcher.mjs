@@ -8,15 +8,13 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const pin = "50a3ce1423e432ccdd9fa470452f6cfce75e2a50";
 const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g, "\n");
 const page = read("use-sslz-agent.md");
 const homepage = read("index.md");
 const readme = read("README.md");
-const manifest = JSON.parse(read(".github/classic-baseline-manifest.json"));
 const workflow = read(".github/workflows/validate-website.yml");
 const cloneCommand =
-  "git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-agent";
+  "git clone --branch main --single-branch https://github.com/ricmmartins/sslz.git sslz-agent";
 const plannerArgs = [
   "scripts/startup-workload-plan.mjs", "plan",
   "--input", "agent/examples/startup-input.json", "--output", "json",
@@ -33,20 +31,22 @@ function validateLauncher(markdown) {
   const shell = commands(markdown);
   assert.deepEqual(shell, [
     "git --version", "copilot --version", "node --version",
-    cloneCommand, "cd sslz-agent", `git checkout --detach ${pin}`, "git rev-parse HEAD",
+    cloneCommand, "cd sslz-agent", "git status --short --branch",
     "copilot login", "copilot --agent sslz-agent",
+    'copilot --agent sslz-agent --interactive "Start a new founder journey."',
     "node tests/sslz-agent.mjs",
     "node scripts\\startup-workload-plan.mjs plan --input agent\\examples\\startup-input.json --output json",
     `node ${plannerArgs.join(" ")}`,
-  ], "Runnable instructions must keep the reviewed commands, pin, and approval boundary.");
+  ], "Runnable instructions must keep the main-branch commands and approval boundary.");
   assert(!shell.some((line) => /\baz\b|--allow-all|--yolo|--prompt|--force/.test(line)));
   const normalized = markdown.replace(/\s+/g, " ");
   for (const required of [
     "without Azure CLI, an Azure subscription, or Azure login",
-    "GitHub account with Copilot access",
+    "Sign in to Copilot with a GitHub account that has Copilot access",
     "PowerShell 6 or later",
     "Node.js 22 or later",
     "This page provides setup instructions only",
+    "profile and its implementation live together on `main`",
     "stop if any command fails",
     "does not already exist",
     ".github/agents/sslz-agent.agent.md",
@@ -73,22 +73,22 @@ function validateLauncher(markdown) {
     "not create an operating-system shell allowlist",
     "Migration and dual-cloud execution are disabled",
     "does not automatically deploy",
-    "absent from classic `main`",
+    "GitHub.com custom-agent picker is not a supported launch path",
+    "The `main` branch includes adoption conversation guidance",
     "external planner invocation",
     "do not prove that the agent ran the planner itself",
     "autonomous conversation-to-deployment",
-    "This pin is verified reachable from the public implementation branch",
   ]) {
     assert(normalized.includes(required), `Missing launcher boundary: ${required}`);
   }
   assert(!/d921d99|b0c2464|100%|fully autonomous|guaranteed deployment/.test(markdown));
   assert(!/sslz-founder|SSLZ Founder Agent/.test(markdown));
-  assert.match(markdown, /Never use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`, or `--yolo`/);
+  assert.match(normalized, /Never use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`, or `--yolo`/);
 }
 
 validateLauncher(page);
 for (const [before, after] of [
-  [pin, "d921d99b6e2c2979d5637f7f186e6c9fe44ef86c"],
+  ["git clone --branch main", "git clone --branch agent-aware"],
   ["copilot --agent sslz-agent\n", "copilot --agent sslz-agent --allow-all\n"],
   ["copilot login\n", "az login\n"],
   ["overrides the repository profile", "does not affect selection"],
@@ -97,16 +97,15 @@ for (const [before, after] of [
   assert.throws(() => validateLauncher(page.replace(before, after)), `Must reject: ${after}`);
 }
 
-assert.equal(manifest.launcher.implementationCommit, pin);
 assert.match(homepage, /\{\{ '\/use-sslz-agent\/' \| relative_url \}\}" class="btn btn-secondary">Use SSLZ Agent<\/a>/);
 assert.equal(homepage.split(">Use SSLZ Agent</a>").length - 1, 1);
 assert.match(homepage, /id="quick-start"/);
 assert.match(readme, /\[Use SSLZ Agent\]\(https:\/\/startupscalelanding.zone\/use-sslz-agent\/\)/);
-assert.match(readme, /without Azure CLI or Azure\r?\nlogin/);
+assert.match(readme, /Clone the `main` branch/);
 assert.match(read("_config.yml"), /^url: "https:\/\/startupscalelanding.zone"$/m);
 assert.match(read("_config.yml"), /^baseurl: ""$/m);
-assert(!/agent-aware|use-sslz-agent\.md/.test(read("_data/navigation.yml")));
-assert(workflow.includes(pin));
+assert.match(read("_data/navigation.yml"), /agent/);
+assert(!/50a3ce1423e432ccdd9fa470452f6cfce75e2a50|agent-aware/.test(page));
 assert.match(workflow, /run_remote_smoke:[\s\S]*?type: boolean/);
 assert.match(
   workflow,
@@ -125,11 +124,10 @@ if (process.argv.includes("--remote-smoke")) {
     cwd, encoding: "utf8", timeout: 120_000, stdio: ["ignore", "pipe", "pipe"],
   }).trim();
   try {
-    // Execute the published clone/pin sequence without reusing any existing checkout.
+    // Execute the published clone sequence without reusing any existing checkout.
     git(cloneCommand.split(" ").slice(1), temporary);
-    git(["checkout", "--detach", pin]);
-    assert.equal(git(["rev-parse", "HEAD"]), pin);
-    git(["merge-base", "--is-ancestor", pin, "origin/agent-aware"]);
+    assert.equal(git(["symbolic-ref", "--short", "HEAD"]), "main");
+    assert.equal(git(["rev-parse", "HEAD"]), git(["rev-parse", "origin/main"]));
     assert.equal(git(["status", "--porcelain"]), "");
     const profile = readFileSync(join(checkout, ".github", "agents", "sslz-agent.agent.md"), "utf8");
     const tools = JSON.parse(profile.match(/^tools: (.+)$/m)[1]);
@@ -152,7 +150,7 @@ if (process.argv.includes("--remote-smoke")) {
     assert.equal(planner.computeProfile, "container-apps");
     assert.deepEqual(planner.profileExtensions, ["postgresql"]);
     assert.equal(git(["status", "--porcelain"]), "", "No tracked or untracked output expected.");
-    console.log(`Public clone pinned ${pin}; exact profile tools verified; no-Azure planner returned ${planner.computeProfile} + ${planner.profileExtensions.join(", ")}.`);
+    console.log(`Public main clone; exact profile tools verified; no-Azure planner returned ${planner.computeProfile} + ${planner.profileExtensions.join(", ")}.`);
     for (const url of links) {
       const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
       assert(response.ok, `${url}: HTTP ${response.status}`);

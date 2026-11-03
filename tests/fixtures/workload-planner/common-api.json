@@ -1,0 +1,16 @@
+{
+  "name": "common API selects Container Apps",
+  "overrides": {
+    "workload": {
+      "description": "A stateless HTTP API.",
+      "traffic": ["http"],
+      "requiresRelationalDatabase": false,
+      "usesDocker": false
+    }
+  },
+  "expected": {
+    "status": "ready",
+    "computeProfile": "container-apps",
+    "profileExtensions": []
+  }
+}

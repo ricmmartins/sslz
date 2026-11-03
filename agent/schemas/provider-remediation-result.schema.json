@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/provider-remediation-result.schema.json",
+  "title": "SSLZ provider remediation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "executorVersion",
+    "generatedBy",
+    "generatedAt",
+    "mode",
+    "status",
+    "code",
+    "message",
+    "plan",
+    "action",
+    "approval",
+    "command",
+    "verification",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "executorVersion": {
+      "const": "1.0.0"
+    },
+    "generatedBy": {
+      "const": "startup-provider-remediation.mjs"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": ["dry-run", "apply"]
+    },
+    "status": {
+      "enum": ["planned", "succeeded", "rejected", "error"]
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$"
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "plan": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["version", "id", "digest"],
+          "properties": {
+            "version": {
+              "const": "1.0.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        }
+      ]
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "operation",
+            "namespace",
+            "subscriptionId",
+            "scope"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^provider\\.register\\.(prod|nonprod)\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "type": {
+              "const": "azureWrite"
+            },
+            "operation": {
+              "const": "provider.register"
+            },
+            "namespace": {
+              "enum": [
+                "Microsoft.App",
+                "Microsoft.CognitiveServices",
+                "Microsoft.Compute",
+                "Microsoft.ContainerService",
+                "Microsoft.DBforPostgreSQL"
+              ]
+            },
+            "subscriptionId": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "scope": {
+              "type": "string",
+              "pattern": "^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        }
+      ]
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provided", "status", "consumed", "expiresAt", "artifactDigest"],
+      "properties": {
+        "provided": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "notProvided",
+            "pending",
+            "approved",
+            "declined",
+            "expired",
+            "consumed",
+            "invalid"
+          ]
+        },
+        "consumed": {
+          "type": "boolean"
+        },
+        "expiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "artifactDigest": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executable", "arguments", "preview", "executed"],
+      "properties": {
+        "executable": {
+          "const": "az"
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "preview": {
+          "type": ["string", "null"],
+          "maxLength": 500
+        },
+        "executed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["performed", "registrationState"],
+      "properties": {
+        "performed": {
+          "type": "boolean"
+        },
+        "registrationState": {
+          "enum": ["Registered", "NotRegistered", "Registering", "Unknown", null]
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "azureWrites",
+        "localState",
+        "rawOutputRetained",
+        "personalApprovalIdentityRetained"
+      ],
+      "properties": {
+        "azureWrites": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "localState": {
+          "enum": ["none", "reserved", "consumed"]
+        },
+        "rawOutputRetained": {
+          "const": false
+        },
+        "personalApprovalIdentityRetained": {
+          "const": false
+        }
+      }
+    }
+  }
+}

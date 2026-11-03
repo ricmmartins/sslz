@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-rehearsal-lineage.schema.json",
+  "title": "SSLZ PostgreSQL accepted rehearsal lineage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "lineageId",
+    "observedAt",
+    "expiresAt",
+    "acceptedEvidenceSets"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "lineageId": { "$ref": "#/$defs/reference" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "acceptedEvidenceSets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidenceSetId",
+          "evidenceDigest",
+          "rehearsalIdentityDigest"
+        ],
+        "properties": {
+          "evidenceSetId": { "$ref": "#/$defs/reference" },
+          "evidenceDigest": { "$ref": "#/$defs/digest" },
+          "rehearsalIdentityDigest": { "$ref": "#/$defs/digest" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

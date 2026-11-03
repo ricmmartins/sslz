@@ -1,0 +1,35 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "postgresql",
+  "kind": "extension",
+  "providerNamespaces": [
+    "Microsoft.DBforPostgreSQL"
+  ],
+  "requiredChecks": [
+    "region.services.available",
+    "region.policy.allowed-locations",
+    "region.data-residency.compatible",
+    "region.availability-zones.supported",
+    "region.postgresql.edition-version-supported",
+    "region.postgresql.extensions-supported",
+    "quota.postgresql.eligible",
+    "capacity.postgresql.available",
+    "region.postgresql.recovery-supported",
+    "workload.postgresql.provider-parity"
+  ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.DBforPostgreSQL/flexibleServers"
+    ],
+    "computeSkuEvidence": false,
+    "gpuSkuEvidence": false,
+    "foundryDeploymentEvidence": false,
+    "planningContract": "postgresql-regional-plan.schema.json",
+    "deploymentBoundary": "planning-only"
+  },
+  "costAssumptions": [
+    "Nonproduction begins with Burstable compute when the workload supports it.",
+    "Production begins with General Purpose compute; high availability is included only when the resilience requirement justifies it.",
+    "Backup storage, retained backups, and cross-region recovery are not priced until retention and recovery decisions are complete."
+  ]
+}

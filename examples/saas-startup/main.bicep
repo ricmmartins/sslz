@@ -3,6 +3,10 @@
 // Container Apps + Azure SQL Elastic Pool + Redis + Key Vault
 // ============================================================================
 
+func isVnetResourceId(resourceId string) bool => length(split(resourceId, '/')) == 9 ? empty(split(resourceId, '/')[0]) && toLower(split(resourceId, '/')[1]) == 'subscriptions' && !empty(split(resourceId, '/')[2]) && toLower(split(resourceId, '/')[3]) == 'resourcegroups' && !empty(split(resourceId, '/')[4]) && toLower(split(resourceId, '/')[5]) == 'providers' && toLower(split(resourceId, '/')[6]) == 'microsoft.network' && toLower(split(resourceId, '/')[7]) == 'virtualnetworks' && !empty(split(resourceId, '/')[8]) : false
+func isSubnetResourceId(resourceId string) bool => length(split(resourceId, '/')) == 11 ? isVnetResourceId(join(take(split(resourceId, '/'), 9), '/')) && toLower(split(resourceId, '/')[9]) == 'subnets' && !empty(split(resourceId, '/')[10]) : false
+func ipv4AddressValue(address string) int => int(split(address, '.')[0]) * 16777216 + int(split(address, '.')[1]) * 65536 + int(split(address, '.')[2]) * 256 + int(split(address, '.')[3])
+
 @description('Azure region')
 param location string = resourceGroup().location
 
@@ -29,13 +33,16 @@ param sqlAdminPassword string
 @allowed(['prod', 'nonprod'])
 param environment string = 'prod'
 
-@description('Deploy Private Endpoints for SQL and Redis. When true, you MUST also provide privateEndpointSubnetId and vnetId.')
+@description('Deploy Private Endpoints for SQL and Redis and inject Container Apps into the same VNet. When true, all three network resource IDs are required.')
 param deployPrivateEndpoints bool = false
 
-@description('Subnet resource ID for Private Endpoints. Required when deployPrivateEndpoints is true. Example: /subscriptions/.../subnets/snet-data')
+@description('Dedicated subnet resource ID for the Container Apps environment. Required in private mode, must be /27 or larger, delegated to Microsoft.App/environments, and must not overlap Azure Container Apps reserved ranges.')
+param containerAppsInfrastructureSubnetId string = ''
+
+@description('Dedicated subnet resource ID for SQL and Redis Private Endpoints. Required in private mode and must be distinct from the Container Apps infrastructure subnet.')
 param privateEndpointSubnetId string = ''
 
-@description('VNet resource ID for Private DNS Zone links. Required when deployPrivateEndpoints is true. Example: /subscriptions/.../virtualNetworks/vnet-prod')
+@description('VNet resource ID shared by the Container Apps infrastructure subnet, Private Endpoint subnet, and Private DNS Zone links.')
 param vnetId string = ''
 
 @description('Resource tags applied to all deployed resources')
@@ -45,6 +52,63 @@ param tags object = {
   project: appName
   managedBy: 'bicep'
 }
+
+var vnetResourceIdValid = isVnetResourceId(vnetId)
+var containerAppsSubnetResourceIdValid = isSubnetResourceId(containerAppsInfrastructureSubnetId)
+var privateEndpointSubnetResourceIdValid = isSubnetResourceId(privateEndpointSubnetId)
+var containerAppsSubnetVnetId = containerAppsSubnetResourceIdValid ? join(take(split(containerAppsInfrastructureSubnetId, '/'), 9), '/') : ''
+var privateEndpointSubnetVnetId = privateEndpointSubnetResourceIdValid ? join(take(split(privateEndpointSubnetId, '/'), 9), '/') : ''
+var vnetSubscriptionMatches = vnetResourceIdValid ? toLower(split(vnetId, '/')[2]) == toLower(subscription().subscriptionId) : false
+var privateNetworkResourceIdsValid = vnetResourceIdValid && containerAppsSubnetResourceIdValid && privateEndpointSubnetResourceIdValid && vnetSubscriptionMatches && toLower(containerAppsSubnetVnetId) == toLower(vnetId) && toLower(privateEndpointSubnetVnetId) == toLower(vnetId) && toLower(containerAppsInfrastructureSubnetId) != toLower(privateEndpointSubnetId)
+var safeContainerAppsSubnetSegments = privateNetworkResourceIdsValid ? split(containerAppsInfrastructureSubnetId, '/') : ['', 'subscriptions', subscription().subscriptionId, 'resourceGroups', resourceGroup().name, 'providers', 'Microsoft.Network', 'virtualNetworks', 'invalid', 'subnets', 'invalid']
+var safePrivateEndpointSubnetSegments = privateNetworkResourceIdsValid ? split(privateEndpointSubnetId, '/') : ['', 'subscriptions', subscription().subscriptionId, 'resourceGroups', resourceGroup().name, 'providers', 'Microsoft.Network', 'virtualNetworks', 'invalid', 'subnets', 'invalid']
+
+resource containerAppsInfrastructureSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' existing = if (deployPrivateEndpoints && privateNetworkResourceIdsValid) {
+  scope: resourceGroup(safeContainerAppsSubnetSegments[2], safeContainerAppsSubnetSegments[4])
+  name: '${safeContainerAppsSubnetSegments[8]}/${safeContainerAppsSubnetSegments[10]}'
+}
+
+resource privateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' existing = if (deployPrivateEndpoints && privateNetworkResourceIdsValid) {
+  scope: resourceGroup(safePrivateEndpointSubnetSegments[2], safePrivateEndpointSubnetSegments[4])
+  name: '${safePrivateEndpointSubnetSegments[8]}/${safePrivateEndpointSubnetSegments[10]}'
+}
+
+var containerAppsSubnetAddressPrefix = deployPrivateEndpoints && privateNetworkResourceIdsValid
+  ? containerAppsInfrastructureSubnet!.properties.addressPrefix ?? (length(containerAppsInfrastructureSubnet!.properties.addressPrefixes ?? []) == 1 ? first(containerAppsInfrastructureSubnet!.properties.addressPrefixes!) : '')
+  : '10.0.0.0/27'
+var privateEndpointSubnetAddressPrefix = deployPrivateEndpoints && privateNetworkResourceIdsValid
+  ? privateEndpointSubnet!.properties.addressPrefix ?? (length(privateEndpointSubnet!.properties.addressPrefixes ?? []) == 1 ? first(privateEndpointSubnet!.properties.addressPrefixes!) : '')
+  : '10.0.1.0/27'
+var containerAppsSubnetHasSinglePrefix = !empty(containerAppsSubnetAddressPrefix)
+var privateEndpointSubnetHasSinglePrefix = !empty(privateEndpointSubnetAddressPrefix)
+var containerAppsSubnetRange = parseCidr(containerAppsSubnetHasSinglePrefix ? containerAppsSubnetAddressPrefix : '10.0.0.0/27')
+var privateEndpointSubnetRange = parseCidr(privateEndpointSubnetHasSinglePrefix ? privateEndpointSubnetAddressPrefix : '10.0.1.0/27')
+var containerAppsSubnetPrefixLength = containerAppsSubnetRange.cidr
+var containerAppsSubnetDelegations = deployPrivateEndpoints && privateNetworkResourceIdsValid ? map(containerAppsInfrastructureSubnet!.properties.delegations ?? [], delegation => toLower(delegation.properties.serviceName)) : ['microsoft.app/environments']
+var containerAppsSubnetIsDelegated = contains(containerAppsSubnetDelegations, 'microsoft.app/environments')
+var reservedContainerAppsRanges = map([
+  '169.254.0.0/16'
+  '172.30.0.0/16'
+  '172.31.0.0/16'
+  '192.0.2.0/24'
+  '100.100.0.0/17'
+  '100.100.128.0/19'
+  '100.100.160.0/19'
+  '100.100.192.0/19'
+], cidr => parseCidr(cidr))
+var containerAppsNetworkValue = ipv4AddressValue(containerAppsSubnetRange.network)
+var containerAppsBroadcastValue = ipv4AddressValue(containerAppsSubnetRange.broadcast)
+var containerAppsSubnetOverlapsReservedRange = length(filter(reservedContainerAppsRanges, reservedRange => containerAppsNetworkValue <= ipv4AddressValue(reservedRange.broadcast) && ipv4AddressValue(reservedRange.network) <= containerAppsBroadcastValue)) > 0
+var privateEndpointNetworkValue = ipv4AddressValue(privateEndpointSubnetRange.network)
+var privateEndpointBroadcastValue = ipv4AddressValue(privateEndpointSubnetRange.broadcast)
+var privateSubnetsOverlap = containerAppsNetworkValue <= privateEndpointBroadcastValue && privateEndpointNetworkValue <= containerAppsBroadcastValue
+var privateNetworkConfigValid = privateNetworkResourceIdsValid && containerAppsSubnetHasSinglePrefix && privateEndpointSubnetHasSinglePrefix && containerAppsSubnetPrefixLength <= 27 && containerAppsSubnetIsDelegated && !containerAppsSubnetOverlapsReservedRange && !privateSubnetsOverlap
+var validatedContainerAppsInfrastructureSubnetId = !deployPrivateEndpoints || privateNetworkConfigValid
+  ? containerAppsInfrastructureSubnetId
+  : fail('Private endpoint mode requires valid, distinct subnet IDs in vnetId. The Container Apps subnet must have one /27-or-larger IPv4 prefix, be delegated to Microsoft.App/environments, avoid reserved Container Apps ranges, and not overlap the Private Endpoint subnet.')
+var validatedPrivateEndpointSubnetId = !deployPrivateEndpoints || privateNetworkConfigValid
+  ? privateEndpointSubnetId
+  : fail('Private endpoint mode requires valid, distinct subnet IDs in vnetId. The Container Apps subnet must have one /27-or-larger IPv4 prefix, be delegated to Microsoft.App/environments, avoid reserved Container Apps ranges, and not overlap the Private Endpoint subnet.')
 
 // ============================================================================
 // Log Analytics (for Container Apps)
@@ -70,7 +134,7 @@ resource cae 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'cae-${appName}-${environment}'
   location: location
   tags: tags
-  properties: {
+  properties: union({
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -78,7 +142,11 @@ resource cae 'Microsoft.App/managedEnvironments@2024-03-01' = {
         sharedKey: law.listKeys().primarySharedKey
       }
     }
-  }
+  }, deployPrivateEndpoints ? {
+    vnetConfiguration: {
+      infrastructureSubnetId: validatedContainerAppsInfrastructureSubnetId
+    }
+  } : {})
 }
 
 // ============================================================================
@@ -373,7 +441,7 @@ resource sqlPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = if
   location: location
   tags: tags
   properties: {
-    subnet: { id: privateEndpointSubnetId }
+    subnet: { id: validatedPrivateEndpointSubnetId }
     privateLinkServiceConnections: [
       {
         name: 'plsc-sql'
@@ -422,7 +490,7 @@ resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = 
   location: location
   tags: tags
   properties: {
-    subnet: { id: privateEndpointSubnetId }
+    subnet: { id: validatedPrivateEndpointSubnetId }
     privateLinkServiceConnections: [
       {
         name: 'plsc-redis'
@@ -468,3 +536,18 @@ output redisHostname string = redis.properties.hostName
 
 @description('Key Vault URI for secret access')
 output keyVaultUri string = kv.properties.vaultUri
+
+@description('Container Apps environment resource ID')
+output containerAppsEnvironmentId string = cae.id
+
+@description('Container Apps infrastructure subnet resource ID in private mode; empty in public mode')
+output containerAppsInfrastructureSubnetId string = deployPrivateEndpoints ? validatedContainerAppsInfrastructureSubnetId : ''
+
+@description('Private Endpoint subnet resource ID in private mode; empty in public mode')
+output privateEndpointSubnetId string = deployPrivateEndpoints ? validatedPrivateEndpointSubnetId : ''
+
+@description('Private DNS zone resource IDs linked to the application VNet; empty in public mode')
+output privateDnsZoneIds array = deployPrivateEndpoints ? [
+  sqlPrivateDnsZone.id
+  redisPrivateDnsZone.id
+] : []

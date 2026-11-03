@@ -1,0 +1,17 @@
+{
+  "name": "Data-residency incompatibility rejects a region",
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": []
+  },
+  "regionEvidenceOverrides": {
+    "eastus2": {
+      "residencyBoundaries": ["Europe"]
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "primaryDisposition": "rejected",
+    "failedCheck": "region.data-residency.compatible"
+  }
+}

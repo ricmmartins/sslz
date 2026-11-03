@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  {% include head.html %}
+  <link rel="canonical" href="{{ page.redirect_to | absolute_url }}">
+  <meta http-equiv="refresh" content="0; url={{ page.redirect_to | relative_url }}">
+</head>
+<body>
+  <main class="site-main">
+    <div class="page-content">
+      <h1 class="page-title">{{ page.title }}</h1>
+      <p>This agent-aware page moved to the optional agent experience.</p>
+      <p><a href="{{ page.redirect_to | relative_url }}">Continue to {{ page.title }}</a></p>
+    </div>
+  </main>
+  <script>window.location.replace({{ page.redirect_to | relative_url | jsonify }});</script>
+</body>
+</html>

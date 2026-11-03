@@ -1,0 +1,14 @@
+{
+  "mode": "public-azure-load-balancer",
+  "serviceType": "LoadBalancer",
+  "frontendExposure": "public",
+  "protocol": "Tcp",
+  "frontendPort": 80,
+  "backendNodePort": 30080,
+  "healthProbe": {
+    "sourcePrefix": "AzureLoadBalancer",
+    "port": 30080
+  },
+  "dataSourcePrefixes": ["Internet"],
+  "reservedNsgPriorities": []
+}

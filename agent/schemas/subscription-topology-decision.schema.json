@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/subscription-topology-decision.schema.json",
+  "title": "SSLZ subscription and billing topology decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "decisionId",
+    "generatedAt",
+    "expiresAt",
+    "status",
+    "tenantId",
+    "environments",
+    "subscriptionTopology",
+    "benefitAssociation",
+    "evidence",
+    "supportHandoff",
+    "decisionDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "decisionId": {"$ref": "#/$defs/reference"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["ready", "blocked"]},
+    "tenantId": {
+      "oneOf": [
+        {"$ref": "#/$defs/uuid"},
+        {"type": "null"}
+      ]
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "subscriptionId"],
+        "properties": {
+          "name": {"enum": ["prod", "nonprod"]},
+          "subscriptionId": {"$ref": "#/$defs/uuid"}
+        }
+      }
+    },
+    "subscriptionTopology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "reasonCode",
+        "selectionMode",
+        "visibleEnabledSubscriptionCount",
+        "targetSubscriptionCount"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "one-subscription-startup",
+            "separate-prod-nonprod-subscriptions",
+            "expected-target-subscriptions-missing",
+            "target-subscription-tenant-mismatch",
+            "unsupported-ambiguous-multi-subscription"
+          ]
+        },
+        "reasonCode": {"$ref": "#/$defs/reference"},
+        "selectionMode": {"enum": ["one-subscription", "explicit-prod-nonprod"]},
+        "visibleEnabledSubscriptionCount": {"type": "integer", "minimum": 0},
+        "targetSubscriptionCount": {"type": "integer", "minimum": 1, "maximum": 2}
+      }
+    },
+    "benefitAssociation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "reasonCode",
+        "authoritativeEvidence",
+        "targetBillingScopeDigests",
+        "observedBenefitScopeDigests",
+        "observedBenefitSubscriptionIds"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "billing-evidence-unavailable",
+            "credits-or-benefit-association-unknown",
+            "benefits-on-different-subscription-or-billing-profile",
+            "confirmed-for-exact-target"
+          ]
+        },
+        "reasonCode": {"$ref": "#/$defs/reference"},
+        "authoritativeEvidence": {"type": "boolean"},
+        "targetBillingScopeDigests": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/digest"}
+        },
+        "observedBenefitScopeDigests": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/digest"}
+        },
+        "observedBenefitSubscriptionIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/uuid"}
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subscriptionInventoryDigest", "billingEvidenceDigest"],
+      "properties": {
+        "subscriptionInventoryDigest": {"$ref": "#/$defs/digest"},
+        "billingEvidenceDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "supportHandoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "route", "reference"],
+      "properties": {
+        "required": {"type": "boolean"},
+        "route": {
+          "enum": [
+            "none",
+            "microsoft-for-startups-program-support",
+            "azure-billing-support"
+          ]
+        },
+        "reference": {
+          "oneOf": [
+            {"$ref": "#/$defs/reference"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "decisionDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    }
+  }
+}

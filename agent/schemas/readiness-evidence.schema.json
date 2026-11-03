@@ -1,0 +1,795 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/readiness-evidence.schema.json",
+  "title": "SSLZ readiness evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "status",
+    "issuedAt",
+    "expiresAt",
+    "subject",
+    "codeEvidence",
+    "humanAttestations",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "3.0.0"
+    },
+    "evidenceId": {
+      "$ref": "#/$defs/reference"
+    },
+    "status": {
+      "enum": ["ready", "blocked"]
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planId",
+        "tenantId",
+        "prodSubscriptionId",
+        "nonprodSubscriptionId",
+        "profileVersion",
+        "computeProfile",
+        "profileExtensions",
+        "regionalMode",
+        "primaryRegion",
+        "secondaryRegion",
+        "aksIngressMode",
+        "aksIngressDecisionDigest"
+      ],
+      "properties": {
+        "planId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "tenantId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "prodSubscriptionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "nonprodSubscriptionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "profileVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "computeProfile": {
+          "enum": ["container-apps", "aks"]
+        },
+        "profileExtensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["postgresql", "foundry", "gpu"]
+          }
+        },
+        "regionalMode": {
+          "enum": ["single-region-ready", "cool-infrastructure", "warm-workload"]
+        },
+        "primaryRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "secondaryRegion": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/region"
+            }
+          ]
+        },
+        "aksIngressMode": {
+          "enum": ["not-applicable", "private", "public-azure-load-balancer"]
+        },
+        "aksIngressDecisionDigest": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "codeEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preflight",
+        "subscriptionTopology",
+        "defenderWorkspacePlacement",
+        "regional",
+        "postgresql",
+        "foundry"
+      ],
+      "properties": {
+        "preflight": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/codeEvidence"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": ["pass", "blocked"]
+                },
+                "issuer": {
+                  "const": "startup-preflight.mjs"
+                }
+              }
+            }
+          ]
+        },
+        "subscriptionTopology": {
+          "$ref": "subscription-topology-decision.schema.json"
+        },
+        "defenderWorkspacePlacement": {
+          "$ref": "defender-workspace-placement-decision.schema.json"
+        },
+        "regional": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/codeEvidence"
+              },
+              {
+                "type": "object",
+                "required": ["role", "region"],
+                "properties": {
+                  "status": {
+                    "enum": ["pass", "blocked"]
+                  },
+                  "issuer": {
+                    "const": "startup-regional-plan.mjs"
+                  },
+                  "role": {
+                    "enum": ["primary", "secondary"]
+                  },
+                  "region": {
+                    "$ref": "#/$defs/region"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "postgresql": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "issuer",
+                "reference",
+                "observedAt",
+                "expiresAt",
+                "evidenceDigest",
+                "decisionDigest",
+                "selectedEvidenceDigest",
+                "targetRegion",
+                "selectedRegion",
+                "fallbackRequired",
+                "fallbackRationale",
+                "providerParametersDigest",
+                "deploymentBoundary"
+              ],
+              "properties": {
+                "status": { "const": "pass" },
+                "issuer": { "const": "startup-postgresql-plan.mjs" },
+                "reference": { "$ref": "#/$defs/reference" },
+                "observedAt": { "type": "string", "format": "date-time" },
+                "expiresAt": { "type": "string", "format": "date-time" },
+                "evidenceDigest": { "$ref": "#/$defs/digest" },
+                "decisionDigest": { "$ref": "#/$defs/digest" },
+                "selectedEvidenceDigest": { "$ref": "#/$defs/digest" },
+                "targetRegion": { "$ref": "#/$defs/region" },
+                "selectedRegion": { "$ref": "#/$defs/region" },
+                "fallbackRequired": { "type": "boolean" },
+                "fallbackRationale": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "$ref": "#/$defs/reference" }
+                },
+                "providerParametersDigest": { "$ref": "#/$defs/digest" },
+                "deploymentBoundary": { "const": "planning-only" }
+              }
+            }
+          ]
+        },
+        "foundry": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/codeEvidence"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "role",
+                  "region",
+                  "modelReference",
+                  "modelVersion",
+                  "deploymentType",
+                  "requiredQuota",
+                  "availableQuota",
+                  "quotaUnit"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": ["pass", "blocked"]
+                  },
+                  "issuer": {
+                    "const": "startup-regional-plan.mjs"
+                  },
+                  "role": {
+                    "enum": ["primary", "secondary"]
+                  },
+                  "region": {
+                    "$ref": "#/$defs/region"
+                  },
+                  "modelReference": {
+                    "$ref": "#/$defs/reference"
+                  },
+                  "modelVersion": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+                  },
+                  "deploymentType": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+                  },
+                  "requiredQuota": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "availableQuota": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "quotaUnit": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "humanAttestations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startupBillingSupport",
+        "externalReviews",
+        "failoverOwner",
+        "recoveryMeasurements",
+        "serviceRecoveryTests",
+        "coolFootprintCost",
+        "recoveryExercise"
+      ],
+      "properties": {
+        "startupBillingSupport": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/humanAttestation"
+            },
+            {
+              "type": "object",
+              "required": [
+                "attestationVersion",
+                "topologyDecisionId",
+                "topologyDecisionDigest"
+              ],
+              "properties": {
+                "attestationVersion": {
+                  "const": "2.0.0"
+                },
+                "topologyDecisionId": {
+                  "$ref": "#/$defs/reference"
+                },
+                "topologyDecisionDigest": {
+                  "$ref": "#/$defs/digest"
+                },
+                "status": {
+                  "enum": ["confirmed", "pending", "rejected"]
+                },
+                "subjectScope": {
+                  "const": "microsoft-for-startups-billing-and-support"
+                }
+              }
+            }
+          ]
+        },
+        "externalReviews": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "security",
+            "azureArchitecture",
+            "iacParity"
+          ],
+          "properties": {
+            "security": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/reviewAttestation"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "subjectScope": {
+                      "const": "sslz-security-review"
+                    }
+                  }
+                }
+              ]
+            },
+            "azureArchitecture": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/reviewAttestation"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "subjectScope": {
+                      "const": "azure-architecture-review"
+                    }
+                  }
+                }
+              ]
+            },
+            "iacParity": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/reviewAttestation"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "subjectScope": {
+                      "const": "bicep-terraform-parity-review"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "failoverOwner": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/humanAttestation"
+            },
+            {
+              "type": "object",
+              "required": ["ownerReference", "roleReference"],
+              "properties": {
+                "status": {
+                  "enum": ["confirmed", "pending", "rejected"]
+                },
+                "subjectScope": {
+                  "const": "workload-failover-accountability"
+                },
+                "ownerReference": {
+                  "$ref": "#/$defs/reference"
+                },
+                "roleReference": {
+                  "$ref": "#/$defs/reference"
+                },
+                "roleDisplayName": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 80
+                }
+              }
+            }
+          ]
+        },
+        "recoveryMeasurements": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/humanAttestation"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "profileId",
+                  "targetRtoMinutes",
+                  "targetRpoMinutes",
+                  "measuredRtoMinutes",
+                  "measuredRpoMinutes"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": ["met", "unmet", "not-measured"]
+                  },
+                  "subjectScope": {
+                    "const": "profile-recovery-measurement"
+                  },
+                  "profileId": {
+                    "enum": ["container-apps", "aks", "postgresql", "foundry", "gpu"]
+                  },
+                  "targetRtoMinutes": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "targetRpoMinutes": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "measuredRtoMinutes": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "measuredRpoMinutes": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "serviceRecoveryTests": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/humanAttestation"
+              },
+              {
+                "type": "object",
+                "required": ["profileExtension"],
+                "properties": {
+                  "status": {
+                    "enum": ["pass", "fail", "not-tested"]
+                  },
+                  "subjectScope": {
+                    "const": "service-specific-recovery-test"
+                  },
+                  "profileExtension": {
+                    "enum": ["postgresql", "foundry", "gpu"]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "coolFootprintCost": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/humanAttestation"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "currency",
+                    "minimum",
+                    "maximum",
+                    "provenanceReference",
+                    "primaryMonthlyCost",
+                    "ceilingPercent",
+                    "projectedPercent"
+                  ],
+                  "properties": {
+                    "status": {
+                      "enum": ["confirmed", "pending", "rejected"]
+                    },
+                    "subjectScope": {
+                      "const": "cool-secondary-footprint-cost"
+                    },
+                    "currency": {
+                      "const": "USD"
+                    },
+                    "minimum": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "maximum": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "provenanceReference": {
+                      "$ref": "#/$defs/reference"
+                    },
+                    "primaryMonthlyCost": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "ceilingPercent": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100
+                    },
+                    "projectedPercent": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "recoveryExercise": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/humanAttestation"
+                },
+                {
+                  "type": "object",
+                  "required": ["cadence", "exerciseReference"],
+                  "properties": {
+                    "status": {
+                      "enum": ["pass", "fail", "not-tested"]
+                    },
+                    "subjectScope": {
+                      "const": "cool-foundation-recovery-exercise"
+                    },
+                    "cadence": {
+                      "enum": ["monthly", "quarterly", "semiannual", "annual"]
+                    },
+                    "exerciseReference": {
+                      "$ref": "#/$defs/reference"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "evidenceDigest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "codeEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "issuer",
+        "reference",
+        "observedAt",
+        "expiresAt",
+        "evidenceDigest"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "issuer": {
+          "$ref": "#/$defs/reference"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "role": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "modelReference": {
+          "type": "string"
+        },
+        "modelVersion": {
+          "type": "string"
+        },
+        "deploymentType": {
+          "type": "string"
+        },
+        "requiredQuota": {
+          "type": "number"
+        },
+        "availableQuota": {
+          "type": "number"
+        },
+        "quotaUnit": {
+          "type": "string"
+        }
+      }
+    },
+    "humanAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "issuerRole",
+        "reference",
+        "subjectScope",
+        "attestedAt",
+        "expiresAt",
+        "evidenceDigest"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "issuerRole": {
+          "$ref": "#/$defs/reference"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "subjectScope": {
+          "$ref": "#/$defs/reference"
+        },
+        "attestedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "ownerReference": {
+          "type": "string"
+        },
+        "roleReference": {
+          "type": "string"
+        },
+        "roleDisplayName": {
+          "type": "string"
+        },
+        "profileId": {
+          "type": "string"
+        },
+        "targetRtoMinutes": {
+          "type": "number"
+        },
+        "targetRpoMinutes": {
+          "type": "number"
+        },
+        "measuredRtoMinutes": {
+          "type": "number"
+        },
+        "measuredRpoMinutes": {
+          "type": "number"
+        },
+        "profileExtension": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "provenanceReference": {
+          "type": "string"
+        },
+        "attestationVersion": {
+          "type": "string"
+        },
+        "topologyDecisionId": {
+          "type": "string"
+        },
+        "topologyDecisionDigest": {
+          "type": "string"
+        },
+        "primaryMonthlyCost": {
+          "type": "number"
+        },
+        "ceilingPercent": {
+          "type": "number"
+        },
+        "projectedPercent": {
+          "type": "number"
+        },
+        "cadence": {
+          "type": "string"
+        },
+        "exerciseReference": {
+          "type": "string"
+        }
+      }
+    },
+    "reviewAttestation": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/humanAttestation"
+        },
+        {
+          "type": "object",
+          "required": [
+            "attestationVersion"
+          ],
+          "properties": {
+            "attestationVersion": {
+              "const": "1.0.0"
+            },
+            "status": {
+              "enum": [
+                "approved",
+                "pending",
+                "rejected"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

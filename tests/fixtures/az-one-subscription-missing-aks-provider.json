@@ -1,0 +1,7 @@
+{
+  "extends": "az-one-subscription.json",
+  "providers": {
+    "prod": "missing-microsoft-container-service",
+    "nonprod": "missing-microsoft-container-service"
+  }
+}

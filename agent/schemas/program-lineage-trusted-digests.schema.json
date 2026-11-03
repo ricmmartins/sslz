@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/program-lineage-trusted-digests.schema.json",
+  "title": "SSLZ externally protected program lineage planner digests",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "postgresqlMigrationPlanInputDigest",
+    "postgresqlMigrationPlanDigest",
+    "postgresqlRehearsalLineageDigest",
+    "postgresqlExecutionTrustManifestDigest",
+    "postgresqlExecutionEvaluationTimeDigest"
+  ],
+  "properties": {
+    "postgresqlMigrationPlanInputDigest": { "$ref": "#/$defs/digest" },
+    "postgresqlMigrationPlanDigest": { "$ref": "#/$defs/digest" },
+    "postgresqlRehearsalLineageDigest": { "$ref": "#/$defs/digest" },
+    "postgresqlExecutionTrustManifestDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "postgresqlExecutionEvaluationTimeDigest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

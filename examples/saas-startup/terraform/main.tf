@@ -35,6 +35,101 @@ data "azurerm_resource_group" "this" {
   name = var.resource_group_name
 }
 
+locals {
+  container_apps_subnet_segments_candidate   = split("/", var.container_apps_infrastructure_subnet_id)
+  private_endpoint_subnet_segments_candidate = split("/", var.private_endpoint_subnet_id)
+  container_apps_subnet_id_valid             = length(local.container_apps_subnet_segments_candidate) == 11
+  private_endpoint_subnet_id_valid           = length(local.private_endpoint_subnet_segments_candidate) == 11
+  container_apps_subnet_segments             = local.container_apps_subnet_id_valid ? local.container_apps_subnet_segments_candidate : ["", "subscriptions", var.subscription_id, "resourceGroups", "invalid", "providers", "Microsoft.Network", "virtualNetworks", "invalid", "subnets", "invalid"]
+  private_endpoint_subnet_segments           = local.private_endpoint_subnet_id_valid ? local.private_endpoint_subnet_segments_candidate : ["", "subscriptions", var.subscription_id, "resourceGroups", "invalid", "providers", "Microsoft.Network", "virtualNetworks", "invalid", "subnets", "invalid"]
+  private_network_resource_ids_valid = (
+    local.container_apps_subnet_id_valid &&
+    local.private_endpoint_subnet_id_valid &&
+    var.vnet_id != "" &&
+    try(split("/", lower(var.vnet_id))[2] == lower(var.subscription_id), false) &&
+    startswith(lower(var.container_apps_infrastructure_subnet_id), "${lower(var.vnet_id)}/subnets/") &&
+    startswith(lower(var.private_endpoint_subnet_id), "${lower(var.vnet_id)}/subnets/") &&
+    lower(var.container_apps_infrastructure_subnet_id) != lower(var.private_endpoint_subnet_id)
+  )
+  safe_container_apps_subnet_id   = local.private_network_resource_ids_valid ? var.container_apps_infrastructure_subnet_id : "/subscriptions/${var.subscription_id}/resourceGroups/invalid/providers/Microsoft.Network/virtualNetworks/invalid/subnets/invalid-container-apps"
+  safe_private_endpoint_subnet_id = local.private_network_resource_ids_valid ? var.private_endpoint_subnet_id : "/subscriptions/${var.subscription_id}/resourceGroups/invalid/providers/Microsoft.Network/virtualNetworks/invalid/subnets/invalid-private-endpoints"
+  safe_vnet_id                    = local.private_network_resource_ids_valid ? var.vnet_id : "/subscriptions/${var.subscription_id}/resourceGroups/invalid/providers/Microsoft.Network/virtualNetworks/invalid"
+}
+
+data "azurerm_subnet" "container_apps" {
+  count                = var.deploy_private_endpoints && local.container_apps_subnet_id_valid ? 1 : 0
+  name                 = local.container_apps_subnet_segments[10]
+  virtual_network_name = local.container_apps_subnet_segments[8]
+  resource_group_name  = local.container_apps_subnet_segments[4]
+}
+
+data "azurerm_subnet" "private_endpoints" {
+  count                = var.deploy_private_endpoints && local.private_endpoint_subnet_id_valid ? 1 : 0
+  name                 = local.private_endpoint_subnet_segments[10]
+  virtual_network_name = local.private_endpoint_subnet_segments[8]
+  resource_group_name  = local.private_endpoint_subnet_segments[4]
+}
+
+locals {
+  container_apps_subnet_prefixes   = var.deploy_private_endpoints && length(data.azurerm_subnet.container_apps) == 1 ? try(data.azurerm_subnet.container_apps[0].address_prefixes, []) : []
+  private_endpoint_subnet_prefixes = var.deploy_private_endpoints && length(data.azurerm_subnet.private_endpoints) == 1 ? try(data.azurerm_subnet.private_endpoints[0].address_prefixes, []) : []
+  container_apps_subnet_has_single_prefix = (
+    local.container_apps_subnet_prefixes != null &&
+    try(length(local.container_apps_subnet_prefixes) == 1, false)
+  )
+  private_endpoint_subnet_has_single_prefix = (
+    local.private_endpoint_subnet_prefixes != null &&
+    try(length(local.private_endpoint_subnet_prefixes) == 1, false)
+  )
+  container_apps_subnet_prefix     = local.container_apps_subnet_has_single_prefix ? one(local.container_apps_subnet_prefixes) : "10.0.0.0/32"
+  private_endpoint_subnet_prefix   = local.private_endpoint_subnet_has_single_prefix ? one(local.private_endpoint_subnet_prefixes) : "10.0.1.0/32"
+  container_apps_prefix_parts      = split("/", local.container_apps_subnet_prefix)
+  private_endpoint_prefix_parts    = split("/", local.private_endpoint_subnet_prefix)
+  container_apps_address_octets    = try([for octet in split(".", local.container_apps_prefix_parts[0]) : tonumber(octet)], [0, 0, 0, 0])
+  private_endpoint_address_octets  = try([for octet in split(".", local.private_endpoint_prefix_parts[0]) : tonumber(octet)], [0, 0, 0, 0])
+  container_apps_prefix_length     = try(tonumber(local.container_apps_prefix_parts[1]), 32)
+  private_endpoint_prefix_length   = try(tonumber(local.private_endpoint_prefix_parts[1]), 32)
+  container_apps_address_value     = local.container_apps_address_octets[0] * 16777216 + local.container_apps_address_octets[1] * 65536 + local.container_apps_address_octets[2] * 256 + local.container_apps_address_octets[3]
+  private_endpoint_address_value   = local.private_endpoint_address_octets[0] * 16777216 + local.private_endpoint_address_octets[1] * 65536 + local.private_endpoint_address_octets[2] * 256 + local.private_endpoint_address_octets[3]
+  container_apps_block_size        = pow(2, 32 - local.container_apps_prefix_length)
+  private_endpoint_block_size      = pow(2, 32 - local.private_endpoint_prefix_length)
+  container_apps_network_value     = floor(local.container_apps_address_value / local.container_apps_block_size) * local.container_apps_block_size
+  private_endpoint_network_value   = floor(local.private_endpoint_address_value / local.private_endpoint_block_size) * local.private_endpoint_block_size
+  container_apps_broadcast_value   = local.container_apps_network_value + local.container_apps_block_size - 1
+  private_endpoint_broadcast_value = local.private_endpoint_network_value + local.private_endpoint_block_size - 1
+  private_subnets_overlap = (
+    local.container_apps_network_value <= local.private_endpoint_broadcast_value &&
+    local.private_endpoint_network_value <= local.container_apps_broadcast_value
+  )
+  reserved_container_apps_cidrs = [
+    "169.254.0.0/16",
+    "172.30.0.0/16",
+    "172.31.0.0/16",
+    "192.0.2.0/24",
+    "100.100.0.0/17",
+    "100.100.128.0/19",
+    "100.100.160.0/19",
+    "100.100.192.0/19",
+  ]
+  reserved_container_apps_ranges = [
+    for cidr in local.reserved_container_apps_cidrs : {
+      network_value = sum([
+        for index, octet in split(".", split("/", cidr)[0]) :
+        tonumber(octet) * pow(256, 3 - index)
+      ])
+      broadcast_value = sum([
+        for index, octet in split(".", split("/", cidr)[0]) :
+        tonumber(octet) * pow(256, 3 - index)
+      ]) + pow(2, 32 - tonumber(split("/", cidr)[1])) - 1
+    }
+  ]
+  container_apps_subnet_overlaps_reserved_range = anytrue([
+    for reserved in local.reserved_container_apps_ranges :
+    local.container_apps_network_value <= reserved.broadcast_value &&
+    reserved.network_value <= local.container_apps_broadcast_value
+  ])
+}
+
 # ==============================================================================
 # Log Analytics
 # 30-day retention keeps costs low for startup workloads. Increase to 90 days
@@ -59,7 +154,22 @@ resource "azurerm_container_app_environment" "this" {
   location                   = var.location
   resource_group_name        = data.azurerm_resource_group.this.name
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+  infrastructure_subnet_id   = var.deploy_private_endpoints ? local.safe_container_apps_subnet_id : null
   tags                       = local.tags
+
+  lifecycle {
+    precondition {
+      condition = !var.deploy_private_endpoints || (
+        local.private_network_resource_ids_valid &&
+        local.container_apps_subnet_has_single_prefix &&
+        local.private_endpoint_subnet_has_single_prefix &&
+        local.container_apps_prefix_length <= 27 &&
+        !local.container_apps_subnet_overlaps_reserved_range &&
+        !local.private_subnets_overlap
+      )
+      error_message = "Private endpoint mode requires a /27-or-larger Container Apps IPv4 subnet that avoids reserved ranges and does not overlap the Private Endpoint subnet. The subnet must also be dedicated and delegated to Microsoft.App/environments; Azure validates delegation when the environment is created."
+    }
+  }
 }
 
 # ==============================================================================
@@ -319,7 +429,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "sql" {
   name                  = "link-sql"
   resource_group_name   = data.azurerm_resource_group.this.name
   private_dns_zone_name = azurerm_private_dns_zone.sql[0].name
-  virtual_network_id    = var.vnet_id
+  virtual_network_id    = local.safe_vnet_id
 }
 
 resource "azurerm_private_endpoint" "sql" {
@@ -327,7 +437,7 @@ resource "azurerm_private_endpoint" "sql" {
   name                = "pe-${azurerm_mssql_server.this.name}"
   location            = var.location
   resource_group_name = data.azurerm_resource_group.this.name
-  subnet_id           = var.private_endpoint_subnet_id
+  subnet_id           = local.safe_private_endpoint_subnet_id
   tags                = local.tags
 
   private_service_connection {
@@ -355,7 +465,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "redis" {
   name                  = "link-redis"
   resource_group_name   = data.azurerm_resource_group.this.name
   private_dns_zone_name = azurerm_private_dns_zone.redis[0].name
-  virtual_network_id    = var.vnet_id
+  virtual_network_id    = local.safe_vnet_id
 }
 
 resource "azurerm_private_endpoint" "redis" {
@@ -363,7 +473,7 @@ resource "azurerm_private_endpoint" "redis" {
   name                = "pe-${azurerm_redis_cache.this.name}"
   location            = var.location
   resource_group_name = data.azurerm_resource_group.this.name
-  subnet_id           = var.private_endpoint_subnet_id
+  subnet_id           = local.safe_private_endpoint_subnet_id
   tags                = local.tags
 
   private_service_connection {

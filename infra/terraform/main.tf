@@ -50,6 +50,9 @@ terraform {
 }
 
 provider "azurerm" {
+  resource_provider_registrations = var.resource_provider_registrations
+  resource_providers_to_register  = var.resource_providers_to_register
+
   features {
     resource_group {
       prevent_deletion_if_contains_resources = true
@@ -62,13 +65,95 @@ provider "azurerm" {
   subscription_id = var.subscription_id
 }
 
+provider "azurerm" {
+  alias                           = "defender_workspace"
+  subscription_id                 = var.subscription_id
+  resource_provider_registrations = var.resource_provider_registrations
+  resource_providers_to_register  = var.resource_providers_to_register
+
+  features {
+    skip_import_check_on_create_and_allow_overwriting_existing_resources = true
+  }
+}
+
 # ==============================================================================
 # Resource Groups
 # ==============================================================================
 
+resource "terraform_data" "log_analytics_workspace_placement_guard" {
+  lifecycle {
+    precondition {
+      condition     = contains(local.allowed_locations, local.log_analytics_workspace_location)
+      error_message = "log_analytics_workspace_location must be included in allowed_locations."
+    }
+
+    precondition {
+      condition     = contains(local.allowed_locations, var.location)
+      error_message = "The selected primary location must be included in allowed_locations."
+    }
+
+    precondition {
+      condition     = !local.create_log_analytics_workspace || local.log_analytics_workspace_location == var.location
+      error_message = "A new Log Analytics workspace must use the selected primary location."
+    }
+
+    precondition {
+      condition     = local.create_log_analytics_workspace || local.existing_workspace_reference_valid
+      error_message = "existing_log_analytics_workspace_id must be a Log Analytics workspace resource ID."
+    }
+
+    precondition {
+      condition     = local.create_log_analytics_workspace || try(lower(split("/", var.existing_log_analytics_workspace_id)[2]) == lower(var.subscription_id), false)
+      error_message = "existing_log_analytics_workspace_id must belong to the deployment subscription."
+    }
+
+    precondition {
+      condition = local.enable_defender_for_servers ? (
+        local.configure_defender_workspace != var.defender_workspace_association_managed_externally
+        ) : (
+        !local.configure_defender_workspace && !var.defender_workspace_association_managed_externally
+      )
+      error_message = "Exactly one Defender workspace association owner is required when Defender for Servers is enabled."
+    }
+
+    precondition {
+      condition     = !var.defender_workspace_association_managed_externally || !local.create_log_analytics_workspace
+      error_message = "An externally managed Defender workspace association requires an approved existing workspace reference."
+    }
+
+    precondition {
+      condition = !local.enable_defender_for_servers || !var.defender_workspace_shared_subscription ? (
+        !var.defender_workspace_association_managed_externally
+        ) : (
+        !local.create_log_analytics_workspace && (
+          (var.environment == "prod" && local.configure_defender_workspace && !var.defender_workspace_association_managed_externally) ||
+          (var.environment == "nonprod" && !local.configure_defender_workspace && var.defender_workspace_association_managed_externally)
+        )
+      )
+      error_message = "A shared subscription requires one approved existing workspace, prod ownership, and nonprod external management."
+    }
+
+    precondition {
+      condition = local.create_log_analytics_workspace || try(
+        lower(data.azurerm_log_analytics_workspace.existing[0].id) == lower(var.existing_log_analytics_workspace_id) &&
+        lower(data.azurerm_log_analytics_workspace.existing[0].location) == lower(local.log_analytics_workspace_location),
+        false,
+      )
+      error_message = "The existing Log Analytics workspace actual ID and location must match the reviewed placement."
+    }
+  }
+}
+
+data "azurerm_log_analytics_workspace" "existing" {
+  count               = local.create_log_analytics_workspace || !local.existing_workspace_reference_valid ? 0 : 1
+  name                = element(reverse(split("/", local.safe_existing_workspace_id)), 0)
+  resource_group_name = split("/", local.safe_existing_workspace_id)[4]
+}
+
 resource "azurerm_resource_group" "monitoring" {
+  count    = local.create_log_analytics_workspace ? 1 : 0
   name     = "rg-${local.prefix}-monitoring"
-  location = var.location
+  location = local.log_analytics_workspace_location
   tags     = local.tags
 }
 
@@ -84,9 +169,10 @@ resource "azurerm_resource_group" "networking" {
 # ==============================================================================
 
 module "log_analytics" {
+  count               = local.create_log_analytics_workspace ? 1 : 0
   source              = "./modules/monitoring"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.monitoring.name
+  location            = local.log_analytics_workspace_location
+  resource_group_name = azurerm_resource_group.monitoring[0].name
   workspace_name      = "law-${local.prefix}"
   retention_in_days   = var.log_retention_in_days
   daily_quota_gb      = var.log_daily_quota_gb
@@ -94,14 +180,21 @@ module "log_analytics" {
 }
 
 module "networking" {
-  count                 = var.deploy_networking ? 1 : 0
-  source                = "./modules/networking"
-  location              = var.location
-  resource_group_name   = azurerm_resource_group.networking[0].name
-  vnet_name             = "vnet-${local.prefix}"
-  vnet_address_prefix   = local.vnet_address_prefix
-  app_subnet_delegation = var.app_subnet_delegation
-  tags                  = local.tags
+  count                                  = var.deploy_networking ? 1 : 0
+  source                                 = "./modules/networking"
+  location                               = var.location
+  resource_group_name                    = azurerm_resource_group.networking[0].name
+  vnet_name                              = "vnet-${local.prefix}"
+  vnet_address_prefix                    = local.vnet_address_prefix
+  app_subnet_delegation                  = var.app_subnet_delegation
+  aks_ingress_mode                       = var.aks_ingress_mode
+  aks_ingress_frontend_port              = var.aks_ingress_frontend_port
+  aks_ingress_backend_node_port          = var.aks_ingress_backend_node_port
+  aks_ingress_health_probe_source_prefix = var.aks_ingress_health_probe_source_prefix
+  aks_ingress_source_prefixes            = var.aks_ingress_source_prefixes
+  aks_ingress_reserved_nsg_priorities    = var.aks_ingress_reserved_nsg_priorities
+  include_container_apps_subnet          = false
+  tags                                   = local.tags
 }
 
 # Defender pricing resources (Microsoft.Security/pricings/*) already exist on every
@@ -150,18 +243,32 @@ import {
 
 module "security" {
   source                         = "./modules/security"
+  subscription_id                = var.subscription_id
   security_contact_email         = var.security_contact_email
   enable_defender_for_servers    = local.enable_defender_for_servers
   enable_defender_for_containers = var.enable_defender_for_containers
   enable_defender_for_databases  = local.enable_defender_for_databases
   enable_defender_for_key_vault  = var.enable_defender_for_key_vault
+  enable_defender_for_storage    = var.enable_defender_for_storage
+}
+
+resource "azurerm_security_center_workspace" "defender" {
+  count        = local.configure_defender_workspace ? 1 : 0
+  provider     = azurerm.defender_workspace
+  scope        = "/subscriptions/${var.subscription_id}"
+  workspace_id = local.effective_log_analytics_workspace_id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 module "policy" {
   source                     = "./modules/policy"
   location                   = var.location
+  policy_assignment_prefix   = var.policy_assignment_prefix
   allowed_locations          = local.allowed_locations
-  log_analytics_workspace_id = module.log_analytics.workspace_id
+  log_analytics_workspace_id = local.effective_log_analytics_workspace_id
   subscription_id            = var.subscription_id
 }
 
@@ -172,7 +279,7 @@ module "policy" {
 resource "azurerm_monitor_diagnostic_setting" "activity_log" {
   name                       = "diag-activity-log-to-law"
   target_resource_id         = "/subscriptions/${var.subscription_id}"
-  log_analytics_workspace_id = module.log_analytics.workspace_id
+  log_analytics_workspace_id = local.effective_log_analytics_workspace_id
 
   enabled_log {
     category = "Administrative"

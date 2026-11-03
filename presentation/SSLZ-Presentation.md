@@ -91,7 +91,7 @@ Each subscription is self-contained. **Add complexity only when you need it.**
 
 ## SLIDE 7 — Built for Real Startup Archetypes
 
-Three production-grade example architectures (Bicep + Terraform):
+Three detailed example architectures (Bicep + Terraform):
 
 | Archetype         | Stack                                                         |
 |-------------------|---------------------------------------------------------------|
@@ -106,7 +106,7 @@ Each includes deployment instructions, realistic cost estimates, and scaling gui
 ## SLIDE 8 — Project Traction & Metrics
 
 **Repository:**
-- 211 commits in ~6 weeks (Feb–Mar 2026)
+- Agent-aware delivery tracked through merged PR #29
 - Dual IaC: 6 Bicep modules + 5 Terraform modules
 - 5 GitHub Actions workflows (deploy, validate, integration test, pages)
 - 8 documentation pages + graduation guide

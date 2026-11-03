@@ -1,0 +1,16 @@
+---
+layout: default
+---
+<div class="page-wrapper">
+  {% include agent-sidebar.html %}
+  <div class="page-content">
+    <article>
+      <p><strong>SSLZ Agent documentation</strong> · <a href="{{ '/use-sslz-agent/' | relative_url }}">Launch the agent</a> · <a href="{{ '/' | relative_url }}">Classic direct-operator site</a></p>
+      <h1 class="page-title">{{ page.title }}</h1>
+      {% if page.description %}
+      <p class="page-description">{{ page.description }}</p>
+      {% endif %}
+      {{ content }}
+    </article>
+  </div>
+</div>

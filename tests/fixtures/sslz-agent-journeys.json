@@ -1,0 +1,585 @@
+{
+  "schemaVersion": "1.0.0",
+  "productName": "SSLZ Agent",
+  "canonicalLaunchUrl": "https://startupscalelanding.zone/use-sslz-agent/",
+  "localAgentName": "sslz-agent",
+  "journeys": [
+    {
+      "id": "synthetic-greenfield",
+      "founderPrompt": "We are launching a new customer API on Azure with PostgreSQL and managed AI inference.",
+      "route": "greenfield",
+      "requiredTopics": [
+        "subscription-topology",
+        "billing-credit-visibility",
+        "provider-registration",
+        "workload-selection",
+        "region-selection",
+        "quota-capacity",
+        "foundry-model-access",
+        "postgresql-regional-capacity",
+        "defender-workspace-policy",
+        "approval-bound-iac"
+      ],
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCallsInFixture": 0,
+      "liveExecution": "guarded-primary-baseline-only"
+    },
+    {
+      "id": "synthetic-migration",
+      "founderPrompt": "Our application already runs in another cloud and must move without losing the rollback path.",
+      "route": "migration",
+      "requiredTopics": [
+        "greenfield-target-readiness",
+        "postgresql-migration-planning",
+        "container-image-cicd-planning",
+        "connectivity-dns-identity-egress",
+        "source-of-truth",
+        "cutover-rollback-failback"
+      ],
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCallsInFixture": 0,
+      "liveExecution": "disabled"
+    },
+    {
+      "id": "synthetic-dual-cloud",
+      "founderPrompt": "We will keep workloads in two clouds and want Azure to own the shared control plane.",
+      "route": "dual-cloud",
+      "requiredTopics": [
+        "greenfield-target-readiness",
+        "connectivity-dns-identity-egress",
+        "control-plane-ownership",
+        "raci",
+        "source-of-truth",
+        "cutover-rollback-failback"
+      ],
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCallsInFixture": 0,
+      "liveExecution": "disabled"
+    }
+  ],
+  "regressionScenarios": [
+    {
+      "id": "ai-saas-aws-to-azure-12-engineers",
+      "founderPrompt": "I'm building an AI SaaS company with 12 engineers. We are currently running on AWS and want to start deploying workloads on Azure. What should we do first?",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "AI SaaS",
+        "engineeringTeamSize": 12,
+        "currentHosting": "AWS",
+        "existingAzureFootprint": "unknown",
+        "intendedAzureOutcome": "unknown"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "existing Azure footprint and intended Azure outcome",
+        "application runtime and traffic shape",
+        "Kubernetes-specific requirements",
+        "relational database requirement",
+        "model hosting and managed-model fit",
+        "data residency and recovery objectives",
+        "operations owner, budget, and subscription topology"
+      ],
+      "architecture": {
+        "status": "awaiting-workload-and-azure-context",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "Required workload and Azure-context answers are unknown; do not map them to false to run the startup planner."
+      },
+      "firstAction": "Ask whether Azure will host a new workload alongside AWS, replace an AWS workload, or extend an existing Azure footprint.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      },
+      "evidenceDistinctions": {
+        "syntheticFixture": "Not customer evidence",
+        "localPlanning": "Uses supplied inputs only and makes no Azure calls",
+        "liveReadOnly": "Requires approval for the exact command and current evidence",
+        "livePreview": "Separate live action requiring its own approval",
+        "azureWrites": "Remain behind existing explicit approval contracts"
+      },
+      "growthRoadmap": {
+        "stages": [
+          "Discovery and decisions",
+          "Offline workload and foundation planning",
+          "Approved readiness evidence",
+          "Approved local parameters and separately approved preview",
+          "Measured workload operations"
+        ],
+        "graduationSignals": [
+          "multiple independent production workloads",
+          "five or more subscriptions",
+          "regulatory controls beyond the startup baseline",
+          "hybrid connectivity",
+          "centralized egress inspection",
+          "active-active multi-region writes",
+          "dedicated platform team",
+          "engineering team above 50"
+        ]
+      }
+    },
+    {
+      "id": "non-ai-gcp-api-with-confirmed-requirements",
+      "founderPrompt": "We have a non-AI HTTP API on GCP. It is containerized, needs PostgreSQL, has no Kubernetes-specific requirements, and we want a new Azure deployment alongside GCP. Our engineering team has 7 people.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "B2B SaaS",
+        "engineeringTeamSize": 7,
+        "currentHosting": "GCP",
+        "existingAzureFootprint": "unknown",
+        "intendedAzureOutcome": "new-workload-alongside-source"
+      },
+      "maturity": {
+        "stage": "planning",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "existing Azure footprint and subscription topology",
+        "data residency and recovery objectives",
+        "account readiness, provider registration, region availability, quota, and capacity"
+      ],
+      "workloadAnswers": {
+        "requiresKubernetes": false,
+        "requiresRelationalDatabase": true,
+        "usesFoundryModels": false,
+        "requiresCustomerManagedGpu": false,
+        "usesDocker": true
+      },
+      "architecture": {
+        "status": "conditional-plan-from-confirmed-requirements",
+        "computeProfile": "container-apps",
+        "extensions": ["postgresql"],
+        "serviceRecommendations": [
+          {
+            "service": "Azure Container Apps",
+            "condition": "The confirmed HTTP container workload has no Kubernetes-specific requirement."
+          },
+          {
+            "service": "Azure Database for PostgreSQL Flexible Server",
+            "condition": "The workload explicitly requires relational persistence."
+          }
+        ],
+        "excludedServices": ["Azure AI Foundry", "AKS", "customer-managed GPU compute"],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": true,
+        "expectedComputeProfile": "container-apps",
+        "expectedExtensions": ["postgresql"]
+      },
+      "architectureEvidence": [
+        {
+          "claim": "Azure Container Apps can host containerized applications.",
+          "microsoftLearnUrl": "https://learn.microsoft.com/azure/container-apps/overview",
+          "sslzPaths": [
+            "agent/profiles/container-apps.json",
+            "scripts/startup-workload-plan.mjs"
+          ],
+          "sslzStatus": "planner-supported; live execution is separately gated"
+        },
+        {
+          "claim": "Azure Database for PostgreSQL Flexible Server is a managed PostgreSQL service.",
+          "microsoftLearnUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/overview",
+          "sslzPaths": [
+            "agent/profiles/postgresql.json",
+            "scripts/startup-postgresql-plan.mjs"
+          ],
+          "sslzStatus": "planning-supported; migration execution is disabled"
+        }
+      ],
+      "firstAction": "Complete the missing account, region, data, and recovery inputs, then run local workload planning before any Azure read or artifact generation.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "greenfield-azure-no-existing-hosting",
+      "founderPrompt": "We are a 3-person company with a new product and no current cloud or on-premises deployment. We want to start on Azure.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": 3,
+        "currentHosting": "none",
+        "existingAzureFootprint": "none",
+        "intendedAzureOutcome": "greenfield"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "product workload shape and traffic",
+        "runtime and containerization",
+        "database, data residency, and recovery objectives",
+        "operations owner, budget, and subscription topology"
+      ],
+      "architecture": {
+        "status": "awaiting-workload-profile",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "The product workload has not been described."
+      },
+      "firstAction": "Ask what the product does, its workload and data shape, and who will own incidents before selecting Azure services.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "existing-azure-environment",
+      "founderPrompt": "We already run a customer-facing application on Azure with a 4-person engineering team. Help us decide what to improve first.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": 4,
+        "currentHosting": "Azure",
+        "existingAzureFootprint": "yes",
+        "intendedAzureOutcome": "improve-existing-environment"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "current architecture, subscriptions, and workload dependencies",
+        "the business or technical improvement goal",
+        "current security, reliability, cost, and operations evidence"
+      ],
+      "architecture": {
+        "status": "awaiting-current-state-and-goal",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "Do not treat an existing Azure deployment as greenfield or assume it needs migration."
+      },
+      "firstAction": "Ask which outcome matters most and request a sanitized current-state summary before proposing a change.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "on-premises-large-team",
+      "founderPrompt": "Our 82-person engineering organization runs systems on-premises and is considering Azure for a new workload. Where should we start?",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software organization",
+        "engineeringTeamSize": 82,
+        "currentHosting": "on-premises",
+        "existingAzureFootprint": "unknown",
+        "intendedAzureOutcome": "new-workload"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "workload shape and dependencies",
+        "whether on-premises connectivity is required",
+        "data residency and recovery objectives",
+        "organizational governance, ownership, budget, and Azure subscription topology"
+      ],
+      "architecture": {
+        "status": "broader-architecture-review",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "Engineering team size exceeds the startup input schema maximum of 50; do not clamp the value or use the startup planner as an enterprise architecture."
+      },
+      "firstAction": "Clarify the workload, whether it needs connectivity to on-premises systems, and the platform team's governance and ownership boundaries.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "gcp-to-azure-migration-planning",
+      "founderPrompt": "We run a containerized web service on GCP and want to move it to Azure while keeping a rollback path. What can we assess first?",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": 18,
+        "currentHosting": "GCP",
+        "existingAzureFootprint": "unknown",
+        "intendedAzureOutcome": "migration"
+      },
+      "maturity": {
+        "stage": "planning",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "current Azure target readiness and subscription topology",
+        "database and data-movement requirements",
+        "network, identity, CI/CD, cutover, and rollback evidence"
+      ],
+      "architecture": {
+        "status": "migration-assessment-only",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "The migration planners require current source and Azure target evidence; live migration execution is disabled."
+      },
+      "route": "migration-planning",
+      "liveExecution": "disabled",
+      "firstAction": "Inventory the source workload and confirm the Azure target and rollback constraints before building the execution-disabled migration plans.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "existing-azure-cost-and-governance",
+      "founderPrompt": "We already run our customer API on Azure with 16 engineers. We want to understand rising costs and inconsistent governance before changing anything.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": 16,
+        "currentHosting": "Azure",
+        "existingAzureFootprint": "yes",
+        "intendedAzureOutcome": "cost-and-governance-improvement"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "current resource and subscription inventory",
+        "cost drivers and billing evidence",
+        "existing policy assignments, exceptions, and operational ownership"
+      ],
+      "architecture": {
+        "status": "current-state-assessment",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "Do not replace current-state inventory and cost evidence with a greenfield workload recommendation."
+      },
+      "route": "existing-azure-improvement",
+      "firstAction": "Review a sanitized inventory, cost evidence, policy assignments, and ownership before proposing architecture changes.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "ai-workload-with-unverified-model-region-and-quota",
+      "founderPrompt": "We are adding an AI feature to a new Azure workload. We have not selected a model or region and do not know our quota or model access.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": 9,
+        "currentHosting": "none",
+        "existingAzureFootprint": "unknown",
+        "intendedAzureOutcome": "new-workload"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "whether managed Azure models are the chosen hosting approach",
+        "model access, region, quota, and deployment capacity",
+        "non-AI workload runtime, persistence, and recovery objectives"
+      ],
+      "architecture": {
+        "status": "awaiting-model-and-workload-decisions",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "servicesRequiringConfirmation": ["Azure AI Foundry"],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "Do not infer Foundry or a model deployment from the AI feature label; account and regional evidence is unavailable."
+      },
+      "firstAction": "Clarify model hosting preference and the ordinary workload shape; verify model access and quota only through a separately approved current evidence path.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "simple-non-ai-http-api",
+      "founderPrompt": "We are a 5-person team launching a stateless HTTP API on Azure. It is containerized, does not need Kubernetes, relational data, AI models, or GPUs, and this is a greenfield workload.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": 5,
+        "currentHosting": "none",
+        "existingAzureFootprint": "none",
+        "intendedAzureOutcome": "greenfield"
+      },
+      "maturity": {
+        "stage": "planning",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "subscription topology, allowed data region, and recovery objectives",
+        "operations owner and current Azure readiness evidence"
+      ],
+      "workloadAnswers": {
+        "requiresKubernetes": false,
+        "requiresRelationalDatabase": false,
+        "usesFoundryModels": false,
+        "requiresCustomerManagedGpu": false,
+        "usesDocker": true
+      },
+      "architecture": {
+        "status": "conditional-plan-from-confirmed-requirements",
+        "computeProfile": "container-apps",
+        "extensions": [],
+        "serviceRecommendations": [
+          {
+            "service": "Azure Container Apps",
+            "condition": "The confirmed stateless HTTP container workload has no Kubernetes-specific requirement."
+          }
+        ],
+        "excludedServices": ["Azure AI Foundry", "AKS", "Azure Database for PostgreSQL", "customer-managed GPU compute"],
+        "availabilityClaimed": false
+      },
+      "architectureEvidence": [
+        {
+          "claim": "Azure Container Apps supports containerized applications.",
+          "microsoftLearnUrl": "https://learn.microsoft.com/azure/container-apps/overview",
+          "sslzPaths": [
+            "agent/profiles/container-apps.json",
+            "scripts/startup-workload-plan.mjs"
+          ],
+          "sslzStatus": "planner-supported; no live deployment authority is implied"
+        }
+      ],
+      "planner": {
+        "eligible": true,
+        "expectedComputeProfile": "container-apps",
+        "expectedExtensions": []
+      },
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    },
+    {
+      "id": "contradictory-intent",
+      "founderPrompt": "We do not want to migrate anything from AWS, but please plan moving our AWS production database to Azure next month.",
+      "sanitized": true,
+      "expectedAzureWritesBeforeApproval": 0,
+      "expectedExternalNetworkCalls": 0,
+      "profile": {
+        "organizationType": "software company",
+        "engineeringTeamSize": null,
+        "currentHosting": "AWS",
+        "existingAzureFootprint": "unknown",
+        "intendedAzureOutcome": "contradictory"
+      },
+      "maturity": {
+        "stage": "discovery",
+        "numericScore": null,
+        "readiness": "not-assessed"
+      },
+      "unknowns": [
+        "whether the founder wants migration planning or no AWS-to-Azure migration",
+        "database engine, data volume, and recovery requirements"
+      ],
+      "architecture": {
+        "status": "clarification-required",
+        "computeProfile": null,
+        "extensions": [],
+        "serviceRecommendations": [],
+        "availabilityClaimed": false
+      },
+      "planner": {
+        "eligible": false,
+        "reason": "The stated migration intent conflicts; ask one clarification before selecting a route or planner."
+      },
+      "firstAction": "Ask whether to assess an AWS-to-Azure migration or keep the current AWS database without migration planning.",
+      "parameterApproval": {
+        "localGenerationRequiresExplicitApproval": true,
+        "previewRequiresSeparateExplicitApproval": true,
+        "azureWritesBeforeApproval": 0
+      }
+    }
+  ],
+  "groundingRegressions": {
+    "documentationUnavailable": {
+      "learnMcpState": "unavailable",
+      "expectedAzureCapabilityClaims": [],
+      "expectedBehavior": "Say official documentation was not retrieved, leave Azure-specific claims unverified, and ask to retry before recommending an undocumented service."
+    },
+    "documentedButNotImplemented": {
+      "service": "Azure Functions",
+      "microsoftLearnUrl": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview",
+      "documentedClaim": "Azure Functions supports event-driven triggers and HTTP-triggered APIs.",
+      "sslzStatus": "No dedicated startup workload profile or selection in the current workload planner; external implementation is required.",
+      "sslzPaths": [
+        "scripts/startup-workload-plan.mjs",
+        "agent/profiles/"
+      ]
+    }
+  }
+}

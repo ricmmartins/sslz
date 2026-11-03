@@ -1,0 +1,36 @@
+{
+  "tenantId": "11111111-1111-1111-1111-111111111111",
+  "subscriptionId": "22222222-2222-2222-2222-222222222222",
+  "centralSubscriptionId": "33333333-3333-3333-3333-333333333333",
+  "primaryRegion": "eastus2",
+  "generatedAt": "2026-08-11T12:00:00Z",
+  "expiresAt": "2026-08-11T14:00:00Z",
+  "planningAt": "2026-08-11T13:00:00Z",
+  "paidPlans": {
+    "defenderForServers": true,
+    "defenderForContainers": false,
+    "defenderForDatabases": true,
+    "defenderForKeyVault": true,
+    "defenderForResourceManager": true,
+    "defenderForStorage": true
+  },
+  "policyEvidence": {
+    "observedAt": "2026-08-11T12:00:00Z",
+    "expiresAt": "2026-08-11T14:00:00Z",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "targetSubscriptionIds": ["22222222-2222-2222-2222-222222222222"],
+    "allowedLocations": ["eastus2", "centralus"]
+  },
+  "serviceSupportEvidence": {
+    "observedAt": "2026-08-11T12:00:00Z",
+    "expiresAt": "2026-08-11T14:00:00Z",
+    "supportedRegions": ["eastus", "eastus2", "centralus"]
+  },
+  "dataResidencyEvidence": {
+    "observedAt": "2026-08-11T12:00:00Z",
+    "expiresAt": "2026-08-11T14:00:00Z",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "targetSubscriptionIds": ["22222222-2222-2222-2222-222222222222"],
+    "allowedRegions": ["eastus2", "centralus"]
+  }
+}

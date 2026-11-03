@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/program-lineage-input.schema.json",
+  "title": "SSLZ non-executable program lineage input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "programId",
+    "generatedAt",
+    "evidenceMode",
+    "baseline",
+    "lineage",
+    "stageOrder",
+    "postgresql",
+    "container",
+    "connectivity"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "programId": { "$ref": "#/$defs/reference" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "evidenceMode": { "enum": ["synthetic", "live"] },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["journeyId", "evidenceMode", "target", "bindings"],
+      "properties": {
+        "journeyId": { "$ref": "#/$defs/reference" },
+        "evidenceMode": { "enum": ["synthetic", "live"] },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "environment",
+            "environmentReference",
+            "region",
+            "targetReference"
+          ],
+          "properties": {
+            "environment": { "enum": ["prod", "nonprod"] },
+            "environmentReference": { "$ref": "#/$defs/reference" },
+            "region": { "$ref": "#/$defs/region" },
+            "targetReference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        "bindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "workloadProfilePlanDigest",
+            "regionalPlanDigest",
+            "postgresqlDecisionDigest",
+            "iacPlanDigest",
+            "readinessEvidenceDigest",
+            "deploymentManifestDigest",
+            "deploymentApprovalDigest"
+          ],
+          "properties": {
+            "workloadProfilePlanDigest": { "$ref": "#/$defs/digest" },
+            "regionalPlanDigest": { "$ref": "#/$defs/digest" },
+            "postgresqlDecisionDigest": { "$ref": "#/$defs/digest" },
+            "iacPlanDigest": { "$ref": "#/$defs/digest" },
+            "readinessEvidenceDigest": { "$ref": "#/$defs/digest" },
+            "deploymentManifestDigest": { "$ref": "#/$defs/digest" },
+            "deploymentApprovalDigest": { "$ref": "#/$defs/digest" }
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lineageId",
+        "attemptOrdinal",
+        "attemptNonce",
+        "acceptedAttempts"
+      ],
+      "properties": {
+        "lineageId": { "$ref": "#/$defs/reference" },
+        "attemptOrdinal": { "type": "integer", "minimum": 1 },
+        "attemptNonce": { "$ref": "#/$defs/reference" },
+        "acceptedAttempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attemptOrdinal", "attemptNonce", "envelopeDigest"],
+            "properties": {
+              "attemptOrdinal": { "type": "integer", "minimum": 1 },
+              "attemptNonce": { "$ref": "#/$defs/reference" },
+              "envelopeDigest": { "$ref": "#/$defs/digest" }
+            }
+          }
+        }
+      }
+    },
+    "stageOrder": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "postgresql": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrationPlanInput",
+        "migrationPlan",
+        "rehearsalEvidence",
+        "rehearsalLineage",
+        "rehearsalPlan",
+        "executionDocuments",
+        "executionPlan"
+      ],
+      "properties": {
+        "migrationPlanInput": {
+          "$ref": "postgresql-migration-plan-input.schema.json"
+        },
+        "migrationPlan": { "$ref": "postgresql-migration-plan.schema.json" },
+        "rehearsalEvidence": {
+          "$ref": "postgresql-rehearsal-evidence.schema.json"
+        },
+        "rehearsalLineage": {
+          "$ref": "postgresql-rehearsal-lineage.schema.json"
+        },
+        "rehearsalPlan": { "$ref": "postgresql-rehearsal-plan.schema.json" },
+        "executionDocuments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceAssessment",
+            "migrationPlanInput",
+            "migrationPlan",
+            "rehearsalEvidence",
+            "rehearsalPlan",
+            "request",
+            "liveEvidence",
+            "approvals",
+            "lineage",
+            "trust"
+          ],
+          "properties": {
+            "sourceAssessment": {
+              "$ref": "postgresql-source-assessment.schema.json"
+            },
+            "migrationPlanInput": {
+              "$ref": "postgresql-migration-plan-input.schema.json"
+            },
+            "migrationPlan": {
+              "$ref": "postgresql-migration-plan.schema.json"
+            },
+            "rehearsalEvidence": {
+              "$ref": "postgresql-rehearsal-evidence.schema.json"
+            },
+            "rehearsalPlan": {
+              "$ref": "postgresql-rehearsal-plan.schema.json"
+            },
+            "request": {
+              "$ref": "postgresql-execution-request.schema.json"
+            },
+            "liveEvidence": {
+              "$ref": "postgresql-execution-evidence.schema.json"
+            },
+            "approvals": {
+              "$ref": "postgresql-execution-approval.schema.json"
+            },
+            "lineage": {
+              "$ref": "postgresql-execution-lineage.schema.json"
+            },
+            "trust": {
+              "$ref": "postgresql-execution-trust.schema.json"
+            }
+          }
+        },
+        "executionPlan": { "$ref": "postgresql-execution-plan.schema.json" }
+      }
+    },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["planInput", "plan"],
+      "properties": {
+        "planInput": { "$ref": "container-image-cicd-plan-input.schema.json" },
+        "plan": { "$ref": "container-image-cicd-plan.schema.json" }
+      }
+    },
+    "connectivity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["planInput", "plan"],
+      "properties": {
+        "planInput": { "$ref": "connectivity-plan-input.schema.json" },
+        "plan": { "$ref": "connectivity-plan.schema.json" }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    }
+  }
+}

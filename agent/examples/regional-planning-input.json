@@ -1,0 +1,236 @@
+{
+  "schemaVersion": "1.0.0",
+  "planningAt": "2026-08-08T12:00:00Z",
+  "maxEvidenceAgeHours": 24,
+  "startupInput": {
+    "schemaVersion": "1.0.0",
+    "company": {
+      "name": "Contoso",
+      "stage": "seed",
+      "engineeringTeamSize": 8
+    },
+    "subscriptions": {
+      "prodSubscriptionId": "22222222-2222-2222-2222-222222222222",
+      "nonprodSubscriptionId": "33333333-3333-3333-3333-333333333333"
+    },
+    "workload": {
+      "description": "An HTTP API with background processing and relational data.",
+      "traffic": ["http", "event"],
+      "requiresKubernetes": false,
+      "requiresRelationalDatabase": true,
+      "usesFoundryModels": false,
+      "requiresCustomerManagedGpu": false,
+      "incidentOwnerConfirmed": true,
+      "usesDocker": true,
+      "kubernetesRequirements": [],
+      "managedModelFit": "unknown",
+      "aksIngress": null
+    },
+    "reliability": {
+      "dataResidency": "United States",
+      "regionalMode": "single-region-ready",
+      "rtoMinutes": null,
+      "rpoMinutes": null,
+      "failoverOwnerConfirmed": false
+    },
+    "budget": {
+      "currency": "USD",
+      "monthlyPlatformMaximum": 500
+    },
+    "architecture": {
+      "regulatedControlsBeyondBaseline": false,
+      "activeActiveMultiRegionWrites": false,
+      "independentProductionWorkloads": 1,
+      "subscriptionCount": 2,
+      "hybridConnectivity": false,
+      "centralizedEgressInspection": false,
+      "automaticFailoverWithoutDataStrategy": false,
+      "dedicatedPlatformTeamSharedServices": false,
+      "unsupportedRequirements": []
+    }
+  },
+  "workloadPlan": {
+    "schemaVersion": "1.0.0",
+    "profileVersion": "1.0.0",
+    "status": "ready",
+    "computeProfile": "container-apps",
+    "profileExtensions": ["postgresql"],
+    "aksIngress": null,
+    "rationale": [
+      {
+        "decision": "container-apps",
+        "reason": "Container Apps is the default because no Kubernetes-specific requirement was provided.",
+        "sourceRequirements": ["workload.traffic"]
+      },
+      {
+        "decision": "postgresql",
+        "reason": "The workload requires relational persistence.",
+        "sourceRequirements": ["workload.requiresRelationalDatabase"]
+      }
+    ],
+    "assumptions": [
+      "One primary workload is planned.",
+      "Separate production and nonproduction subscriptions are used.",
+      "Managed Azure services are preferred unless a stated requirement needs direct control.",
+      "The planner does not assume service, model, SKU, quota, or capacity availability."
+    ],
+    "requiredChecks": [
+      "account.provider.required-registrations",
+      "quota.workload.headroom",
+      "region.services.available",
+      "security.defender.selection-reviewed",
+      "operations.monitoring.destination-valid",
+      "region.policy.allowed-locations",
+      "region.data-residency.compatible",
+      "region.availability-zones.supported",
+      "region.postgresql.edition-version-supported",
+      "region.postgresql.extensions-supported",
+      "quota.postgresql.eligible",
+      "capacity.postgresql.available",
+      "region.postgresql.recovery-supported",
+      "workload.postgresql.provider-parity"
+    ],
+    "unresolvedDecisions": [
+      {
+        "id": "reliability.rto.required",
+        "severity": "advisory",
+        "question": "What recovery time objective does the workload require?",
+        "reason": "The input does not define an RTO."
+      },
+      {
+        "id": "reliability.rpo.required",
+        "severity": "advisory",
+        "question": "What recovery point objective does the workload require?",
+        "reason": "The input does not define an RPO."
+      }
+    ],
+    "costAssumptions": {
+      "currency": "USD",
+      "monthlyPlatformMaximum": 500,
+      "items": [
+        "Estimates are deferred until region, sizing, service tier, usage, and availability checks complete.",
+        "Container Apps consumption charges depend on requested CPU, memory, execution time, and replica minimums.",
+        "Nonproduction can scale to zero unless startup latency requires a minimum replica.",
+        "Nonproduction begins with Burstable compute when the workload supports it.",
+        "Production begins with General Purpose compute; high availability is included only when the resilience requirement justifies it.",
+        "Backup storage, retained backups, and cross-region recovery are not priced until retention and recovery decisions are complete."
+      ]
+    },
+    "architectureReview": {
+      "required": false,
+      "reasons": []
+    },
+    "iacGenerated": false,
+    "azureOperations": "none"
+  },
+  "regionalRequirements": {
+    "primaryCandidates": ["eastus2", "centralus"],
+    "secondaryCandidates": ["centralus"],
+    "additionalRequiredServices": [],
+    "requireAvailabilityZones": true,
+    "computeSku": null,
+    "gpuSku": null,
+    "foundry": null,
+    "secondaryBaseline": {
+      "currency": "USD",
+      "minimum": 75,
+      "maximum": 180,
+      "assumptions": [
+        "The estimate covers a reviewed secondary baseline only; workload usage, replication, and transfer are separate."
+      ]
+    }
+  },
+  "evidence": {
+    "regions": [
+      {
+        "region": "eastus2",
+        "observedAt": "2026-08-08T11:00:00Z",
+        "allowedByPolicy": true,
+        "availableServices": [
+          "Microsoft.App/managedEnvironments",
+          "Microsoft.DBforPostgreSQL/flexibleServers",
+          "Microsoft.CognitiveServices/accounts",
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.ContainerService/managedClusters"
+        ],
+        "availabilityZonesSupported": true,
+        "eligibleComputeSkus": ["Standard_D4s_v5"],
+        "eligibleGpuSkus": ["Standard_NC24ads_A100_v4"],
+        "quota": {
+          "required": 8,
+          "available": 24,
+          "unit": "vCPUs"
+        },
+        "capacity": {
+          "status": "available",
+          "observedAt": "2026-08-08T11:30:00Z"
+        },
+        "residencyBoundaries": ["United States"],
+        "proposedVnetCidr": "10.20.0.0/16",
+        "foundryDeployments": [
+          {
+            "model": "gpt-4.1",
+            "deploymentType": "GlobalStandard",
+            "available": true
+          }
+        ],
+        "alternates": [
+          {
+            "type": "compute-sku",
+            "value": "Standard_D8s_v5",
+            "available": true
+          },
+          {
+            "type": "foundry-deployment",
+            "value": "gpt-4.1:DataZoneStandard",
+            "available": true
+          }
+        ],
+        "latencyRank": 1,
+        "estimatedMonthlyCost": 210
+      },
+      {
+        "region": "centralus",
+        "observedAt": "2026-08-08T10:30:00Z",
+        "allowedByPolicy": true,
+        "availableServices": [
+          "Microsoft.App/managedEnvironments",
+          "Microsoft.DBforPostgreSQL/flexibleServers",
+          "Microsoft.CognitiveServices/accounts",
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.ContainerService/managedClusters"
+        ],
+        "availabilityZonesSupported": true,
+        "eligibleComputeSkus": ["Standard_D4s_v5"],
+        "eligibleGpuSkus": ["Standard_NC24ads_A100_v4"],
+        "quota": {
+          "required": 8,
+          "available": 16,
+          "unit": "vCPUs"
+        },
+        "capacity": {
+          "status": "available",
+          "observedAt": "2026-08-08T10:45:00Z"
+        },
+        "residencyBoundaries": ["United States"],
+        "proposedVnetCidr": "10.40.0.0/16",
+        "foundryDeployments": [
+          {
+            "model": "gpt-4.1",
+            "deploymentType": "GlobalStandard",
+            "available": true
+          }
+        ],
+        "alternates": [
+          {
+            "type": "compute-sku",
+            "value": "Standard_D8s_v5",
+            "available": true
+          }
+        ],
+        "latencyRank": 2,
+        "estimatedMonthlyCost": 190
+      }
+    ]
+  }
+}

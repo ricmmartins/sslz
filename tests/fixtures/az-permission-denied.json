@@ -1,0 +1,6 @@
+{
+  "extends": "az-success.json",
+  "errors": {
+    "roles": "AuthorizationFailed: user founder@startup.example does not have authorization. accessToken=fixture-secret"
+  }
+}
