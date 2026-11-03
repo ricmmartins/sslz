@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const profile = readFileSync(
-  resolve(root, ".github/agents/sslz-founder.agent.md"),
+  resolve(root, ".github/agents/sslz-agent.agent.md"),
   "utf8",
 );
 const launcher = readFileSync(resolve(root, "use-sslz-agent.md"), "utf8");
@@ -25,7 +25,7 @@ const workloadPlanner = readFileSync(
   "utf8",
 );
 const journeys = JSON.parse(
-  readFileSync(resolve(root, "tests/fixtures/founder-agent-journeys.json"), "utf8"),
+  readFileSync(resolve(root, "tests/fixtures/sslz-agent-journeys.json"), "utf8"),
 );
 
 function parseFrontmatter(markdown) {
@@ -51,7 +51,14 @@ function parseFrontmatter(markdown) {
 const agent = parseFrontmatter(profile);
 const normalizedLauncher = launcher.replace(/^>\s?/gm, "").replace(/\s+/g, " ");
 const normalizedProfile = agent.body.replace(/\s+/g, " ");
-assert.equal(agent.name, "SSLZ Founder Agent");
+assert.equal(agent.name, "SSLZ Agent");
+assert.match(profile, /^  product: SSLZ Agent$/m);
+assert.deepEqual(
+  readdirSync(resolve(root, ".github/agents"))
+    .filter((name) => name.endsWith(".agent.md")),
+  ["sslz-agent.agent.md"],
+  "Keep exactly one discoverable product profile.",
+);
 assert.equal(agent.target, "github-copilot");
 assert.deepEqual(agent.tools, ["read", "search", "execute", "WebFetch"]);
 assert.equal(agent.disableModelInvocation, true);
@@ -117,7 +124,8 @@ assert(!/startup-scale architecture/i.test(profile));
 assert(!profile.includes("startup-provider-remediation.mjs apply"));
 
 assert.equal(journeys.schemaVersion, "1.0.0");
-assert.equal(journeys.productName, "SSLZ Founder Agent");
+assert.equal(journeys.productName, "SSLZ Agent");
+assert.equal(journeys.localAgentName, "sslz-agent");
 assert.equal(
   journeys.canonicalLaunchUrl,
   "https://startupscalelanding.zone/use-sslz-agent/",
@@ -291,10 +299,12 @@ assert(grounding.includes("capacity"));
 assert(grounding.includes("tenant-specific guarantee"));
 
 assert(launcher.includes("permalink: /use-sslz-agent/"));
-assert(launcher.includes("copilot --agent sslz-founder"));
+assert(launcher.includes('copilot --agent sslz-agent --interactive "Start a new founder journey."'));
+assert(launcher.includes("`.github/agents/sslz-agent.agent.md`"));
+assert(launcher.includes("`sslz-agent` as the clone folder"));
 assert(launcher.includes('--interactive "Start a new founder journey."'));
 assert(launcher.includes("/agent"));
-assert(!launcher.includes("copilot --agent sslz-founder --prompt"));
+assert(!launcher.includes("copilot --agent sslz-agent --prompt"));
 assert(launcher.includes("Do not use prompt mode as an unattended"));
 assert(launcher.includes("never launch this profile with `--allow-all`"));
 assert(launcher.includes("default branch"));
@@ -311,4 +321,4 @@ for (const text of [
   assert(normalizedLauncher.includes(text), `Launch instructions are missing: ${text}`);
 }
 
-console.log(`SSLZ Founder Agent contracts passed across ${scenarios.length} generic scenarios and grounding regressions.`);
+console.log(`SSLZ Agent contracts passed across ${scenarios.length} generic scenarios and grounding regressions.`);

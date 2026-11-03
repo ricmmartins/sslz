@@ -1,11 +1,11 @@
 ---
 layout: agent
-title: "SSLZ Founder Agent"
+title: "SSLZ Agent"
 description: "Founder-guided Azure readiness, planning, evidence, and approval boundaries"
 permalink: /agent/
 ---
 
-The **SSLZ Founder Agent** guides founders from "what are you building?" to a reviewable Azure readiness and landing-zone
+The **SSLZ Agent** guides founders from "what are you building?" to a reviewable Azure readiness and landing-zone
 plan. It reuses local scripts, machine-readable contracts, deterministic planning, and narrowly approval-gated
 integrations. It does not replace the classic Bicep or Terraform Quick Start.
 
@@ -14,7 +14,7 @@ recommendation suited to the organization and workload, and identifies the next 
 coexistence, or existing-Azure improvement path. Unknown service fit, account readiness, availability, quota, capacity,
 billing, and support are never inferred from the prompt.
 
-[Launch the SSLZ Founder Agent]({{ '/use-sslz-agent/' | relative_url }})
+[Launch the SSLZ Agent]({{ '/use-sslz-agent/' | relative_url }})
 
 Use that launch page for the local launcher and its published revision requirements. Initial planning requires Git and
 GitHub Copilot CLI authenticated with a GitHub account that has Copilot access. It does not require Azure CLI, an Azure
@@ -32,7 +32,7 @@ Use the capabilities of the checked-out revision; publication and a reviewed pin
 | Experience | Best for | Execution model |
 |---|---|---|
 | [Classic SSLZ]({{ '/' | relative_url }}) | Teams that want the original one-hour landing-zone path | Direct operator Bicep or Terraform |
-| SSLZ Founder Agent | Founders who want guided discovery, plans, evidence, and explicit approval boundaries | Local Copilot CLI plus repository scripts and contracts; writes are absent, disabled, or narrowly approval-gated as documented |
+| SSLZ Agent | Founders who want guided discovery, plans, evidence, and explicit approval boundaries | Local Copilot CLI plus repository scripts and contracts; writes are absent, disabled, or narrowly approval-gated as documented |
 
 ## Flow, contracts, and evidence
 
