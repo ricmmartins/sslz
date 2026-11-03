@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
-  "productName": "SSLZ Founder Agent",
+  "productName": "SSLZ Agent",
   "canonicalLaunchUrl": "https://startupscalelanding.zone/use-sslz-agent/",
-  "localAgentName": "sslz-founder",
+  "localAgentName": "sslz-agent",
   "journeys": [
     {
       "id": "synthetic-greenfield",

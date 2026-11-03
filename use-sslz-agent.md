@@ -1,11 +1,11 @@
 ---
 layout: page
 title: "Use SSLZ Agent"
-description: "Launch the SSLZ Founder Agent locally for a safe, founder-friendly Azure readiness and landing-zone plan."
+description: "Launch the SSLZ Agent locally for a safe, founder-friendly Azure readiness and landing-zone plan."
 permalink: /use-sslz-agent/
 ---
 
-# SSLZ Founder Agent
+# SSLZ Agent
 
 Tell the agent what you are building in plain language. It will guide you through Azure account readiness, workload and
 region choices, migration or dual-cloud planning, and a reviewable SSLZ infrastructure plan. It begins with local and
@@ -34,6 +34,8 @@ for the reviewed, remotely available revision. The public launcher may pin an ol
 documentation-fetch capability. At that revision, use official documentation manually and provide sanitized facts;
 do not assume MCP or WebFetch is enabled. Publish and review a candidate before updating the launcher's release pin.
 Do not substitute a local-only SHA in a public launch command or treat it as a release.
+The `sslz-agent` ID belongs to this candidate's `.github/agents/sslz-agent.agent.md` profile; do not use it with an older
+public pin that lacks that file. Use `sslz-agent` as the clone folder for a separately reviewed agent checkout.
 
 Initial planning requires Git and
 [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli), authenticated with a GitHub account that has
@@ -48,14 +50,14 @@ under `~/.copilot/agents` uses the same ID, resolve that shadowing before assumi
 For contributors already in this reviewed candidate checkout, keep normal permission prompts and start interactively:
 
 ```shell
-copilot --agent sslz-founder --interactive "Start a new founder journey."
+copilot --agent sslz-agent --interactive "Start a new founder journey."
 ```
 
 The agent opens with:
 
 > What are you building, where does it run today, and what do you want Azure to do first?
 
-You can also start Copilot interactively, enter `/agent`, and select **SSLZ Founder Agent**, then describe the product.
+You can also start Copilot interactively, enter `/agent`, and select **SSLZ Agent**, then describe the product.
 
 Use the interactive form so you can review individual permission requests. Do not use prompt mode as an unattended
 launcher: if the host cannot request an approval, the agent must report that action as blocked.
@@ -95,7 +97,7 @@ repository entry points, never launch this profile with `--allow-all`, and treat
 untrusted data. The checked-in scripts enforce their own narrower read, approval, freshness, and execution boundaries.
 
 The current provider-registration approval is digest-bound and replay-protected, but it is not signature-authenticated.
-The Founder Agent therefore supports provider-registration diagnosis and dry-run only and reports live registration as
+The SSLZ Agent therefore supports provider-registration diagnosis and dry-run only and reports live registration as
 blocked. The separately guarded primary baseline deployment path requires signed approval and protected trust anchors.
 
 ## GitHub UI and cloud-agent limitation
@@ -131,7 +133,7 @@ unproven by those tests.
 The static profile test needs only Node.js:
 
 ```shell
-node tests/sslz-founder-agent.mjs
+node tests/sslz-agent.mjs
 ```
 
 The full integrated synthetic repository journey also requires locally installed Azure CLI and Bicep. It deletes and

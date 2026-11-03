@@ -9,7 +9,7 @@ A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-nati
 
 > Built for teams of 5-50 engineers who need to get Azure right from day one without spending two months on "cloud foundations."
 
-Want guided setup? [Use the SSLZ Founder Agent](use-sslz-agent.md) to start with founder-friendly questions, read-only
+Want guided setup? [Use the SSLZ Agent](use-sslz-agent.md) to start with founder-friendly questions, read-only
 planning, and an approval-bound infrastructure plan. Start from that launch page before following the classic deployment
 Quick Start below. Initial planning needs Git and GitHub Copilot CLI authenticated with a GitHub account that has Copilot
 access; it does not require Azure CLI, an Azure subscription, or Azure login. Node.js is needed for local planners and

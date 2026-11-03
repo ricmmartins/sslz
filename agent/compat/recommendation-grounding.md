@@ -1,6 +1,6 @@
 # Recommendation grounding
 
-The Founder Agent combines two separate kinds of evidence for each Azure recommendation:
+The SSLZ Agent combines two separate kinds of evidence for each Azure recommendation:
 
 1. **Azure guidance:** use Microsoft Learn MCP search with a sanitized, workload-specific query. Fetch the relevant
    Microsoft Learn page before relying on details that affect architecture or prerequisites. Cite the actual official
@@ -29,7 +29,7 @@ not infer a compute profile, database, managed model, GPU, or Kubernetes require
 ## Retrieval fallback and unavailable documentation
 
 Check whether the documentation search/fetch tools are actually available in the active runtime. Do not assume that a
-tool listed in another session or assistant is available to the Founder Agent. If Learn MCP search or fetch is missing
+tool listed in another session or assistant is available to the SSLZ Agent. If Learn MCP search or fetch is missing
 or fails, disclose that specific limitation. Prefer MCP when it works. If an approved `web_fetch` tool is available,
 fetch a relevant public HTTPS page on `learn.microsoft.com` or `docs.microsoft.com`, honoring URL approvals and checking
 that the final URL after redirects remains official. Use only sanitized technical URLs, never authenticated pages,

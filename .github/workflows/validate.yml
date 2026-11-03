@@ -91,8 +91,8 @@ jobs:
       - name: Validate schemas, catalog, and examples
         run: node scripts/validate-agent-contracts.mjs
 
-      - name: Validate SSLZ Founder Agent profile and journeys
-        run: node tests/sslz-founder-agent.mjs
+      - name: Validate SSLZ Agent profile and journeys
+        run: node tests/sslz-agent.mjs
 
       - name: Test blocking-check catalog coverage
         run: node tests/blocking-check-catalog.mjs
