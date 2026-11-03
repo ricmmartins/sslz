@@ -92,7 +92,7 @@
     {
       "path": "use-sslz-agent.md",
       "status": "A",
-      "expectedBlob": "b1fad4f9a42605881c5b4041615750036d2c7231",
+      "expectedBlob": "a68495f7f98976c81330442ec7664765ba7a9376",
       "reason": "Classic-native public launcher for the separately maintained SSLZ Founder Agent"
     }
   ],
@@ -119,12 +119,12 @@
   },
   "launcher": {
     "path": "use-sslz-agent.md",
-    "expectedBlob": "b1fad4f9a42605881c5b4041615750036d2c7231",
+    "expectedBlob": "a68495f7f98976c81330442ec7664765ba7a9376",
     "permalink": "/use-sslz-agent/",
     "title": "Use SSLZ Agent",
     "product": "SSLZ Founder Agent",
     "technicalBranch": "agent-aware",
-    "implementationCommit": "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670"
+    "implementationCommit": "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22"
   },
   "validateWorkflow": {
     "baselineBlob": "1b524b6966c84fd43798535d2462606a6ab74165",

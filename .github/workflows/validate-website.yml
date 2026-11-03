@@ -60,7 +60,7 @@ jobs:
           links = Links()
           links.feed(launcher)
           text = "".join(links.text)
-          assert "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670" in text
+          assert "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22" in text
           assert "copilot --agent sslz-founder" in text
           assert "git checkout --detach" in text
           assert "{{" not in launcher

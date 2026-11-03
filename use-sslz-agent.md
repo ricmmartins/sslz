@@ -37,7 +37,7 @@ path with different prerequisites and approval responsibilities.
 ## Clone the public agent version
 
 The agent implementation is maintained separately from the classic website. These commands pin public commit
-`362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670` on the implementation branch. Use a parent directory where
+`3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22` on the implementation branch. Use a parent directory where
 `sslz-founder-agent` does not already exist. Git will refuse to clone over a nonempty directory; do not delete or
 overwrite an existing checkout to follow this guide.
 
@@ -47,18 +47,19 @@ shells:
 ```shell
 git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-founder-agent
 cd sslz-founder-agent
-git checkout --detach 362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670
+git checkout --detach 3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22
 git rev-parse HEAD
 ```
 
-The last command must print exactly `362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670`. A detached HEAD keeps this walkthrough
+The last command must print exactly `3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22`. A detached HEAD keeps this walkthrough
 on that version even if the branch moves. If checkout fails or the hash differs, stop; do not substitute an unverified
 commit or continue on the branch tip.
 
 Review `.github/agents/sslz-founder.agent.md`, `.github/copilot-instructions.md`, and any repository configuration
-before trusting the folder in Copilot. This pin has `read`, `search`, and `execute` tools. It does not include the newer
-`WebFetch` capability or the newer adoption conversation improvements. Unpublished local work is not installed by
-these commands.
+before trusting the folder in Copilot. This published pin has `read`, `search`, `execute`, and `WebFetch` tools.
+It includes adoption guidance for founders and technology leaders across different organization sizes and hosting
+environments. The startup planner itself accepts teams of 1-50 engineers; larger teams need broader architecture review
+instead of forcing their inputs into that schema.
 
 ## Sign in to Copilot and select the agent
 
@@ -87,9 +88,10 @@ Start with repository reads and planning only. Do not log in to Azure, inspect a
 write files, or run a preview. Ask before any command or external request.
 ```
 
-Describe your own workload using sanitized facts. At this public pin, an open-ended request starts with:
+Describe your own workload using sanitized facts. For an open-ended request, the agent summarizes what is known,
+unknown, and the next safe decision, then asks about facts you have not already provided:
 
-> What are you building, who needs it, and is it new on Azure, moving from another cloud, or staying in two clouds?
+> What are you building, where does it run today, and what do you want Azure to do first?
 
 Answer one question at a time. Expect unknowns and evidence gaps to remain explicit. A conversation does not guarantee
 that a deterministic planner ran; request its exact command and review its output when you need a planner result.
@@ -125,18 +127,15 @@ tooling; it is not part of this no-Azure smoke check.
 
 ## Current documentation and MCP availability
 
-The preferred source for current Azure documentation in a compatible agent release is the public
+The preferred source for current Azure documentation is the public
 [Microsoft Learn MCP server](https://learn.microsoft.com/en-us/training/support/mcp), using HTTP transport at
 `https://learn.microsoft.com/api/mcp`. It requires no Azure login or API key. In Copilot CLI, `/mcp` shows availability;
 `/mcp add` opens the setup form. Choose a unique server name, HTTP, that URL, and only the documentation tools you need,
 then save with Ctrl+S. Preserve existing server settings; do not replace your MCP configuration file.
 See [GitHub's MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers).
 
-Configuring a server does not grant this pinned agent permission to use it. The public profile predates documentation
-retrieval support and forbids ad hoc web requests. For this version, read official Learn pages in your browser and
-provide sanitized facts or excerpts for discussion; label claims needing current verification as unverified.
-
-In a newer reviewed release that explicitly permits documentation retrieval, prefer Learn MCP. If it is unavailable,
+Configuring a server does not guarantee that its tools are exposed in the selected agent's runtime. The `WebFetch`
+profile capability does not itself grant Microsoft Learn MCP access. Prefer Learn MCP when available. If it is unavailable,
 use only an exposed, approved HTTPS fetch tool for relevant public `learn.microsoft.com` or `docs.microsoft.com` pages,
 checking the final URL after redirects. Cite what was actually retrieved. If neither route works, disclose the gap and
 continue with local facts only. Do not add tools, use shell HTTP commands, or enable blanket permissions to bypass a
@@ -169,9 +168,11 @@ a supported launch path for this repository. A hosted agent also has no automati
 See GitHub's [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents)
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
-This public pin supports local contract checks and fixture-based planning. Tests of newer local candidates, including
-conversation checks and fixture replay, are not evidence for the version installed here. Neither those tests nor this
-guide establish an autonomous conversation-to-deployment flow or real tenant readiness.
+This public pin supports adoption conversation guidance, documentation grounding when the required tools are exposed,
+local contract checks, and fixture-based planning. Seven real two-turn conversations, version 3 fixture replay, and an
+external planner invocation were validated for the reviewed implementation. Those checks have different scopes:
+conversation and replay checks do not prove that the agent ran the planner itself. Neither those tests nor this guide
+establish an autonomous conversation-to-deployment flow or real tenant readiness.
 
 Maintainers must publish a reviewed agent implementation first, verify its full commit is reachable from the public
 implementation branch, and rerun clean-clone checks before updating this page's pin and capability descriptions.

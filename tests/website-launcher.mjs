@@ -8,7 +8,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const pin = "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670";
+const pin = "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22";
 const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g, "\n");
 const page = read("use-sslz-agent.md");
 const homepage = read("index.md");
@@ -54,12 +54,13 @@ function validateLauncher(markdown) {
     "folder trust",
     "`/agent`",
     "`/login`",
-    "`read`, `search`, and `execute`",
-    "does not include the newer `WebFetch` capability",
+    "`read`, `search`, `execute`, and `WebFetch`",
+    "startup planner itself accepts teams of 1-50 engineers",
+    "What are you building, where does it run today, and what do you want Azure to do first?",
     "https://learn.microsoft.com/api/mcp",
     "requires no Azure login or API key",
-    "Configuring a server does not grant this pinned agent permission",
-    "forbids ad hoc web requests",
+    "does not itself grant Microsoft Learn MCP access",
+    "does not guarantee that its tools are exposed",
     "`learn.microsoft.com` or `docs.microsoft.com`",
     "checking the final URL after redirects",
     "does not by itself mean that your company's administrator must change anything",
@@ -69,7 +70,8 @@ function validateLauncher(markdown) {
     "Migration and dual-cloud execution are disabled",
     "does not automatically deploy",
     "absent from classic `main`",
-    "not evidence for the version installed here",
+    "external planner invocation",
+    "do not prove that the agent ran the planner itself",
     "autonomous conversation-to-deployment",
     "publish a reviewed agent implementation first",
   ]) {
@@ -85,7 +87,7 @@ for (const [before, after] of [
   ["copilot --agent sslz-founder\n", "copilot --agent sslz-founder --allow-all\n"],
   ["copilot login\n", "az login\n"],
   ["overrides the repository profile", "does not affect selection"],
-  ["forbids ad hoc web requests", "allows arbitrary HTTP requests"],
+  ["does not itself grant Microsoft Learn MCP access", "grants all MCP tools"],
 ]) {
   assert.throws(() => validateLauncher(page.replace(before, after)), `Must reject: ${after}`);
 }
@@ -119,9 +121,10 @@ if (process.argv.includes("--remote-smoke")) {
     assert.equal(git(["status", "--porcelain"]), "");
     const profile = readFileSync(join(checkout, ".github", "agents", "sslz-founder.agent.md"), "utf8");
     const tools = JSON.parse(profile.match(/^tools: (.+)$/m)[1]);
-    assert.deepEqual(tools, ["read", "search", "execute"]);
+    assert.deepEqual(tools, ["read", "search", "execute", "WebFetch"]);
     assert.match(profile, /^name: SSLZ Founder Agent$/m);
-    assert.match(profile, /Do not use ad hoc web requests/);
+    assert.match(profile, /do not assume[\s\S]*?add tools to frontmatter, or[\s\S]*?use ad hoc network requests/i);
+    assert.match(profile, /What are you building, where does it run today, and what do you want Azure to do first/);
     const env = {
       ...process.env, PATH: "", Path: "",
       AZURE_CONFIG_DIR: join(temporary, "no-azure-login"),
