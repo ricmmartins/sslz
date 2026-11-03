@@ -12,30 +12,55 @@ region choices, migration or dual-cloud planning, and a reviewable SSLZ infrastr
 read-only checks. It stops before local artifact generation, live preview, provider registration, or deployment and
 explains the exact approval boundary.
 
+For an open-ended request, it first summarizes the known company and workload facts, calls out the decisions still
+unknown, and offers a conditional architecture and first-step sequence suited to the organization's context. Mentioning
+another cloud does not by itself mean you want to migrate or run in two clouds; the agent clarifies that intent before
+choosing those planning paths. Recommendations remain candidates until the relevant repository planner and evidence
+support them.
+
+In this candidate checkout, Azure service guidance prefers Microsoft Learn MCP. If it is unavailable, an approved
+`web_fetch` tool can retrieve relevant public official Microsoft pages. The agent reports the method, URL and retrieval time; a page fetch does not
+prove exhaustive search coverage or tenant readiness. The agent also cites
+the SSLZ files that implement or plan each capability; documentation alone does not mean SSLZ supports a service.
+When documentation retrieval is unavailable, Azure-specific claims that need it remain unverified.
+
 > The supported launch surface is the GitHub Copilot CLI on your computer. The agent does not receive access to your
 > Azure tenant, billing account, subscriptions, or secrets from GitHub.
 
 ## Launch
 
-You need [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli), Git, and Node.js. Azure CLI is
-needed only when you choose to run live read-only account inspection or a separately configured approved execution.
+Use the launcher instructions published on the [Use SSLZ Agent page](https://startupscalelanding.zone/use-sslz-agent/)
+for the reviewed, remotely available revision. The public launcher may pin an older profile without this candidate's
+documentation-fetch capability. At that revision, use official documentation manually and provide sanitized facts;
+do not assume MCP or WebFetch is enabled. Publish and review a candidate before updating the launcher's release pin.
+Do not substitute a local-only SHA in a public launch command or treat it as a release.
+
+Initial planning requires Git and
+[GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli), authenticated with a GitHub account that has
+Copilot access. It does not require Azure CLI, an Azure subscription, or Azure login. Node.js is required to run local
+planners and tests. Azure CLI is needed only for later operations such as approved live read-only account inspection or
+local Bicep validation; preview and separately configured approved execution have their own prerequisites.
+
+The public launch instructions must use a fresh checkout, verify its detached revision, and keep classic `main` separate. Review
+repository trust before granting it and authenticate Copilot with `copilot login` if needed. If a global custom agent
+under `~/.copilot/agents` uses the same ID, resolve that shadowing before assuming the repository profile was selected.
+
+For contributors already in this reviewed candidate checkout, keep normal permission prompts and start interactively:
 
 ```shell
-git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git
-cd sslz
 copilot --agent sslz-founder --interactive "Start a new founder journey."
 ```
 
 The agent opens with:
 
-> What are you building, who needs it, and is it new on Azure, moving from another cloud, or staying in two clouds?
+> What are you building, where does it run today, and what do you want Azure to do first?
 
-You can also start Copilot interactively, enter `/agent`, and select **SSLZ Founder Agent**. For a focused
-non-interactive request that already describes the product:
+You can also start Copilot interactively, enter `/agent`, and select **SSLZ Founder Agent**, then describe the product.
 
-```shell
-copilot --agent sslz-founder --prompt "I am building a B2B API for EU retailers. It is new on Azure, uses PostgreSQL, and must stay in the EU. Start with read-only planning."
-```
+Use the interactive form so you can review individual permission requests. Do not use prompt mode as an unattended
+launcher: if the host cannot request an approval, the agent must report that action as blocked.
+Approve only the specific tool, command, local path, or official documentation URL needed for the next step. Do not
+grant Node-wide execution or blanket filesystem access to make a local generator run.
 
 These invocation forms follow GitHub's current
 [custom-agent CLI guidance](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli)
@@ -96,6 +121,12 @@ The agent reuses the repository's deterministic schemas, planners, fixtures, and
 become sanitized local inputs; planners produce stable decisions; freshness rules prevent old evidence from passing;
 digests bind the reviewed plan; and separate single-purpose approvals guard the only narrow Azure write integrations.
 Migration and dual-cloud plans retain ownership and rollback lineage without gaining execution authority.
+
+Validation distinguishes real CLI conversations from static tests and synthetic planner replay. Replaying a v3 fixture
+with its fixed test clock and synthetic readiness/Defender decisions validates a test contract only. JSON returned by the
+agent, captured externally, and passed to an externally executed planner is not evidence that the agent ran the planner
+or generated deployment-ready parameters. Current tenant readiness and autonomous end-to-end execution remain
+unproven by those tests.
 
 The static profile test needs only Node.js:
 

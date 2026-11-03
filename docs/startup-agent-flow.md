@@ -14,7 +14,12 @@ PostgreSQL migration, image/CI, dual-cloud connectivity, and program-lineage sur
 validation contracts without execution authority. See the
 [authoritative implementation and evidence matrix](/agent/docs/implementation-status/).
 
-The canonical current-`main` validation command is:
+Start the local conversation from [Use SSLZ Agent](/use-sslz-agent/). Initial planning requires Git and GitHub Copilot CLI
+authenticated with a GitHub account that has Copilot access, without Azure CLI or Azure login. Install Node.js when
+running local planners or tests. Live account inspection and preview require additional tools and separate approval.
+The website does not host the agent or supply an Azure identity.
+
+The integrated validation command in this checkout is:
 
 ```bash
 node scripts/validate-greenfield-journey.mjs

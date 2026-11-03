@@ -9,7 +9,19 @@ The **SSLZ Founder Agent** guides founders from "what are you building?" to a re
 plan. It reuses local scripts, machine-readable contracts, deterministic planning, and narrowly approval-gated
 integrations. It does not replace the classic Bicep or Terraform Quick Start.
 
+For an underspecified Azure adoption request, it summarizes knowns and unknowns, makes a conditional architecture
+recommendation suited to the organization and workload, and identifies the next decision before selecting a migration,
+coexistence, or existing-Azure improvement path. Unknown service fit, account readiness, availability, quota, capacity,
+billing, and support are never inferred from the prompt.
+
 [Launch the SSLZ Founder Agent]({{ '/use-sslz-agent/' | relative_url }})
+
+Use that launch page for the local launcher and its published revision requirements. Initial planning requires Git and
+GitHub Copilot CLI authenticated with a GitHub account that has Copilot access. It does not require Azure CLI, an Azure
+subscription, or Azure login. Node.js is required when you run local planners or tests; Azure inspection and preview
+have additional tooling and separate approval requirements.
+The public launcher's pinned profile may predate the grounding/fetch behavior described in this candidate checkout.
+Use the capabilities of the checked-out revision; publication and a reviewed pin update are separate release steps.
 
 > **Not an autonomous hosted bot:** SSLZ does not embed a chatbot, run a hosted agent, capture your credentials, or make
 > unattended cloud decisions. Operators choose inputs, review artifacts, provide Azure authentication only when needed,
@@ -32,6 +44,8 @@ integrations. It does not replace the classic Bicep or Terraform Quick Start.
    what is delivered, what can write, and whether evidence is synthetic, historical, or live.
 4. [Implementation plan]({{ '/agent/docs/startup-agent-implementation-plan/' | relative_url }}) records the phased
    program and review gates.
+5. [Recommendation grounding](compat/recommendation-grounding.md) explains how Azure guidance is checked against
+   Microsoft Learn and kept distinct from the capabilities implemented in this repository.
 
 ## Planning and readiness
 
@@ -56,6 +70,10 @@ These programs remain separate from primary-baseline authority. Their lineage do
 
 ## Safety and execution boundaries
 
+- Prefer Microsoft Learn MCP when available; use the approved official-page fetch fallback when it is not. Cite only
+  retrieved content and distinguish documentation from the SSLZ implementation and tenant-specific evidence.
+- Keep normal Copilot permission prompts enabled and approve only the proposed tool, command, path, or official URL.
+  Do not use blanket approval or `--allow-all`.
 - Read-only planners do not log into Azure unless a documented preview or inspection explicitly requires authentication.
 - Planning-only migration, image, connectivity, control-plane, and Hot/Cool artifacts do not authorize execution.
 - Provider registration and primary-baseline integration accept only reviewed, digest-bound, single-purpose approvals.
@@ -63,6 +81,12 @@ These programs remain separate from primary-baseline authority. Their lineage do
   promotion, private connection, capacity allocation, or application-health outcome.
 - Follow the [implementation status matrix]({{ '/agent/docs/implementation-status/' | relative_url }}) for the remaining
   human review and live validation gates.
+
+Local validation includes separate conversational scenarios and synthetic planner tests. A fixture replay through the
+v3 planner uses a fixed test clock and synthetic readiness and Defender decisions; it does not establish current tenant
+readiness. Capturing JSON from a CLI response and running the planner externally does not demonstrate autonomous
+parameter generation or planner execution by the agent. A local validation commit is not a published release: public
+launch commands must use a remotely available, reviewed revision rather than an unpublished local SHA.
 
 ## Repository assets
 
