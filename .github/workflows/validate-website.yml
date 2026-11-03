@@ -6,6 +6,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      run_remote_smoke:
+        description: Run the clean public clone and pinned-agent smoke check
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -21,10 +27,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Check classic compatibility and launcher instructions
+      - name: Check classic compatibility and static launcher instructions
         run: |
           node tests/classic-baseline-manifest.mjs
-          node tests/website-launcher.mjs --remote-smoke
+          node tests/website-launcher.mjs
+      - name: Check published agent pin with a clean clone
+        if: github.event_name == 'workflow_dispatch' && inputs.run_remote_smoke
+        run: node tests/website-launcher.mjs --remote-smoke
 
   render:
     runs-on: ubuntu-latest
@@ -60,8 +69,9 @@ jobs:
           links = Links()
           links.feed(launcher)
           text = "".join(links.text)
-          assert "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22" in text
-          assert "copilot --agent sslz-founder" in text
+          assert "Run SSLZ Agent" in text
+          assert "798a3ccad9710084ecc37f3386e8826934bfa0f2" in text
+          assert "copilot --agent sslz-agent" in text
           assert "git checkout --detach" in text
           assert "{{" not in launcher
           assert "/#quick-start" in links.hrefs

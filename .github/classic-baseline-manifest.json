@@ -92,13 +92,13 @@
     {
       "path": "use-sslz-agent.md",
       "status": "A",
-      "expectedBlob": "a68495f7f98976c81330442ec7664765ba7a9376",
-      "reason": "Classic-native public launcher for the separately maintained SSLZ Founder Agent"
+      "expectedBlob": "23938a287686147113a91f72b8922f51d9117b77",
+      "reason": "Classic-native public launcher for the separately maintained SSLZ Agent"
     }
   ],
   "readme": {
     "baselineBlob": "d7790f6feb08fd21006af3127bc869d0e9443b38",
-    "launcherSection": "## Plan with the SSLZ Founder Agent\n\n[Use SSLZ Agent](https://startupscalelanding.zone/use-sslz-agent/) explains how to run the separate, pinned agent\nimplementation in local GitHub Copilot CLI. Start with a conversation and local planning without Azure CLI or Azure\nlogin. Live reads and any later write-capable operation require separate review and approval. This classic branch\ncontains the website launcher, not the agent profile; the Quick Start below remains the direct operator deployment path.\n",
+    "launcherSection": "## Plan with SSLZ Agent\n\n[Use SSLZ Agent](https://startupscalelanding.zone/use-sslz-agent/) explains how to run the separate, pinned agent\nimplementation in local GitHub Copilot CLI. Start with a conversation and local planning without Azure CLI or Azure\nlogin. Live reads and any later write-capable operation require separate review and approval. This classic branch\ncontains the website launcher, not the agent profile; the Quick Start below remains the direct operator deployment path.\n",
     "originalBadges": [
       "[![Validate IaC](https://github.com/ricmmartins/sslz/workflows/Validate%20IaC/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml)",
       "[![Deploy Landing Zone (Bicep)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Bicep)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-bicep.yml)",
@@ -119,12 +119,12 @@
   },
   "launcher": {
     "path": "use-sslz-agent.md",
-    "expectedBlob": "a68495f7f98976c81330442ec7664765ba7a9376",
+    "expectedBlob": "23938a287686147113a91f72b8922f51d9117b77",
     "permalink": "/use-sslz-agent/",
     "title": "Use SSLZ Agent",
-    "product": "SSLZ Founder Agent",
+    "product": "SSLZ Agent",
     "technicalBranch": "agent-aware",
-    "implementationCommit": "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22"
+    "implementationCommit": "798a3ccad9710084ecc37f3386e8826934bfa0f2"
   },
   "validateWorkflow": {
     "baselineBlob": "1b524b6966c84fd43798535d2462606a6ab74165",

@@ -28,8 +28,8 @@ const EXPECTED_AGENT_PROFILE_BLOB =
   "6cd3691239ea9d243c837f2eb0507dae455a65f6";
 const EXPECTED_CLASSIC_LAUNCHER_COMMIT =
   "294a0af7c1dd43fc6eec305aa783e412eb82076a";
-const EXPECTED_PUBLIC_IMPLEMENTATION_COMMIT =
-  "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22";
+const EXPECTED_PINNED_IMPLEMENTATION_COMMIT =
+  "798a3ccad9710084ecc37f3386e8826934bfa0f2";
 const REPO_ROOT = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const MANIFEST_PATH = resolve(
   REPO_ROOT,
@@ -329,7 +329,7 @@ function validateClassicBaseline({
 
   if (
     manifest.launcher.path !== manifest.approvedAgentSource.launcherPath ||
-    manifest.launcher.implementationCommit !== EXPECTED_PUBLIC_IMPLEMENTATION_COMMIT ||
+    manifest.launcher.implementationCommit !== EXPECTED_PINNED_IMPLEMENTATION_COMMIT ||
     manifest.launcher.expectedBlob !==
       manifest.allowedChanges.find(
         ({ path }) => path === manifest.launcher.path,
@@ -352,7 +352,7 @@ function validateClassicBaseline({
     !currentLauncher.includes(
       `git clone --branch ${manifest.launcher.technicalBranch} --single-branch`,
     ) ||
-    !currentLauncher.includes(EXPECTED_PUBLIC_IMPLEMENTATION_COMMIT)
+    !currentLauncher.includes(EXPECTED_PINNED_IMPLEMENTATION_COMMIT)
   ) {
     throw new Error(
       "Launcher is missing an approved identity, route, or local setup boundary.",
@@ -394,7 +394,7 @@ function validateClassicBaseline({
     cwd: repoRoot,
   }).split(/\r?\n/);
   if (paths.includes(EXPECTED_AGENT_PROFILE_PATH)) {
-    throw new Error("Classic tree must not contain the SSLZ Founder Agent profile.");
+    throw new Error("Classic tree must not contain the SSLZ Agent profile.");
   }
   const agentPaths = paths.filter(isAgentPath);
   if (

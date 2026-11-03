@@ -8,14 +8,15 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const pin = "3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22";
+const pin = "798a3ccad9710084ecc37f3386e8826934bfa0f2";
 const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g, "\n");
 const page = read("use-sslz-agent.md");
 const homepage = read("index.md");
 const readme = read("README.md");
 const manifest = JSON.parse(read(".github/classic-baseline-manifest.json"));
+const workflow = read(".github/workflows/validate-website.yml");
 const cloneCommand =
-  "git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-founder-agent";
+  "git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-agent";
 const plannerArgs = [
   "scripts/startup-workload-plan.mjs", "plan",
   "--input", "agent/examples/startup-input.json", "--output", "json",
@@ -32,9 +33,9 @@ function validateLauncher(markdown) {
   const shell = commands(markdown);
   assert.deepEqual(shell, [
     "git --version", "copilot --version", "node --version",
-    cloneCommand, "cd sslz-founder-agent", `git checkout --detach ${pin}`, "git rev-parse HEAD",
-    "copilot login", "copilot --agent sslz-founder",
-    "node tests/sslz-founder-agent.mjs",
+    cloneCommand, "cd sslz-agent", `git checkout --detach ${pin}`, "git rev-parse HEAD",
+    "copilot login", "copilot --agent sslz-agent",
+    "node tests/sslz-agent.mjs",
     "node scripts\\startup-workload-plan.mjs plan --input agent\\examples\\startup-input.json --output json",
     `node ${plannerArgs.join(" ")}`,
   ], "Runnable instructions must keep the reviewed commands, pin, and approval boundary.");
@@ -48,6 +49,9 @@ function validateLauncher(markdown) {
     "This page provides setup instructions only",
     "stop if any command fails",
     "does not already exist",
+    ".github/agents/sslz-agent.agent.md",
+    "sslz-agent.agent.md",
+    "sslz-agent.md",
     "~/.copilot/agents/",
     "$HOME\\.copilot\\agents",
     "overrides the repository profile",
@@ -73,18 +77,19 @@ function validateLauncher(markdown) {
     "external planner invocation",
     "do not prove that the agent ran the planner itself",
     "autonomous conversation-to-deployment",
-    "publish a reviewed agent implementation first",
+    "only after this exact commit is",
   ]) {
     assert(normalized.includes(required), `Missing launcher boundary: ${required}`);
   }
   assert(!/d921d99|b0c2464|100%|fully autonomous|guaranteed deployment/.test(markdown));
+  assert(!/sslz-founder|SSLZ Founder Agent/.test(markdown));
   assert.match(markdown, /Never use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`, or `--yolo`/);
 }
 
 validateLauncher(page);
 for (const [before, after] of [
   [pin, "d921d99b6e2c2979d5637f7f186e6c9fe44ef86c"],
-  ["copilot --agent sslz-founder\n", "copilot --agent sslz-founder --allow-all\n"],
+  ["copilot --agent sslz-agent\n", "copilot --agent sslz-agent --allow-all\n"],
   ["copilot login\n", "az login\n"],
   ["overrides the repository profile", "does not affect selection"],
   ["does not itself grant Microsoft Learn MCP access", "grants all MCP tools"],
@@ -101,6 +106,13 @@ assert.match(readme, /without Azure CLI or Azure\r?\nlogin/);
 assert.match(read("_config.yml"), /^url: "https:\/\/startupscalelanding.zone"$/m);
 assert.match(read("_config.yml"), /^baseurl: ""$/m);
 assert(!/agent-aware|use-sslz-agent\.md/.test(read("_data/navigation.yml")));
+assert(workflow.includes(pin));
+assert.match(workflow, /run_remote_smoke:[\s\S]*?type: boolean/);
+assert.match(
+  workflow,
+  /if: github\.event_name == 'workflow_dispatch' && inputs\.run_remote_smoke/,
+);
+assert.match(workflow, /node tests\/website-launcher\.mjs --remote-smoke/);
 const links = [...page.matchAll(/\]\((https:\/\/[^)]+)\)/g)].map((match) => match[1]);
 assert(links.every((link) => ["docs.github.com", "learn.microsoft.com"].includes(new URL(link).hostname)));
 assert(page.includes("{{ '/' | relative_url }}#quick-start"));
@@ -108,7 +120,7 @@ console.log("Website launcher contracts and negative regressions passed.");
 
 if (process.argv.includes("--remote-smoke")) {
   const temporary = mkdtempSync(join(tmpdir(), "sslz-launcher-"));
-  const checkout = join(temporary, "sslz-founder-agent");
+  const checkout = join(temporary, "sslz-agent");
   const git = (args, cwd = checkout) => execFileSync("git", args, {
     cwd, encoding: "utf8", timeout: 120_000, stdio: ["ignore", "pipe", "pipe"],
   }).trim();
@@ -119,10 +131,10 @@ if (process.argv.includes("--remote-smoke")) {
     assert.equal(git(["rev-parse", "HEAD"]), pin);
     git(["merge-base", "--is-ancestor", pin, "origin/agent-aware"]);
     assert.equal(git(["status", "--porcelain"]), "");
-    const profile = readFileSync(join(checkout, ".github", "agents", "sslz-founder.agent.md"), "utf8");
+    const profile = readFileSync(join(checkout, ".github", "agents", "sslz-agent.agent.md"), "utf8");
     const tools = JSON.parse(profile.match(/^tools: (.+)$/m)[1]);
     assert.deepEqual(tools, ["read", "search", "execute", "WebFetch"]);
-    assert.match(profile, /^name: SSLZ Founder Agent$/m);
+    assert.match(profile, /^name: SSLZ Agent$/m);
     assert.match(profile, /do not assume[\s\S]*?add tools to frontmatter, or[\s\S]*?use ad hoc network requests/i);
     assert.match(profile, /What are you building, where does it run today, and what do you want Azure to do first/);
     const env = {
@@ -132,7 +144,7 @@ if (process.argv.includes("--remote-smoke")) {
     const runNode = (args) => execFileSync(process.execPath, args, {
       cwd: checkout, env, encoding: "utf8", timeout: 60_000,
     });
-    const profileResult = runNode(["tests/sslz-founder-agent.mjs"]);
+    const profileResult = runNode(["tests/sslz-agent.mjs"]);
     console.log(profileResult.trim());
     const planner = JSON.parse(runNode(plannerArgs));
     assert.equal(planner.schemaVersion, "1.0.0");

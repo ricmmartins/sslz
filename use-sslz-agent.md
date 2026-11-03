@@ -1,11 +1,11 @@
 ---
 layout: page
 title: "Use SSLZ Agent"
-description: "Start local Azure adoption planning with the SSLZ Founder Agent in GitHub Copilot CLI."
+description: "Start local Azure adoption planning with SSLZ Agent in GitHub Copilot CLI."
 permalink: /use-sslz-agent/
 ---
 
-Run the **SSLZ Founder Agent** in GitHub Copilot CLI from a local checkout. This page provides setup instructions only:
+Run **SSLZ Agent** in GitHub Copilot CLI from a local checkout. This page provides setup instructions only:
 it does not run the agent, connect to Azure, or receive access to your tenant, subscriptions, billing account, or secrets.
 You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
 
@@ -36,27 +36,29 @@ path with different prerequisites and approval responsibilities.
 
 ## Clone the public agent version
 
-The agent implementation is maintained separately from the classic website. These commands pin public commit
-`3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22` on the implementation branch. Use a parent directory where
-`sslz-founder-agent` does not already exist. Git will refuse to clone over a nonempty directory; do not delete or
+The agent implementation is maintained separately from the classic website. These commands pin commit
+`798a3ccad9710084ecc37f3386e8826934bfa0f2` on the implementation branch. Run them only after this exact commit is
+reachable from the public `agent-aware` branch; do not substitute another commit or continue on the branch tip. Use a
+parent directory where
+`sslz-agent` does not already exist. Git will refuse to clone over a nonempty directory; do not delete or
 overwrite an existing checkout to follow this guide.
 
-Run each command separately and stop if any command fails. The following commands work in PowerShell and macOS/Linux
-shells:
+Run each command separately and stop if any command fails. Once the pinned commit is public, these commands work in
+PowerShell and macOS/Linux shells:
 
 ```shell
-git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-founder-agent
-cd sslz-founder-agent
-git checkout --detach 3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22
+git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-agent
+cd sslz-agent
+git checkout --detach 798a3ccad9710084ecc37f3386e8826934bfa0f2
 git rev-parse HEAD
 ```
 
-The last command must print exactly `3f376b3c1d5afd0dbb60cd7f70a97cfce0a7be22`. A detached HEAD keeps this walkthrough
+The last command must print exactly `798a3ccad9710084ecc37f3386e8826934bfa0f2`. A detached HEAD keeps this walkthrough
 on that version even if the branch moves. If checkout fails or the hash differs, stop; do not substitute an unverified
 commit or continue on the branch tip.
 
-Review `.github/agents/sslz-founder.agent.md`, `.github/copilot-instructions.md`, and any repository configuration
-before trusting the folder in Copilot. This published pin has `read`, `search`, `execute`, and `WebFetch` tools.
+Review `.github/agents/sslz-agent.agent.md`, `.github/copilot-instructions.md`, and any repository configuration
+before trusting the folder in Copilot. This pinned profile has `read`, `search`, `execute`, and `WebFetch` tools.
 It includes adoption guidance for founders and technology leaders across different organization sizes and hosting
 environments. The startup planner itself accepts teams of 1-50 engineers; larger teams need broader architecture review
 instead of forcing their inputs into that schema.
@@ -67,15 +69,15 @@ Sign in to GitHub Copilot, independently of Azure:
 
 ```shell
 copilot login
-copilot --agent sslz-founder
+copilot --agent sslz-agent
 ```
 
 Follow the GitHub sign-in prompts. Review the folder trust prompt before accepting it. In an existing CLI session,
 `/login` handles GitHub authentication. You can alternatively start `copilot`, enter `/agent`, and select
-**SSLZ Founder Agent** from this repository. The CLI ID `sslz-founder` comes from the profile filename.
+**SSLZ Agent** from this repository. The CLI ID `sslz-agent` comes from the profile filename.
 
 A personal profile with the same ID in `~/.copilot/agents/` overrides the repository profile. On Windows, that folder is
-`$HOME\.copilot\agents`. Check for both `sslz-founder.agent.md` and `sslz-founder.md`, and any conflicting display name.
+`$HOME\.copilot\agents`. Check for both `sslz-agent.agent.md` and `sslz-agent.md`, and any conflicting display name.
 Resolve a conflict yourself before continuing; these instructions do not rename, remove, or overwrite your profiles.
 If the agent is missing, confirm the repository root, pinned hash, profile file, folder trust, and CLI version, then
 restart the CLI. See GitHub's [custom-agent guidance](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli).
@@ -95,7 +97,7 @@ unknown, and the next safe decision, then asks about facts you have not already 
 
 Answer one question at a time. Expect unknowns and evidence gaps to remain explicit. A conversation does not guarantee
 that a deterministic planner ran; request its exact command and review its output when you need a planner result.
-GitHub also documents `--agent sslz-founder --prompt "..."` for programmatic invocation. This walkthrough uses an
+GitHub also documents `--agent sslz-agent --prompt "..."` for programmatic invocation. This walkthrough uses an
 interactive session so you can answer questions and review tool requests; do not add blanket permissions to make an
 unattended prompt run.
 
@@ -105,7 +107,7 @@ In the pinned checkout, these optional checks read tracked files and sanitized f
 these exact commands when the agent proposes them:
 
 ```shell
-node tests/sslz-founder-agent.mjs
+node tests/sslz-agent.mjs
 ```
 
 For PowerShell:
@@ -168,12 +170,12 @@ a supported launch path for this repository. A hosted agent also has no automati
 See GitHub's [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents)
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
-This public pin supports adoption conversation guidance, documentation grounding when the required tools are exposed,
-local contract checks, and fixture-based planning. Seven real two-turn conversations, version 3 fixture replay, and an
-external planner invocation were validated for the reviewed implementation. Those checks have different scopes:
+This pinned implementation supports adoption conversation guidance, documentation grounding when the required tools
+are exposed, local contract checks, and fixture-based planning. Earlier release checks included seven real two-turn
+conversations, version 3 fixture replay, and an external planner invocation. Those checks have different scopes:
 conversation and replay checks do not prove that the agent ran the planner itself. Neither those tests nor this guide
 establish an autonomous conversation-to-deployment flow or real tenant readiness.
 
-Maintainers must publish a reviewed agent implementation first, verify its full commit is reachable from the public
-implementation branch, and rerun clean-clone checks before updating this page's pin and capability descriptions.
-Publish the website documentation separately from classic `main`; do not merge the agent implementation into it.
+Release this page only after the pinned commit is reachable from the public implementation branch and clean-clone
+checks pass. Publish the website documentation separately from classic `main`; do not merge the agent implementation
+into it.

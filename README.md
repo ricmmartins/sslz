@@ -52,7 +52,7 @@ vnet-<co>-nonprod (10.1.0.0/16)
 
 No hub. No Azure Firewall. No VNet peering. Each subscription is self-contained. [Read more →](docs/architecture.md)
 
-## Plan with the SSLZ Founder Agent
+## Plan with SSLZ Agent
 
 [Use SSLZ Agent](https://startupscalelanding.zone/use-sslz-agent/) explains how to run the separate, pinned agent
 implementation in local GitHub Copilot CLI. Start with a conversation and local planning without Azure CLI or Azure
