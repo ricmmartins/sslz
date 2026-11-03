@@ -9,6 +9,11 @@ The **SSLZ Founder Agent** guides founders from "what are you building?" to a re
 plan. It reuses local scripts, machine-readable contracts, deterministic planning, and narrowly approval-gated
 integrations. It does not replace the classic Bicep or Terraform Quick Start.
 
+For an underspecified Azure adoption request, it summarizes knowns and unknowns, makes a conditional architecture
+recommendation suited to the organization and workload, and identifies the next decision before selecting a migration,
+coexistence, or existing-Azure improvement path. Unknown service fit, account readiness, availability, quota, capacity,
+billing, and support are never inferred from the prompt.
+
 [Launch the SSLZ Founder Agent]({{ '/use-sslz-agent/' | relative_url }})
 
 > **Not an autonomous hosted bot:** SSLZ does not embed a chatbot, run a hosted agent, capture your credentials, or make
@@ -32,6 +37,8 @@ integrations. It does not replace the classic Bicep or Terraform Quick Start.
    what is delivered, what can write, and whether evidence is synthetic, historical, or live.
 4. [Implementation plan]({{ '/agent/docs/startup-agent-implementation-plan/' | relative_url }}) records the phased
    program and review gates.
+5. [Recommendation grounding](compat/recommendation-grounding.md) explains how Azure guidance is checked against
+   Microsoft Learn and kept distinct from the capabilities implemented in this repository.
 
 ## Planning and readiness
 

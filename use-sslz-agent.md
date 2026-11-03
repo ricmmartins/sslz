@@ -12,6 +12,16 @@ region choices, migration or dual-cloud planning, and a reviewable SSLZ infrastr
 read-only checks. It stops before local artifact generation, live preview, provider registration, or deployment and
 explains the exact approval boundary.
 
+For an open-ended request, it first summarizes the known company and workload facts, calls out the decisions still
+unknown, and offers a conditional architecture and first-step sequence suited to the organization's context. Mentioning
+another cloud does not by itself mean you want to migrate or run in two clouds; the agent clarifies that intent before
+choosing those planning paths. Recommendations remain candidates until the relevant repository planner and evidence
+support them.
+
+Azure service guidance is grounded in retrieved Microsoft Learn pages when that MCP is available. The agent also cites
+the SSLZ files that implement or plan each capability; documentation alone does not mean SSLZ supports a service.
+When documentation retrieval is unavailable, Azure-specific claims that need it remain unverified.
+
 > The supported launch surface is the GitHub Copilot CLI on your computer. The agent does not receive access to your
 > Azure tenant, billing account, subscriptions, or secrets from GitHub.
 
