@@ -17,7 +17,7 @@ assert.deepEqual(parseNameStatus("M\0README.md\0A\0new.txt\0"), [
 ]);
 assert.deepEqual(parseNameStatus(""), []);
 assert.equal(isAgentPath("use-sslz-agent.md"), true);
-assert.equal(isAgentPath(".github/agents/sslz-founder.agent.md"), true);
+assert.equal(isAgentPath(".github/agents/sslz-agent.agent.md"), true);
 assert.equal(isAgentPath("agent/checks/check-catalog.json"), true);
 assert.equal(isAgentPath("docs/architecture.md"), false);
 
@@ -63,10 +63,10 @@ assert.equal(
     readme: {
       originalBadges: ["old"],
       approvedBadges: ["new"],
-      launcherSection: "## Plan with the SSLZ Founder Agent\n\nlauncher link\n",
+      launcherSection: "## Plan with SSLZ Agent\n\nlauncher link\n",
     },
   }),
-  "new\n\n## Plan with the SSLZ Founder Agent\n\nlauncher link\n\n## Quick Start\nunchanged\n",
+  "new\n\n## Plan with SSLZ Agent\n\nlauncher link\n\n## Quick Start\nunchanged\n",
 );
 assert.throws(
   () => expectedReadme("old\n", {
