@@ -7,7 +7,7 @@ description: "VNet design, NSGs, and when you actually need a hub"
 
 # Networking Deep Dive
 
-> See also: [Architecture Decisions](architecture.md#networking) for details on why this layout was chosen.
+> See also: [Architecture Decisions](/docs/architecture/#networking) for details on why this layout was chosen.
 
 ## Do You Even Need a VNet?
 
@@ -259,7 +259,7 @@ You can explicitly set `defaultOutboundAccess: false` on subnets to make them "p
 
 For PaaS-only subnets (`snet-app`, `snet-data`), this setting has no practical effect since the platform services manage their own connectivity.
 
-> **See also:** The [SaaS Startup example](../examples/saas-startup/) demonstrates opt-in Private Endpoints for SQL and Redis with DNS zone configuration.
+> **See also:** The [SaaS Startup example]({{ site.github_repo }}/tree/main/examples/saas-startup) demonstrates opt-in Private Endpoints for SQL and Redis with DNS zone configuration.
 
 ## Front Door vs Application Gateway
 

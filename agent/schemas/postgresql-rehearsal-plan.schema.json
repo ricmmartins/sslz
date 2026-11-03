@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-rehearsal-plan.schema.json",
+  "title": "SSLZ PostgreSQL rehearsal and validation plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "evaluatedAt",
+    "rehearsalId",
+    "evidenceSetId",
+    "acceptedLineageDigest",
+    "status",
+    "sourceAssessmentDigest",
+    "migrationPlanInputDigest",
+    "migrationPlanDigest",
+    "target",
+    "requiredChecks",
+    "checks",
+    "transition",
+    "stages",
+    "rehearsalPlan",
+    "validationSummary",
+    "identityBindings",
+    "humanConfirmationRequired",
+    "safety",
+    "planDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "evaluatedAt": { "type": "string", "format": "date-time" },
+    "rehearsalId": { "$ref": "#/$defs/reference" },
+    "evidenceSetId": { "$ref": "#/$defs/reference" },
+    "acceptedLineageDigest": { "$ref": "#/$defs/digest" },
+    "status": {
+      "enum": [
+        "ready-for-cutover-review",
+        "manual-review-required",
+        "blocked"
+      ]
+    },
+    "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+    "migrationPlanInputDigest": { "$ref": "#/$defs/digest" },
+    "migrationPlanDigest": { "$ref": "#/$defs/digest" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["region", "engine", "strategy", "evidenceReference"],
+      "properties": {
+        "region": { "$ref": "#/$defs/region" },
+        "engine": { "$ref": "#/$defs/engine" },
+        "strategy": { "$ref": "#/$defs/strategy" },
+        "evidenceReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/checkId" }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "requested", "disposition", "transitionApplied"],
+      "properties": {
+        "from": { "const": "rehearse" },
+        "requested": { "const": "cutover-ready" },
+        "disposition": {
+          "enum": ["eligible-for-human-review", "blocked"]
+        },
+        "transitionApplied": { "const": false }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state",
+          "status",
+          "gate",
+          "transitionApplied",
+          "executionAllowed"
+        ],
+        "properties": {
+          "state": {
+            "enum": [
+              "assess",
+              "prepare",
+              "rehearse",
+              "initial-load",
+              "catch-up",
+              "validate",
+              "cutover-ready",
+              "cutover",
+              "verify",
+              "rollback-required",
+              "completed"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "blocked",
+              "pending-human-confirmation",
+              "not-applicable",
+              "not-triggered"
+            ]
+          },
+          "gate": { "type": "string", "minLength": 1 },
+          "transitionApplied": { "const": false },
+          "executionAllowed": { "const": false }
+        }
+      }
+    },
+    "rehearsalPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modelPreparation",
+        "initialLoad",
+        "catchUp",
+        "validation",
+        "cutoverReadiness",
+        "rollbackReadiness",
+        "sourceOfTruth",
+        "unresolvedChecks"
+      ],
+      "properties": {
+        "modelPreparation": { "$ref": "#/$defs/nonEmptyStrings" },
+        "initialLoad": { "$ref": "#/$defs/nonEmptyStrings" },
+        "catchUp": { "$ref": "#/$defs/nonEmptyStrings" },
+        "validation": { "$ref": "#/$defs/nonEmptyStrings" },
+        "cutoverReadiness": { "$ref": "#/$defs/nonEmptyStrings" },
+        "rollbackReadiness": { "$ref": "#/$defs/nonEmptyStrings" },
+        "sourceOfTruth": { "$ref": "#/$defs/nonEmptyStrings" },
+        "unresolvedChecks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/checkId" }
+        }
+      }
+    },
+    "validationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceFreshness",
+        "schemaCompatibilityPassed",
+        "objectCountsMatch",
+        "rowCountsPassed",
+        "rowCounts",
+        "dataVerificationMethod",
+        "dataVerificationPassed",
+        "applicationSmokeTestsPassed"
+      ],
+      "properties": {
+        "evidenceFreshness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "migrationPlanning",
+            "regionalPlanning",
+            "rehearsal",
+            "sourceAssessment",
+            "targetMigrationEvidence",
+            "selectedRegionalEvidence",
+            "acceptedLineage"
+          ],
+          "properties": {
+            "migrationPlanning": { "enum": ["current", "stale"] },
+            "regionalPlanning": { "enum": ["current", "stale"] },
+            "rehearsal": { "enum": ["current", "stale"] },
+            "sourceAssessment": { "enum": ["current", "stale"] },
+            "targetMigrationEvidence": { "enum": ["current", "stale"] },
+            "selectedRegionalEvidence": { "enum": ["current", "stale"] },
+            "acceptedLineage": { "enum": ["current", "stale"] }
+          }
+        },
+        "schemaCompatibilityPassed": { "type": "boolean" },
+        "objectCountsMatch": { "type": "boolean" },
+        "rowCountsPassed": { "type": "boolean" },
+        "rowCounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tableReference",
+              "sourceRows",
+              "targetRows",
+              "allowedDifferenceRows",
+              "differenceRows",
+              "withinBound"
+            ],
+            "properties": {
+              "tableReference": { "$ref": "#/$defs/reference" },
+              "sourceRows": { "type": "integer", "minimum": 0 },
+              "targetRows": { "type": "integer", "minimum": 0 },
+              "allowedDifferenceRows": { "const": 0 },
+              "differenceRows": { "type": "integer", "minimum": 0 },
+              "withinBound": { "type": "boolean" }
+            }
+          }
+        },
+        "dataVerificationMethod": {
+          "enum": ["checksums", "chunked-checksums", "bounded-sampling"]
+        },
+        "dataVerificationPassed": { "type": "boolean" },
+        "applicationSmokeTestsPassed": { "type": "boolean" }
+      }
+    },
+    "identityBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "migrationPlanInputDigest",
+        "migrationPlanDigest",
+        "migrationIdentityDigest",
+        "rehearsalEvidenceDigest",
+        "evaluatedAt",
+        "targetRegion",
+        "targetEngine",
+        "targetPostgresqlDecisionDigest",
+        "targetPostgresqlSelectedEvidenceDigest",
+        "selectedRegionalEvidenceReference",
+        "selectedRegionalEvidenceObservedAt",
+        "selectedRegionalEvidenceExpiresAt",
+        "targetMigrationEvidenceDigest",
+        "targetMigrationEvidenceObservedAt",
+        "targetMigrationEvidenceExpiresAt",
+        "acceptedLineageDigest",
+        "strategy",
+        "validationPlanDigest",
+        "rollbackPlanDigest",
+        "rehearsalIdentityDigest"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "migrationPlanInputDigest": { "$ref": "#/$defs/digest" },
+        "migrationPlanDigest": { "$ref": "#/$defs/digest" },
+        "migrationIdentityDigest": { "$ref": "#/$defs/digest" },
+        "rehearsalEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "evaluatedAt": { "type": "string", "format": "date-time" },
+        "targetRegion": { "$ref": "#/$defs/region" },
+        "targetEngine": { "$ref": "#/$defs/engine" },
+        "targetPostgresqlDecisionDigest": { "$ref": "#/$defs/digest" },
+        "targetPostgresqlSelectedEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "selectedRegionalEvidenceReference": { "$ref": "#/$defs/reference" },
+        "selectedRegionalEvidenceObservedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "selectedRegionalEvidenceExpiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "targetMigrationEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "targetMigrationEvidenceObservedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "targetMigrationEvidenceExpiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "acceptedLineageDigest": { "$ref": "#/$defs/digest" },
+        "strategy": { "$ref": "#/$defs/strategy" },
+        "validationPlanDigest": { "$ref": "#/$defs/digest" },
+        "rollbackPlanDigest": { "$ref": "#/$defs/digest" },
+        "rehearsalIdentityDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "humanConfirmationRequired": { "$ref": "#/$defs/nonEmptyStrings" },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "sourceConnections",
+        "targetConnections",
+        "sourceWrites",
+        "targetWrites",
+        "cloudOperations",
+        "cloudWrites",
+        "migrationToolActions",
+        "dumpRestoreActions",
+        "cdcActions",
+        "dnsActions",
+        "generatedCommands",
+        "transitionWrites",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "sourceConnections": { "const": "none" },
+        "targetConnections": { "const": "none" },
+        "sourceWrites": { "const": "none" },
+        "targetWrites": { "const": "none" },
+        "cloudOperations": { "const": "none" },
+        "cloudWrites": { "const": "none" },
+        "migrationToolActions": { "const": "none" },
+        "dumpRestoreActions": { "const": "none" },
+        "cdcActions": { "const": "none" },
+        "dnsActions": { "const": "none" },
+        "generatedCommands": { "const": "none" },
+        "transitionWrites": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "planDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{1,31}$"
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "major", "minor"],
+      "properties": {
+        "family": { "const": "postgresql" },
+        "major": { "type": "integer", "minimum": 11, "maximum": 99 },
+        "minor": { "type": "integer", "minimum": 0, "maximum": 99 }
+      }
+    },
+    "strategy": {
+      "enum": ["offline-dump-restore", "online-logical-replication"]
+    },
+    "checkId": {
+      "enum": [
+        "rehearsal.postgresql.contracts-bound",
+        "rehearsal.postgresql.evidence-current",
+        "rehearsal.postgresql.replay-protected",
+        "rehearsal.postgresql.target-bound",
+        "rehearsal.postgresql.model-prechecks-complete",
+        "rehearsal.postgresql.initial-load-evidenced",
+        "rehearsal.postgresql.catch-up-permitted",
+        "rehearsal.postgresql.schema-compatible",
+        "rehearsal.postgresql.row-counts-within-bound",
+        "rehearsal.postgresql.data-verification-complete",
+        "rehearsal.postgresql.cutover-ready",
+        "rehearsal.postgresql.rollback-ready",
+        "rehearsal.postgresql.source-of-truth-safe",
+        "rehearsal.postgresql.output-sanitized"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "freshness",
+        "summary",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/checkId" },
+        "classification": { "enum": ["pass", "fail", "unresolved"] },
+        "freshness": { "enum": ["current", "stale", "not-applicable"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "evidenceReferences": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

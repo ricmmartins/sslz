@@ -1,0 +1,30 @@
+{
+  "name": "AKS without an operations owner is blocked",
+  "overrides": {
+    "workload": {
+      "description": "An application that requires Kubernetes APIs.",
+      "traffic": ["mixed"],
+      "requiresKubernetes": true,
+      "requiresRelationalDatabase": false,
+      "kubernetesRequirements": ["kubernetes-api"],
+      "incidentOwnerConfirmed": false,
+      "aksIngress": {
+        "mode": "private",
+        "serviceType": "ClusterIP",
+        "frontendExposure": "private",
+        "protocol": "Tcp",
+        "frontendPort": null,
+        "backendNodePort": null,
+        "healthProbe": { "sourcePrefix": null, "port": null },
+        "dataSourcePrefixes": [],
+        "reservedNsgPriorities": []
+      }
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "computeProfile": "aks",
+    "profileExtensions": [],
+    "blockingDecision": "operations.aks-owner.required"
+  }
+}

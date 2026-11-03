@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/deployment-result.schema.json",
+  "title": "SSLZ approved deployment result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "executorVersion",
+    "generatedBy",
+    "generatedAt",
+    "mode",
+    "status",
+    "code",
+    "message",
+    "manifest",
+    "approval",
+    "commands",
+    "verification",
+    "rollback",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "executorVersion": {
+      "const": "1.0.0"
+    },
+    "generatedBy": {
+      "const": "startup-deployment-integration.mjs"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": ["preview", "apply"]
+    },
+    "status": {
+      "enum": ["planned", "succeeded", "rejected", "error"]
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$"
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "manifest": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "deployment-execution-manifest.schema.json"
+        }
+      ]
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provided",
+        "status",
+        "consumed",
+        "expiresAt",
+        "artifactDigest",
+        "keyId"
+      ],
+      "properties": {
+        "provided": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "notProvided",
+            "pending",
+            "approved",
+            "declined",
+            "expired",
+            "consumed",
+            "invalid"
+          ]
+        },
+        "consumed": {
+          "type": "boolean"
+        },
+        "expiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "artifactDigest": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "keyId": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preparation", "deployment"],
+      "properties": {
+        "preparation": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/auditCommand"
+            }
+          ]
+        },
+        "deployment": {
+          "$ref": "#/$defs/auditCommand"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "performed",
+        "healthy",
+        "attempts",
+        "checks",
+        "workloadDeploymentAllowed"
+      ],
+      "properties": {
+        "performed": {
+          "type": "boolean"
+        },
+        "healthy": {
+          "type": "boolean"
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 7,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^deployment\\.platform\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "status": {
+                "enum": ["not-run", "pass", "fail"]
+              }
+            }
+          }
+        },
+        "workloadDeploymentAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "guidanceCode"],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "guidanceCode": {
+          "enum": [
+            "deployment.rollback.not-required",
+            "deployment.rollback.review-required"
+          ]
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deploymentWrites",
+        "localState",
+        "rawOutputRetained",
+        "personalDataRetained",
+        "secondaryRegionDeployment",
+        "workloadDeployment"
+      ],
+      "properties": {
+        "deploymentWrites": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "localState": {
+          "enum": ["none", "reserved", "consumed"]
+        },
+        "rawOutputRetained": {
+          "const": false
+        },
+        "personalDataRetained": {
+          "const": false
+        },
+        "secondaryRegionDeployment": {
+          "const": false
+        },
+        "workloadDeployment": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "auditCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executable", "arguments", "preview", "executed"],
+      "properties": {
+        "executable": {
+          "enum": ["az", "terraform", null]
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "preview": {
+          "type": ["string", "null"],
+          "maxLength": 1000
+        },
+        "executed": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

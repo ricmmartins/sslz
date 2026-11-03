@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedBy": "startup-iac-plan.mjs",
+  "sourceDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "parameterDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "backendDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "providerLockDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "savedPlanDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "planJsonDigest": "sha256:abababababababababababababababababababababababababababababababab",
+  "configurationDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "plannedValuesDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "providerConfigurationDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "resourceChangesDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "variablesDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "terraformVersion": "1.9.8",
+  "terraformPlatform": "linux_amd64",
+  "terraformExecutableDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "signatureAlgorithm": "Ed25519",
+  "keyId": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+}

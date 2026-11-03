@@ -1,0 +1,244 @@
+[
+  {
+    "name": "offline rehearsal is ready for cutover review",
+    "mutations": [],
+    "expectedStatus": "ready-for-cutover-review",
+    "expectedChecks": []
+  },
+  {
+    "name": "stale evidence requires manual review",
+    "mutations": [
+      ["expiresAt", "2026-08-12T11:59:59Z"]
+    ],
+    "expectedStatus": "manual-review-required",
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "future-dated evidence requires manual review",
+    "mutations": [
+      ["observedAt", "2026-08-12T12:30:01Z"]
+    ],
+    "expectedStatus": "manual-review-required",
+    "expectedChecks": [
+      "rehearsal.postgresql.evidence-current"
+    ]
+  },
+  {
+    "name": "model precheck omission blocks",
+    "mutations": [
+      ["prechecks.requiredTransformationsReviewed", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.model-prechecks-complete"
+    ]
+  },
+  {
+    "name": "initial load method mismatch blocks",
+    "mutations": [
+      ["initialLoad.method", "consistent-snapshot"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.initial-load-evidenced"
+    ]
+  },
+  {
+    "name": "offline rehearsal cannot claim catch-up",
+    "mutations": [
+      ["catchUp.mode", "logical-replication"],
+      ["catchUp.explicitlyPermitted", true],
+      ["catchUp.completed", true],
+      ["catchUp.maxLagSeconds", 30],
+      ["catchUp.finalLagSeconds", 0],
+      ["catchUp.evidenceReferences", ["evidence.rehearsal.orders.catch-up"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.catch-up-permitted"
+    ]
+  },
+  {
+    "name": "schema incompatibility blocks",
+    "mutations": [
+      ["validation.schemaCompatibilityPassed", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.schema-compatible",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "row count beyond explicit bound blocks",
+    "mutations": [
+      ["validation.rowCounts.0.targetRows", 1249990],
+      ["validation.rowCounts.0.allowedDifferenceRows", 5]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.row-counts-within-bound",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "unknown table row count blocks",
+    "mutations": [
+      ["validation.rowCounts.0.tableReference", "table.not-in-source"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.row-counts-within-bound",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "duplicate table row count blocks",
+    "mutations": [
+      [
+        "validation.rowCounts",
+        [
+          {
+            "tableReference": "table.orders",
+            "sourceRows": 1250000,
+            "targetRows": 1250000,
+            "allowedDifferenceRows": 0
+          },
+          {
+            "tableReference": "table.orders",
+            "sourceRows": 1250000,
+            "targetRows": 1250000,
+            "allowedDifferenceRows": 0
+          }
+        ]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.row-counts-within-bound",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "zero object counts cannot pass by equality alone",
+    "mutations": [
+      ["validation.objectCounts.source", 0],
+      ["validation.objectCounts.target", 0]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "unrelated validation query blocks",
+    "mutations": [
+      ["validation.queryReferences", ["validation.unrelated.query"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "unrelated smoke test blocks",
+    "mutations": [
+      [
+        "validation.applicationSmokeTestReferences",
+        ["validation.unrelated.smoke"]
+      ]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "bounded sampling with risk acceptance passes",
+    "mutations": [
+      ["validation.dataVerification.method", "bounded-sampling"],
+      ["validation.dataVerification.coveragePercent", 10],
+      ["validation.dataVerification.sampleRows", 125000],
+      ["validation.dataVerification.riskAcceptanceReference", "risk.acceptance.orders.sampling"]
+    ],
+    "expectedStatus": "ready-for-cutover-review",
+    "expectedChecks": []
+  },
+  {
+    "name": "unbounded checksum alternative blocks",
+    "mutations": [
+      ["validation.dataVerification.method", "bounded-sampling"],
+      ["validation.dataVerification.coveragePercent", 10],
+      ["validation.dataVerification.sampleRows", 125000]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.data-verification-complete",
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "replayed evidence set blocks",
+    "mutations": [
+      ["replayProtection.attemptOrdinal", 2],
+      ["replayProtection.priorEvidenceSetIds", ["evidence.rehearsal.orders.attempt-1"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.replay-protected"
+    ]
+  },
+  {
+    "name": "target binding mismatch blocks",
+    "mutations": [
+      ["bindings.targetRegion", "eastus2"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.target-bound"
+    ]
+  },
+  {
+    "name": "cutover readiness omission blocks",
+    "mutations": [
+      ["cutoverReadiness.connectionDrainRehearsed", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.cutover-ready"
+    ]
+  },
+  {
+    "name": "rollback readiness failure blocks",
+    "mutations": [
+      ["rollbackReadiness.sourceRetained", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.rollback-ready"
+    ]
+  },
+  {
+    "name": "source authority transfer blocks",
+    "mutations": [
+      ["sourceOfTruth.owner", "target"],
+      ["sourceOfTruth.transferAuthorized", true]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.source-of-truth-safe"
+    ]
+  },
+  {
+    "name": "missing sanitization attestation blocks",
+    "mutations": [
+      ["redaction.sanitized", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedChecks": [
+      "rehearsal.postgresql.output-sanitized"
+    ]
+  }
+]

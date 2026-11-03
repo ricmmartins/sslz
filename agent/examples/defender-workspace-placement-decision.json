@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "workspace.startup-primary-baseline.prod",
+  "generatedAt": "2026-08-11T12:00:00Z",
+  "expiresAt": "2026-08-11T14:00:00Z",
+  "status": "ready",
+  "reasonCode": "workspace.explicit-new-compatible",
+  "tenantId": "11111111-1111-1111-1111-111111111111",
+  "subscriptionId": "22222222-2222-2222-2222-222222222222",
+  "targetSubscriptionIds": [
+    "22222222-2222-2222-2222-222222222222",
+    "33333333-3333-3333-3333-333333333333"
+  ],
+  "primaryRegion": "eastus2",
+  "defenderWorkspaceRequired": true,
+  "requiredByPlans": ["defenderForServers"],
+  "paidPlanSelectionDigest": "sha256:81223bfb07407a6a76a5a673216f1d2f7a916d695d943d553025b81fa9d785d1",
+  "placement": {
+    "mode": "new",
+    "region": "eastus2",
+    "workspaceReference": "new:11111111-1111-1111-1111-111111111111:22222222-2222-2222-2222-222222222222:eastus2",
+    "workspaceReferenceDigest": "sha256:b29223855e80dd5155029929f10ee34e0fa432f96d9faad6df7f5ae3ef0ca7d2",
+    "scopeDigest": "sha256:07749bf51273fe63996561c4553ece0d13141020f9fcd10074c22835930dc83b"
+  },
+  "evidence": {
+    "policyEvidenceDigest": "sha256:b42d601c5bd05cf8e34954a7e74f541dce17dab1f4cdc21ebc6455f8046806cd",
+    "policyEvidenceExpiresAt": "2026-08-11T14:00:00Z",
+    "serviceSupportEvidenceDigest": "sha256:8738347bf254d27d7c20afc20d59412b647994fd8aea1663d6b2c567d64e74f5",
+    "serviceSupportEvidenceExpiresAt": "2026-08-11T14:00:00Z",
+    "dataResidencyEvidenceDigest": "sha256:4e59c2f7267184a097bc6b32e44fbf2cff3ff8ec333c3411a254cf06721f1f28",
+    "dataResidencyEvidenceExpiresAt": "2026-08-11T14:00:00Z",
+    "workspaceEvidenceDigest": null,
+    "workspaceEvidenceExpiresAt": null,
+    "centralWorkspaceEvidenceDigest": null,
+    "centralWorkspaceEvidenceExpiresAt": null
+  },
+  "decisionDigest": "sha256:f4ae885b8c2ab9e7d41a365af43575bba7acd36ad83ab8d3648c4c3e17626fcf"
+}

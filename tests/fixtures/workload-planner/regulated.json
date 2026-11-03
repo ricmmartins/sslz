@@ -1,0 +1,13 @@
+{
+  "name": "Regulated requirements stop for architecture review",
+  "overrides": {
+    "architecture": {
+      "regulatedControlsBeyondBaseline": true
+    }
+  },
+  "expected": {
+    "status": "architecture-review",
+    "computeProfile": null,
+    "profileExtensions": []
+  }
+}

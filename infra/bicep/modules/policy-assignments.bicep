@@ -8,6 +8,9 @@ targetScope = 'subscription'
 @description('Azure region for policy assignment managed identity')
 param location string
 
+@description('Attempt-scoped prefix for policy assignments with location-bound identities')
+param policyAssignmentPrefix string = ''
+
 @description('Allowed Azure regions for resource deployment')
 param allowedLocations string[]
 
@@ -38,7 +41,7 @@ var policyDefinitions = {
 // ============================================================================
 
 resource mcsbAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'mcsb-audit'
+  name: '${policyAssignmentPrefix}mcsb-audit'
   properties: {
     displayName: 'Microsoft Cloud Security Benchmark (Audit)'
     description: 'Audit resources against Microsoft Cloud Security Benchmark. Does not block deployments.'
@@ -52,7 +55,7 @@ resource mcsbAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' =
 // ============================================================================
 
 resource allowedLocationsAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'allowed-locations'
+  name: '${policyAssignmentPrefix}allowed-locations'
   properties: {
     displayName: 'Allowed Locations'
     description: 'Restrict resource deployment to approved regions only.'
@@ -67,7 +70,7 @@ resource allowedLocationsAssignment 'Microsoft.Authorization/policyAssignments@2
 }
 
 resource allowedLocationsRgAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'allowed-locations-rg'
+  name: '${policyAssignmentPrefix}allowed-locations-rg'
   properties: {
     displayName: 'Allowed Locations for Resource Groups'
     description: 'Restrict resource group creation to approved regions only.'
@@ -86,7 +89,7 @@ resource allowedLocationsRgAssignment 'Microsoft.Authorization/policyAssignments
 // ============================================================================
 
 resource requireEnvironmentTag 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'require-env-tag-rg'
+  name: '${policyAssignmentPrefix}require-env-tag-rg'
   properties: {
     displayName: 'Require environment tag on resource groups'
     description: 'All resource groups must have an environment tag for cost tracking.'
@@ -101,7 +104,7 @@ resource requireEnvironmentTag 'Microsoft.Authorization/policyAssignments@2024-0
 }
 
 resource requireTeamTag 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'require-team-tag-rg'
+  name: '${policyAssignmentPrefix}require-team-tag-rg'
   properties: {
     displayName: 'Require team tag on resource groups'
     description: 'All resource groups must have a team tag for ownership tracking.'
@@ -120,7 +123,7 @@ resource requireTeamTag 'Microsoft.Authorization/policyAssignments@2024-04-01' =
 // ============================================================================
 
 resource inheritEnvironmentTag 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'inherit-env-tag'
+  name: '${policyAssignmentPrefix}inherit-env-tag'
   location: location
   identity: {
     type: 'SystemAssigned'
@@ -139,7 +142,7 @@ resource inheritEnvironmentTag 'Microsoft.Authorization/policyAssignments@2024-0
 }
 
 resource inheritTeamTag 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'inherit-team-tag'
+  name: '${policyAssignmentPrefix}inherit-team-tag'
   location: location
   identity: {
     type: 'SystemAssigned'
@@ -162,7 +165,7 @@ resource inheritTeamTag 'Microsoft.Authorization/policyAssignments@2024-04-01' =
 // ============================================================================
 
 resource activityLogDiagAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
-  name: 'activity-log-diag'
+  name: '${policyAssignmentPrefix}activity-log-diag'
   location: location
   identity: {
     type: 'SystemAssigned'

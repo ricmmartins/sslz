@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-execution-plan.schema.json",
+  "title": "SSLZ PostgreSQL migration execution orchestration plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "evaluatedAt",
+    "executionId",
+    "attemptOrdinal",
+    "status",
+    "executionEligibility",
+    "strategy",
+    "target",
+    "artifactBindings",
+    "requiredChecks",
+    "checks",
+    "plannedActions",
+    "lineageTransition",
+    "outstandingPrerequisites",
+    "safety",
+    "planDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "plannerVersion": { "const": "1.0.0" },
+    "evaluatedAt": { "type": "string", "format": "date-time" },
+    "executionId": { "$ref": "#/$defs/reference" },
+    "attemptOrdinal": { "type": "integer", "minimum": 1 },
+    "status": {
+      "enum": ["execution-contract-satisfied", "manual-review-required", "blocked"]
+    },
+    "executionEligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligible", "executionPerformed", "reason"],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "executionPerformed": { "const": false },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "strategy": {
+      "enum": ["offline-dump-restore", "online-logical-replication"]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environmentReference",
+        "sourceReference",
+        "targetReference",
+        "region",
+        "engine"
+      ],
+      "properties": {
+        "environmentReference": { "$ref": "#/$defs/reference" },
+        "sourceReference": { "$ref": "#/$defs/reference" },
+        "targetReference": { "$ref": "#/$defs/reference" },
+        "region": { "type": "string", "pattern": "^[a-z][a-z0-9]{1,31}$" },
+        "engine": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family", "major", "minor"],
+          "properties": {
+            "family": { "const": "postgresql" },
+            "major": { "type": "integer" },
+            "minor": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "artifactBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssessmentDigest",
+        "migrationPlanInputDigest",
+        "migrationPlanDigest",
+        "rehearsalEvidenceDigest",
+        "rehearsalPlanDigest",
+        "currentLineageDigest",
+        "liveEvidenceDigest",
+        "approvalSetDigest",
+        "trustManifestDigest",
+        "evaluationTimeDigest"
+      ],
+      "properties": {
+        "sourceAssessmentDigest": { "$ref": "#/$defs/digest" },
+        "migrationPlanInputDigest": { "$ref": "#/$defs/digest" },
+        "migrationPlanDigest": { "$ref": "#/$defs/digest" },
+        "rehearsalEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "rehearsalPlanDigest": { "$ref": "#/$defs/digest" },
+        "currentLineageDigest": { "$ref": "#/$defs/digest" },
+        "liveEvidenceDigest": { "$ref": "#/$defs/digest" },
+        "approvalSetDigest": { "$ref": "#/$defs/digest" },
+        "trustManifestDigest": { "$ref": "#/$defs/digest" },
+        "evaluationTimeDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "requiredChecks": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "uniqueItems": true,
+      "prefixItems": [
+        { "const": "execution.postgresql.artifacts-bound" },
+        { "const": "execution.postgresql.lineage-monotonic" },
+        { "const": "execution.postgresql.replay-protected" },
+        { "const": "execution.postgresql.evidence-current" },
+        { "const": "execution.postgresql.target-bound" },
+        { "const": "execution.postgresql.authorities-bound" },
+        { "const": "execution.postgresql.signatures-valid" },
+        { "const": "execution.postgresql.approvals-complete" },
+        { "const": "execution.postgresql.approval-scope-exact" },
+        { "const": "execution.postgresql.strategy-bound" },
+        { "const": "execution.postgresql.privileges-exact" },
+        { "const": "execution.postgresql.stage-order-valid" },
+        { "const": "execution.postgresql.rollback-boundaries-complete" },
+        { "const": "execution.postgresql.output-sanitized" }
+      ],
+      "items": false
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "uniqueItems": true,
+      "prefixItems": [
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.artifacts-bound" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.lineage-monotonic" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.replay-protected" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.evidence-current" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.target-bound" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.authorities-bound" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.signatures-valid" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.approvals-complete" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.approval-scope-exact" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.strategy-bound" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.privileges-exact" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.stage-order-valid" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.rollback-boundaries-complete" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/check" }, { "properties": { "id": { "const": "execution.postgresql.output-sanitized" } } }] }
+      ],
+      "items": false
+    },
+    "plannedActions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "prefixItems": [
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "rehearsal-execution" }, "path": { "const": "forward" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "initial-load" }, "path": { "const": "forward" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "cdc-catch-up" }, "path": { "const": "forward" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "write-freeze-connection-drain" }, "path": { "const": "forward" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "cutover-readiness" }, "path": { "const": "forward" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "source-of-truth-transfer" }, "path": { "const": "forward" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "rollback" }, "path": { "const": "contingency" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/action" }, { "properties": { "stage": { "const": "failback" }, "path": { "const": "contingency" } } }] }
+      ],
+      "items": false
+    },
+    "lineageTransition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lineageDigest",
+        "fromOrdinal",
+        "toOrdinal",
+        "predecessorState",
+        "successorState",
+        "transitionApplied"
+      ],
+      "properties": {
+        "lineageDigest": { "$ref": "#/$defs/digest" },
+        "fromOrdinal": { "type": "integer", "minimum": 0 },
+        "toOrdinal": { "type": "integer", "minimum": 1 },
+        "predecessorState": { "$ref": "#/$defs/reference" },
+        "successorState": { "$ref": "#/$defs/reference" },
+        "transitionApplied": { "const": false }
+      }
+    },
+    "outstandingPrerequisites": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "sourceConnections",
+        "targetConnections",
+        "databaseOperations",
+        "dumpRestoreOperations",
+        "replicationOperations",
+        "cloudOperations",
+        "iacOperations",
+        "networkOperations",
+        "dnsOperations",
+        "cutoverOperations",
+        "rollbackOperations",
+        "failbackOperations",
+        "generatedCommands",
+        "stateWrites",
+        "generatedArtifacts"
+      ],
+      "properties": {
+        "executionEnabled": { "const": false },
+        "sourceConnections": { "const": "none" },
+        "targetConnections": { "const": "none" },
+        "databaseOperations": { "const": "none" },
+        "dumpRestoreOperations": { "const": "none" },
+        "replicationOperations": { "const": "none" },
+        "cloudOperations": { "const": "none" },
+        "iacOperations": { "const": "none" },
+        "networkOperations": { "const": "none" },
+        "dnsOperations": { "const": "none" },
+        "cutoverOperations": { "const": "none" },
+        "rollbackOperations": { "const": "none" },
+        "failbackOperations": { "const": "none" },
+        "generatedCommands": { "const": "none" },
+        "stateWrites": { "const": "none" },
+        "generatedArtifacts": { "const": "stdout-only" }
+      }
+    },
+    "planDigest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "classification", "freshness", "summary", "references"],
+      "properties": {
+        "id": { "$ref": "#/$defs/checkId" },
+        "classification": { "enum": ["pass", "fail", "unresolved"] },
+        "freshness": { "enum": ["current", "stale", "not-applicable"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "references": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    },
+    "action": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ordinal",
+          "stage",
+          "path",
+          "authorityReference",
+          "approvalId",
+          "disposition",
+          "description",
+          "predecessor",
+          "successor",
+          "allowedOriginStates",
+          "triggerEvidenceRequired",
+          "idempotencyIdentityDigest",
+          "rollbackBoundary",
+          "executionEligible",
+          "executionPerformed"
+        ],
+        "properties": {
+          "ordinal": { "type": "integer", "minimum": 1, "maximum": 8 },
+          "stage": { "$ref": "#/$defs/stage" },
+          "path": { "enum": ["forward", "contingency"] },
+          "authorityReference": { "$ref": "#/$defs/reference" },
+          "approvalId": { "$ref": "#/$defs/reference" },
+          "disposition": { "enum": ["planned", "not-applicable", "contingency", "blocked"] },
+          "description": { "type": "string", "minLength": 1 },
+          "predecessor": { "$ref": "#/$defs/reference" },
+          "successor": { "$ref": "#/$defs/reference" },
+          "allowedOriginStates": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/reference" }
+          },
+          "triggerEvidenceRequired": { "type": "boolean" },
+          "idempotencyIdentityDigest": { "$ref": "#/$defs/digest" },
+          "rollbackBoundary": { "type": "string", "minLength": 1 },
+          "executionEligible": { "type": "boolean" },
+          "executionPerformed": { "const": false }
+        }
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "checkId": {
+      "enum": [
+        "execution.postgresql.artifacts-bound",
+        "execution.postgresql.lineage-monotonic",
+        "execution.postgresql.replay-protected",
+        "execution.postgresql.evidence-current",
+        "execution.postgresql.target-bound",
+        "execution.postgresql.authorities-bound",
+        "execution.postgresql.signatures-valid",
+        "execution.postgresql.approvals-complete",
+        "execution.postgresql.approval-scope-exact",
+        "execution.postgresql.strategy-bound",
+        "execution.postgresql.privileges-exact",
+        "execution.postgresql.stage-order-valid",
+        "execution.postgresql.rollback-boundaries-complete",
+        "execution.postgresql.output-sanitized"
+      ]
+    },
+    "stage": {
+      "enum": [
+        "rehearsal-execution",
+        "initial-load",
+        "cdc-catch-up",
+        "write-freeze-connection-drain",
+        "cutover-readiness",
+        "source-of-truth-transfer",
+        "rollback",
+        "failback"
+      ]
+    }
+  }
+}

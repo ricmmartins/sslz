@@ -1,0 +1,408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/container-image-cicd-source-assessment.schema.json",
+  "title": "SSLZ container image and CI/CD source assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "assessmentId",
+    "observedAt",
+    "expiresAt",
+    "registry",
+    "images",
+    "cicd",
+    "governance"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "assessmentId": { "$ref": "#/$defs/reference" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "reference",
+        "region",
+        "tagImmutability",
+        "deploysByMutableTag",
+        "replication",
+        "retention",
+        "encryption",
+        "network",
+        "scanning"
+      ],
+      "properties": {
+        "provider": {
+          "enum": [
+            "aws-ecr",
+            "gcp-artifact-registry",
+            "gcp-gcr",
+            "generic-oci"
+          ]
+        },
+        "reference": { "$ref": "#/$defs/reference" },
+        "region": { "$ref": "#/$defs/region" },
+        "tagImmutability": { "enum": ["enabled", "disabled"] },
+        "deploysByMutableTag": { "type": "boolean" },
+        "replication": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "regions"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "regions": { "$ref": "#/$defs/regionList" }
+          }
+        },
+        "retention": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "days"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "days": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["atRest"],
+          "properties": {
+            "atRest": {
+              "enum": ["provider-managed", "customer-managed", "none"]
+            }
+          }
+        },
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["publicAccess", "privateAccess"],
+          "properties": {
+            "publicAccess": { "enum": ["enabled", "disabled"] },
+            "privateAccess": { "enum": ["ready", "planned", "missing"] }
+          }
+        },
+        "scanning": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "reference"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "reference": { "$ref": "#/$defs/reference" }
+          }
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/image" }
+    },
+    "cicd": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "pipelineReference",
+        "triggers",
+        "protectedBranches",
+        "environments",
+        "runner",
+        "secrets",
+        "promotion",
+        "deploymentTargets"
+      ],
+      "properties": {
+        "provider": {
+          "enum": [
+            "github-actions",
+            "aws-codebuild",
+            "gcp-cloud-build",
+            "gitlab-ci",
+            "jenkins",
+            "azure-devops"
+          ]
+        },
+        "pipelineReference": { "$ref": "#/$defs/reference" },
+        "triggers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protectedBranchPush",
+            "pullRequestFromForks",
+            "tagTriggers",
+            "scheduled"
+          ],
+          "properties": {
+            "protectedBranchPush": { "type": "boolean" },
+            "pullRequestFromForks": {
+              "enum": ["blocked", "restricted", "allowed"]
+            },
+            "tagTriggers": { "type": "boolean" },
+            "scheduled": { "type": "boolean" }
+          }
+        },
+        "protectedBranches": {
+          "type": "array",
+          "minItems": 0,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/value" }
+        },
+        "environments": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/environment" }
+        },
+        "runner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "identityType",
+            "privilege",
+            "egress",
+            "hostedType"
+          ],
+          "properties": {
+            "identityType": {
+              "enum": [
+                "oidc-federated",
+                "workload-identity",
+                "static-credential"
+              ]
+            },
+            "privilege": { "enum": ["least", "broad"] },
+            "egress": { "enum": ["allowlist", "open"] },
+            "hostedType": { "enum": ["hosted", "self-hosted"] }
+          }
+        },
+        "secrets": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference", "exposure", "store"],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "exposure": { "enum": ["reference", "inline"] },
+              "store": {
+                "enum": ["external-managed", "pipeline-native", "plaintext"]
+              }
+            }
+          }
+        },
+        "promotion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model",
+            "requiresSignature",
+            "requiresAttestation",
+            "gateReferences"
+          ],
+          "properties": {
+            "model": { "enum": ["digest-immutable", "tag-mutable"] },
+            "requiresSignature": { "type": "boolean" },
+            "requiresAttestation": { "type": "boolean" },
+            "gateReferences": { "$ref": "#/$defs/referenceList" }
+          }
+        },
+        "deploymentTargets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reference",
+              "environment",
+              "imageReference",
+              "boundByDigest",
+              "approvalReference"
+            ],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "environment": { "$ref": "#/$defs/value" },
+              "imageReference": { "$ref": "#/$defs/reference" },
+              "boundByDigest": { "type": "boolean" },
+              "approvalReference": {
+                "oneOf": [{ "$ref": "#/$defs/reference" }, { "type": "null" }]
+              }
+            }
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceOfTruth",
+        "dataResidency",
+        "compliance",
+        "owner",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "sourceOfTruth": {
+          "enum": ["source-registry", "target-registry", "ambiguous"]
+        },
+        "dataResidency": { "$ref": "#/$defs/value" },
+        "compliance": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/value" }
+        },
+        "owner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["role", "reference"],
+          "properties": {
+            "role": { "$ref": "#/$defs/value" },
+            "reference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        "evidenceReferences": { "$ref": "#/$defs/nonEmptyReferences" }
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "referenceList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "nonEmptyReferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "regionList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/region" }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "tag": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$"
+    },
+    "platform": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]+/[a-z0-9]+(?:/[a-z0-9]+)?$"
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference",
+        "repository",
+        "digest",
+        "tags",
+        "platforms",
+        "signed",
+        "signatureType",
+        "attestations",
+        "provenanceSubjectDigest",
+        "sbomFormat",
+        "baseImage",
+        "vulnerabilities"
+      ],
+      "properties": {
+        "reference": { "$ref": "#/$defs/reference" },
+        "repository": { "$ref": "#/$defs/reference" },
+        "digest": { "$ref": "#/$defs/digest" },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/tag" }
+        },
+        "platforms": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/platform" }
+        },
+        "signed": { "type": "boolean" },
+        "signatureType": { "enum": ["sigstore", "notary", "none"] },
+        "attestations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provenance", "sbom", "vulnerabilityScan"],
+          "properties": {
+            "provenance": { "type": "boolean" },
+            "sbom": { "type": "boolean" },
+            "vulnerabilityScan": { "type": "boolean" }
+          }
+        },
+        "provenanceSubjectDigest": {
+          "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        },
+        "sbomFormat": { "enum": ["spdx", "cyclonedx", "none"] },
+        "baseImage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reference", "digest", "supportStatus"],
+          "properties": {
+            "reference": { "$ref": "#/$defs/reference" },
+            "digest": { "$ref": "#/$defs/digest" },
+            "supportStatus": {
+              "enum": ["supported", "deprecated", "end-of-life", "unknown"]
+            }
+          }
+        },
+        "vulnerabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scanStatus", "critical", "high", "medium", "low"],
+          "properties": {
+            "scanStatus": { "enum": ["scanned", "not-scanned", "stale"] },
+            "critical": { "type": "integer", "minimum": 0 },
+            "high": { "type": "integer", "minimum": 0 },
+            "medium": { "type": "integer", "minimum": 0 },
+            "low": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "purpose",
+        "requiredReviewers",
+        "isolatedSecrets",
+        "isolatedIdentity"
+      ],
+      "properties": {
+        "name": { "$ref": "#/$defs/value" },
+        "purpose": { "enum": ["nonprod", "prod"] },
+        "requiredReviewers": { "type": "integer", "minimum": 0 },
+        "isolatedSecrets": { "type": "boolean" },
+        "isolatedIdentity": { "type": "boolean" }
+      }
+    }
+  }
+}

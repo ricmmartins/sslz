@@ -1,0 +1,32 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "aks",
+  "kind": "compute",
+  "providerNamespaces": [
+    "Microsoft.ContainerService"
+  ],
+  "requiredChecks": [
+    "account.provider.required-registrations",
+    "quota.workload.headroom",
+    "region.services.available",
+    "region.skus.eligible",
+    "operations.aks-owner.confirmed",
+    "network.aks-ingress.decision-explicit",
+    "network.aks-ingress.provider-parity",
+    "security.defender.selection-reviewed",
+    "operations.monitoring.destination-valid"
+  ],
+  "regionalRequirements": {
+    "services": [
+      "Microsoft.ContainerService/managedClusters"
+    ],
+    "computeSkuEvidence": true,
+    "gpuSkuEvidence": false,
+    "foundryDeploymentEvidence": false
+  },
+  "costAssumptions": [
+    "Production uses the AKS Standard tier and uptime SLA.",
+    "The baseline includes one system node pool and one user node pool.",
+    "Node, disk, load balancer, network, observability, and support charges are not priced until region and sizing checks complete."
+  ]
+}

@@ -25,7 +25,7 @@
 
 ### THE SOLUTION (3-4 min)
 
-> "So I built the Startup-Scale Landing Zone — SSLZ. It's an opinionated, production-ready Azure infrastructure template that deploys in under one hour using either Bicep or Terraform.
+> "So I built the Startup-Scale Landing Zone — SSLZ. It's an opinionated, deployable Azure infrastructure baseline that can be applied with either Bicep or Terraform.
 >
 > It's targeted at teams of 5 to 50 engineers, typically pre-seed to Series A, who don't have a dedicated platform team but still need to get Azure right from day one.
 >
@@ -54,7 +54,7 @@
 
 > "Out of the box, you get: management groups, Azure Policy with the Microsoft Cloud Security Benchmark in audit mode, VNets with NSGs, Log Analytics with activity log forwarding, Defender for Cloud, budget alerts, and full CI/CD with GitHub Actions using Workload Identity Federation — so no secrets to store or rotate.
 >
-> I also built three production-grade example architectures — a SaaS startup stack with Container Apps and Azure SQL Elastic Pool, an AI startup stack with AKS and GPU Spot pools, and an API-first stack with App Service and APIM. Each one has full Bicep and Terraform implementations with realistic cost estimates."
+> I also built three detailed example architectures — a SaaS startup stack with Container Apps and Azure SQL Elastic Pool, an AI startup stack with AKS and GPU Spot pools, and an API-first stack with App Service and APIM. Each one has Bicep and Terraform implementations with cost estimates that still require workload-specific validation."
 
 ---
 
@@ -62,7 +62,7 @@
 
 > "Let me share some numbers on where this stands.
 >
-> The repo has 211 commits over about six weeks. Dual IaC support — 6 Bicep modules and 5 Terraform modules. Five GitHub Actions workflows for deployment, validation, and integration testing. Eight documentation pages including the graduation guide. And I've published it with a custom domain — startupscalelanding.zone.
+> The repository history now includes the merged agent-aware delivery through PR #29, alongside dual IaC, GitHub Actions validation and deployment workflows, examples, and the graduation guide. The site is published at startupscalelanding.zone.
 >
 > Beyond SSLZ itself, I've been actively building a presence on the Startups at Microsoft blog. Since mid-2025, I've published over 10 technical articles — covering everything from Azure Landing Zones to AI Gateway patterns, Azure Monitor, capacity planning, cost optimization, and more. Collectively, those posts have generated over 8,000 views on TechCommunity.
 >
@@ -106,7 +106,7 @@
 
 ### CLOSE (30 sec)
 
-> "To sum it up: I identified this gap through my direct work with startups. I built the solution — 211 commits, dual IaC, full documentation, live website. I published the blog series to build the audience. And now I'm driving the org integration with Founders Hub.
+> "To sum it up: I identified this gap through my direct work with startups. I built the solution with dual IaC, documented guardrails, and a live website. I published the blog series to build the audience. And now I'm driving the org integration with Founders Hub.
 >
 > The solution is built. The content engine is running. The next step is integration — and that's where I need your support.
 >
@@ -125,7 +125,7 @@
 > "I've been transparent about the positioning — SSLZ is complementary to ALZ, not competitive. The graduation guide explicitly funnels startups into ALZ when they're ready. I'd welcome a conversation with the ALZ team to tighten that alignment."
 
 **Q: "Who maintains this?"**
-> "I do. It's actively maintained — 211 commits and counting. The blog series keeps me engaged with the community, and I iterate based on feedback."
+> "I do. It's actively maintained, with the agent-aware delivery tracked through merged PR #29. The blog series keeps me engaged with the community, and I iterate based on feedback."
 
 **Q: "What if startups get stuck on SSLZ and never graduate?"**
 > "The graduation guide has explicit signals — 50+ engineers, compliance requirements, multi-region, hybrid connectivity. And even if they stay on SSLZ longer, they're still on Azure with proper governance. That's infinitely better than the zero-governance alternative."

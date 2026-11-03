@@ -1,0 +1,18 @@
+{
+  "name": "Managed-model fit does not select customer-managed GPU",
+  "overrides": {
+    "workload": {
+      "description": "An AI assistant that can use a managed model.",
+      "traffic": ["http"],
+      "requiresRelationalDatabase": false,
+      "requiresCustomerManagedGpu": true,
+      "managedModelFit": "yes",
+      "incidentOwnerConfirmed": false
+    }
+  },
+  "expected": {
+    "status": "ready",
+    "computeProfile": "container-apps",
+    "profileExtensions": ["foundry"]
+  }
+}

@@ -1,0 +1,112 @@
+[
+  {
+    "name": "missing accountable DNS authority",
+    "mutations": [["states.0.assignments.0.accountable", null]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.raci-complete", "control.ownership.authority-unambiguous"]
+  },
+  {
+    "name": "duplicate capability omits another assignment",
+    "mutations": [["states.0.assignments.1.capabilityId", "dns-zones-records-resolvers"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.raci-complete"]
+  },
+  {
+    "name": "ambiguous DNS authority",
+    "mutations": [["states.0.assignments.0.authorityScope", "ambiguous"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.authority-unambiguous"]
+  },
+  {
+    "name": "certificate authority substituted with source platform",
+    "mutations": [["states.0.assignments.1.accountable", "role.source-cloud-platform"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.authority-unambiguous"]
+  },
+  {
+    "name": "self approval violates separation of duties",
+    "mutations": [["states.0.assignments.1.approvalAuthority", "role.security"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.separation-of-duties"]
+  },
+  {
+    "name": "circular escalation",
+    "mutations": [["escalationRoutes.6.toRole", "role.source-cloud-platform"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.escalation-acyclic"]
+  },
+  {
+    "name": "unauthorized source of truth transfer",
+    "mutations": [["transitions.1.sourceOfTruthTransferApproved", false]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.source-of-truth-authorized"]
+  },
+  {
+    "name": "ownerless rollback",
+    "mutations": [["states.0.assignments.14.accountable", null]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.rollback-failback-owned"]
+  },
+  {
+    "name": "stale handoff evidence",
+    "mutations": [
+      ["transitions.1.handoffs.0.observedAt", "2026-08-01T18:00:00Z"],
+      ["transitions.1.handoffs.0.expiresAt", "2026-08-02T18:00:00Z"]
+    ],
+    "refreshHandoffDigest": [1, 0],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.evidence-current"]
+  },
+  {
+    "name": "tampered handoff evidence digest",
+    "mutations": [["transitions.1.handoffs.0.evidenceDigest", "sha256:0000000000000000000000000000000000000000000000000000000000000000"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.handoff-integrity"]
+  },
+  {
+    "name": "replayed handoff nonce",
+    "copyHandoffNonce": [[1, 1], [1, 0]],
+    "refreshHandoffDigest": [1, 1],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.replay-protected"]
+  },
+  {
+    "name": "out of order transition",
+    "mutations": [["transitions.0.sequence", 2]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.transition-order-valid"]
+  },
+  {
+    "name": "non monotonic accepted lineage",
+    "mutations": [
+      ["lineage.attemptOrdinal", 2],
+      ["lineage.acceptedAttempts", [{"attemptOrdinal": 2, "attemptNonce": "nonce.ownership.accepted.0002", "planDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]]
+    ],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.lineage-monotonic", "control.ownership.replay-protected"]
+  },
+  {
+    "name": "target environment substitution",
+    "mutations": [["target.environment", "nonprod"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.artifacts-bound"]
+  },
+  {
+    "name": "target reference substitution",
+    "mutations": [["target.targetReference", "target.postgresql.other.flexible"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.artifacts-bound"]
+  },
+  {
+    "name": "tampered authority matrix without a fresh integrity claim",
+    "mutations": [["states.0.assignments.0.informed", ["role.application"]]],
+    "refreshIntegrity": false,
+    "expectedChecks": ["control.ownership.artifacts-bound"]
+  },
+  {
+    "name": "live operations enabled",
+    "mutations": [["safety.liveOperations", "enabled"]],
+    "refreshIntegrity": true,
+    "expectedChecks": ["control.ownership.safety-enforced"]
+  }
+]

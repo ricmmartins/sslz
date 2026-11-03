@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/aks-ingress-postcheck.schema.json",
+  "title": "SSLZ AKS ingress validation and postcheck contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "decisionDigest",
+    "serviceType",
+    "frontendExposure",
+    "frontendPort",
+    "backendNodePort",
+    "expectedHealthState",
+    "expectedReachability",
+    "observedHealthState",
+    "observedReachability",
+    "observedAt",
+    "expiresAt",
+    "evidenceReference",
+    "liveConnectivityClaimed"
+  ],
+  "properties": {
+    "contractVersion": { "const": "1.0.0" },
+    "decisionDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "serviceType": { "enum": ["ClusterIP", "LoadBalancer"] },
+    "frontendExposure": { "enum": ["private", "public"] },
+    "frontendPort": { "type": ["integer", "null"] },
+    "backendNodePort": { "type": ["integer", "null"] },
+    "expectedHealthState": {
+      "enum": ["healthy", "not-applicable"]
+    },
+    "expectedReachability": {
+      "enum": ["reachable", "not-publicly-reachable"]
+    },
+    "observedHealthState": {
+      "enum": ["healthy", "unhealthy", "not-applicable", "not-observed"]
+    },
+    "observedReachability": {
+      "enum": ["reachable", "unreachable", "not-publicly-reachable", "not-observed"]
+    },
+    "observedAt": { "type": ["string", "null"], "format": "date-time" },
+    "expiresAt": { "type": ["string", "null"], "format": "date-time" },
+    "evidenceReference": { "type": ["string", "null"] },
+    "liveConnectivityClaimed": { "type": "boolean" }
+  }
+}

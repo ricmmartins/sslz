@@ -1,0 +1,12 @@
+{
+  "bicep": {
+    "exitCode": 0,
+    "stdout": "Resource changes: Create: 2 Modify: 1 Delete: 0",
+    "stderr": ""
+  },
+  "terraform": {
+    "exitCode": 0,
+    "stdout": "Plan: 2 to add, 1 to change, 0 to destroy.",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/postgresql-source-assessment.schema.json",
+  "title": "SSLZ PostgreSQL source assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "assessmentId",
+    "observedAt",
+    "expiresAt",
+    "provider",
+    "sourceType",
+    "engine",
+    "size",
+    "databases",
+    "extensions",
+    "inventory",
+    "security",
+    "replication",
+    "availability",
+    "workload",
+    "network",
+    "identity",
+    "observability",
+    "governance"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "assessmentId": { "$ref": "#/$defs/reference" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "provider": { "enum": ["aws-rds", "google-cloud-sql", "self-managed"] },
+    "sourceType": { "enum": ["managed", "self-managed"] },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "major", "minor"],
+      "properties": {
+        "family": { "const": "postgresql" },
+        "major": { "type": "integer", "minimum": 11, "maximum": 99 },
+        "minor": { "type": "integer", "minimum": 0, "maximum": 99 }
+      }
+    },
+    "size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allocatedGiB", "usedGiB", "monthlyGrowthGiB"],
+      "properties": {
+        "allocatedGiB": { "type": "number", "minimum": 0 },
+        "usedGiB": { "type": "number", "minimum": 0 },
+        "monthlyGrowthGiB": { "type": "number", "minimum": 0 }
+      }
+    },
+    "databases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reference", "sizeGiB", "encoding", "locale", "collation"],
+        "properties": {
+          "reference": { "$ref": "#/$defs/reference" },
+          "sizeGiB": { "type": "number", "minimum": 0 },
+          "encoding": { "$ref": "#/$defs/value" },
+          "locale": { "$ref": "#/$defs/locale" },
+          "collation": { "$ref": "#/$defs/locale" }
+        }
+      }
+    },
+    "extensions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "databaseReferences"],
+        "properties": {
+          "name": { "$ref": "#/$defs/value" },
+          "version": { "$ref": "#/$defs/version" },
+          "databaseReferences": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/reference" }
+          }
+        }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemas",
+        "tables",
+        "partitions",
+        "indexes",
+        "constraints",
+        "sequences",
+        "generatedColumns",
+        "functions",
+        "triggers",
+        "largeObjects"
+      ],
+      "properties": {
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference", "ownerReference"],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "ownerReference": { "$ref": "#/$defs/reference" }
+            }
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reference",
+              "schemaReference",
+              "rowCount",
+              "sizeGiB",
+              "partitioned",
+              "hasGeneratedColumns"
+            ],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "schemaReference": { "$ref": "#/$defs/reference" },
+              "rowCount": { "type": "integer", "minimum": 0 },
+              "sizeGiB": { "type": "number", "minimum": 0 },
+              "partitioned": { "type": "boolean" },
+              "hasGeneratedColumns": { "type": "boolean" }
+            }
+          }
+        },
+        "partitions": { "$ref": "#/$defs/countInventory" },
+        "indexes": { "$ref": "#/$defs/countInventory" },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primaryKeys", "foreignKeys", "unique", "check"],
+          "properties": {
+            "primaryKeys": { "type": "integer", "minimum": 0 },
+            "foreignKeys": { "type": "integer", "minimum": 0 },
+            "unique": { "type": "integer", "minimum": 0 },
+            "check": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "sequences": { "type": "integer", "minimum": 0 },
+        "generatedColumns": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        },
+        "functions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "languages"],
+          "properties": {
+            "count": { "type": "integer", "minimum": 0 },
+            "languages": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/value" }
+            }
+          }
+        },
+        "triggers": { "type": "integer", "minimum": 0 },
+        "largeObjects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "totalGiB"],
+          "properties": {
+            "count": { "type": "integer", "minimum": 0 },
+            "totalGiB": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roles", "ownership", "rowLevelSecurity"],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference", "login", "superuser", "replication"],
+            "properties": {
+              "reference": { "$ref": "#/$defs/reference" },
+              "login": { "type": "boolean" },
+              "superuser": { "type": "boolean" },
+              "replication": { "type": "boolean" }
+            }
+          }
+        },
+        "ownership": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ownedObjectCount", "distinctOwnerCount"],
+          "properties": {
+            "ownedObjectCount": { "type": "integer", "minimum": 0 },
+            "distinctOwnerCount": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rowLevelSecurity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabledTableCount", "policyCount"],
+          "properties": {
+            "enabledTableCount": { "type": "integer", "minimum": 0 },
+            "policyCount": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "replication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "walLevel",
+        "logicalReplicationEnabled",
+        "maxReplicationSlots",
+        "availableReplicationSlots",
+        "replicaIdentityReady",
+        "slots",
+        "publications"
+      ],
+      "properties": {
+        "walLevel": { "enum": ["minimal", "replica", "logical", "unknown"] },
+        "logicalReplicationEnabled": { "type": "boolean" },
+        "maxReplicationSlots": { "type": "integer", "minimum": 0 },
+        "availableReplicationSlots": { "type": "integer", "minimum": 0 },
+        "replicaIdentityReady": { "type": "boolean" },
+        "slots": { "$ref": "#/$defs/referenceList" },
+        "publications": { "$ref": "#/$defs/referenceList" }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "highAvailability",
+        "readReplicas",
+        "backupRetentionDays",
+        "pointInTimeRecovery"
+      ],
+      "properties": {
+        "highAvailability": { "enum": ["none", "same-zone", "zone-redundant", "multi-zone", "unknown"] },
+        "readReplicas": { "type": "integer", "minimum": 0 },
+        "backupRetentionDays": { "type": "integer", "minimum": 0 },
+        "pointInTimeRecovery": { "type": "boolean" }
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxConnections",
+        "peakConnections",
+        "averageTps",
+        "peakTps",
+        "peakIops",
+        "maintenanceWindowReference"
+      ],
+      "properties": {
+        "maxConnections": { "type": "integer", "minimum": 1 },
+        "peakConnections": { "type": "integer", "minimum": 0 },
+        "averageTps": { "type": "number", "minimum": 0 },
+        "peakTps": { "type": "number", "minimum": 0 },
+        "peakIops": { "type": "number", "minimum": 0 },
+        "maintenanceWindowReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exposure",
+        "connectivity",
+        "dnsReference",
+        "certificateReference"
+      ],
+      "properties": {
+        "exposure": { "enum": ["public", "private", "mixed"] },
+        "connectivity": { "enum": ["available", "planned", "missing", "unknown"] },
+        "dnsReference": { "$ref": "#/$defs/reference" },
+        "certificateReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authenticationModes",
+        "identityProviderReference",
+        "secretReferences"
+      ],
+      "properties": {
+        "authenticationModes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["postgresql-native", "iam", "cloud-iam", "ldap", "certificate"] }
+        },
+        "identityProviderReference": { "$ref": "#/$defs/reference" },
+        "secretReferences": { "$ref": "#/$defs/referenceList" }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metricsReference", "logsReference", "auditReference"],
+      "properties": {
+        "metricsReference": { "$ref": "#/$defs/reference" },
+        "logsReference": { "$ref": "#/$defs/reference" },
+        "auditReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceOfTruth",
+        "dataResidency",
+        "compliance",
+        "toleratedDowntimeMinutes",
+        "rtoMinutes",
+        "rpoMinutes",
+        "owner",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "sourceOfTruth": { "enum": ["source", "target", "ambiguous"] },
+        "dataResidency": { "$ref": "#/$defs/value" },
+        "compliance": { "$ref": "#/$defs/referenceList" },
+        "toleratedDowntimeMinutes": { "type": "integer", "minimum": 0 },
+        "rtoMinutes": { "type": "integer", "minimum": 0 },
+        "rpoMinutes": { "type": "integer", "minimum": 0 },
+        "owner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["role", "reference"],
+          "properties": {
+            "role": { "$ref": "#/$defs/value" },
+            "reference": { "$ref": "#/$defs/reference" }
+          }
+        },
+        "evidenceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/reference" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "provider": { "const": "aws-rds" },
+            "sourceType": { "const": "managed" }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "provider": { "const": "google-cloud-sql" },
+            "sourceType": { "const": "managed" }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "provider": { "const": "self-managed" },
+            "sourceType": { "const": "self-managed" }
+          }
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "referenceList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/reference" }
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+(?:\\.[0-9A-Za-z-]+){0,3}$"
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._@-]{0,63}$"
+    },
+    "countInventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tableReference", "count", "types"],
+        "properties": {
+          "tableReference": { "$ref": "#/$defs/reference" },
+          "count": { "type": "integer", "minimum": 0 },
+          "types": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/value" }
+          }
+        }
+      }
+    }
+  }
+}

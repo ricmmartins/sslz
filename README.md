@@ -2,10 +2,18 @@
 
 [![Validate IaC](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml?query=branch%3Amain)
 [![Deploy to GitHub Pages](https://github.com/ricmmartins/sslz/actions/workflows/github-pages.yml/badge.svg?branch=main)](https://github.com/ricmmartins/sslz/actions/workflows/github-pages.yml?query=branch%3Amain)
+[![Bicep deploy: manual and approval-gated](https://img.shields.io/badge/Bicep_deploy-manual_%7C_approval--gated-0078D4)](docs/ci-cd-setup.md#automate-the-classic-direct-operator-path)
+[![Terraform deploy: manual and approval-gated](https://img.shields.io/badge/Terraform_deploy-manual_%7C_approval--gated-844FBA)](docs/ci-cd-setup.md#automate-the-classic-direct-operator-path)
 
 A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's [Azure Landing Zone (ALZ)](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/) — formerly Enterprise-Scale Landing Zone (ESLZ) — minus the enterprise complexity.
 
 > Built for teams of 5-50 engineers who need to get Azure right from day one without spending two months on "cloud foundations."
+
+Want guided setup? [Use the SSLZ Agent](use-sslz-agent.md) to start with founder-friendly questions, read-only
+planning, and an approval-bound infrastructure plan. Start from that launch page before following the classic deployment
+Quick Start below. Initial planning needs Git and GitHub Copilot CLI authenticated with a GitHub account that has Copilot
+access; it does not require Azure CLI, an Azure subscription, or Azure login. Node.js is needed for local planners and
+tests, and Azure tooling is needed only for later operations that explicitly require it.
 
 ## TL;DR
 
@@ -54,10 +62,10 @@ No hub. No Azure Firewall. No VNet peering. Each subscription is self-contained.
 
 ## Plan with SSLZ Agent
 
-[Use SSLZ Agent](https://startupscalelanding.zone/use-sslz-agent/) explains how to run the separate, pinned agent
-implementation in local GitHub Copilot CLI. Start with a conversation and local planning without Azure CLI or Azure
-login. Live reads and any later write-capable operation require separate review and approval. This classic branch
-contains the website launcher, not the agent profile; the Quick Start below remains the direct operator deployment path.
+[Use SSLZ Agent](https://startupscalelanding.zone/use-sslz-agent/) explains how to run the repository profile in local
+GitHub Copilot CLI. Clone the `main` branch to get the profile, planners, and documentation together. Start with a
+conversation and local planning without Azure CLI or Azure login. Live reads and later write-capable operations require
+separate review and approval. The Quick Start below remains the direct operator deployment path.
 
 ## Quick Start
 
@@ -134,6 +142,7 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 - `securityContactEmail` — Email for Defender for Cloud alerts.
 - `budgetAlertEmails` — List of emails for budget notifications.
 - `monthlyBudgetAmount` — Your monthly budget in USD.
+- `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
 
 ```bash
 # Preview what will be created (no changes made)
@@ -169,6 +178,7 @@ Open `terraform.tfvars` and fill in the **REQUIRED** values (marked in the file)
 - `environment` — `"prod"` or `"nonprod"`
 - `budget_alert_emails` — List of email addresses
 - `security_contact_email` — Email for security alerts
+- `enable_defender_for_storage` — Keep `false` unless you explicitly opt into the paid Defender for Storage V2 plan
 
 ```bash
 # Initialize Terraform

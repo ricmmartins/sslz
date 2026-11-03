@@ -1,0 +1,111 @@
+[
+  {
+    "name": "eastus2 unsupported edition and version falls back to centralus",
+    "mutations": [],
+    "expectedStatus": "fallback-required",
+    "expectedRegion": "centralus",
+    "expectedCodes": [
+      "postgresql.edition.unsupported",
+      "postgresql.version.unsupported"
+    ]
+  },
+  {
+    "name": "no valid fallback",
+    "mutations": [
+      ["evidence.1.serviceAvailability", "unavailable"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.service.unavailable"]
+  },
+  {
+    "name": "quota available but capacity unavailable",
+    "mutations": [
+      ["evidence.1.capacity.status", "unavailable"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.capacity.unavailable"]
+  },
+  {
+    "name": "quota status shortage",
+    "mutations": [
+      ["evidence.1.quota.status", "shortage"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.quota.shortage"]
+  },
+  {
+    "name": "quota amount below requirement",
+    "mutations": [
+      ["evidence.1.quota.available", 1]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.quota.shortage"]
+  },
+  {
+    "name": "capacity unknown",
+    "mutations": [
+      ["evidence.1.capacity.status", "unknown"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.capacity.unknown"]
+  },
+  {
+    "name": "capacity evidence stale",
+    "mutations": [
+      ["evidence.1.source.observedAt", "2026-08-01T17:35:00Z"]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.evidence.stale"]
+  },
+  {
+    "name": "required extension mismatch",
+    "mutations": [
+      ["evidence.1.supportedExtensions", ["pgcrypto"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.extension.unsupported"]
+  },
+  {
+    "name": "policy rejection",
+    "mutations": [
+      ["evidence.1.allowedByPolicy", false]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.policy.denied"]
+  },
+  {
+    "name": "residency rejection",
+    "mutations": [
+      ["evidence.1.residencyBoundaries", ["EuropeanUnion"]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.residency.rejected"]
+  },
+  {
+    "name": "cost ceiling",
+    "mutations": [
+      ["requirements.monthlyCostCeiling", 600]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.cost.ceiling-exceeded"]
+  },
+  {
+    "name": "exact version mismatch cannot downgrade",
+    "mutations": [
+      ["evidence.1.supportedVersions", [{"major": 15, "minor": 9}]]
+    ],
+    "expectedStatus": "blocked",
+    "expectedRegion": null,
+    "expectedCodes": ["postgresql.version.unsupported"]
+  }
+]

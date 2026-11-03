@@ -1,0 +1,30 @@
+{
+  "name": "PostgreSQL, Foundry, and GPU extensions compose deterministically",
+  "overrides": {
+    "workload": {
+      "description": "An AI platform with relational data, managed models, and custom GPU inference.",
+      "traffic": ["mixed"],
+      "requiresRelationalDatabase": true,
+      "usesFoundryModels": true,
+      "requiresCustomerManagedGpu": true,
+      "managedModelFit": "no",
+      "incidentOwnerConfirmed": true,
+      "aksIngress": {
+        "mode": "private",
+        "serviceType": "ClusterIP",
+        "frontendExposure": "private",
+        "protocol": "Tcp",
+        "frontendPort": null,
+        "backendNodePort": null,
+        "healthProbe": { "sourcePrefix": null, "port": null },
+        "dataSourcePrefixes": [],
+        "reservedNsgPriorities": []
+      }
+    }
+  },
+  "expected": {
+    "status": "ready",
+    "computeProfile": "aks",
+    "profileExtensions": ["postgresql", "foundry", "gpu"]
+  }
+}

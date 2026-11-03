@@ -1,0 +1,20 @@
+{
+  "name": "Stale point-in-time evidence cannot produce executable readiness",
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": []
+  },
+  "regionEvidenceOverrides": {
+    "eastus2": {
+      "observedAt": "2026-08-06T11:00:00Z",
+      "capacity": {
+        "observedAt": "2026-08-06T11:30:00Z"
+      }
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "primaryDisposition": "unresolved",
+    "overallFreshness": "stale"
+  }
+}

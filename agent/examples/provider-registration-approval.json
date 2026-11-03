@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "approved",
+  "planVersion": "1.0.0",
+  "planId": "plan-ready-example",
+  "planDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "actionId": "provider.register.prod.microsoft-app",
+  "actionType": "azureWrite",
+  "operation": "provider.register",
+  "namespace": "Microsoft.App",
+  "subscriptionId": "22222222-2222-2222-2222-222222222222",
+  "scope": "/subscriptions/22222222-2222-2222-2222-222222222222",
+  "approvedAt": "2026-08-09T12:00:00Z",
+  "expiresAt": "2026-08-09T14:00:00Z",
+  "approvalDigest": "sha256:22e1936154b3f6851cc53743abcff66cee439ddf7372f56ecd2339d282d89e96"
+}

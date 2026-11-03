@@ -1,0 +1,5 @@
+provider_installation {
+  direct {
+    include = ["registry.terraform.io/hashicorp/azurerm"]
+  }
+}

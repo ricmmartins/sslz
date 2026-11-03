@@ -1,0 +1,392 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/cool-foundation-manifest.schema.json",
+  "title": "SSLZ cool foundation execution-disabled manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestVersion",
+    "generatedBy",
+    "manifestDigest",
+    "provider",
+    "mode",
+    "environment",
+    "sourcePlan",
+    "target",
+    "artifacts",
+    "stateIsolation",
+    "steps",
+    "resume",
+    "postchecks",
+    "teardown",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "manifestVersion": {
+      "const": "1.0.0"
+    },
+    "generatedBy": {
+      "const": "startup-cool-foundation-plan.mjs"
+    },
+    "manifestDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "provider": {
+      "enum": ["bicep", "terraform"]
+    },
+    "mode": {
+      "const": "cool-infrastructure"
+    },
+    "environment": {
+      "const": "nonprod"
+    },
+    "sourcePlan": {
+      "$ref": "#/$defs/sourcePlan"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantId",
+        "subscriptionId",
+        "regionRole",
+        "region",
+        "scope",
+        "primaryVnetCidr",
+        "secondaryVnetCidr",
+        "resourceNames"
+      ],
+      "properties": {
+        "tenantId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "subscriptionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "regionRole": {
+          "const": "secondary"
+        },
+        "region": {
+          "$ref": "#/$defs/region"
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^/subscriptions/[0-9a-f-]+/resourceGroups/rg-[a-z0-9-]+-(monitoring|networking)$"
+        },
+        "primaryVnetCidr": {
+          "$ref": "#/$defs/cidr"
+        },
+        "secondaryVnetCidr": {
+          "$ref": "#/$defs/cidr"
+        },
+        "resourceNames": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["monitoringResourceGroup", "networkingResourceGroup", "workspace", "vnet"],
+          "properties": {
+            "monitoringResourceGroup": {
+              "$ref": "#/$defs/resourceName"
+            },
+            "networkingResourceGroup": {
+              "$ref": "#/$defs/resourceName"
+            },
+            "workspace": {
+              "$ref": "#/$defs/resourceName"
+            },
+            "vnet": {
+              "$ref": "#/$defs/resourceName"
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parameterPath",
+        "parameterDigest",
+        "decisionDigest",
+        "sourcePath",
+        "sourceDigest"
+      ],
+      "properties": {
+        "parameterPath": {
+          "$ref": "#/$defs/generatedPath"
+        },
+        "parameterDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "decisionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "sourcePath": {
+          "enum": [
+            "infra/bicep/cool-foundation.bicep",
+            "infra/terraform/cool-foundation"
+          ]
+        },
+        "sourceDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "stateIsolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "identifier", "primaryIdentifier", "isolated"],
+      "properties": {
+        "kind": {
+          "enum": ["arm-deployment-history", "terraform-remote-state"]
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 3
+        },
+        "primaryIdentifier": {
+          "type": "string",
+          "minLength": 3
+        },
+        "isolated": {
+          "const": true
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "resume": {
+      "$ref": "#/$defs/resume"
+    },
+    "postchecks": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/postcheck"
+      }
+    },
+    "teardown": {
+      "$ref": "#/$defs/teardown"
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "azureOperations",
+        "providerRegistration",
+        "globalIngress",
+        "workloadFailover",
+        "dataFailover",
+        "productionExecution"
+      ],
+      "properties": {
+        "executionEnabled": {
+          "const": false
+        },
+        "azureOperations": {
+          "const": "none"
+        },
+        "providerRegistration": {
+          "const": false
+        },
+        "globalIngress": {
+          "const": false
+        },
+        "workloadFailover": {
+          "const": false
+        },
+        "dataFailover": {
+          "const": false
+        },
+        "productionExecution": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "cidr": {
+      "type": "string",
+      "pattern": "^\\d{1,3}(?:\\.\\d{1,3}){3}/\\d{1,2}$"
+    },
+    "resourceName": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{3,90}$"
+    },
+    "generatedPath": {
+      "type": "string",
+      "pattern": "^\\.sslz/generated/[A-Za-z0-9._/-]+$"
+    },
+    "sourcePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "planId", "planDigest", "readinessEvidenceDigest"],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "planId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "planDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "readinessEvidenceDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "id",
+        "intent",
+        "state",
+        "attempt",
+        "maxAttempts",
+        "retryable",
+        "idempotencyKey",
+        "postcheckIds"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^cool\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 3
+        },
+        "state": {
+          "enum": ["pending", "running", "succeeded", "failed", "cleanup-required"]
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxAttempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "idempotencyKey": {
+          "$ref": "#/$defs/digest"
+        },
+        "postcheckIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^cool\\.postcheck\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
+      }
+    },
+    "resume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "action", "stepId", "reason"],
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        },
+        "action": {
+          "enum": ["start", "resume", "retry", "reconcile", "cleanup", "complete"]
+        },
+        "stepId": {
+          "type": ["string", "null"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "postcheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "readOnly", "blocking", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^cool\\.postcheck\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "status": {
+          "enum": ["not-run", "pass", "fail"]
+        },
+        "readOnly": {
+          "const": true
+        },
+        "blocking": {
+          "const": true
+        },
+        "description": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "teardown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "approvalRequired", "status", "triggers", "orderedActions"],
+      "properties": {
+        "intent": {
+          "const": "review-only"
+        },
+        "approvalRequired": {
+          "const": true
+        },
+        "status": {
+          "const": "not-run"
+        },
+        "triggers": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 3
+          }
+        },
+        "orderedActions": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      }
+    }
+  }
+}

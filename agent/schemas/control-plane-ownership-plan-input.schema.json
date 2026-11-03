@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/control-plane-ownership-plan-input.schema.json",
+  "title": "SSLZ dual-cloud control-plane ownership planning input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "planId",
+    "planningAt",
+    "maxEvidenceAgeHours",
+    "evidenceMode",
+    "sourceProvider",
+    "target",
+    "integration",
+    "roles",
+    "capabilities",
+    "states",
+    "escalationRoutes",
+    "transitions",
+    "lineage",
+    "integrityClaims",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "planId": { "$ref": "#/$defs/reference" },
+    "planningAt": { "type": "string", "format": "date-time" },
+    "maxEvidenceAgeHours": { "type": "integer", "minimum": 1, "maximum": 168 },
+    "evidenceMode": { "enum": ["synthetic", "live"] },
+    "sourceProvider": { "enum": ["aws", "gcp", "generic"] },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment",
+        "environmentReference",
+        "region",
+        "targetReference"
+      ],
+      "properties": {
+        "environment": { "enum": ["prod", "nonprod"] },
+        "environmentReference": { "$ref": "#/$defs/reference" },
+        "region": { "$ref": "#/$defs/region" },
+        "targetReference": { "$ref": "#/$defs/reference" }
+      }
+    },
+    "integration": {
+      "$ref": "control-plane-ownership-trusted-bindings.schema.json"
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reference", "type"],
+        "properties": {
+          "reference": { "$ref": "#/$defs/roleReference" },
+          "type": {
+            "enum": [
+              "source-cloud",
+              "azure",
+              "shared-platform",
+              "application",
+              "security",
+              "network",
+              "database",
+              "incident"
+            ]
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/capability" }
+    },
+    "states": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "ordinal", "assignments"],
+        "properties": {
+          "state": { "$ref": "#/$defs/state" },
+          "ordinal": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "assignments": {
+            "type": "array",
+            "minItems": 16,
+            "maxItems": 16,
+            "items": { "$ref": "#/$defs/assignment" }
+          }
+        }
+      }
+    },
+    "escalationRoutes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fromRole", "toRole"],
+        "properties": {
+          "fromRole": { "$ref": "#/$defs/roleReference" },
+          "toRole": { "$ref": "#/$defs/roleReference" }
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "fromState",
+          "toState",
+          "sourceOfTruthTransferApproved",
+          "handoffs"
+        ],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "fromState": { "$ref": "#/$defs/state" },
+          "toState": { "$ref": "#/$defs/state" },
+          "sourceOfTruthTransferApproved": { "type": "boolean" },
+          "handoffs": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/handoff" }
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attemptOrdinal", "attemptNonce", "acceptedAttempts"],
+      "properties": {
+        "attemptOrdinal": { "type": "integer", "minimum": 1 },
+        "attemptNonce": { "$ref": "#/$defs/reference" },
+        "acceptedAttempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attemptOrdinal", "attemptNonce", "planDigest"],
+            "properties": {
+              "attemptOrdinal": { "type": "integer", "minimum": 1 },
+              "attemptNonce": { "$ref": "#/$defs/reference" },
+              "planDigest": { "$ref": "#/$defs/digest" }
+            }
+          }
+        }
+      }
+    },
+    "integrityClaims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statesDigest",
+        "transitionsDigest",
+        "roleCatalogDigest"
+      ],
+      "properties": {
+        "statesDigest": { "$ref": "#/$defs/digest" },
+        "transitionsDigest": { "$ref": "#/$defs/digest" },
+        "roleCatalogDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionEnabled",
+        "executionEligible",
+        "executionAllowed",
+        "liveOperations"
+      ],
+      "properties": {
+        "executionEnabled": { "type": "boolean" },
+        "executionEligible": { "type": "boolean" },
+        "executionAllowed": { "type": "boolean" },
+        "liveOperations": { "enum": ["disabled", "enabled"] }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{2,159}$"
+    },
+    "roleReference": {
+      "type": "string",
+      "pattern": "^role\\.[a-z0-9][a-z0-9.-]{2,79}$"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,39}$"
+    },
+    "state": {
+      "enum": [
+        "coexistence",
+        "pre-cutover",
+        "cutover",
+        "post-cutover",
+        "rollback",
+        "failback"
+      ]
+    },
+    "capability": {
+      "enum": [
+        "dns-zones-records-resolvers",
+        "certificate-issuance-renewal",
+        "secret-stores-references-rotation",
+        "cicd-pipelines-runners",
+        "artifact-promotion",
+        "observability-telemetry-alert-routing",
+        "incidents-oncall-escalation",
+        "feature-flags-configuration",
+        "deployment-authority",
+        "database-writes",
+        "application-writes",
+        "source-of-truth-transfer",
+        "backup-restore",
+        "cutover",
+        "rollback",
+        "failback"
+      ]
+    },
+    "roleList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/roleReference" }
+    },
+    "assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capabilityId",
+        "accountable",
+        "responsible",
+        "consulted",
+        "informed",
+        "approvalAuthority",
+        "authorityScope"
+      ],
+      "properties": {
+        "capabilityId": { "$ref": "#/$defs/capability" },
+        "accountable": {
+          "oneOf": [
+            { "$ref": "#/$defs/roleReference" },
+            { "type": "null" }
+          ]
+        },
+        "responsible": { "$ref": "#/$defs/roleList" },
+        "consulted": { "$ref": "#/$defs/roleList" },
+        "informed": { "$ref": "#/$defs/roleList" },
+        "approvalAuthority": {
+          "oneOf": [
+            { "$ref": "#/$defs/roleReference" },
+            { "type": "null" }
+          ]
+        },
+        "authorityScope": {
+          "enum": ["source-cloud", "azure", "shared", "ambiguous"]
+        }
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference",
+        "capabilityId",
+        "offeredBy",
+        "acceptedBy",
+        "approvalAuthority",
+        "accepted",
+        "observedAt",
+        "expiresAt",
+        "nonce",
+        "evidenceDigest"
+      ],
+      "properties": {
+        "reference": { "$ref": "#/$defs/reference" },
+        "capabilityId": { "$ref": "#/$defs/capability" },
+        "offeredBy": { "$ref": "#/$defs/roleReference" },
+        "acceptedBy": { "$ref": "#/$defs/roleReference" },
+        "approvalAuthority": {
+          "oneOf": [
+            { "$ref": "#/$defs/roleReference" },
+            { "type": "null" }
+          ]
+        },
+        "accepted": { "type": "boolean" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "nonce": { "$ref": "#/$defs/reference" },
+        "evidenceDigest": { "$ref": "#/$defs/digest" }
+      }
+    }
+  }
+}

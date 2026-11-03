@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/container-apps-cool-profile-plan.schema.json",
+  "title": "SSLZ planning-only Container Apps cool profile plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannerVersion",
+    "generatedBy",
+    "planId",
+    "planDigest",
+    "evaluatedAt",
+    "status",
+    "mode",
+    "environment",
+    "source",
+    "readinessBinding",
+    "gateResults",
+    "profile",
+    "artifacts",
+    "manifests",
+    "deploymentStateContract",
+    "approvalBinding",
+    "safety"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "plannerVersion": {
+      "const": "1.0.0"
+    },
+    "generatedBy": {
+      "const": "startup-container-apps-cool-plan.mjs"
+    },
+    "planId": {
+      "$ref": "#/$defs/id"
+    },
+    "planDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "evaluatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": ["blocked", "ready-for-review"]
+    },
+    "mode": {
+      "const": "cool-container-apps"
+    },
+    "environment": {
+      "const": "nonprod"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["foundationPlanId", "foundationPlanDigest", "readinessEvidenceDigest", "profileDecisionDigest"],
+      "properties": {
+        "foundationPlanId": {
+          "$ref": "#/$defs/id"
+        },
+        "foundationPlanDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "readinessEvidenceDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "profileDecisionDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "readinessBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["foundationStatus", "foundationGateDigest", "attestationFreshness", "attestationDigest", "measuredRecoveryStatus"],
+      "properties": {
+        "foundationStatus": {
+          "enum": ["blocked", "ready-for-review"]
+        },
+        "foundationGateDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "attestationFreshness": {
+          "enum": ["current", "expired", "future", "invalid"]
+        },
+        "attestationDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "measuredRecoveryStatus": {
+          "enum": ["not-measured", "met", "unmet"]
+        }
+      }
+    },
+    "gateResults": {
+      "type": "array",
+      "minItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidenceReferences", "message"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^cool\\.container-apps\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "status": {
+            "enum": ["pass", "blocked"]
+          },
+          "evidenceReferences": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          "message": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configuration", "recovery", "cost", "excludedCapabilities"],
+      "properties": {
+        "configuration": {
+          "type": "object"
+        },
+        "recovery": {
+          "type": "object"
+        },
+        "cost": {
+          "type": "object"
+        },
+        "excludedCapabilities": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["production-execution", "global-ingress", "dns-cutover", "data-replication", "data-failover", "traffic-failover"]
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "path", "digest", "decisionDigest", "sourcePath", "sourceDigest"],
+        "properties": {
+          "provider": {
+            "enum": ["bicep", "terraform"]
+          },
+          "path": {
+            "$ref": "#/$defs/generatedPath"
+          },
+          "digest": {
+            "$ref": "#/$defs/digest"
+          },
+          "decisionDigest": {
+            "$ref": "#/$defs/digest"
+          },
+          "sourcePath": {
+            "enum": ["infra/bicep/cool-container-apps.bicep", "infra/terraform/cool-container-apps"]
+          },
+          "sourceDigest": {
+            "$ref": "#/$defs/digest"
+          }
+        }
+      }
+    },
+    "manifests": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "path", "digest"],
+        "properties": {
+          "provider": {
+            "enum": ["bicep", "terraform"]
+          },
+          "path": {
+            "$ref": "#/$defs/generatedPath"
+          },
+          "digest": {
+            "$ref": "#/$defs/digest"
+          }
+        }
+      }
+    },
+    "deploymentStateContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["states", "ordered", "singleActiveStep", "idempotencyRequired", "resumeRequiresArtifactDigestMatch", "partialFailure"],
+      "properties": {
+        "states": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["pending", "running", "succeeded", "failed", "cleanup-required"]
+          }
+        },
+        "ordered": {
+          "const": true
+        },
+        "singleActiveStep": {
+          "const": true
+        },
+        "idempotencyRequired": {
+          "const": true
+        },
+        "resumeRequiresArtifactDigestMatch": {
+          "const": true
+        },
+        "partialFailure": {
+          "const": "fail-closed"
+        }
+      }
+    },
+    "approvalBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "status", "signingDomain", "planDigest", "foundationPlanDigest", "profileDecisionDigest", "manifestDigests", "executionApprovalAccepted"],
+      "properties": {
+        "required": {
+          "const": true
+        },
+        "status": {
+          "const": "pending"
+        },
+        "signingDomain": {
+          "const": "sslz.cool-container-apps.approval.v1"
+        },
+        "planDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "foundationPlanDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "profileDecisionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "manifestDigests": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/digest"
+          }
+        },
+        "executionApprovalAccepted": {
+          "const": false
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executionEnabled", "azureOperations", "providerRegistration", "productionExecution", "globalIngress", "dnsCutover", "dataReplication", "dataFailover", "endToEndRecoveryClaim"],
+      "properties": {
+        "executionEnabled": {
+          "const": false
+        },
+        "azureOperations": {
+          "const": "none"
+        },
+        "providerRegistration": {
+          "const": false
+        },
+        "productionExecution": {
+          "const": false
+        },
+        "globalIngress": {
+          "const": false
+        },
+        "dnsCutover": {
+          "const": false
+        },
+        "dataReplication": {
+          "const": false
+        },
+        "dataFailover": {
+          "const": false
+        },
+        "endToEndRecoveryClaim": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "generatedPath": {
+      "type": "string",
+      "pattern": "^\\.sslz/generated/[A-Za-z0-9._/-]+$"
+    }
+  }
+}

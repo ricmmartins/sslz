@@ -12,3 +12,11 @@ param sqlAdminLogin = '<replace-with-admin-username>'
 // In production, use Key Vault references instead of inline passwords.
 // See: https://learn.microsoft.com/azure/azure-resource-manager/bicep/key-vault-parameter
 param sqlAdminPassword = '<replace-with-secure-password>'
+
+// Private mode requires two distinct subnets in the same VNet:
+// - a dedicated /27-or-larger subnet delegated to Microsoft.App/environments
+// - a separate subnet for SQL and Redis Private Endpoints
+// param deployPrivateEndpoints = true
+// param vnetId = '/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>'
+// param containerAppsInfrastructureSubnetId = '${vnetId}/subnets/snet-container-apps'
+// param privateEndpointSubnetId = '${vnetId}/subnets/snet-private-endpoints'

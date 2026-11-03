@@ -1,0 +1,22 @@
+{
+  "name": "Missing required Foundry model and deployment type blocks the region",
+  "startupOverrides": {
+    "workload": {
+      "requiresRelationalDatabase": false,
+      "usesFoundryModels": true
+    }
+  },
+  "requirementOverrides": {
+    "primaryCandidates": ["eastus2"],
+    "secondaryCandidates": [],
+    "foundry": {
+      "model": "gpt-4.1",
+      "deploymentType": "ProvisionedManaged"
+    }
+  },
+  "expected": {
+    "status": "blocked",
+    "primaryDisposition": "rejected",
+    "failedCheck": "region.foundry-model.available"
+  }
+}

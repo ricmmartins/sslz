@@ -49,6 +49,15 @@ Azure Policy can auto-inherit tags from resource groups to child resources. Depl
 
 ## Common Startup Cost Mistakes
 
+### Defender for Storage opt-in
+
+SSLZ keeps the paid Defender for Storage V2 plan off by default in both Bicep and Terraform. The disabled path manages
+the subscription `StorageAccounts` pricing resource at `Free` without a paid subplan. Set
+`enableDefenderForStorage = true` or `enable_defender_for_storage = true` only after reviewing the workload need, the number of storage accounts in
+the subscription, and current Azure pricing. Because the plan is subscription-wide, future storage accounts can also
+affect cost after opt-in. [PR #28](https://github.com/ricmmartins/sslz/pull/28) delivered this default-off behavior;
+confirm the effective tier and budget impact in the target subscription after any approved opt-in.
+
 ### 1. Forgotten Dev Resources
 
 **The problem:** Someone spins up a `Standard_D4s_v5` VM to test something. Three weeks later it's still running. Multiply by 5 engineers.
@@ -241,6 +250,6 @@ resources
 
 ## See Also
 
-- [Architecture Decisions](architecture.md) — Why two subscriptions, budget design
-- [Troubleshooting](troubleshooting.md) — Budget start date format errors
-- [Graduation Guide](graduation-guide.md) — When to add cost management tooling
+- [Architecture Decisions](/docs/architecture/) — Why two subscriptions, budget design
+- [Troubleshooting](/docs/troubleshooting/) — Budget start date format errors
+- [Graduation Guide](/docs/graduation-guide/) — When to add cost management tooling
