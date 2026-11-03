@@ -45,21 +45,25 @@ jobs:
               def __init__(self):
                   super().__init__()
                   self.hrefs = []
+                  self.text = []
               def handle_starttag(self, tag, attrs):
                   if tag == "a":
                       self.hrefs.append(dict(attrs).get("href"))
+              def handle_data(self, data):
+                  self.text.append(data)
 
           root = Path("_site")
           home = Links()
           home.feed((root / "index.html").read_text())
           assert "/use-sslz-agent/" in home.hrefs
           launcher = (root / "use-sslz-agent/index.html").read_text()
-          assert "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670" in launcher
-          assert "copilot --agent sslz-founder" in launcher
-          assert "git checkout --detach" in launcher
-          assert "{{" not in launcher
           links = Links()
           links.feed(launcher)
+          text = "".join(links.text)
+          assert "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670" in text
+          assert "copilot --agent sslz-founder" in text
+          assert "git checkout --detach" in text
+          assert "{{" not in launcher
           assert "/#quick-start" in links.hrefs
           print("Rendered homepage CTA, launcher route, pin, commands, and Quick Start link passed.")
           PY
