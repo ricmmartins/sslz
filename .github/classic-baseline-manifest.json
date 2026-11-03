@@ -43,6 +43,11 @@
       "reason": "Commit attribution CI guard from the approved source commit"
     },
     {
+      "path": ".github/workflows/validate-website.yml",
+      "status": "A",
+      "reason": "Read-only public launcher, link, and clean-clone validation"
+    },
+    {
       "path": ".github/workflows/validate.yml",
       "status": "M",
       "reason": "Permit on-demand validation of the branch-main IaC health badge"
@@ -50,7 +55,7 @@
     {
       "path": "README.md",
       "status": "M",
-      "reason": "Replace manual deployment status badges with branch-main health badges"
+      "reason": "Branch-main health badges and a planning-first link to the public launcher"
     },
     {
       "path": "index.md",
@@ -80,14 +85,20 @@
       "reason": "Commit attribution validator tests from the approved source commit with zero-base regression coverage"
     },
     {
+      "path": "tests/website-launcher.mjs",
+      "status": "A",
+      "reason": "Website instruction regressions and optional public pin/profile/planner/link smoke checks"
+    },
+    {
       "path": "use-sslz-agent.md",
       "status": "A",
-      "expectedBlob": "442904395b5b6f956f40bfc07b5d573a78b40d37",
+      "expectedBlob": "b1fad4f9a42605881c5b4041615750036d2c7231",
       "reason": "Classic-native public launcher for the separately maintained SSLZ Founder Agent"
     }
   ],
   "readme": {
     "baselineBlob": "d7790f6feb08fd21006af3127bc869d0e9443b38",
+    "launcherSection": "## Plan with the SSLZ Founder Agent\n\n[Use SSLZ Agent](https://startupscalelanding.zone/use-sslz-agent/) explains how to run the separate, pinned agent\nimplementation in local GitHub Copilot CLI. Start with a conversation and local planning without Azure CLI or Azure\nlogin. Live reads and any later write-capable operation require separate review and approval. This classic branch\ncontains the website launcher, not the agent profile; the Quick Start below remains the direct operator deployment path.\n",
     "originalBadges": [
       "[![Validate IaC](https://github.com/ricmmartins/sslz/workflows/Validate%20IaC/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/validate.yml)",
       "[![Deploy Landing Zone (Bicep)](https://github.com/ricmmartins/sslz/workflows/Deploy%20Landing%20Zone%20(Bicep)/badge.svg)](https://github.com/ricmmartins/sslz/actions/workflows/deploy-bicep.yml)",
@@ -108,11 +119,12 @@
   },
   "launcher": {
     "path": "use-sslz-agent.md",
-    "expectedBlob": "442904395b5b6f956f40bfc07b5d573a78b40d37",
+    "expectedBlob": "b1fad4f9a42605881c5b4041615750036d2c7231",
     "permalink": "/use-sslz-agent/",
     "title": "Use SSLZ Agent",
     "product": "SSLZ Founder Agent",
-    "technicalBranch": "agent-aware"
+    "technicalBranch": "agent-aware",
+    "implementationCommit": "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670"
   },
   "validateWorkflow": {
     "baselineBlob": "1b524b6966c84fd43798535d2462606a6ab74165",

@@ -59,6 +59,26 @@ assert.equal(
   "before\nnew-a\nnew-b\nafter\n",
 );
 assert.equal(
+  expectedReadme("old\n\n## Quick Start\nunchanged\n", {
+    readme: {
+      originalBadges: ["old"],
+      approvedBadges: ["new"],
+      launcherSection: "## Plan with the SSLZ Founder Agent\n\nlauncher link\n",
+    },
+  }),
+  "new\n\n## Plan with the SSLZ Founder Agent\n\nlauncher link\n\n## Quick Start\nunchanged\n",
+);
+assert.throws(
+  () => expectedReadme("old\n", {
+    readme: {
+      originalBadges: ["old"],
+      approvedBadges: ["new"],
+      launcherSection: "launcher link\n",
+    },
+  }),
+  /Quick Start insertion point is not unique/,
+);
+assert.equal(
   expectedHomepage("before\nmarker\nafter\n", {
     homepage: { insertAfter: "marker", cta: "cta" },
   }),
@@ -91,6 +111,11 @@ assert.equal(
   result.integrationBase,
   "ff16a2ce81425507461bba52ec9319ba1ce55020",
 );
-assert.equal(result.changes.length, 11);
+assert.equal(result.changes.length, 13);
+assert.throws(
+  () => validateClassicBaseline({ head: "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670" }),
+  undefined,
+  "The agent implementation must not qualify as a classic website release.",
+);
 
 console.log("Classic baseline manifest tests passed.");

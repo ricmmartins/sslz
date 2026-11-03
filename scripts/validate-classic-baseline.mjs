@@ -26,6 +26,10 @@ const EXPECTED_AGENT_LAUNCHER_BLOB =
 const EXPECTED_AGENT_PROFILE_PATH = ".github/agents/sslz-founder.agent.md";
 const EXPECTED_AGENT_PROFILE_BLOB =
   "6cd3691239ea9d243c837f2eb0507dae455a65f6";
+const EXPECTED_CLASSIC_LAUNCHER_COMMIT =
+  "294a0af7c1dd43fc6eec305aa783e412eb82076a";
+const EXPECTED_PUBLIC_IMPLEMENTATION_COMMIT =
+  "362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670";
 const REPO_ROOT = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const MANIFEST_PATH = resolve(
   REPO_ROOT,
@@ -99,10 +103,18 @@ function expectedReadme(baselineReadme, manifest) {
   if (countOccurrences(baselineReadme, original) !== 1) {
     throw new Error("Baseline README badge block is not uniquely identifiable.");
   }
-  return baselineReadme.replace(
+  const withBadges = baselineReadme.replace(
     original,
     manifest.readme.approvedBadges.join("\n"),
   );
+  if (!manifest.readme.launcherSection) {
+    return withBadges;
+  }
+  const marker = "## Quick Start\n";
+  if (countOccurrences(withBadges, marker) !== 1) {
+    throw new Error("Baseline README Quick Start insertion point is not unique.");
+  }
+  return withBadges.replace(marker, `${manifest.readme.launcherSection}\n${marker}`);
 }
 
 function expectedHomepage(baselineHomepage, manifest) {
@@ -156,15 +168,25 @@ function validateClassicBaseline({
   }
 
   const resolvedHead = git(["rev-parse", `${head}^{commit}`], { cwd: repoRoot });
-  const headLineage = git(["rev-list", "--parents", "-n", "1", resolvedHead], {
-    cwd: repoRoot,
-  }).split(/\s+/);
+  git(
+    ["merge-base", "--is-ancestor", EXPECTED_CLASSIC_LAUNCHER_COMMIT, resolvedHead],
+    { cwd: repoRoot },
+  );
+  const merges = git(
+    ["rev-list", "--merges", `${EXPECTED_CLASSIC_LAUNCHER_COMMIT}..${resolvedHead}`],
+    { cwd: repoRoot },
+  );
+  const launcherLineage = git(
+    ["rev-list", "--parents", "-n", "1", EXPECTED_CLASSIC_LAUNCHER_COMMIT],
+    { cwd: repoRoot },
+  ).split(/\s+/);
   if (
-    headLineage.length !== 2 ||
-    headLineage[1] !== EXPECTED_INTEGRATION_BASE_COMMIT
+    merges ||
+    launcherLineage.length !== 2 ||
+    launcherLineage[1] !== EXPECTED_INTEGRATION_BASE_COMMIT
   ) {
     throw new Error(
-      "Classic launcher integration must be one commit above the approved main integration base.",
+      "Classic documentation releases must descend without merges from the approved launcher integration.",
     );
   }
   const integrationBaseLineage = git(
@@ -274,7 +296,7 @@ function validateClassicBaseline({
   const currentReadme = readCommitPath(resolvedHead, "README.md");
   const approvedReadme = expectedReadme(baselineReadme, manifest);
   if (currentReadme !== approvedReadme) {
-    throw new Error("README differs from the approved badge-only transformation.");
+    throw new Error("README differs from the approved badges and launcher-link transformation.");
   }
   const badgeLines = currentReadme
     .split(/\r?\n/)
@@ -307,6 +329,7 @@ function validateClassicBaseline({
 
   if (
     manifest.launcher.path !== manifest.approvedAgentSource.launcherPath ||
+    manifest.launcher.implementationCommit !== EXPECTED_PUBLIC_IMPLEMENTATION_COMMIT ||
     manifest.launcher.expectedBlob !==
       manifest.allowedChanges.find(
         ({ path }) => path === manifest.launcher.path,
@@ -329,7 +352,7 @@ function validateClassicBaseline({
     !currentLauncher.includes(
       `git clone --branch ${manifest.launcher.technicalBranch} --single-branch`,
     ) ||
-    !currentLauncher.includes(EXPECTED_AGENT_SOURCE_COMMIT)
+    !currentLauncher.includes(EXPECTED_PUBLIC_IMPLEMENTATION_COMMIT)
   ) {
     throw new Error(
       "Launcher is missing an approved identity, route, or local setup boundary.",

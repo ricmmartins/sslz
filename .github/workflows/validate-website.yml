@@ -1,0 +1,26 @@
+name: Validate website launcher
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launcher:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check classic compatibility and launcher instructions
+        run: |
+          node tests/classic-baseline-manifest.mjs
+          node tests/website-launcher.mjs --remote-smoke

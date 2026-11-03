@@ -1,92 +1,178 @@
 ---
 layout: page
 title: "Use SSLZ Agent"
-description: "Run the SSLZ Founder Agent locally for a safe, founder-friendly Azure readiness and landing-zone plan."
+description: "Start local Azure adoption planning with the SSLZ Founder Agent in GitHub Copilot CLI."
 permalink: /use-sslz-agent/
 ---
 
 Run the **SSLZ Founder Agent** in GitHub Copilot CLI from a local checkout. This page provides setup instructions only:
 it does not run the agent, connect to Azure, or receive access to your tenant, subscriptions, billing account, or secrets.
+You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
 
-The agent starts with repository reads and local, deterministic checks. It asks before any live read-only Azure
-inspection and stops before artifact generation, preview, provider registration, or deployment so you can review the
-next action and its approval boundary.
+## Install the local prerequisites
 
-## Run locally
+You need Git, [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli),
+and a GitHub account with Copilot access. On Windows, use PowerShell 6 or later. Installation options:
 
-Install [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli), Git, and
-[Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli). Use an Azure identity with read access to the
-subscriptions you want inspected.
+| Environment | Install Copilot CLI |
+|---|---|
+| Windows with WinGet | `winget install GitHub.Copilot` |
+| macOS or Linux with Homebrew | `brew install --cask copilot-cli` |
+| npm on any supported OS, with Node.js 22 or later | `npm install -g @github/copilot` |
 
-The agent profile currently lives on the technical implementation branch. Clone that branch and pin the verified
-implementation commit:
+Node.js is also needed to run SSLZ's local `.mjs` checks and planners, regardless of how you install Copilot CLI.
+Use Node.js 22 or later for this walkthrough. The CLI syntax was checked with Copilot CLI 1.0.105; this is a tested
+version, not a proven minimum. Check your installation:
+
+```shell
+git --version
+copilot --version
+node --version
+```
+
+Azure CLI, Bicep, Terraform, and Azure permissions are not prerequisites for the initial conversation or local JSON
+planning. The website's [Quick Start]({{ '/' | relative_url }}#quick-start) is a separate, direct operator deployment
+path with different prerequisites and approval responsibilities.
+
+## Clone the public agent version
+
+The agent implementation is maintained separately from the classic website. These commands pin public commit
+`362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670` on the implementation branch. Use a parent directory where
+`sslz-founder-agent` does not already exist. Git will refuse to clone over a nonempty directory; do not delete or
+overwrite an existing checkout to follow this guide.
+
+Run each command separately and stop if any command fails. The following commands work in PowerShell and macOS/Linux
+shells:
 
 ```shell
 git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-founder-agent
 cd sslz-founder-agent
-git checkout --detach b0c24640a833e0302e0edc4a542948301f33bbd2
+git checkout --detach 362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670
+git rev-parse HEAD
 ```
 
-Sign in locally and confirm the subscription context that the agent may inspect:
+The last command must print exactly `362dd43ca4e0991e00f4b2c8454ba4a4bd0b0670`. A detached HEAD keeps this walkthrough
+on that version even if the branch moves. If checkout fails or the hash differs, stop; do not substitute an unverified
+commit or continue on the branch tip.
+
+Review `.github/agents/sslz-founder.agent.md`, `.github/copilot-instructions.md`, and any repository configuration
+before trusting the folder in Copilot. This pin has `read`, `search`, and `execute` tools. It does not include the newer
+`WebFetch` capability or the newer adoption conversation improvements. Unpublished local work is not installed by
+these commands.
+
+## Sign in to Copilot and select the agent
+
+Sign in to GitHub Copilot, independently of Azure:
 
 ```shell
-az login
-az account show --output table
+copilot login
+copilot --agent sslz-founder
 ```
 
-Then start the agent from the repository root:
+Follow the GitHub sign-in prompts. Review the folder trust prompt before accepting it. In an existing CLI session,
+`/login` handles GitHub authentication. You can alternatively start `copilot`, enter `/agent`, and select
+**SSLZ Founder Agent** from this repository. The CLI ID `sslz-founder` comes from the profile filename.
 
-```shell
-copilot --agent=sslz-founder
+A personal profile with the same ID in `~/.copilot/agents/` overrides the repository profile. On Windows, that folder is
+`$HOME\.copilot\agents`. Check for both `sslz-founder.agent.md` and `sslz-founder.md`, and any conflicting display name.
+Resolve a conflict yourself before continuing; these instructions do not rename, remove, or overwrite your profiles.
+If the agent is missing, confirm the repository root, pinned hash, profile file, folder trust, and CLI version, then
+restart the CLI. See GitHub's [custom-agent guidance](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli).
+
+Enter this in the interactive session:
+
+```text
+I am building a B2B API for EU retailers. It is new on Azure, uses PostgreSQL, and must stay in the EU.
+Start with repository reads and planning only. Do not log in to Azure, inspect a tenant, install software,
+write files, or run a preview. Ask before any command or external request.
 ```
 
-Enter `Start a new founder journey.` The agent begins by asking:
+Describe your own workload using sanitized facts. At this public pin, an open-ended request starts with:
 
 > What are you building, who needs it, and is it new on Azure, moving from another cloud, or staying in two clouds?
 
-You can also start `copilot` interactively, enter `/agent`, and select **SSLZ Founder Agent**. For a focused
-non-interactive request:
+Answer one question at a time. Expect unknowns and evidence gaps to remain explicit. A conversation does not guarantee
+that a deterministic planner ran; request its exact command and review its output when you need a planner result.
+GitHub also documents `--agent sslz-founder --prompt "..."` for programmatic invocation. This walkthrough uses an
+interactive session so you can answer questions and review tool requests; do not add blanket permissions to make an
+unattended prompt run.
+
+## Check local planning without Azure
+
+In the pinned checkout, these optional checks read tracked files and sanitized fixtures. Run them yourself, or approve
+these exact commands when the agent proposes them:
 
 ```shell
-copilot --agent=sslz-founder --prompt "I am building a B2B API for EU retailers. It is new on Azure, uses PostgreSQL, and must stay in the EU. Start with read-only planning."
+node tests/sslz-founder-agent.mjs
 ```
 
-These invocation forms follow GitHub's
-[custom-agent CLI guidance](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli)
-and [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents).
+For PowerShell:
 
-## What it can help with
+```powershell
+node scripts\startup-workload-plan.mjs plan --input agent\examples\startup-input.json --output json
+```
 
-| Your situation | Planning support | Live boundary |
-|---|---|---|
-| New Azure foundation | Account readiness, workload and region choices, quota and capacity checks, and a reviewable SSLZ infrastructure plan | Read-only inspection requires your approval; provider registration and deployment remain separately guarded |
-| Moving from another cloud | Target readiness, connectivity, data and image migration, rehearsal, cutover, and rollback planning | Live migration and cutover execution remain disabled |
-| Keeping two clouds | Connectivity, DNS, identity, egress, ownership, source-of-truth, rollback, and failback planning | Live dual-cloud execution remains disabled |
+For macOS/Linux:
 
-The agent does not treat a synthetic test as tenant evidence, quota as capacity, billing visibility as proof that credits
-apply, or a successful command as proof that a workload is healthy.
+```bash
+node scripts/startup-workload-plan.mjs plan --input agent/examples/startup-input.json --output json
+```
 
-## Keep control of your environment
+The first command checks static profile and journey contracts. The second runs a local workload planner on a synthetic
+example and prints JSON. Neither proves readiness, quota, available capacity, startup-credit eligibility, or health in
+your tenant. The full greenfield journey is a different check that writes local artifacts and requires additional
+tooling; it is not part of this no-Azure smoke check.
 
-Keep Copilot CLI's normal command permission prompts enabled. The custom-agent `execute` capability is broad; the profile
-does not create an operating-system shell allowlist. Review every proposed command, reject anything outside the
-documented repository entry points, and never launch this profile with `--allow-all`.
+## Current documentation and MCP availability
 
-Do not paste credentials, access tokens, billing records, signing keys, customer data, tenant IDs, or subscription IDs
-into the chat or tracked files. The agent uses your current local Azure CLI identity only after it shows the exact
-read-only command and receives your approval.
+The preferred source for current Azure documentation in a compatible agent release is the public
+[Microsoft Learn MCP server](https://learn.microsoft.com/en-us/training/support/mcp), using HTTP transport at
+`https://learn.microsoft.com/api/mcp`. It requires no Azure login or API key. In Copilot CLI, `/mcp` shows availability;
+`/mcp add` opens the setup form. Choose a unique server name, HTTP, that URL, and only the documentation tools you need,
+then save with Ctrl+S. Preserve existing server settings; do not replace your MCP configuration file.
+See [GitHub's MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers).
 
-## GitHub UI and cloud-agent limitations
+Configuring a server does not grant this pinned agent permission to use it. The public profile predates documentation
+retrieval support and forbids ad hoc web requests. For this version, read official Learn pages in your browser and
+provide sanitized facts or excerpts for discussion; label claims needing current verification as unverified.
 
-GitHub custom-agent discovery on GitHub.com requires the profile to be merged into the repository's default branch. The
-profile is intentionally absent from protected classic `main`, so the GitHub agents picker is not a supported launch
-path today. Local Copilot CLI discovery from the checkout above is the supported path.
+In a newer reviewed release that explicitly permits documentation retrieval, prefer Learn MCP. If it is unavailable,
+use only an exposed, approved HTTPS fetch tool for relevant public `learn.microsoft.com` or `docs.microsoft.com` pages,
+checking the final URL after redirects. Cite what was actually retrieved. If neither route works, disclose the gap and
+continue with local facts only. Do not add tools, use shell HTTP commands, or enable blanket permissions to bypass a
+restriction. An unavailable tool can reflect the profile, runtime, configuration, or policy; it does not by itself
+mean that your company's administrator must change anything.
 
-A GitHub cloud agent also does not automatically have an identity in an arbitrary founder Azure tenant. Live tenant
-reads would require separately configured identity and permissions. Approved writes would additionally require protected
-secrets, replay state, trust anchors, and an approval service. This launcher does not ask you to add those capabilities
-to `main`.
+## Approve live access separately
 
-See GitHub's [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration)
-and [cloud custom-agent guidance](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/create-custom-agents)
-for the platform behavior behind these limitations.
+Only when you choose a specific live read should the agent explain the exact read-only repository command, target,
+required permissions, and information it will read. Then install
+[Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) if needed and authenticate locally for that
+approved scope. Review the active account and subscription before allowing the inspection. Azure authentication is
+not consent to subsequent reads or writes.
+
+Keep Copilot CLI's normal permission prompts enabled. The custom-agent `execute` capability is broad; the profile
+does not create an operating-system shell allowlist. Reject commands outside the documented repository entry points.
+Never use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`, or `--yolo` with this walkthrough.
+Do not paste credentials, tokens, billing records, signing keys, customer data, tenant IDs, or subscription IDs into
+chat or tracked files.
+
+Local artifact generation and live preview need separate review and approval. Provider registration and deployment
+remain guarded by their operation-specific contracts; provider apply is disabled in this profile. Migration and
+dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command
+does not establish application health.
+
+## Hosted UI and release limits
+
+This is a local CLI launcher. The profile is absent from classic `main`; the GitHub.com custom-agent picker is not
+a supported launch path for this repository. A hosted agent also has no automatic access to an arbitrary Azure tenant.
+See GitHub's [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents)
+and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
+
+This public pin supports local contract checks and fixture-based planning. Tests of newer local candidates, including
+conversation checks and fixture replay, are not evidence for the version installed here. Neither those tests nor this
+guide establish an autonomous conversation-to-deployment flow or real tenant readiness.
+
+Maintainers must publish a reviewed agent implementation first, verify its full commit is reachable from the public
+implementation branch, and rerun clean-clone checks before updating this page's pin and capability descriptions.
+Publish the website documentation separately from classic `main`; do not merge the agent implementation into it.
