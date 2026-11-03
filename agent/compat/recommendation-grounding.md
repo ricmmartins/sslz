@@ -36,6 +36,10 @@ that the final URL after redirects remains official. Use only sanitized technica
 customer URLs, identifiers, secrets, or private data. No shell HTTP clients, proxies, installations, or global
 configuration changes are permitted.
 
+The profile includes GitHub's documented `WebFetch` tool alias; file `read` and `search` aliases alone do not enable
+web retrieval. CLI availability filters can still remove it, and the runtime must actually expose a fetching tool.
+This alias does not authorize arbitrary URLs, shell commands, Azure actions, or new MCP configuration.
+
 Report the retrieval method (MCP or web-fetch), actual final URL, and retrieval time. Rely only on content actually
 returned. Distinguish retrieval time from an editorial update date; report the latter only if present in retrieved
 content, never infer it. A fetched known page provides current page content, not exhaustive search coverage or proof that it is the

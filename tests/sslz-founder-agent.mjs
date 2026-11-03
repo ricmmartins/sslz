@@ -53,7 +53,7 @@ const normalizedLauncher = launcher.replace(/^>\s?/gm, "").replace(/\s+/g, " ");
 const normalizedProfile = agent.body.replace(/\s+/g, " ");
 assert.equal(agent.name, "SSLZ Founder Agent");
 assert.equal(agent.target, "github-copilot");
-assert.deepEqual(agent.tools, ["read", "search", "execute"]);
+assert.deepEqual(agent.tools, ["read", "search", "execute", "WebFetch"]);
 assert.equal(agent.disableModelInvocation, true);
 assert.equal(agent.userInvocable, true);
 assert(agent.description.length > 20);
