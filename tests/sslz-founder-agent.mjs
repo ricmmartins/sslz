@@ -69,6 +69,10 @@ for (const text of [
   "If requirements are unknown, recommend no compute or extension profile yet.",
   "Public documentation search and fetch are permitted for sanitized technical queries",
   "If Learn MCP is unavailable or retrieval fails",
+  "approved `web_fetch` tool",
+  "verify the final URL remains official after redirects",
+  "If both retrieval methods are unavailable or fail",
+  "not proof of the user's corporate policy",
   "Cite the retrieved URL",
   "cite the local SSLZ file path",
   "An Azure service described in Learn is not automatically implemented by SSLZ.",
@@ -247,6 +251,18 @@ assert.equal(scenariosById.get("on-premises-large-team").profile.engineeringTeam
 assert.equal(scenariosById.get("on-premises-large-team").planner.eligible, false);
 
 const groundingRegressions = journeys.groundingRegressions;
+for (const rule of [
+  "Prefer MCP when it works",
+  "honoring URL approvals",
+  "final URL after redirects remains official",
+  "never authenticated pages",
+  "retrieval method (MCP or web-fetch)",
+  "not exhaustive search coverage",
+  "If neither approved retrieval method succeeds",
+  "No shell HTTP clients, proxies, installations, or global configuration changes",
+]) {
+  assert(normalizedGrounding.includes(rule), `Missing safe retrieval fallback rule: ${rule}`);
+}
 assert.deepEqual(groundingRegressions.documentationUnavailable.expectedAzureCapabilityClaims, []);
 assert.match(
   groundingRegressions.documentationUnavailable.expectedBehavior,

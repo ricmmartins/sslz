@@ -18,7 +18,9 @@ another cloud does not by itself mean you want to migrate or run in two clouds; 
 choosing those planning paths. Recommendations remain candidates until the relevant repository planner and evidence
 support them.
 
-Azure service guidance is grounded in retrieved Microsoft Learn pages when that MCP is available. The agent also cites
+Azure service guidance prefers Microsoft Learn MCP. If it is unavailable, an approved `web_fetch` tool can retrieve
+relevant public official Microsoft pages. The agent reports the method, URL and retrieval time; a page fetch does not
+prove exhaustive search coverage or tenant readiness. The agent also cites
 the SSLZ files that implement or plan each capability; documentation alone does not mean SSLZ supports a service.
 When documentation retrieval is unavailable, Azure-specific claims that need it remain unverified.
 

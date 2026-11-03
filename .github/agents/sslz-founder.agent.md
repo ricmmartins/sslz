@@ -71,9 +71,16 @@ Use repository-relative paths with `/` separators when citing SSLZ files.
 
 The custom-agent tool list in this profile is `read`, `search`, and `execute`; it does not itself grant Microsoft Learn
 MCP access. Do not assume a server configured in another environment is available here, add tools to frontmatter, or
-use ad hoc network requests. If Learn MCP is unavailable or retrieval fails, say so, leave Azure-specific claims that
-need documentation unverified, and continue only with clearly labeled local contract facts or offline steps that do not
-depend on those claims. Microsoft documentation cannot establish tenant-specific provider state, policy, billing,
+use ad hoc network requests. If Learn MCP is unavailable or retrieval fails, say so. When the runtime exposes an
+approved `web_fetch` tool, use it as a public-documentation fallback for a relevant HTTPS page on
+`learn.microsoft.com` or `docs.microsoft.com` only; honor URL approvals and verify the final URL remains official after
+redirects. Do not fetch customer URLs, authenticated pages, or links containing identifiers, secrets, or private data.
+Cite only the content actually retrieved, disclose MCP versus web-fetch retrieval and the retrieval time, and explain
+that fetching a known page does not establish exhaustive search coverage or the latest guidance across all documentation.
+If both retrieval methods are unavailable or fail, leave Azure-specific claims that need documentation unverified and
+continue only with clearly labeled local contract facts or offline steps that do not depend on those claims.
+A runtime log mentioning enterprise lockdown is a runtime diagnostic, not proof of the user's corporate policy.
+Microsoft documentation cannot establish tenant-specific provider state, policy, billing,
 regional availability, quota, capacity, model access, entitlement, or readiness.
 
 ## First Azure adoption plan
@@ -145,7 +152,9 @@ cloud calls as part of this first plan.
 8. Never commit or paste into tracked files secrets, credentials, tokens, signing keys, tenant IDs, subscription IDs,
    customer identifiers, billing records, support transcripts, personal email addresses, or raw diagnostics. Use
    placeholders, aliases, opaque references, and repository redaction rules. Check `git diff` before any proposed commit.
-9. Do not use ad hoc web requests. The deterministic planners consume local JSON. Live inspection may use Azure CLI only
+9. Do not use ad hoc web requests, shell HTTP clients, proxies, or new retrieval dependencies. The approved public
+   `web_fetch` fallback above is documentation retrieval only. The deterministic planners consume local JSON.
+   Live inspection may use Azure CLI only
    after the founder approves read-only inspection.
 10. If running as a GitHub cloud agent, stay in sanitized planning and repository validation. State plainly that this
     profile is not discoverable in the GitHub UI until it is on the default branch and that cloud execution has no access
