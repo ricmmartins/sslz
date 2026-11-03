@@ -36,25 +36,23 @@ path with different prerequisites and approval responsibilities.
 
 ## Clone the public agent version
 
-The agent implementation is maintained separately from the classic website. These commands pin commit
-`798a3ccad9710084ecc37f3386e8826934bfa0f2` on the implementation branch. Run them only after this exact commit is
-reachable from the public `agent-aware` branch; do not substitute another commit or continue on the branch tip. Use a
-parent directory where
-`sslz-agent` does not already exist. Git will refuse to clone over a nonempty directory; do not delete or
-overwrite an existing checkout to follow this guide.
+The agent implementation is maintained separately from the classic website. These commands pin public commit
+`50a3ce1423e432ccdd9fa470452f6cfce75e2a50` on the implementation branch. Use a parent directory where `sslz-agent`
+does not already exist. Git will refuse to clone over a nonempty directory; do not delete or overwrite an existing
+checkout to follow this guide.
 
-Run each command separately and stop if any command fails. Once the pinned commit is public, these commands work in
-PowerShell and macOS/Linux shells:
+Run each command separately and stop if any command fails. The following commands work in PowerShell and macOS/Linux
+shells:
 
 ```shell
 git clone --branch agent-aware --single-branch https://github.com/ricmmartins/sslz.git sslz-agent
 cd sslz-agent
-git checkout --detach 798a3ccad9710084ecc37f3386e8826934bfa0f2
+git checkout --detach 50a3ce1423e432ccdd9fa470452f6cfce75e2a50
 git rev-parse HEAD
 ```
 
-The last command must print exactly `798a3ccad9710084ecc37f3386e8826934bfa0f2`. A detached HEAD keeps this walkthrough
-on that version even if the branch moves. If checkout fails or the hash differs, stop; do not substitute an unverified
+The last command must print exactly `50a3ce1423e432ccdd9fa470452f6cfce75e2a50`. A detached HEAD keeps this walkthrough
+on that version even if the branch moves. If checkout fails or the hash differs, stop; do not substitute another
 commit or continue on the branch tip.
 
 Review `.github/agents/sslz-agent.agent.md`, `.github/copilot-instructions.md`, and any repository configuration
@@ -170,12 +168,11 @@ a supported launch path for this repository. A hosted agent also has no automati
 See GitHub's [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents)
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
-This pinned implementation supports adoption conversation guidance, documentation grounding when the required tools
+This public pin supports adoption conversation guidance, documentation grounding when the required tools
 are exposed, local contract checks, and fixture-based planning. Earlier release checks included seven real two-turn
 conversations, version 3 fixture replay, and an external planner invocation. Those checks have different scopes:
 conversation and replay checks do not prove that the agent ran the planner itself. Neither those tests nor this guide
 establish an autonomous conversation-to-deployment flow or real tenant readiness.
 
-Release this page only after the pinned commit is reachable from the public implementation branch and clean-clone
-checks pass. Publish the website documentation separately from classic `main`; do not merge the agent implementation
-into it.
+This pin is verified reachable from the public implementation branch. Publish the website documentation separately
+from classic `main`; do not merge the agent implementation into it.

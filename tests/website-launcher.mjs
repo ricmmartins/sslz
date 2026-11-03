@@ -8,7 +8,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const pin = "798a3ccad9710084ecc37f3386e8826934bfa0f2";
+const pin = "50a3ce1423e432ccdd9fa470452f6cfce75e2a50";
 const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g, "\n");
 const page = read("use-sslz-agent.md");
 const homepage = read("index.md");
@@ -77,7 +77,7 @@ function validateLauncher(markdown) {
     "external planner invocation",
     "do not prove that the agent ran the planner itself",
     "autonomous conversation-to-deployment",
-    "only after this exact commit is",
+    "This pin is verified reachable from the public implementation branch",
   ]) {
     assert(normalized.includes(required), `Missing launcher boundary: ${required}`);
   }

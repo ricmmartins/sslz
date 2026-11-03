@@ -29,7 +29,7 @@ const EXPECTED_AGENT_PROFILE_BLOB =
 const EXPECTED_CLASSIC_LAUNCHER_COMMIT =
   "294a0af7c1dd43fc6eec305aa783e412eb82076a";
 const EXPECTED_PINNED_IMPLEMENTATION_COMMIT =
-  "798a3ccad9710084ecc37f3386e8826934bfa0f2";
+  "50a3ce1423e432ccdd9fa470452f6cfce75e2a50";
 const REPO_ROOT = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const MANIFEST_PATH = resolve(
   REPO_ROOT,

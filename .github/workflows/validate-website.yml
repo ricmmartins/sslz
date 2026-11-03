@@ -70,7 +70,7 @@ jobs:
           links.feed(launcher)
           text = "".join(links.text)
           assert "Run SSLZ Agent" in text
-          assert "798a3ccad9710084ecc37f3386e8826934bfa0f2" in text
+          assert "50a3ce1423e432ccdd9fa470452f6cfce75e2a50" in text
           assert "copilot --agent sslz-agent" in text
           assert "git checkout --detach" in text
           assert "{{" not in launcher
