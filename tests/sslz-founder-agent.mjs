@@ -294,11 +294,21 @@ assert(launcher.includes("permalink: /use-sslz-agent/"));
 assert(launcher.includes("copilot --agent sslz-founder"));
 assert(launcher.includes('--interactive "Start a new founder journey."'));
 assert(launcher.includes("/agent"));
-assert(launcher.includes("copilot --agent sslz-founder --prompt"));
+assert(!launcher.includes("copilot --agent sslz-founder --prompt"));
+assert(launcher.includes("Do not use prompt mode as an unattended"));
 assert(launcher.includes("never launch this profile with `--allow-all`"));
 assert(launcher.includes("default branch"));
 assert(normalizedLauncher.includes("does not receive access to your Azure tenant"));
 assert(launcher.includes("Microsoft Learn"));
 assert(launcher.includes("SSLZ files that implement or plan each capability"));
+for (const text of [
+  "authenticated with a GitHub account that has Copilot access",
+  "does not require Azure CLI, an Azure subscription, or Azure login",
+  "review individual permission requests",
+  "remotely available revision",
+  "not evidence that the agent ran the planner",
+]) {
+  assert(normalizedLauncher.includes(text), `Launch instructions are missing: ${text}`);
+}
 
 console.log(`SSLZ Founder Agent contracts passed across ${scenarios.length} generic scenarios and grounding regressions.`);
