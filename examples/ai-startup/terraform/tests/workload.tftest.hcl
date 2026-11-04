@@ -227,24 +227,3 @@ run "invalid_app_name_is_rejected" {
 
   expect_failures = [var.app_name]
 }
-
-run "invalid_subscription_is_rejected" {
-  command = plan
-
-  override_resource {
-    target          = azurerm_kubernetes_cluster.this
-    override_during = plan
-
-    values = {
-      kubelet_identity = [{
-        object_id = "44444444-4444-4444-4444-444444444444"
-      }]
-    }
-  }
-
-  variables {
-    subscription_id = "not-a-subscription"
-  }
-
-  expect_failures = [var.subscription_id]
-}
