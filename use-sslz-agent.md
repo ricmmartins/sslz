@@ -11,6 +11,9 @@ run the agent or connect to Azure, and it does not receive access to your Azure 
 or secrets.
 You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
 
+The shipped profile supports GitHub Copilot CLI. Claude Code and Codex do not have a maintained native adapter or
+client-specific acceptance tests in this repository; reusing the scripts does not establish equivalent agent behavior.
+
 ## Install the local prerequisites
 
 You need Git and [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
@@ -129,6 +132,12 @@ The first command checks static profile and journey contracts. The second runs a
 example and prints JSON. Neither proves readiness, quota, available capacity, startup-credit eligibility, or health in
 your tenant. The full greenfield journey is a different check that writes local artifacts and requires additional
 tooling; it is not part of this no-Azure smoke check.
+
+The full journey deletes and recreates `.sslz/generated/greenfield-journey` and creates and removes the
+process-specific replay store `.sslz/remediation-state/greenfield-${process.pid}`. Use an isolated checkout to preserve
+existing reports, and approve both local write targets before running that command through the agent.
+Generated `.bicepparam` and `.tfvars` files can require separate read-only confirmations. If a confirmation is
+unavailable, the agent must report that readback as blocked; generation alone does not verify the file contents.
 
 ## Current documentation and MCP availability
 

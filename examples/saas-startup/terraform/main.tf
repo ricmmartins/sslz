@@ -274,6 +274,10 @@ resource "azurerm_mssql_server" "this" {
   minimum_tls_version           = "1.2"
   public_network_access_enabled = !var.deploy_private_endpoints
   tags                          = local.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Allow Azure services to reach SQL when not using Private Endpoints
@@ -309,6 +313,10 @@ resource "azurerm_mssql_database" "app" {
   server_id       = azurerm_mssql_server.this.id
   elastic_pool_id = azurerm_mssql_elasticpool.this.id
   tags            = local.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # ==============================================================================
@@ -345,6 +353,10 @@ resource "azurerm_key_vault" "this" {
   purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   network_acls {
     default_action = "Deny"
     bypass         = "AzureServices"
@@ -377,9 +389,8 @@ resource "azurerm_monitor_diagnostic_setting" "redis" {
   target_resource_id         = azurerm_redis_cache.this.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 

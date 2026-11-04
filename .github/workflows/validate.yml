@@ -310,6 +310,11 @@ jobs:
           for dir in examples/*/terraform; do
             if [ -d "$dir" ]; then
               echo "=== Validating $dir ==="
+              if ! find "$dir/tests" -name '*.tftest.hcl' -type f -print -quit | grep -q .; then
+                echo "::error::$dir must include Terraform tests; zero-test success is not validation"
+                failed=1
+                continue
+              fi
               terraform -chdir="$dir" init -backend=false
               if terraform -chdir="$dir" validate; then
                 echo "  ✓ OK"

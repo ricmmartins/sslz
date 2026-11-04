@@ -92,6 +92,21 @@ resource "azurerm_linux_web_app" "this" {
     ftps_state          = "Disabled"
     minimum_tls_version = "1.2"
 
+    auto_heal_setting {
+      action {
+        action_type                    = "Recycle"
+        minimum_process_execution_time = "00:05:00"
+      }
+
+      trigger {
+        status_code {
+          count             = 5
+          interval          = "00:01:00"
+          status_code_range = "500-599"
+        }
+      }
+    }
+
     application_stack {
       node_version = "20-lts"
     }
@@ -120,6 +135,21 @@ resource "azurerm_linux_web_app_slot" "staging" {
     always_on           = false
     ftps_state          = "Disabled"
     minimum_tls_version = "1.2"
+
+    auto_heal_setting {
+      action {
+        action_type                    = "Recycle"
+        minimum_process_execution_time = "00:05:00"
+      }
+
+      trigger {
+        status_code {
+          count             = 5
+          interval          = "00:01:00"
+          status_code_range = "500-599"
+        }
+      }
+    }
 
     application_stack {
       node_version = "20-lts"
@@ -164,6 +194,10 @@ resource "azurerm_cosmosdb_account" "this" {
   public_network_access_enabled = false
   tags                          = local.tags
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   consistency_policy {
     consistency_level = "Session"
   }
@@ -185,6 +219,10 @@ resource "azurerm_cosmosdb_sql_database" "this" {
   name                = var.app_name
   resource_group_name = data.azurerm_resource_group.this.name
   account_name        = azurerm_cosmosdb_account.this.name
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_cosmosdb_sql_container" "items" {
@@ -193,6 +231,10 @@ resource "azurerm_cosmosdb_sql_container" "items" {
   account_name        = azurerm_cosmosdb_account.this.name
   database_name       = azurerm_cosmosdb_sql_database.this.name
   partition_key_paths = ["/tenantId"]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 
   dynamic "autoscale_settings" {
     for_each = var.environment == "prod" ? [1] : []
@@ -253,6 +295,10 @@ resource "azurerm_key_vault" "this" {
   soft_delete_retention_days = 90
   purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 
   network_acls {
     default_action = "Deny"
@@ -317,9 +363,8 @@ resource "azurerm_monitor_diagnostic_setting" "redis" {
   target_resource_id         = azurerm_redis_cache.this.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 

@@ -6,22 +6,27 @@ nav_order: 7.9
 description: "Authoritative implementation, execution-authority, and validation status for SSLZ"
 ---
 
-This page is the authoritative status summary for the repository at
-[`8e96bd5`](https://github.com/ricmmartins/sslz/commit/8e96bd5),
-the `main` merge commit for [PR #31](https://github.com/ricmmartins/sslz/pull/31), as of 2026-08-17 UTC.
-The SSLZ Agent row below is an additive delivery on the permanent planning branch and does not redefine the
-page's existing `current-main` evidence terms.
-It distinguishes implemented code from execution authority and test evidence. A contract or planner can be implemented
-without being allowed to execute the operation it describes.
+This page describes the implementation and execution boundaries of the integrated `main` branch.
+[PR #41](https://github.com/ricmmartins/sslz/pull/41) brought the SSLZ Agent profile, planners, contracts, and
+documentation together at [`8ceaa7f`](https://github.com/ricmmartins/sslz/commit/8ceaa7ff382e772cb6d3d8f8aeef7a8474f5d42a).
+Installation uses `main`; no separate planning branch or pinned checkout is required.
+
+The capability matrix distinguishes implemented code from execution authority and test evidence. A contract or planner
+can be implemented without being allowed to execute the operation it describes. Evidence links below identify the
+revision actually tested; they do not certify later revisions or current tenant readiness.
 
 ## Evidence terms
 
 - **Local synthetic:** deterministic fixtures, mocks, generated ephemeral signing identities, schema validation, and
   compiled-template or Terraform tests. It is not evidence about a real tenant, workload, recovery event, or migration.
-- **Hosted CI:** the same repository tests on GitHub-hosted runners. The three `Validate IaC` jobs passed for
-  [PR #31](https://github.com/ricmmartins/sslz/actions/runs/31987165122).
+- **Hosted CI:** repository tests on GitHub-hosted runners. All four `Validate IaC` jobs passed on the PR #41 integration
+  revision in [run 41689880093](https://github.com/ricmmartins/sslz/actions/runs/41689880093).
+  A separate [website validation run](https://github.com/ricmmartins/sslz/actions/runs/41697498964) rebuilt Jekyll,
+  checked the rendered routes, and tested a clean public `main` clone without publishing. The earlier
+  [PR #31 run](https://github.com/ricmmartins/sslz/actions/runs/31987165122) is historical evidence for
+  [`8e96bd5`](https://github.com/ricmmartins/sslz/commit/8e96bd5), recorded on 2026-08-17 UTC.
 - **Live preview:** Azure-authenticated Bicep what-if or Terraform plan. The latest verified successful scheduled run in
-  this audit was [2026-08-10 on commit `a7acdbd`](https://github.com/ricmmartins/sslz/actions/runs/31365214740), after
+  the historical audit was [2026-08-10 on commit `a7acdbd`](https://github.com/ricmmartins/sslz/actions/runs/31365214740), after
   PR #9. Both preview jobs passed and the deploy job was skipped. This predates PRs #10-#31 and is not current-`main`
   live evidence.
 - **Live execution:** an Azure, database, registry, pipeline, DNS, identity, network, cutover, rollback, or failback write
@@ -54,6 +59,21 @@ Its `programLineage` summary references the separately emitted envelope by exact
 `programIdentityDigest`, and it separates baseline deployment readiness from PostgreSQL migration, container
 image/CI/CD, and dual-cloud planning readiness. The checked-in report uses `evidenceMode: "synthetic"` and grants no
 migration or dual-cloud execution authority.
+
+## Client and local validation limits
+
+The shipped profile is for GitHub Copilot CLI. Claude Code and Codex do not have a maintained native adapter or
+client-specific acceptance suite in this repository. Reusing the documentation or scripts in another client does not
+establish equivalent discovery, tool permissions, or approval behavior.
+
+The synthetic journey command writes and recreates `.sslz/generated/greenfield-journey`. It also creates and removes
+the process-specific replay store `.sslz/remediation-state/greenfield-${process.pid}`. Approve both local targets and
+use an isolated checkout if an earlier report must be preserved. Its fixed fixture timestamps and synthetic approvals
+are test data, not current operational authority.
+
+Copilot may request additional read-only confirmations for generated `.bicepparam` and `.tfvars` files. A successful
+generation command does not prove that the agent read those files; report any blocked readback separately. Public Learn
+retrieval also remains unverified if the runtime cannot expose the final response URL after redirects.
 
 ## Direct operator boundary
 
@@ -114,6 +134,7 @@ The numbered phases are capability labels, not GitHub pull-request numbers. The 
 | [#29](https://github.com/ricmmartins/sslz/pull/29) | Cross-program lineage and report v2 |
 | [#30](https://github.com/ricmmartins/sslz/pull/30) | Implementation and evidence status reconciliation |
 | [#31](https://github.com/ricmmartins/sslz/pull/31) | Dual-cloud control-plane ownership and RACI planning |
+| [#41](https://github.com/ricmmartins/sslz/pull/41) | SSLZ Agent and classic implementation unified on `main` |
 
 [PR #12](https://github.com/ricmmartins/sslz/pull/12) was closed without merge; its intended hardening scope was delivered
 through later merged work, beginning with PR #13.

@@ -45,6 +45,14 @@ run "public_default_preserves_internet_path" {
     condition     = length(output.private_dns_zone_ids) == 0
     error_message = "Public mode must not expose private DNS zones."
   }
+
+  assert {
+    condition = (
+      length(azurerm_monitor_diagnostic_setting.redis.enabled_metric) == 1 &&
+      one(azurerm_monitor_diagnostic_setting.redis.enabled_metric).category == "AllMetrics"
+    )
+    error_message = "Redis diagnostics must retain enabled AllMetrics after removing the deprecated metric block."
+  }
 }
 
 run "private_mode_builds_complete_runtime_path" {
