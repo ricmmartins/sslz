@@ -232,7 +232,8 @@ run "invalid_subscription_is_rejected" {
   command = plan
 
   override_resource {
-    target = azurerm_kubernetes_cluster.this
+    target          = azurerm_kubernetes_cluster.this
+    override_during = plan
 
     values = {
       kubelet_identity = [{
