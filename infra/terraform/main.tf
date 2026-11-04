@@ -39,7 +39,7 @@ terraform {
 
   # Remote backend for shared state. Required for CI/CD.
   # Run ./scripts/bootstrap-backend.sh -s <storage-account-name> to create the storage account.
-  # For local dev without backend, run: terraform init -backend=false
+  # For isolated local development, copy local-backend.tf.example to backend_override.tf, then terraform init.
   backend "azurerm" {
     resource_group_name  = "rg-terraform-state"
     storage_account_name = "yourStorageAccount"

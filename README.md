@@ -69,6 +69,12 @@ separate review and approval. The Quick Start below remains the direct operator 
 
 ## Quick Start
 
+These Bash commands deploy the platform baseline under your Azure identity,
+without SSLZ Agent signed approvals. Use Bash, Azure Cloud Shell, or WSL with the
+required tools installed in that environment. Start each provider option from the
+repository root. The time estimates assume completed prerequisites; they are not
+a measured end-to-end production-readiness guarantee.
+
 ### Step 1: Check Prerequisites (5 min)
 
 You need:
@@ -88,14 +94,32 @@ az login
 az account set --subscription <YOUR_PROD_SUBSCRIPTION_ID>
 
 # Check all prerequisites
-./scripts/validate-prerequisites.sh
+./scripts/validate-prerequisites.sh --tool bicep
+# Use --tool terraform instead when choosing Terraform.
+
+# Repeat the read-only check for the non-production subscription.
+az account set --subscription <YOUR_NONPROD_SUBSCRIPTION_ID>
+./scripts/validate-prerequisites.sh --tool bicep
+# Use --tool terraform instead when choosing Terraform.
 ```
 
 If the script reports errors, fix them before proceeding. See [Troubleshooting](docs/troubleshooting.md) for common issues.
+The script checks only the currently selected subscription; repeat it for both
+targets. These checks are read-only and do not establish deployment
+authorization, quota, capacity or cost readiness. Review effective write
+permissions and the preview for each selected subscription before deploying.
 
 ### Step 2: Deploy Management Groups (Optional, 5 min)
 
 This step creates the management group hierarchy shown in the [Architecture](#architecture) diagram. It requires **tenant-level permissions** (Owner or Management Group Contributor on the Tenant Root Group). Skip this if you don't have tenant-level access — the landing zone works without it.
+
+The templates also associate the supplied existing prod/non-prod subscriptions
+with the new management groups. This changes their parent hierarchy and can
+change inherited policy and RBAC for every resource in those subscriptions.
+Inventory current parent groups and inherited assignments first; do not run this
+step for shared or already governed subscriptions without tenant-owner review
+and explicit approval. The landing-zone teardown commands below do not remove
+management groups or reverse subscription associations.
 
 #### Option A: Bicep
 
@@ -142,6 +166,8 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 - `securityContactEmail` — Email for Defender for Cloud alerts.
 - `budgetAlertEmails` — List of emails for budget notifications.
 - `monthlyBudgetAmount` — Your monthly budget in USD.
+- `budgetStartDate` — First day of the deployment month at `00:00:00Z`; replace the example date.
+- `location`, `allowedLocations`, `logAnalyticsWorkspaceLocation` — Review the deployment and workspace regions together; changing the CLI deployment location alone does not move resources.
 - `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
 
 ```bash
@@ -158,9 +184,22 @@ az deployment sub create \
   --parameters parameters/prod.local.bicepparam
 ```
 
-Repeat for non-prod by creating a `nonprod.local.bicepparam` file with `environment = 'nonprod'` and switching subscriptions:
+For non-prod, use the dedicated parameter sample. It keeps Defender for
+Servers, Containers, Databases, and Storage disabled; review those plans before
+enabling them in a non-production subscription. Set the company name, alert
+addresses, budget, deployment-month start date, and regions in the local copy:
 ```bash
+cp parameters/nonprod.bicepparam parameters/nonprod.local.bicepparam
+# Edit parameters/nonprod.local.bicepparam before running these commands.
 az account set --subscription <YOUR_NONPROD_SUBSCRIPTION_ID>
+az deployment sub what-if \
+  --location eastus2 \
+  --template-file main.bicep \
+  --parameters parameters/nonprod.local.bicepparam
+az deployment sub create \
+  --location eastus2 \
+  --template-file main.bicep \
+  --parameters parameters/nonprod.local.bicepparam
 ```
 
 #### Option B: Terraform
@@ -179,9 +218,14 @@ Open `terraform.tfvars` and fill in the **REQUIRED** values (marked in the file)
 - `budget_alert_emails` — List of email addresses
 - `security_contact_email` — Email for security alerts
 - `enable_defender_for_storage` — Keep `false` unless you explicitly opt into the paid Defender for Storage V2 plan
+- `monthly_budget_amount` — Review the monthly budget; alerts do not impose a spending cap.
+- `location`, `allowed_locations`, `log_analytics_workspace_location` — Review resource, policy and workspace regions together.
 
 ```bash
-# Initialize Terraform
+# Isolated local development only: replace the remote backend with local state
+cp local-backend.tf.example backend_override.tf
+
+# Initialize Terraform with the selected backend
 terraform init
 
 # Preview what will be created (no changes made)
@@ -191,13 +235,27 @@ terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-> **Important:** For CI/CD and team use, set up a remote backend for Terraform state. Run `./scripts/bootstrap-backend.sh -s <storage-account-name>` to create the backend storage, then configure your workflow with the storage account name. For local dev without a backend, run `terraform init -backend=false`. See [CI/CD Setup](docs/ci-cd-setup.md) for full instructions.
+> **Important:** Local state is only for an isolated development exercise. Keep the ignored `backend_override.tf`, state and saved plan protected, and use the same directory and state for teardown. For CI/CD and team use, configure the remote backend before deployment instead of copying the local override. From the repository root, `./scripts/bootstrap-backend.sh -s <storage-account-name>` provisions backend resources; review its changes and follow [CI/CD Setup](docs/ci-cd-setup.md). `terraform init -backend=false` does not select local state. If migrating existing state, stop and follow Terraform's reviewed state-migration procedure rather than removing state or reinitializing blindly.
+
+For the second environment, repeat the Terraform option in a **separate clean
+clone**, with that environment's subscription and variables. Keep its local state
+separate, or use a distinct remote backend key when using shared storage. Editing
+`environment` or `subscription_id` in a directory holding the first environment's
+state can plan destruction of that deployment.
 
 ### Step 4: Verify the Deployment (5 min)
 
-After deployment completes, verify in the Azure Portal or CLI:
+After deployment completes, return from `infra/bicep` or `infra/terraform` to the
+repository root. Select the subscription just deployed, including when Terraform
+used a `subscription_id` different from your Azure CLI default. Repeat verification
+for each environment. Replace `yourcompany` in the query with the deployed name.
+These listing commands aid inspection; compare the exact resources and settings
+to the reviewed plan rather than treating successful CLI exit codes as acceptance.
 
 ```bash
+cd ../..
+az account set --subscription <DEPLOYED_SUBSCRIPTION_ID>
+
 # Check resource groups were created
 az group list --query "[?contains(name, 'yourcompany')].name" -o tsv
 
@@ -228,6 +286,49 @@ See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-
 
 To destroy all landing zone resources:
 
+Return to the repository root first and select the subscription used for that
+deployment. Run only the command for your provider and actual environment.
+Preserve the Terraform backend configuration and original state; do not use
+another environment's state or assume `--env` selects a different state file.
+Review all listed changes, including subscription-level settings, before confirming.
+For Bicep, `--company` is required and the script selects only the baseline's
+monitoring and networking groups. Names alone do not prove ownership: check them
+against the pre-deployment inventory and do not delete pre-existing groups.
+Group deletion is asynchronous and does not undo subscription policies, Defender
+plans, security contacts, diagnostics or budgets. Verify deletion completion and
+restore shared settings from that inventory; do not delete role assignments by
+role name or reset paid security plans blindly.
+
+Terraform has an additional guard: the Defender workspace association uses
+`prevent_destroy`, and the generic teardown command does not restore shared
+subscription settings. If this deployment created that association or changed
+Defender pricing, first restore those settings to the pre-deployment inventory.
+Back up the Terraform state, confirm the exact addresses with `terraform state
+list`, and remove only the restored subscription-level objects from state; this
+does not delete Azure resources:
+
+```bash
+cd infra/terraform
+# Include the workspace address only if it exists in this deployment's state.
+terraform state rm \
+  'azurerm_security_center_workspace.defender[0]' \
+  'module.security.azurerm_security_center_subscription_pricing.arm' \
+  'module.security.azurerm_security_center_subscription_pricing.containers' \
+  'module.security.azurerm_security_center_subscription_pricing.cspm' \
+  'module.security.azurerm_security_center_subscription_pricing.keyvault' \
+  'module.security.azurerm_security_center_subscription_pricing.oss_db' \
+  'module.security.azurerm_security_center_subscription_pricing.servers' \
+  'module.security.azurerm_security_center_subscription_pricing.sql' \
+  'module.security.azurerm_security_center_subscription_pricing.storage'
+terraform plan -destroy -out=tfplan
+terraform show tfplan
+terraform apply tfplan
+```
+
+Review the destroy plan and apply it only when it contains expected
+exercise-owned deletions and no changes to restored shared settings. Do not
+remove the `prevent_destroy` lifecycle guard to bypass this review.
+
 ```bash
 # Terraform
 ./scripts/teardown.sh --tool terraform --env nonprod --company yourcompany
@@ -253,7 +354,11 @@ To destroy all landing zone resources:
 - [ ] Create Entra ID groups: `sg-azure-developers`, `sg-azure-readers`
 - [ ] Assign [RBAC roles](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles) (see [Security docs](docs/security.md))
 - [ ] Set up [CI/CD](docs/ci-cd-setup.md) with [Workload Identity Federation](https://learn.microsoft.com/entra/workload-id/workload-identity-federation)
+- [ ] Configure [Cost Management anomaly detection and email alerts](https://learn.microsoft.com/azure/cost-management-billing/understand/analyze-unexpected-charges) for each subscription. In Azure portal, open **Cost Management > Cost Analysis**, select a subscription scope and a **Smart view** to onboard anomaly detection; status can take up to 24 hours. Then open **Cost alerts > Add > Anomaly**, choose recipients and create the rule. Creation requires Owner, Contributor, Cost Management Contributor or the documented custom permission. Anomaly emails are sent once per detected event, not as a spending cap; the rule creator must retain Reader or equivalent access for email delivery. Available in Azure public cloud, not Azure Government.
 - [ ] Test a sample deployment end-to-end
+
+The 30-minute estimate does not include anomaly detection onboarding, which can
+take up to 24 hours. Do not treat a budget or anomaly alert as a hard spending cap.
 
 ## What's Included
 

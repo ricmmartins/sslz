@@ -20,6 +20,20 @@ param contactEmails string[]
 @description('Budget start date (first day of a month in ISO 8601 format, e.g., 2026-01-01T00:00:00Z)')
 param startDate string
 
+var startYear = int(substring(startDate, 0, 4))
+var startMonth = int(substring(startDate, 5, 2))
+var endYear = startYear + 10
+var startYearIsLeap = startYear % 4 == 0 && (startYear % 100 != 0 || startYear % 400 == 0)
+var endYearIsLeap = endYear % 4 == 0 && (endYear % 100 != 0 || endYear % 400 == 0)
+var leapDaysBeforeEndYear = int((endYear - 1) / 4) - int((endYear - 1) / 100) + int((endYear - 1) / 400)
+var leapDaysBeforeStartYear = int(startYear / 4) - int(startYear / 100) + int(startYear / 400)
+var leapDayCount = leapDaysBeforeEndYear - leapDaysBeforeStartYear + ((startYearIsLeap && startMonth <= 2) ? 1 : 0) + ((endYearIsLeap && startMonth > 2) ? 1 : 0)
+// Match the Cost Management API's ten-calendar-year default end date.
+var endDate = dateTimeAdd(
+  dateTimeAdd(startDate, 'P10Y'),
+  'P${leapDayCount}D'
+)
+
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: budgetName
   properties: {
@@ -28,6 +42,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
     timeGrain: 'Monthly'
     timePeriod: {
       startDate: startDate
+      endDate: endDate
     }
     notifications: {
       fiftyPercent: {

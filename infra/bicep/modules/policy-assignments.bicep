@@ -24,8 +24,10 @@ param logAnalyticsWorkspaceId string
 var policyDefinitions = {
   // Microsoft Cloud Security Benchmark
   mcsb: '/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8'
+  mcsbVersion: '57.*.*'
   // Allowed locations
   allowedLocations: '/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c'
+  defaultVersion: '1.*.*'
   // Allowed locations for resource groups
   allowedLocationsRg: '/providers/Microsoft.Authorization/policyDefinitions/e765b5de-1225-4ba3-bd56-1ac6695af988'
   // Require tag on resource groups
@@ -46,6 +48,7 @@ resource mcsbAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' =
     displayName: 'Microsoft Cloud Security Benchmark (Audit)'
     description: 'Audit resources against Microsoft Cloud Security Benchmark. Does not block deployments.'
     policyDefinitionId: policyDefinitions.mcsb
+    definitionVersion: policyDefinitions.mcsbVersion
     enforcementMode: 'Default'
   }
 }
@@ -60,6 +63,7 @@ resource allowedLocationsAssignment 'Microsoft.Authorization/policyAssignments@2
     displayName: 'Allowed Locations'
     description: 'Restrict resource deployment to approved regions only.'
     policyDefinitionId: policyDefinitions.allowedLocations
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       listOfAllowedLocations: {
@@ -75,6 +79,7 @@ resource allowedLocationsRgAssignment 'Microsoft.Authorization/policyAssignments
     displayName: 'Allowed Locations for Resource Groups'
     description: 'Restrict resource group creation to approved regions only.'
     policyDefinitionId: policyDefinitions.allowedLocationsRg
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       listOfAllowedLocations: {
@@ -94,6 +99,7 @@ resource requireEnvironmentTag 'Microsoft.Authorization/policyAssignments@2024-0
     displayName: 'Require environment tag on resource groups'
     description: 'All resource groups must have an environment tag for cost tracking.'
     policyDefinitionId: policyDefinitions.requireTagOnRg
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       tagName: {
@@ -109,6 +115,7 @@ resource requireTeamTag 'Microsoft.Authorization/policyAssignments@2024-04-01' =
     displayName: 'Require team tag on resource groups'
     description: 'All resource groups must have a team tag for ownership tracking.'
     policyDefinitionId: policyDefinitions.requireTagOnRg
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       tagName: {
@@ -132,6 +139,7 @@ resource inheritEnvironmentTag 'Microsoft.Authorization/policyAssignments@2024-0
     displayName: 'Inherit environment tag from resource group'
     description: 'Automatically propagate the environment tag from resource groups to child resources.'
     policyDefinitionId: policyDefinitions.inheritTag
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       tagName: {
@@ -151,6 +159,7 @@ resource inheritTeamTag 'Microsoft.Authorization/policyAssignments@2024-04-01' =
     displayName: 'Inherit team tag from resource group'
     description: 'Automatically propagate the team tag from resource groups to child resources.'
     policyDefinitionId: policyDefinitions.inheritTag
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       tagName: {
@@ -174,6 +183,7 @@ resource activityLogDiagAssignment 'Microsoft.Authorization/policyAssignments@20
     displayName: 'Deploy Activity Log diagnostics to Log Analytics'
     description: 'Automatically configure Activity Log to stream to Log Analytics workspace.'
     policyDefinitionId: policyDefinitions.activityLogDiag
+    definitionVersion: policyDefinitions.defaultVersion
     enforcementMode: 'Default'
     parameters: {
       logAnalytics: {
@@ -194,11 +204,17 @@ var roleDefinitions = {
   monitoringContributor: '/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa'
 }
 
+var scopedRoleDefinitions = {
+  tagContributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4a9ae827-6dc8-4573-8ac7-8239d42aa03f')
+  logAnalyticsContributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '92aaf0da-9dab-42b6-94a3-d43ce8d16293')
+  monitoringContributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '749f88d5-cbae-40b8-bcfc-e573ddc772fa')
+}
+
 resource inheritEnvTagRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, inheritEnvironmentTag.name, roleDefinitions.tagContributor)
   properties: {
     principalId: inheritEnvironmentTag.identity.principalId
-    roleDefinitionId: roleDefinitions.tagContributor
+    roleDefinitionId: scopedRoleDefinitions.tagContributor
     principalType: 'ServicePrincipal'
   }
 }
@@ -207,7 +223,7 @@ resource inheritTeamTagRole 'Microsoft.Authorization/roleAssignments@2022-04-01'
   name: guid(subscription().id, inheritTeamTag.name, roleDefinitions.tagContributor)
   properties: {
     principalId: inheritTeamTag.identity.principalId
-    roleDefinitionId: roleDefinitions.tagContributor
+    roleDefinitionId: scopedRoleDefinitions.tagContributor
     principalType: 'ServicePrincipal'
   }
 }
@@ -216,7 +232,7 @@ resource activityLogDiagRoleLaw 'Microsoft.Authorization/roleAssignments@2022-04
   name: guid(subscription().id, activityLogDiagAssignment.name, roleDefinitions.logAnalyticsContributor)
   properties: {
     principalId: activityLogDiagAssignment.identity.principalId
-    roleDefinitionId: roleDefinitions.logAnalyticsContributor
+    roleDefinitionId: scopedRoleDefinitions.logAnalyticsContributor
     principalType: 'ServicePrincipal'
   }
 }
@@ -225,7 +241,7 @@ resource activityLogDiagRoleMonitor 'Microsoft.Authorization/roleAssignments@202
   name: guid(subscription().id, activityLogDiagAssignment.name, roleDefinitions.monitoringContributor)
   properties: {
     principalId: activityLogDiagAssignment.identity.principalId
-    roleDefinitionId: roleDefinitions.monitoringContributor
+    roleDefinitionId: scopedRoleDefinitions.monitoringContributor
     principalType: 'ServicePrincipal'
   }
 }

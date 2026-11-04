@@ -44,12 +44,14 @@ resource "azurerm_security_center_subscription_pricing" "oss_db" {
 resource "azurerm_security_center_subscription_pricing" "keyvault" {
   tier          = var.enable_defender_for_key_vault ? "Standard" : "Free"
   resource_type = "KeyVaults"
+  subplan       = "PerKeyVault"
 }
 
 # Defender for ARM
 resource "azurerm_security_center_subscription_pricing" "arm" {
   tier          = "Standard"
   resource_type = "Arm"
+  subplan       = "PerSubscription"
 }
 
 # Defender for Storage V2 — opt in only when the workload justifies the added cost
