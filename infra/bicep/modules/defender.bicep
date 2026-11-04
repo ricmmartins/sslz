@@ -91,10 +91,18 @@ resource defenderOssDatabases 'Microsoft.Security/pricings@2024-01-01' = {
 }
 
 // Defender for Key Vault — cheap, always enable on prod
-resource defenderKeyVault 'Microsoft.Security/pricings@2024-01-01' = {
+resource defenderKeyVaultStandard 'Microsoft.Security/pricings@2024-01-01' = if (enableDefenderForKeyVault) {
   name: 'KeyVaults'
   properties: {
-    pricingTier: enableDefenderForKeyVault ? 'Standard' : 'Free'
+    pricingTier: 'Standard'
+    subPlan: 'PerKeyVault'
+  }
+}
+
+resource defenderKeyVaultFree 'Microsoft.Security/pricings@2024-01-01' = if (!enableDefenderForKeyVault) {
+  name: 'KeyVaults'
+  properties: {
+    pricingTier: 'Free'
   }
 }
 
@@ -102,7 +110,8 @@ resource defenderKeyVault 'Microsoft.Security/pricings@2024-01-01' = {
 resource defenderArm 'Microsoft.Security/pricings@2024-01-01' = {
   name: 'Arm'
   properties: {
-    pricingTier: 'Standard' // Free-ish, very low cost, always worth enabling
+    pricingTier: 'Standard'
+    subPlan: 'PerSubscription'
   }
 }
 

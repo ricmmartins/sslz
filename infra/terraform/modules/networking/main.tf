@@ -350,7 +350,8 @@ resource "azurerm_subnet" "app" {
   delegation {
     name = "delegation-web"
     service_delegation {
-      name = var.app_subnet_delegation
+      name    = var.app_subnet_delegation
+      actions = var.app_subnet_delegation == "Microsoft.Web/serverFarms" ? ["Microsoft.Network/virtualNetworks/subnets/action"] : []
     }
   }
 }

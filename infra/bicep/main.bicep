@@ -219,7 +219,7 @@ resource rgNetworkingRes 'Microsoft.Resources/resourceGroups@2024-03-01' = if (d
 // ============================================================================
 
 module logAnalytics 'modules/log-analytics.bicep' = if (!useExistingLogAnalyticsWorkspace) {
-  name: 'deploy-log-analytics-${environment}${regionalAttemptSuffix}'
+  name: 'deploy-log-analytics-${uniqueString(subscription().id, companyName, environment, location, regionalAttemptSuffix)}'
   scope: rgMonitoringRes
   params: {
     location: logAnalyticsWorkspaceLocation
@@ -235,7 +235,7 @@ module logAnalytics 'modules/log-analytics.bicep' = if (!useExistingLogAnalytics
 // ============================================================================
 
 module networking 'modules/networking.bicep' = if (deployNetworking) {
-  name: 'deploy-networking-${environment}${regionalAttemptSuffix}'
+  name: 'deploy-networking-${uniqueString(subscription().id, companyName, environment, location, regionalAttemptSuffix)}'
   scope: rgNetworkingRes
   params: {
     location: location
@@ -258,7 +258,7 @@ module networking 'modules/networking.bicep' = if (deployNetworking) {
 // ============================================================================
 
 module defender 'modules/defender.bicep' = {
-  name: 'deploy-defender-${environment}${regionalAttemptSuffix}'
+  name: 'deploy-defender-${uniqueString(subscription().id, companyName, environment, location, regionalAttemptSuffix)}'
   params: {
     enableDefenderForServers: enableDefenderForServers
     enableDefenderForContainers: enableDefenderForContainers
@@ -276,7 +276,7 @@ module defender 'modules/defender.bicep' = {
 // ============================================================================
 
 module budgets 'modules/budgets.bicep' = {
-  name: 'deploy-budgets-${environment}${regionalAttemptSuffix}'
+  name: 'deploy-budgets-${uniqueString(subscription().id, companyName, environment, location, regionalAttemptSuffix)}'
   params: {
     budgetName: 'budget-${prefix}-monthly'
     amount: monthlyBudgetAmount
@@ -311,7 +311,7 @@ resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-previ
 // ============================================================================
 
 module policies 'modules/policy-assignments.bicep' = {
-  name: 'deploy-policies-${environment}${regionalAttemptSuffix}'
+  name: 'deploy-policies-${uniqueString(subscription().id, companyName, environment, location, regionalAttemptSuffix)}'
   params: {
     location: location
     policyAssignmentPrefix: policyAssignmentPrefix

@@ -11,6 +11,23 @@ set -uo pipefail
 
 ERRORS=0
 WARNINGS=0
+TOOL=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --tool)
+      if [[ $# -lt 2 || ( "$2" != "bicep" && "$2" != "terraform" ) ]]; then
+        echo "Error: --tool requires bicep or terraform."
+        exit 1
+      fi
+      TOOL="$2"; shift 2 ;;
+    --help)
+      echo "Usage: $0 [--tool bicep|terraform]"
+      echo "Read-only checks; successful checks do not prove deployment authorization."
+      exit 0 ;;
+    *) echo "Error: Unknown argument: $1"; exit 1 ;;
+  esac
+done
 
 pass() { echo "  ✓ $1"; }
 fail() { echo "  ✗ $1"; ERRORS=$((ERRORS + 1)); }
@@ -20,10 +37,15 @@ echo "=== Checking CLI Tools ==="
 
 # Azure CLI
 if command -v az &>/dev/null; then
-  AZ_VERSION=$(az version --query '"azure-cli"' -o tsv 2>/dev/null)
-  pass "Azure CLI $AZ_VERSION"
+  if AZ_VERSION=$(az version --query '"azure-cli"' -o tsv 2>/dev/null) && [[ -n "$AZ_VERSION" ]]; then
+    pass "Azure CLI $AZ_VERSION"
+  else
+    fail "Azure CLI version check failed — repair the CLI installation before proceeding"
+    exit 1
+  fi
 else
   fail "Azure CLI not found — install from https://aka.ms/install-azure-cli"
+  exit 1
 fi
 
 # Terraform
@@ -39,6 +61,8 @@ if command -v terraform &>/dev/null; then
   else
     fail "Terraform ${TF_VERSION:-unknown} is below minimum 1.5.0"
   fi
+elif [[ "$TOOL" == "terraform" ]]; then
+  fail "Terraform not found — required for --tool terraform"
 else
   warn "Terraform not found — install from https://terraform.io/downloads (only needed for Terraform option)"
 fi
@@ -48,6 +72,8 @@ if command -v az &>/dev/null; then
   if az bicep version --only-show-errors &>/dev/null; then
     BICEP_VERSION=$(az bicep version --only-show-errors 2>&1 | grep -oE '[0-9]+\.[0-9.]+' | head -1)
     pass "Bicep CLI $BICEP_VERSION"
+  elif [[ "$TOOL" == "bicep" ]]; then
+    fail "Bicep CLI not installed — run: az bicep install"
   else
     warn "Bicep CLI not installed — run: az bicep install"
   fi
@@ -107,7 +133,7 @@ echo "=== Checking Permissions ==="
 if az account show &>/dev/null; then
   # Check if we can list resource groups (basic permission test)
   if az group list --query "[0].name" -o tsv &>/dev/null; then
-    pass "Can list resource groups (basic permissions OK)"
+    pass "Can list resource groups (read access only)"
   else
     fail "Cannot list resource groups — insufficient permissions"
   fi
@@ -116,14 +142,16 @@ if az account show &>/dev/null; then
   if az policy assignment list --query "[0].name" -o tsv &>/dev/null; then
     pass "Can read policy assignments"
   else
-    warn "Cannot read policy assignments — may need higher permissions for policy module"
+    fail "Cannot read policy assignments — resolve access before reviewing the deployment"
   fi
 fi
 
 echo ""
 echo "=== Summary ==="
 if [[ $ERRORS -eq 0 ]]; then
-  echo "All checks passed ($WARNINGS warnings). Ready to deploy!"
+  echo "Read-only checks passed ($WARNINGS warnings)."
+  echo "Deployment authorization, deny assignments, quotas, regional capacity, existing-resource conflicts and costs remain unverified."
+  echo "Review the selected subscription and preview before applying; this result does not authorize deployment."
   exit 0
 else
   echo "$ERRORS errors, $WARNINGS warnings. Fix errors before deploying."
