@@ -51,6 +51,27 @@ function parseFrontmatter(markdown) {
 const agent = parseFrontmatter(profile);
 const normalizedLauncher = launcher.replace(/^>\s?/gm, "").replace(/\s+/g, " ");
 const normalizedProfile = agent.body.replace(/\s+/g, " ");
+const localWriteTargets = [
+  ".sslz/generated/greenfield-journey",
+  ".sslz/remediation-state/greenfield-${process.pid}",
+];
+for (const path of [
+  ".github/agents/sslz-agent.agent.md",
+  "agent/README.md",
+  "docs/startup-agent-flow.md",
+  "docs/implementation-status.md",
+  "use-sslz-agent.md",
+]) {
+  const document = readFileSync(resolve(root, path), "utf8");
+  assert(!document.includes("permanent planning branch"), `${path} must describe the integrated main branch.`);
+  for (const target of localWriteTargets) {
+    assert(document.includes(target), `${path} must disclose the synthetic journey write target: ${target}`);
+  }
+}
+assert(!agent.body.includes("not discoverable in the GitHub UI until"), "Do not imply default-branch publication enables the hosted picker.");
+assert(normalizedProfile.includes("GitHub.com custom-agent picker is not a supported launch path"));
+assert(normalizedLauncher.includes("Claude Code and Codex do not have a maintained native adapter"));
+assert(normalizedProfile.includes("report readback as blocked"), "File-generation success must not substitute for permitted readback.");
 assert.equal(agent.name, "SSLZ Agent");
 assert.match(profile, /^  product: SSLZ Agent$/m);
 assert.deepEqual(

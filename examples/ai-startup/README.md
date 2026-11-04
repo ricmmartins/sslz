@@ -116,6 +116,26 @@ terraform apply
    docker push <ACR_LOGIN_SERVER>/inference:latest
    ```
 
+## Local Terraform tests
+
+With Terraform 1.7 or later, run from `examples/ai-startup/terraform`:
+
+```shell
+terraform init -backend=false
+terraform validate
+terraform test
+```
+
+The tests use a mock Azure provider and synthetic inputs, without Azure login or resource creation. They cover
+production/nonproduction settings, independent Spot and regular node-pool choices, GPU isolation, private access
+defaults, diagnostics, caller overrides, and rejected inputs. Provider installation needs network access.
+These are plan tests, not evidence that the declared Kubernetes version, model, GPU SKU, or quota is available,
+or that the private services are reachable from a deployed application.
+The AI tests target workload resources because AzureRM mocks return an empty computed AKS kubelet identity
+([provider issue #25691](https://github.com/hashicorp/terraform-provider-azurerm/issues/25691)).
+They do not plan the `aks_acr_pull` role assignment or verify image pulls. Validate that binding and image pulls
+with a live cluster before declaring the workload ready.
+
 ## Teardown
 
 To destroy all resources created by this example:
@@ -139,4 +159,4 @@ cd examples/ai-startup/terraform
 terraform destroy
 ```
 
-> **Note:** AKS clusters can take 10-15 minutes to fully delete. Storage accounts with blob containers will fail to delete if they contain data — empty the containers first or use `terraform destroy -target` to remove other resources first.
+Terraform `prevent_destroy` guards protect the storage account, both blob containers, and Key Vault. Back up any data, then remove those lifecycle guards from the matching resources in `main.tf` before running `terraform destroy`; review the destroy plan first. AKS clusters can take 10-15 minutes to delete, and storage accounts cannot be removed while their containers still contain data.

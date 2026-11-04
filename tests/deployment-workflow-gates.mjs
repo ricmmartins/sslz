@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -68,6 +68,23 @@ assert.match(validation, /^  pull_request:/m);
 assert.match(validation, /^  push:/m);
 assert.match(validation, /node tests\/blocking-check-catalog\.mjs/);
 assert.match(validation, /node tests\/deployment-workflow-gates\.mjs/);
+assert.match(
+  validation,
+  /if ! find "\$dir\/tests" -name '\*\.tftest\.hcl' -type f -print -quit \| grep -q \.; then[\s\S]*?failed=1[\s\S]*?continue/,
+  "Example validation must reject a missing Terraform test suite.",
+);
+for (const example of ["ai-startup", "api-first-startup", "saas-startup"]) {
+  const directory = resolve(root, "examples", example, "terraform", "tests");
+  const suites = readdirSync(directory).filter((name) => name.endsWith(".tftest.hcl"));
+  assert(suites.length > 0, `${example} must have Terraform tests.`);
+  for (const suite of suites) {
+    const source = readFileSync(resolve(directory, suite), "utf8");
+    assert.match(source, /mock_provider "azurerm"/, `${example}/${suite} must not require live Azure.`);
+    assert.match(source, /^run "[^"]+" \{/m, `${example}/${suite} must declare a test run.`);
+    assert.doesNotMatch(source, /^\s*command\s*=\s*apply\b/m, `${example}/${suite} must use plan-only tests.`);
+    assert.match(source, /expect_failures\s*=/, `${example}/${suite} must cover rejected inputs.`);
+  }
+}
 
 const integration = workflow("integration-test.yml");
 assert.match(

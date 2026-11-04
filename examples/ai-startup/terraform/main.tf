@@ -209,6 +209,10 @@ resource "azurerm_storage_account" "this" {
   allow_nested_items_to_be_public = false
   tags                            = local.tags
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   network_rules {
     default_action = "Deny"
     bypass         = ["AzureServices"]
@@ -219,12 +223,20 @@ resource "azurerm_storage_container" "models" {
   name                  = "models"
   storage_account_id    = azurerm_storage_account.this.id
   container_access_type = "private"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_storage_container" "datasets" {
   name                  = "datasets"
   storage_account_id    = azurerm_storage_account.this.id
   container_access_type = "private"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # ==============================================================================
@@ -281,9 +293,8 @@ resource "azurerm_monitor_diagnostic_setting" "redis" {
   target_resource_id         = azurerm_redis_cache.this.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
@@ -309,6 +320,10 @@ resource "azurerm_key_vault" "this" {
   soft_delete_retention_days = 90
   purge_protection_enabled   = var.environment == "prod"
   tags                       = local.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 
   network_acls {
     default_action = "Deny"

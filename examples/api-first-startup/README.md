@@ -134,6 +134,22 @@ terraform apply
    curl https://app-<APP_NAME>-api-<ENV>-staging.azurewebsites.net/health
    ```
 
+## Local Terraform tests
+
+With Terraform 1.7 or later, run from `examples/api-first-startup/terraform`:
+
+```shell
+terraform init -backend=false
+terraform validate
+terraform test
+```
+
+The tests use a mock Azure provider and synthetic inputs, without Azure login or resource creation. They cover
+production staging and role assignments, Basic versus Premium hosting, serverless versus autoscale Cosmos settings,
+private access defaults, Redis metrics, caller overrides, and rejected inputs. Provider installation needs network
+access. These plan tests do not prove application health or connectivity to private services; that requires a
+separately reviewed network path and live postchecks.
+
 ## Teardown
 
 To destroy all resources created by this example:
@@ -157,4 +173,4 @@ cd examples/api-first-startup/terraform
 terraform destroy
 ```
 
-> **Note:** Cosmos DB accounts with `enablePurgeProtection` may remain in a soft-deleted state. API Management in Consumption tier may take a few minutes to fully deprovision.
+Terraform `prevent_destroy` guards protect the Cosmos DB account, SQL database and container, and Key Vault. Back up required data, then remove those lifecycle guards from the matching resources in `main.tf` before running `terraform destroy`; review the destroy plan first. Cosmos DB accounts with purge protection may remain soft-deleted, and API Management in Consumption tier may take a few minutes to deprovision.

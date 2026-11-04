@@ -63,11 +63,15 @@ boundaries, synthetic and hosted validation, historical live preview evidence, a
 node scripts/validate-greenfield-journey.mjs
 ```
 
-That is the canonical validation-only entry point for the integrated founder journey on the permanent planning branch.
+That is the canonical validation-only entry point for the integrated founder journey on `main`.
 It exercises the repository planners and approval/remediation boundaries with deterministic mocks, creates no
 Azure resources, and requires no tenant access. The emitted report contains aliases and digests rather than tenant or
 subscription identifiers, PII, secrets, or raw diagnostics. Node.js and the local Bicep CLI installed by
 `az bicep install` are required; no npm install or project dependency restore is needed.
+
+Run it in an isolated checkout to preserve previous reports. It deletes and recreates
+`.sslz/generated/greenfield-journey`, and creates and removes the process-specific replay store
+`.sslz/remediation-state/greenfield-${process.pid}`. Approve both local write targets before asking the agent to run it.
 
 Individual contract suites remain available for focused development:
 

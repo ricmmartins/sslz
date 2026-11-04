@@ -32,6 +32,11 @@ Bicep CLI installed by `az bicep install`, but no npm install or project depende
 the capabilities documented in their tag; direct Bicep/Terraform usage remains the baseline deployment workflow rather
 than an implicit agent run.
 
+Run this check in an isolated checkout if an earlier report must be preserved. It deletes and recreates
+`.sslz/generated/greenfield-journey`, and creates and removes the process-specific replay store
+`.sslz/remediation-state/greenfield-${process.pid}`. The agent needs explicit approval for both local write targets.
+The fixture's fixed clock and synthetic approvals do not establish current tenant readiness or authorization.
+
 ## Acceptance-gap context
 
 The one-subscription and billing-benefit scenario was observed while the existing SSLZ baseline was exercised through a

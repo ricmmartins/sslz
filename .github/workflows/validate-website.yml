@@ -30,6 +30,8 @@ jobs:
       - name: Check static launcher instructions
         run: |
           node tests/website-launcher.mjs
+      - name: Check infrastructure safety and responsive table rules
+        run: node tests/example-infrastructure-safety.mjs
       - name: Check public main-branch clone with a clean checkout
         if: github.event_name == 'workflow_dispatch' && inputs.run_remote_smoke
         run: node tests/website-launcher.mjs --remote-smoke

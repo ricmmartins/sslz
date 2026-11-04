@@ -156,3 +156,5 @@ az group delete --name <RG> --yes
 cd examples/saas-startup/terraform
 terraform destroy
 ```
+
+Terraform `prevent_destroy` guards protect the SQL server, application database, and Key Vault. Back up required data, then remove those lifecycle guards from the matching resources in `main.tf` before running `terraform destroy`; review the destroy plan first.
