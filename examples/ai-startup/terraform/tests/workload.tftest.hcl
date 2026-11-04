@@ -231,6 +231,10 @@ run "invalid_app_name_is_rejected" {
 run "invalid_subscription_is_rejected" {
   command = plan
 
+  plan_options {
+    target = [azurerm_kubernetes_cluster.this]
+  }
+
   variables {
     subscription_id = "not-a-subscription"
   }
