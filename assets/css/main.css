@@ -2314,3 +2314,9 @@ img {
   .site-header, .sidebar, .site-footer, .theme-toggle, .mobile-menu-toggle { display: none; }
   .page-content { max-width: 100%; padding: 0; }
 }
+
+/* JetBrains Mono ligatures turn "-<co>-" into dash-like glyphs in code */
+code, pre, kbd, samp {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
