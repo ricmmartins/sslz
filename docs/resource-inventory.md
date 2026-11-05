@@ -156,7 +156,7 @@ workspace resource ID reuses that workspace and suppresses both workspace and mo
 
 All plans are `Microsoft.Security/pricings` resources at subscription scope.
 
-| Plan Name (resource) | Resource Type Covered | Default Tier, Prod | Default Tier, Non-Prod | Sub-Plan |
+| Plan Name (resource) | Resource Type Covered | Default Tier (Prod) | Default Tier (Non-Prod) | Sub-Plan |
 |---|---|---|---|---|
 | `CloudPosture` | CSPM | Free | Free | n/a |
 | `VirtualMachines` | Servers | Standard | Free | P2 (when Standard) |
