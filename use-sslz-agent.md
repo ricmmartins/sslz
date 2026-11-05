@@ -195,7 +195,8 @@ and a hosted agent has no automatic access to your Azure tenant. See GitHub's
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
 The `main` branch includes adoption conversation guidance, documentation grounding when the required tools are exposed,
-local contract checks, and fixture-based planning. Fixture replay checks and an external planner invocation do not prove
-that the agent ran the planner itself, and this guide does not establish an autonomous conversation-to-deployment flow
-or real tenant readiness. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for
-details.
+local contract checks, and fixture-based planning. Fixture replay checks are not evidence that the agent ran the planner, and an external planner invocation and a CLI
+response do not prove that the agent ran the planner itself. This guide does not establish an autonomous
+conversation-to-deployment flow or real tenant readiness. Record a remotely available revision when you need repeatable
+evidence. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for links to the
+SSLZ files that implement or plan each capability.
