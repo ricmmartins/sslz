@@ -182,20 +182,7 @@ When you have 5+ Private DNS Zones and 3+ VNets, managing zone links gets tediou
 
 ## When to Add a Hub
 
-```
-Before (what we deploy):
-
-    vnet-<co>-prod ←──── (no connection) ────→ vnet-<co>-nonprod
-
-After (when you graduate):
-
-    vnet-<co>-prod ←── peering ──→ hub-vnet ←── peering ──→ vnet-<co>-nonprod
-                                  │
-                            Azure Firewall
-                            VPN Gateway
-                            DNS Private Resolver
-                            Azure Bastion
-```
+![Before: the prod and nonprod VNets have no connection. After: both VNets peer to a hub VNet that hosts Azure Firewall, VPN Gateway, DNS Private Resolver and Azure Bastion.](/assets/images/hub-before-after.svg)
 
 **Triggers for adding a hub:**
 1. You need VPN or ExpressRoute (gateway goes in the hub)

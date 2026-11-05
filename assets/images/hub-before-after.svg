@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="hub-title hub-desc" font-family="Segoe UI, Arial, sans-serif">
+  <title id="hub-title">When to add a hub VNet</title>
+  <desc id="hub-desc">Before: the prod and nonprod VNets are separate with no connection. After: both VNets peer to a hub VNet that hosts Azure Firewall, VPN Gateway, DNS Private Resolver and Azure Bastion.</desc>
+  <defs>
+    <marker id="hub-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6c8ebf"/>
+    </marker>
+  </defs>
+  <rect width="760" height="460" fill="#ffffff"/>
+
+  <text x="24" y="32" font-size="16" font-weight="600" fill="#1f2937">Before: what we deploy</text>
+  <rect x="40" y="52" width="200" height="64" rx="10" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="140" y="80" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">vnet-&lt;co&gt;-prod</text>
+  <text x="140" y="100" text-anchor="middle" font-size="12" fill="#374151">10.0.0.0/16</text>
+  <rect x="520" y="52" width="200" height="64" rx="10" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="620" y="80" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">vnet-&lt;co&gt;-nonprod</text>
+  <text x="620" y="100" text-anchor="middle" font-size="12" fill="#374151">10.1.0.0/16</text>
+  <line x1="256" y1="84" x2="504" y2="84" stroke="#b85450" stroke-width="2" stroke-dasharray="6 5"/>
+  <rect x="318" y="70" width="124" height="28" rx="14" fill="#f8cecc" stroke="#b85450"/>
+  <text x="380" y="89" text-anchor="middle" font-size="12" font-weight="600" fill="#7f1d1d">no connection</text>
+
+  <line x1="24" y1="148" x2="736" y2="148" stroke="#e5e7eb"/>
+
+  <text x="24" y="182" font-size="16" font-weight="600" fill="#1f2937">After: when you graduate</text>
+  <rect x="40" y="220" width="190" height="64" rx="10" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="135" y="248" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">vnet-&lt;co&gt;-prod</text>
+  <text x="135" y="268" text-anchor="middle" font-size="12" fill="#374151">spoke</text>
+  <rect x="530" y="220" width="190" height="64" rx="10" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="625" y="248" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">vnet-&lt;co&gt;-nonprod</text>
+  <text x="625" y="268" text-anchor="middle" font-size="12" fill="#374151">spoke</text>
+
+  <rect x="290" y="206" width="180" height="92" rx="10" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="380" y="248" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">hub-vnet</text>
+  <text x="380" y="268" text-anchor="middle" font-size="12" fill="#374151">Connectivity subscription</text>
+
+  <line x1="234" y1="252" x2="286" y2="252" stroke="#6c8ebf" stroke-width="2" marker-start="url(#hub-arrow)" marker-end="url(#hub-arrow)"/>
+  <line x1="474" y1="252" x2="526" y2="252" stroke="#6c8ebf" stroke-width="2" marker-start="url(#hub-arrow)" marker-end="url(#hub-arrow)"/>
+  <text x="260" y="238" text-anchor="middle" font-size="12" fill="#374151">peering</text>
+  <text x="500" y="238" text-anchor="middle" font-size="12" fill="#374151">peering</text>
+
+  <line x1="380" y1="298" x2="380" y2="330" stroke="#82b366" stroke-width="2"/>
+  <text x="392" y="322" font-size="12" fill="#374151">lives in the hub</text>
+
+  <rect x="60" y="334" width="150" height="56" rx="10" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="135" y="367" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">Azure Firewall</text>
+  <rect x="230" y="334" width="150" height="56" rx="10" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="305" y="367" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">VPN Gateway</text>
+  <rect x="400" y="334" width="150" height="56" rx="10" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="475" y="360" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">DNS Private</text>
+  <text x="475" y="378" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">Resolver</text>
+  <rect x="570" y="334" width="150" height="56" rx="10" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="645" y="367" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">Azure Bastion</text>
+  <line x1="135" y1="330" x2="645" y2="330" stroke="#82b366" stroke-width="2"/>
+  <line x1="135" y1="330" x2="135" y2="334" stroke="#82b366" stroke-width="2"/>
+  <line x1="305" y1="330" x2="305" y2="334" stroke="#82b366" stroke-width="2"/>
+  <line x1="475" y1="330" x2="475" y2="334" stroke="#82b366" stroke-width="2"/>
+  <line x1="645" y1="330" x2="645" y2="334" stroke="#82b366" stroke-width="2"/>
+
+  <text x="24" y="432" font-size="12" fill="#4b5563">Spokes stay in their own subscriptions. Shared services move into the hub only when you need them.</text>
+</svg>
