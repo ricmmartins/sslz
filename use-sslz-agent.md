@@ -175,6 +175,21 @@ remain guarded by their operation-specific contracts; provider apply is disabled
 dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
 not establish application health.
 
+## Before agentic workload execution
+
+Signed workload execution is pre-production. A rehearsal with throwaway keys deployed and removed a small
+`greenfield-acceptance` workload in a test subscription, which does not prove independent trust. Production use needs
+infrastructure you provision once, outside this repository:
+
+- signing keys held in a service independent of the runner, with only public keys on the runner;
+- a protected self-hosted runner with required reviewers, limited to `main`;
+- GitHub OIDC federation to Azure with least-privilege RBAC, never Owner;
+- a durable, backed-up replay store.
+
+The
+[production executor runbook](https://github.com/ricmmartins/sslz/blob/main/docs/production-executor.md#prerequisites-before-agentic-execution)
+lists each prerequisite with example commands and a read-only readiness check.
+
 ## Hosted UI and release limits
 
 This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository.
