@@ -187,18 +187,15 @@ remain guarded by their operation-specific contracts; provider apply is disabled
 dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
 not establish application health.
 
-## Hosted UI and release limits
+## Limits
 
-This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository.
-A hosted agent also has no automatic access to an arbitrary Azure tenant. See GitHub's
+This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository,
+and a hosted agent has no automatic access to your Azure tenant. See GitHub's
 [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents)
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
 The `main` branch includes adoption conversation guidance, documentation grounding when the required tools are exposed,
-local contract checks, and fixture-based planning. Conversation and fixture replay checks do not prove that the agent
-ran the planner itself. An external planner invocation using JSON captured from a CLI response does not prove that the
-agent ran the planner. A CLI response followed by an external planner invocation is not evidence that the agent ran the
-planner. Neither those tests nor this guide establish an autonomous conversation-to-deployment flow or real tenant
-readiness. Record a remotely available revision when you need repeatable evidence; do not cite an
-unpublished local SHA. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for links to
-the SSLZ files that implement or plan each capability.
+local contract checks, and fixture-based planning. Fixture replay checks and an external planner invocation do not prove
+that the agent ran the planner itself, and this guide does not establish an autonomous conversation-to-deployment flow
+or real tenant readiness. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for
+details.
