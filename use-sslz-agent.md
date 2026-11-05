@@ -11,11 +11,11 @@ run the agent or connect to Azure, and it does not receive access to your Azure 
 or secrets.
 You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
 
-The tested launch path is GitHub Copilot CLI. Claude Code and Codex use generated adapters of the same profile (see [Use Claude Code or Codex](#use-claude-code-or-codex)). They have no client-specific acceptance tests, so equivalent agent behavior is not established.
+Copilot CLI is the primary launch path. Claude Code and Codex use generated adapters of the same profile (see [Use Claude Code or Codex](#use-claude-code-or-codex)).
 
 ## In short
 
-SSLZ Agent is an assistant that runs on your computer, inside GitHub Copilot CLI (tested) or, with generated copies, Claude Code or Codex. You describe what you are building,
+SSLZ Agent is an assistant that runs on your computer, inside GitHub Copilot CLI or, with generated copies, Claude Code or Codex. You describe what you are building,
 and it explains your options for a starting foundation on Azure aligned with SSLZ, then helps you plan it. It only
 talks and plans: it does not connect to Azure or change anything unless you approve a specific step.
 
@@ -119,9 +119,9 @@ answer questions and review tool requests; do not add blanket permissions to mak
 
 ## Use Claude Code or Codex
 
-Copilot CLI is the tested path. If you use Claude Code or Codex instead, install it from its own documentation, clone
+If you use Claude Code or Codex instead, install it from its own documentation, clone
 the repository as above, and start it in the cloned folder. Both use generated copies of the same instructions. They
-have had no client-specific acceptance testing, so check each permission prompt, keep approvals on, and never use a
+are not yet validated in those clients, so check each permission prompt, keep approvals on, and never use a
 bypass mode such as `--dangerously-skip-permissions` or `--dangerously-bypass-approvals-and-sandbox`.
 
 For Claude Code:
