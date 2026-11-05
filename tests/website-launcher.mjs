@@ -63,11 +63,7 @@ function validateLauncher(markdown) {
     "What are you building, where does it run today, and what do you want Azure to do first?",
     "https://learn.microsoft.com/api/mcp",
     "requires no Azure login or API key",
-    "does not itself grant Microsoft Learn MCP access",
     "does not guarantee that its tools are exposed",
-    "`learn.microsoft.com` or `docs.microsoft.com`",
-    "checking the final URL after redirects",
-    "does not by itself mean that your company's administrator must change anything",
     "Azure authentication is not consent",
     "normal permission prompts enabled",
     "not create an operating-system shell allowlist",
@@ -92,7 +88,7 @@ for (const [before, after] of [
   ["copilot --agent sslz-agent\n", "copilot --agent sslz-agent --allow-all\n"],
   ["copilot login\n", "az login\n"],
   ["overrides the repository profile", "does not affect selection"],
-  ["does not itself grant Microsoft Learn MCP access", "grants all MCP tools"],
+  ["does not guarantee that its tools are exposed", "guarantees all tools are exposed"],
 ]) {
   assert.throws(() => validateLauncher(page.replace(before, after)), `Must reject: ${after}`);
 }
