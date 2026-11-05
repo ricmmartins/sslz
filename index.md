@@ -184,6 +184,7 @@ cd sslz
 
 az login
 az account set --subscription &lt;YOUR_PROD_SUBSCRIPTION_ID&gt;
+az account show --query "{name:name, tenant:tenantId}"   # confirm this is the right subscription
 
 # Validates CLI tools, Azure auth, provider registrations, and permissions
 ./scripts/validate-prerequisites.sh</code></pre>
@@ -220,7 +221,7 @@ cd ../../../..</code></pre>
       <div class="step-number">3</div>
       <h3>Deploy</h3>
       <span class="step-time">20 min</span>
-      <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values, preview with what-if/plan, then deploy.</p>
+      <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values (set <code>budgetStartDate</code> to the first day of the current month, or the deployment fails), preview with what-if/plan, then deploy.</p>
       <details>
         <summary>Bicep commands</summary>
 <pre><code>cd infra/bicep
@@ -300,9 +301,13 @@ az network nsg list --query "[].name" -o tsv</code></pre>
       <p>Assign RBAC roles to your team, set up CI/CD with Workload Identity Federation, and enable cost anomaly alerts. See the <a href="#day-1-checklist">Day-1 Checklist</a> below.</p>
       <details>
         <summary>Teardown commands (if needed)</summary>
-<pre><code># Remove all landing zone resources
-./scripts/teardown.sh --tool terraform --env nonprod --company yourcompany
-./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany</code></pre>
+<pre><code># Use the same --env you deployed (prod or nonprod)
+./scripts/teardown.sh --tool terraform --env prod --company yourcompany
+./scripts/teardown.sh --tool bicep --env prod --company yourcompany
+
+# Bicep teardown deletes only the resource groups. Subscription-level
+# policy assignments, role assignments, the activity-log diagnostic setting,
+# budget, security contact and Defender plans stay; remove them yourself.</code></pre>
       </details>
     </div>
   </div>
