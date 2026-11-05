@@ -194,7 +194,7 @@ az account show --query "{name:name, tenant:tenantId}"   # confirm this is the r
       <div class="step-number">2</div>
       <h3>Management Groups (Optional)</h3>
       <span class="step-time">5 min</span>
-      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access — the landing zone works without it.</p>
+      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access, the landing zone works without it.</p>
       <details>
         <summary>Bicep command</summary>
 <pre><code>az deployment tenant create \
@@ -221,7 +221,7 @@ cd ../../../..</code></pre>
       <div class="step-number">3</div>
       <h3>Deploy</h3>
       <span class="step-time">20 min</span>
-      <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values (set <code>budgetStartDate</code> to the first day of the current month, or the deployment fails), preview with what-if/plan, then deploy.</p>
+      <p>Deploy the landing zone, policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values (set <code>budgetStartDate</code> to the first day of the current month, or the deployment fails), preview with what-if/plan, then deploy.</p>
       <details>
         <summary>Bicep commands</summary>
 <pre><code>cd infra/bicep
@@ -349,7 +349,7 @@ az network nsg list --query "[].name" -o tsv</code></pre>
           <span class="timeline-badge">30 min</span>
         </div>
         <ul>
-          <li>Run <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription" target="_blank" rel="noopener">Bicep</a> or <a href="https://learn.microsoft.com/azure/developer/terraform/overview" target="_blank" rel="noopener">Terraform</a> deployment — see <a href="#quick-start">Step 3</a> above</li>
+          <li>Run <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription" target="_blank" rel="noopener">Bicep</a> or <a href="https://learn.microsoft.com/azure/developer/terraform/overview" target="_blank" rel="noopener">Terraform</a> deployment, see <a href="#quick-start">Step 3</a> above</li>
           <li>Verify resources in <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal</a></li>
         </ul>
       </div>

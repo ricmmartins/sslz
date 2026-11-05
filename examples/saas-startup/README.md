@@ -41,7 +41,7 @@ Azure Container Apps Environment (public mode or VNet-injected private-data mode
 ### Prerequisites
 
 - Azure CLI `>= 2.53.0` with Bicep CLI (or Terraform `>= 1.5.0`)
-- An existing resource group (you must create this — the landing zone does not create application resource groups)
+- An existing resource group (you must create this, the landing zone does not create application resource groups)
 
 ### Bicep
 

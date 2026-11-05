@@ -88,7 +88,7 @@ Application Insights provides:
 ### Prerequisites
 
 - Azure CLI >= 2.53.0 with Bicep CLI (or Terraform >= 1.5.0)
-- An existing resource group (you must create this — the landing zone does not create application resource groups)
+- An existing resource group (you must create this, the landing zone does not create application resource groups)
 - APIM publisher email and name for API Management configuration
 
 ### Bicep

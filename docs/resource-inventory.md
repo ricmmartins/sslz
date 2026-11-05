@@ -52,7 +52,7 @@ Networking resources are created in `rg-{company}-{env}-networking` when `deploy
 | Property | Prod | Non-Prod |
 |---|---|---|
 | **Name** | `vnet-{company}-{env}` | `vnet-{company}-{env}` |
-| **Resource type** | `Microsoft.Network/virtualNetworks` | — |
+| **Resource type** | `Microsoft.Network/virtualNetworks` | n/a |
 | **Address space** | `10.0.0.0/16` | `10.1.0.0/16` |
 
 ### Subnets
@@ -156,15 +156,15 @@ workspace resource ID reuses that workspace and suppresses both workspace and mo
 
 All plans are `Microsoft.Security/pricings` resources at subscription scope.
 
-| Plan Name (resource) | Resource Type Covered | Default Tier — Prod | Default Tier — Non-Prod | Sub-Plan |
+| Plan Name (resource) | Resource Type Covered | Default Tier, Prod | Default Tier, Non-Prod | Sub-Plan |
 |---|---|---|---|---|
-| `CloudPosture` | CSPM | Free | Free | — |
+| `CloudPosture` | CSPM | Free | Free | n/a |
 | `VirtualMachines` | Servers | Standard | Free | P2 (when Standard) |
-| `Containers` | Containers (AKS) | Free | Free | — |
-| `SqlServers` | Azure SQL | Standard | Free | — |
-| `OpenSourceRelationalDatabases` | PostgreSQL, MySQL, MariaDB | Standard | Free | — |
-| `KeyVaults` | Key Vault | Standard | Standard | — |
-| `Arm` | ARM control plane | Standard | Standard | — |
+| `Containers` | Containers (AKS) | Free | Free | n/a |
+| `SqlServers` | Azure SQL | Standard | Free | n/a |
+| `OpenSourceRelationalDatabases` | PostgreSQL, MySQL, MariaDB | Standard | Free | n/a |
+| `KeyVaults` | Key Vault | Standard | Standard | n/a |
+| `Arm` | ARM control plane | Standard | Standard | n/a |
 | `StorageAccounts` | Storage | Free | Free | DefenderForStorageV2 only when explicitly enabled |
 
 > **Notes:**
@@ -200,7 +200,7 @@ All policies are `Microsoft.Authorization/policyAssignments` at subscription sco
 
 | Assignment Name | Display Name | Built-in Policy/Initiative ID | Effect | Enforcement | Parameters | Identity |
 |---|---|---|---|---|---|---|
-| `mcsb-audit` | Microsoft Cloud Security Benchmark (Audit) | `1f3afdf9-d0c9-4c3d-847f-89da613e70a8` (Initiative) | Audit | Default | — | None |
+| `mcsb-audit` | Microsoft Cloud Security Benchmark (Audit) | `1f3afdf9-d0c9-4c3d-847f-89da613e70a8` (Initiative) | Audit | Default | n/a | None |
 | `allowed-locations` | Allowed Locations | `e56962a6-4747-49cd-b67b-bf8b01975c4c` | Deny | Default | `listOfAllowedLocations`: deployment region | None |
 | `allowed-locations-rg` | Allowed Locations for Resource Groups | `e765b5de-1225-4ba3-bd56-1ac6695af988` | Deny | Default | `listOfAllowedLocations`: deployment region | None |
 | `require-env-tag-rg` | Require environment tag on resource groups | `96670d01-0a4d-4649-9c89-2d3abc0a5025` | Deny | Default | `tagName`: `environment` | None |

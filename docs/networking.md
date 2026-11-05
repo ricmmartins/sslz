@@ -34,7 +34,7 @@ Then you can run production without a VNet. Use service-level firewalls to restr
 | `vnet-<co>-prod` | `10.0.0.0/16` | 65,536 |
 | `vnet-<co>-nonprod` | `10.1.0.0/16` | 65,536 |
 
-Use `10.x.0.0/16` ranges. They're private (RFC 1918), rarely conflict with corporate networks, and leave room to grow. **Do not use `172.16.0.0/12` or `192.168.0.0/16`** — they're more likely to conflict if you ever need VPN to an office network.
+Use `10.x.0.0/16` ranges. They're private (RFC 1918), rarely conflict with corporate networks, and leave room to grow. **Do not use `172.16.0.0/12` or `192.168.0.0/16`**, they're more likely to conflict if you ever need VPN to an office network.
 
 ### Subnet Layout
 
@@ -92,9 +92,9 @@ Inbound is denied by default. Add explicit allow rules for what you need.
 120  Inbound  Allow  Internet           snet-aks  80,443     (if using LoadBalancer service)
 ```
 
-**For App Service subnet (VNet integration — outbound only):**
+**For App Service subnet (VNet integration, outbound only):**
 ```
-No inbound rules needed — VNet integration is outbound only.
+No inbound rules needed, VNet integration is outbound only.
 ```
 
 **For data subnet:**
@@ -116,7 +116,7 @@ Enable [VNet Flow Logs](https://learn.microsoft.com/azure/network-watcher/vnet-f
 - Traffic analytics (optional, costs extra)
 
 ```bicep
-// Illustrative — requires a Storage Account and Log Analytics Workspace
+// Illustrative, requires a Storage Account and Log Analytics Workspace
 // to be deployed separately for flow log storage and analytics.
 param vnetName string
 param vnetId string
@@ -247,7 +247,7 @@ If you deploy VMs into `snet-shared` (jump boxes, self-hosted CI/CD agents, etc.
 
 | Option | Cost | Best For |
 |---|---|---|
-| **NAT Gateway** | ~$32/month + data processing | Most scenarios — simple, per-subnet, static outbound IPs |
+| **NAT Gateway** | ~$32/month + data processing | Most scenarios, simple, per-subnet, static outbound IPs |
 | **Standard Load Balancer** outbound rules | Included with LB | When you already have a Load Balancer |
 | **Azure Firewall** (hub) | ~$900+/month | When you need L7 inspection and centralized egress (graduation path) |
 
@@ -255,7 +255,7 @@ If you deploy VMs into `snet-shared` (jump boxes, self-hosted CI/CD agents, etc.
 
 ### Private Subnets (Optional Hardening)
 
-You can explicitly set `defaultOutboundAccess: false` on subnets to make them "private" — blocking all outbound internet access unless a NAT Gateway or other explicit path is configured. This is good security practice, but only needed if you're deploying VMs and want to ensure no accidental outbound access.
+You can explicitly set `defaultOutboundAccess: false` on subnets to make them "private", blocking all outbound internet access unless a NAT Gateway or other explicit path is configured. This is good security practice, but only needed if you're deploying VMs and want to ensure no accidental outbound access.
 
 For PaaS-only subnets (`snet-app`, `snet-data`), this setting has no practical effect since the platform services manage their own connectivity.
 

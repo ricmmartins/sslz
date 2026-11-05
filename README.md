@@ -5,7 +5,7 @@
 [![Bicep deploy: manual and approval-gated](https://img.shields.io/badge/Bicep_deploy-manual_%7C_approval--gated-0078D4)](docs/ci-cd-setup.md#automate-the-classic-direct-operator-path)
 [![Terraform deploy: manual and approval-gated](https://img.shields.io/badge/Terraform_deploy-manual_%7C_approval--gated-844FBA)](docs/ci-cd-setup.md#automate-the-classic-direct-operator-path)
 
-A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's [Azure Landing Zone (ALZ)](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/) — formerly Enterprise-Scale Landing Zone (ESLZ) — minus the enterprise complexity.
+A stripped-down, opinionated, **deployable** Azure Landing Zone for digital-native companies and startups. Based on Microsoft's [Azure Landing Zone (ALZ)](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/), formerly Enterprise-Scale Landing Zone (ESLZ), minus the enterprise complexity.
 
 > Built for teams of 5-50 engineers who need to get Azure right from day one without spending two months on "cloud foundations."
 
@@ -78,10 +78,10 @@ a measured end-to-end production-readiness guarantee.
 ### Step 1: Check Prerequisites (5 min)
 
 You need:
-- **Azure CLI** — [Install guide](https://learn.microsoft.com/cli/azure/install-azure-cli)
-- **Terraform** >= 1.5.0 — [Install guide](https://developer.hashicorp.com/terraform/install) (only for Terraform option)
-- **Two Azure subscriptions** — One for prod, one for non-prod. [Create a subscription](https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription)
-- **Permissions** — Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups)
+- **Azure CLI**: [Install guide](https://learn.microsoft.com/cli/azure/install-azure-cli)
+- **Terraform** >= 1.5.0: [Install guide](https://developer.hashicorp.com/terraform/install) (only for Terraform option)
+- **Two Azure subscriptions**: One for prod, one for non-prod. [Create a subscription](https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription)
+- **Permissions**: Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups)
 
 Run the pre-flight check to verify everything:
 
@@ -111,7 +111,7 @@ permissions and the preview for each selected subscription before deploying.
 
 ### Step 2: Deploy Management Groups (Optional, 5 min)
 
-This step creates the management group hierarchy shown in the [Architecture](#architecture) diagram. It requires **tenant-level permissions** (Owner or Management Group Contributor on the Tenant Root Group). Skip this if you don't have tenant-level access — the landing zone works without it.
+This step creates the management group hierarchy shown in the [Architecture](#architecture) diagram. It requires **tenant-level permissions** (Owner or Management Group Contributor on the Tenant Root Group). Skip this if you don't have tenant-level access, the landing zone works without it.
 
 The templates also associate the supplied existing prod/non-prod subscriptions
 with the new management groups. This changes their parent hierarchy and can
@@ -162,13 +162,13 @@ cp parameters/prod.bicepparam parameters/prod.local.bicepparam
 ```
 
 Open `parameters/prod.local.bicepparam` and change these values (the `.local.` copy keeps your settings out of version control):
-- `companyName` — Your company name (e.g., `'acme'`). Used in all resource names.
-- `securityContactEmail` — Email for Defender for Cloud alerts.
-- `budgetAlertEmails` — List of emails for budget notifications.
-- `monthlyBudgetAmount` — Your monthly budget in USD.
-- `budgetStartDate` — First day of the deployment month at `00:00:00Z`; replace the example date.
-- `location`, `allowedLocations`, `logAnalyticsWorkspaceLocation` — Review the deployment and workspace regions together; changing the CLI deployment location alone does not move resources.
-- `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
+- `companyName`: Your company name (e.g., `'acme'`). Used in all resource names.
+- `securityContactEmail`: Email for Defender for Cloud alerts.
+- `budgetAlertEmails`: List of emails for budget notifications.
+- `monthlyBudgetAmount`: Your monthly budget in USD.
+- `budgetStartDate`: First day of the deployment month at `00:00:00Z`; replace the example date.
+- `location`, `allowedLocations`, `logAnalyticsWorkspaceLocation`: Review the deployment and workspace regions together; changing the CLI deployment location alone does not move resources.
+- `enableDefenderForStorage`: Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
 
 ```bash
 # Preview what will be created (no changes made)
@@ -212,14 +212,14 @@ cp terraform.tfvars.example terraform.tfvars
 ```
 
 Open `terraform.tfvars` and fill in the **REQUIRED** values (marked in the file):
-- `subscription_id` — Your Azure subscription UUID
-- `company_name` — Your company name (e.g., `"acme"`)
-- `environment` — `"prod"` or `"nonprod"`
-- `budget_alert_emails` — List of email addresses
-- `security_contact_email` — Email for security alerts
-- `enable_defender_for_storage` — Keep `false` unless you explicitly opt into the paid Defender for Storage V2 plan
-- `monthly_budget_amount` — Review the monthly budget; alerts do not impose a spending cap.
-- `location`, `allowed_locations`, `log_analytics_workspace_location` — Review resource, policy and workspace regions together.
+- `subscription_id`: Your Azure subscription UUID
+- `company_name`: Your company name (e.g., `"acme"`)
+- `environment`: `"prod"` or `"nonprod"`
+- `budget_alert_emails`: List of email addresses
+- `security_contact_email`: Email for security alerts
+- `enable_defender_for_storage`: Keep `false` unless you explicitly opt into the paid Defender for Storage V2 plan
+- `monthly_budget_amount`: Review the monthly budget; alerts do not impose a spending cap.
+- `location`, `allowed_locations`, `log_analytics_workspace_location`: Review resource, policy and workspace regions together.
 
 ```bash
 # Isolated local development only: replace the remote backend with local state
@@ -346,7 +346,7 @@ remove the `prevent_destroy` lifecycle guard to bypass this review.
 - [ ] [Create security group](https://learn.microsoft.com/entra/fundamentals/groups-view-azure-portal) `sg-azure-admins`, add 2-3 founders/leads
 
 ### Deploy Landing Zone (30 min)
-- [ ] Run [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription) or [Terraform](https://learn.microsoft.com/azure/developer/terraform/overview) deployment — see [Step 3](#step-3-deploy-the-landing-zone-20-min) above
+- [ ] Run [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-subscription) or [Terraform](https://learn.microsoft.com/azure/developer/terraform/overview) deployment, see [Step 3](#step-3-deploy-the-landing-zone-20-min) above
 - [ ] Verify resources in Azure Portal
 
 ### Post-Deployment (30 min)
@@ -399,14 +399,14 @@ Pre-built configurations for common startup archetypes:
 
 ## Documentation
 
-- [Architecture Decisions](docs/architecture.md) — Why this layout, what we skipped, and when to revisit
-- [Resource Inventory](docs/resource-inventory.md) — Complete list of every Azure resource created
-- [Networking Deep Dive](docs/networking.md) — VNet design, NSGs, when you need a hub
-- [Security Baseline](docs/security.md) — Defender, RBAC, logging, network security
-- [Cost Management](docs/cost-management.md) — Budgets, RI guidance, common mistakes
-- [CI/CD Setup](docs/ci-cd-setup.md) — Workload Identity Federation, GitHub Actions, secrets
-- [Troubleshooting](docs/troubleshooting.md) — Common deployment errors and fixes
-- [Graduation Guide](docs/graduation-guide.md) — When and how to migrate to full ALZ
+- [Architecture Decisions](docs/architecture.md): Why this layout, what we skipped, and when to revisit
+- [Resource Inventory](docs/resource-inventory.md): Complete list of every Azure resource created
+- [Networking Deep Dive](docs/networking.md): VNet design, NSGs, when you need a hub
+- [Security Baseline](docs/security.md): Defender, RBAC, logging, network security
+- [Cost Management](docs/cost-management.md): Budgets, RI guidance, common mistakes
+- [CI/CD Setup](docs/ci-cd-setup.md): Workload Identity Federation, GitHub Actions, secrets
+- [Troubleshooting](docs/troubleshooting.md): Common deployment errors and fixes
+- [Graduation Guide](docs/graduation-guide.md): When and how to migrate to full ALZ
 
 ## Contributing
 

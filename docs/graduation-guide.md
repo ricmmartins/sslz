@@ -13,7 +13,7 @@ You don't need all of these. If 2-3 apply simultaneously, start planning.
 
 | Signal | Why It Matters |
 |---|---|
-| **Second independent workload** | Each workload should live in its own subscription. If you're deploying a second product, service, or team's workload, create a new subscription — don't colocate in the same one. Resource groups are not isolation boundaries. |
+| **Second independent workload** | Each workload should live in its own subscription. If you're deploying a second product, service, or team's workload, create a new subscription, don't colocate in the same one. Resource groups are not isolation boundaries. |
 | **Engineering team > 50 people** | Different teams need different permissions, policies, and cost boundaries. A flat structure can't support this. |
 | **Regulatory compliance** (SOC2 Type II, HIPAA, PCI-DSS, FedRAMP) | Compliance frameworks require specific controls: network segmentation, centralized logging, access reviews, change management. The starter landing zone doesn't cover these. |
 | **Multi-region deployment** | Cross-region networking, global DNS, and traffic routing need centralized network management. |
@@ -51,7 +51,7 @@ Tenant Root Group
 **Why this helps:**
 - Separates platform policies (security baselines, logging requirements) from workload policies (resource type restrictions, naming conventions)
 - Gives infrastructure and product teams clear boundaries without the overhead of dedicated Platform subscriptions
-- Makes the eventual move to full ALZ (Phase 1) smoother — the hierarchy is already in place
+- Makes the eventual move to full ALZ (Phase 1) smoother, the hierarchy is already in place
 
 **Steps:**
 1. Create `mg-platform` and `mg-landing-zones` under your root MG
@@ -109,7 +109,7 @@ Tenant Root Group
 
 **Steps:**
 1. Create the Connectivity subscription
-2. Deploy hub VNet (`10.255.0.0/16` — use a range that doesn't overlap with existing VNets)
+2. Deploy hub VNet (`10.255.0.0/16`, use a range that doesn't overlap with existing VNets)
 3. Deploy Azure Firewall in the hub
 4. Create VNet peerings: hub ↔ prod, hub ↔ nonprod
 5. Add UDRs on spoke subnets to route traffic through the firewall
@@ -193,17 +193,17 @@ That is why we don't start with full ALZ. At $1,500-3,000/month for platform ove
 
 ## See Also
 
-- [Architecture Decisions — Multi-Region and DR](/docs/architecture/#multi-region-and-disaster-recovery) — When and how to expand to multiple regions
-- [Networking Deep Dive](/docs/networking/) — VNet design, hub-spoke, Private Endpoints
-- [Security Baseline](/docs/security/) — Defender, RBAC, identity hardening
-- [Cost Management](/docs/cost-management/) — RI guidance, Savings Plans, cost mistakes
+- [Architecture Decisions: Multi-Region and DR](/docs/architecture/#multi-region-and-disaster-recovery): When and how to expand to multiple regions
+- [Networking Deep Dive](/docs/networking/): VNet design, hub-spoke, Private Endpoints
+- [Security Baseline](/docs/security/): Defender, RBAC, identity hardening
+- [Cost Management](/docs/cost-management/): RI guidance, Savings Plans, cost mistakes
 
 ## Resources
 
-- [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195) — Step-by-step guide covering the full ALZ journey, from identity and RBAC to Platform and Application Landing Zones
+- [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195): Step-by-step guide covering the full ALZ journey, from identity and RBAC to Platform and Application Landing Zones
 - [Azure Landing Zones documentation](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/)
 - [ALZ Bicep modules](https://github.com/Azure/ALZ-Bicep)
 - [ALZ Terraform module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) (extended support, archived Aug 2026)
-- [Azure Verified Modules for Landing Zones (Terraform)](https://aka.ms/alz/tf) — Microsoft's recommended replacement
+- [Azure Verified Modules for Landing Zones (Terraform)](https://aka.ms/alz/tf): Microsoft's recommended replacement
 - [Azure Landing Zone Vending Module](https://registry.terraform.io/modules/Azure/lz-vending/azurerm/latest)
 - [Azure Architecture Center](https://learn.microsoft.com/azure/architecture/)

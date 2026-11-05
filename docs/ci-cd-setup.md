@@ -106,7 +106,7 @@ Grant the service principal the required roles on both subscriptions:
 PROD_SUB_ID="your-prod-subscription-id"
 NONPROD_SUB_ID="your-nonprod-subscription-id"
 
-# Contributor — create and manage all resources
+# Contributor, create and manage all resources
 az role assignment create \
   --assignee "$APP_ID" \
   --role "Contributor" \
@@ -117,7 +117,7 @@ az role assignment create \
   --role "Contributor" \
   --scope "/subscriptions/$NONPROD_SUB_ID"
 
-# User Access Administrator — required for DINE/Modify policies that create
+# User Access Administrator, required for DINE/Modify policies that create
 # managed identities and their role assignments
 az role assignment create \
   --assignee "$APP_ID" \
@@ -129,7 +129,7 @@ az role assignment create \
   --role "User Access Administrator" \
   --scope "/subscriptions/$NONPROD_SUB_ID"
 
-# Resource Policy Contributor — required for policy assignments
+# Resource Policy Contributor, required for policy assignments
 az role assignment create \
   --assignee "$APP_ID" \
   --role "Resource Policy Contributor" \
@@ -140,7 +140,7 @@ az role assignment create \
   --role "Resource Policy Contributor" \
   --scope "/subscriptions/$NONPROD_SUB_ID"
 
-# Security Admin — required for Defender for Cloud configuration
+# Security Admin, required for Defender for Cloud configuration
 az role assignment create \
   --assignee "$APP_ID" \
   --role "Security Admin" \
@@ -211,8 +211,8 @@ Also add these **repository-level variables** (Settings > Secrets and variables 
 
 If deploying with the Bicep workflow, update the parameter files with your actual values **before** triggering a deploy:
 
-- `infra/bicep/parameters/prod.bicepparam` — production settings
-- `infra/bicep/parameters/nonprod.bicepparam` — non-production settings
+- `infra/bicep/parameters/prod.bicepparam`: production settings
+- `infra/bicep/parameters/nonprod.bicepparam`: non-production settings
 
 At minimum, update `companyName`, `budgetAlertEmails`, `securityContactEmail`, and `allowedLocations`. Commit and push the changes.
 

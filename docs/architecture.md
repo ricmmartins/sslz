@@ -45,7 +45,7 @@ This exists because enterprises have hundreds of subscriptions owned by differen
 A single management group gives you:
 - **One place to apply policies** that cover everything
 - **Zero hierarchy to maintain** or explain to new hires
-- **Easy migration later** — moving subscriptions between management groups is a 10-second operation
+- **Easy migration later**: moving subscriptions between management groups is a 10-second operation
 
 ### When to Add More
 
@@ -67,28 +67,28 @@ Add a second management group level when:
 
 The subscription is Azure's strongest isolation boundary. Separating prod from non-prod gives you:
 
-1. **Cost isolation for free** — No tagging gymnastics to figure out dev vs prod spend
-2. **RBAC without custom roles** — Developers get Contributor on non-prod, Reader on prod
-3. **Blast radius containment** — `az group delete` in dev can't touch prod
-4. **Quota isolation** — Non-prod experiments won't consume prod resource quotas
+1. **Cost isolation for free**: No tagging gymnastics to figure out dev vs prod spend
+2. **RBAC without custom roles**: Developers get Contributor on non-prod, Reader on prod
+3. **Blast radius containment**: `az group delete` in dev can't touch prod
+4. **Quota isolation**: Non-prod experiments won't consume prod resource quotas
 
 ### ⚠️ One Workload Per Subscription
 
-This layout assumes **one primary workload per subscription**. If you're deploying a second independent workload (separate team, separate lifecycle, separate cost center), don't put it in the same subscription — create a new one.
+This layout assumes **one primary workload per subscription**. If you're deploying a second independent workload (separate team, separate lifecycle, separate cost center), don't put it in the same subscription, create a new one.
 
 Why this matters:
 - **Resource groups are not isolation boundaries.** They don't provide separate RBAC inheritance, cost tracking, or policy scopes the way subscriptions do.
 - **Habits form early.** Once your team starts treating resource groups as workload boundaries, it becomes an embedded practice that's expensive to refactor later.
-- **Subscriptions are free.** Adding a subscription costs nothing — the overhead is only in CI/CD and RBAC setup, which takes an hour.
+- **Subscriptions are free.** Adding a subscription costs nothing: the overhead is only in CI/CD and RBAC setup, which takes an hour.
 
 If you find yourself adding a second workload, that's a [graduation signal](/docs/graduation-guide/).
 
 ### Why Not Three+ Subscriptions?
 
 You can. Common third subscriptions:
-- **Sandbox** — For unrestricted experimentation (no policies, auto-delete after 30 days)
-- **Data** — If you have a dedicated data platform (Databricks, Synapse, data lakes)
-- **Shared Services** — If you have cross-cutting services (container registry, key vault)
+- **Sandbox**: For unrestricted experimentation (no policies, auto-delete after 30 days)
+- **Data**: If you have a dedicated data platform (Databricks, Synapse, data lakes)
+- **Shared Services**: If you have cross-cutting services (container registry, key vault)
 
 But don't create them until you feel the pain of not having them. Each subscription is more RBAC to manage, more policies to assign, more cost to track.
 
@@ -125,7 +125,7 @@ vnet-<co>-prod (10.0.0.0/16)       vnet-<co>-nonprod (10.1.0.0/16)
 ```
 
 Each VNet is an island. Subnets are sized for growth:
-- `/20` for AKS (4k IPs — enough for most clusters using Azure CNI with sane max-pods and surge settings, and plenty for Cilium overlay)
+- `/20` for AKS (4k IPs: enough for most clusters using Azure CNI with sane max-pods and surge settings, and plenty for Cilium overlay)
 - `/22` for App Service / Container Apps VNet integration
 - `/22` for Private Endpoints (databases, storage, caches)
 - `/24` for shared services (CI/CD agents, jump boxes)
@@ -133,10 +133,10 @@ Each VNet is an island. Subnets are sized for growth:
 ### When You Need a Hub
 
 Add a hub VNet when any of these apply:
-- **VPN/ExpressRoute** — You need hybrid connectivity to on-prem or another cloud
-- **Centralized egress filtering** — Compliance requires all outbound traffic to go through a firewall
-- **DNS resolution at scale** — You have 5+ Private DNS Zones that need to be shared across VNets
-- **Cross-subscription communication** — Workloads in prod need to talk to shared services in another subscription
+- **VPN/ExpressRoute**: You need hybrid connectivity to on-prem or another cloud
+- **Centralized egress filtering**: Compliance requires all outbound traffic to go through a firewall
+- **DNS resolution at scale**: You have 5+ Private DNS Zones that need to be shared across VNets
+- **Cross-subscription communication**: Workloads in prod need to talk to shared services in another subscription
 
 ## Identity
 
@@ -177,9 +177,9 @@ Because Deny mode on security policies will block legitimate deployments and cre
 
 ### Policies We Intentionally Skip
 
-- CIS Benchmark — Overlaps heavily with MCSB, adds noise
-- NIST / ISO / PCI initiatives — Add when compliance requires it
-- Custom policies — Write them when built-in ones don't cover a specific need
+- CIS Benchmark, Overlaps heavily with MCSB, adds noise
+- NIST / ISO / PCI initiatives, Add when compliance requires it
+- Custom policies, Write them when built-in ones don't cover a specific need
 
 ## Rollback and Recovery
 
@@ -188,7 +188,7 @@ Because Deny mode on security policies will block legitimate deployments and cre
 If a `terraform apply` goes wrong:
 
 1. **Immediate:** If still running, Ctrl+C will stop and leave state consistent with what was applied so far
-2. **Revert code, re-apply:** The safest approach — revert your `.tf` files to the previous commit and run `terraform apply` again. Terraform will converge to the desired state.
+2. **Revert code, re-apply:** The safest approach: revert your `.tf` files to the previous commit and run `terraform apply` again. Terraform will converge to the desired state.
 3. **State surgery (last resort):** Use `terraform state rm` to remove a problematic resource from state, then re-import or recreate it. Never edit the state file directly.
 
 ```bash
@@ -200,7 +200,7 @@ terraform -chdir=infra/terraform apply   # Apply the rollback
 
 ### Bicep Deployment Reversal
 
-Bicep deployments are incremental by default — they add/update but don't delete. To roll back:
+Bicep deployments are incremental by default, they add/update but don't delete. To roll back:
 
 1. **Revert code, re-deploy:** Check out the previous version and deploy again
 2. **Manual cleanup:** If new resources were created, delete them via CLI or portal
@@ -218,16 +218,16 @@ az deployment sub create \
 
 If a Deny policy is blocking a critical deployment:
 
-1. **Temporary exemption:** Create a policy exemption (preferred — auditable and time-limited)
+1. **Temporary exemption:** Create a policy exemption (preferred: auditable and time-limited)
    ```bash
    az policy exemption create \
      --name "emergency-deploy-$(date +%Y%m%d)" \
      --policy-assignment "/subscriptions/$SUB_ID/providers/Microsoft.Authorization/policyAssignments/allowed-locations" \
      --exemption-category Waiver \
-     --description "Emergency deployment — expires in 24h"
+     --description "Emergency deployment, expires in 24h"
    ```
-2. **Switch to Audit:** Change the policy assignment's `enforce` mode from `true` to `false` — this converts Deny to Audit temporarily
-3. **Never delete the policy assignment** — you'll lose compliance history and audit trail
+2. **Switch to Audit:** Change the policy assignment's `enforce` mode from `true` to `false`: this converts Deny to Audit temporarily
+3. **Never delete the policy assignment**: you'll lose compliance history and audit trail
 
 ## Multi-Region and Disaster Recovery
 
@@ -271,8 +271,8 @@ Key additions when you graduate to multi-region:
 
 ### See Also
 
-- [Graduation Guide](/docs/graduation-guide/) — Full migration path to enterprise-scale
-- [Networking Deep Dive](/docs/networking/) — When to add a hub VNet
-- [Security Baseline](/docs/security/) — Defender, RBAC, logging
-- [Cost Management](/docs/cost-management/) — Budgets and cost optimization
-- [Troubleshooting](/docs/troubleshooting/) — Common deployment errors
+- [Graduation Guide](/docs/graduation-guide/): Full migration path to enterprise-scale
+- [Networking Deep Dive](/docs/networking/): When to add a hub VNet
+- [Security Baseline](/docs/security/): Defender, RBAC, logging
+- [Cost Management](/docs/cost-management/): Budgets and cost optimization
+- [Troubleshooting](/docs/troubleshooting/): Common deployment errors

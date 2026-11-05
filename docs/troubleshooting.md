@@ -33,7 +33,7 @@ description: "Common deployment errors and fixes"
 
 **Error:** `budget_start_date must be the first of a month in ISO 8601 format`
 
-**Cause:** The budget start date must be exactly `YYYY-MM-01T00:00:00Z`. Additionally, Azure rejects changes to `startDate` on existing budgets — so this value must remain constant across redeployments.
+**Cause:** The budget start date must be exactly `YYYY-MM-01T00:00:00Z`. Additionally, Azure rejects changes to `startDate` on existing budgets, so this value must remain constant across redeployments.
 
 **Fix:**
 - **Bicep:** Set `budgetStartDate` in your `.bicepparam` file to a fixed date (e.g., `'2026-01-01T00:00:00Z'`). This is a required parameter.
@@ -126,9 +126,9 @@ Or run `scripts/validate-prerequisites.sh` to check all required providers.
 
 **Cause:** Some Azure resources already exist on every subscription or from a prior deployment. Common examples:
 
-- `Microsoft.Security/pricings/*` — Defender plan pricing resources exist on every subscription at "Free" tier. The Terraform code includes `import` blocks in `main.tf` to handle these automatically.
-- `securityContacts/default` — may exist from a prior deployment or if created manually via the Portal
-- `diag-activity-log-to-law` — created by a prior Bicep deployment or the `activity-log-diag` DINE policy
+- `Microsoft.Security/pricings/*`: Defender plan pricing resources exist on every subscription at "Free" tier. The Terraform code includes `import` blocks in `main.tf` to handle these automatically.
+- `securityContacts/default`: may exist from a prior deployment or if created manually via the Portal
+- `diag-activity-log-to-law`: created by a prior Bicep deployment or the `activity-log-diag` DINE policy
 
 **Fix:** For Defender pricing, the `import` blocks in `main.tf` handle this automatically. For other resources, uncomment the relevant import block in `main.tf` or run manually:
 ```bash
@@ -157,7 +157,7 @@ terraform plan -out=tfplan && terraform apply tfplan
 **Fix:**
 - Review the what-if output carefully before deploying
 - For critical resources, use `az deployment sub create --mode Incremental` (default)
-- Never use `--mode Complete` at subscription scope — it will delete unmanaged resource groups
+- Never use `--mode Complete` at subscription scope, it will delete unmanaged resource groups
 
 ### RoleAssignmentUpdateNotPermitted on Redeploy
 

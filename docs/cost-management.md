@@ -41,7 +41,7 @@ Enforced via Azure Policy (deny mode):
 |---|---|
 | `project` | Which product/feature this supports |
 | `created-by` | CI/CD pipeline URL or person (for debugging) |
-| `auto-shutdown` | `true` — for non-prod VMs that should shut down at night |
+| `auto-shutdown` | `true`, for non-prod VMs that should shut down at night |
 
 ### Tag Inheritance
 
@@ -204,8 +204,8 @@ Azure Cost Management also supports **anomaly detection** (preview). Enable it t
 ### Weekly (5 minutes)
 
 1. Open **Cost Management** in Azure Portal
-2. Check cost trend — is it flat, growing, or spiking?
-3. Review **Azure Advisor** cost recommendations — usually 2-3 quick wins
+2. Check cost trend, is it flat, growing, or spiking?
+3. Review **Azure Advisor** cost recommendations, usually 2-3 quick wins
 4. Check for resources with no tags (use Resource Graph: `resources | where tags == {}`)
 
 ### Monthly (30 minutes)
@@ -250,6 +250,6 @@ resources
 
 ## See Also
 
-- [Architecture Decisions](/docs/architecture/) — Why two subscriptions, budget design
-- [Troubleshooting](/docs/troubleshooting/) — Budget start date format errors
-- [Graduation Guide](/docs/graduation-guide/) — When to add cost management tooling
+- [Architecture Decisions](/docs/architecture/): Why two subscriptions, budget design
+- [Troubleshooting](/docs/troubleshooting/): Budget start date format errors
+- [Graduation Guide](/docs/graduation-guide/): When to add cost management tooling

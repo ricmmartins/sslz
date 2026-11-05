@@ -48,36 +48,36 @@ scope for this increment and are not asserted, translated, or validated.
 
 The evaluator checks each of these controls and blocks if any fails:
 
-- **Supported architecture and current, complete evidence** — the source provider and connectivity type pair to a
+- **Supported architecture and current, complete evidence**: the source provider and connectivity type pair to a
   supported Azure gateway kind (AWS Direct Connect/Site-to-Site VPN, GCP Cloud Interconnect/Cloud VPN, or generic/on-prem
   ExpressRoute/IPsec VPN); the source assessment and target evidence are current; and every required evidence reference
   is present.
-- **Address space, routing, and gateway resilience** — no overlapping source and target address space unless an
+- **Address space, routing, and gateway resilience**: no overlapping source and target address space unless an
   approved, owned, and referenced translation with exact non-overlapping translated prefixes exists; every route has a
   unique, exact owner; routing is symmetric; no broad default route (`0.0.0.0/0` or a supernet default) is advertised or
   accepted under the configured minimum route prefix length; BGP ASNs are within the acceptable set; MTU is compatible
   end to end; and the gateway is redundant/highly available.
-- **Firewall/NSG/NVA intent and private access** — firewall or NSG or NVA policy intent is explicit (not implicit
+- **Firewall/NSG/NVA intent and private access**: firewall or NSG or NVA policy intent is explicit (not implicit
   allow-all), and private endpoint or service endpoint evidence is present where the target requires it.
-- **Target binding and source-of-truth authority** — the target evidence is bound to the assessed source region and
+- **Target binding and source-of-truth authority**: the target evidence is bound to the assessed source region and
   scope, and the source network remains the explicit, singular authority until an approved cutover completes.
-- **DNS authority, loop prevention, and resolver reachability** — DNS zone authority and source of truth are explicit; no
+- **DNS authority, loop prevention, and resolver reachability**: DNS zone authority and source of truth are explicit; no
   forwarding or conditional-forwarding loop exists between source and target resolvers; every referenced resolver is
   explicitly reachable; conditional forwarding is explicit where required; TTL and negative-caching policy meet the
   configured bound; and certificate/SNI dependencies are bound to the correct zone.
-- **Workload identity federation and least privilege** — OIDC issuer, audience, and subject are pinned and match the
+- **Workload identity federation and least privilege**: OIDC issuer, audience, and subject are pinned and match the
   target's expectations; no long-lived secret or static credential is present; access is least-privilege scoped; and
   nonproduction and production environments are not mixed in a single identity or trust boundary.
-- **Bounded egress** — runner/workload egress destinations are an explicit, bounded allowlist (never a broad `0.0.0.0/0`
+- **Bounded egress**: runner/workload egress destinations are an explicit, bounded allowlist (never a broad `0.0.0.0/0`
   or `::/0` assumption, or a prefix broader than the configured minimum); a default-deny egress posture is enforced; and
   an explicit NAT or proxy reference is recorded on both the source and target side where required.
-- **Telemetry, ownership, recovery, and bounded transition** — telemetry coverage, an explicit accountable owner, a
+- **Telemetry, ownership, recovery, and bounded transition**: telemetry coverage, an explicit accountable owner, a
   recovery plan meeting the RPO/RTO policy, and a bounded transition window with a complete rollback/failback plan are
   all present.
-- **Freshness, tamper/replay protection, and integrity lineage** — the source assessment and target evidence digests
+- **Freshness, tamper/replay protection, and integrity lineage**: the source assessment and target evidence digests
   match their integrity claims (detecting tamper or a mismatched target); replay lineage rejects a reused assessment ID
   or nonce and rejects a non-monotonic (out-of-order or duplicated) attempt ordinal.
-- **Fail-closed manual review** — an unsupported provider/connectivity-type pairing, missing evidence, or any unsatisfied
+- **Fail-closed manual review**: an unsupported provider/connectivity-type pairing, missing evidence, or any unsatisfied
   control blocks the plan and selects `blocked-manual-review`.
 
 ## Strategy and stages

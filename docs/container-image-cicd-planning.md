@@ -45,28 +45,28 @@ private-key, credential-bearing URI, AWS access-key, and JWT-shaped values fail 
 
 The evaluator checks, and blocks on failure of, every one of these controls:
 
-- **Digest pinning and no mutable-tag trust** — every image and deployment reference is pinned by immutable digest,
+- **Digest pinning and no mutable-tag trust**: every image and deployment reference is pinned by immutable digest,
   mutable-tag deploys are disabled, and tag immutability is enabled on the source and target registries.
-- **Signatures, SBOM, provenance, and unsigned/unattested promotion policy** — every image is signed, carries a
+- **Signatures, SBOM, provenance, and unsigned/unattested promotion policy**: every image is signed, carries a
   supported-format SBOM, and has provenance whose subject digest matches the artifact; the target enforces verification;
   and promotion requires signatures and attestations, so unsigned or unattested images cannot be promoted.
-- **Multi-arch compatibility and provenance continuity** — required platforms are present, every image platform is
+- **Multi-arch compatibility and provenance continuity**: required platforms are present, every image platform is
   supported by the target, and the target preserves the digest on promotion.
-- **Base image support and vulnerability policy** — base images are in scope and supported, and every image has a current
+- **Base image support and vulnerability policy**: base images are in scope and supported, and every image has a current
   scan within the critical and high vulnerability policy.
-- **Registry control parity** — target replication, retention, encryption (including customer-managed keys when required),
+- **Registry control parity**: target replication, retention, encryption (including customer-managed keys when required),
   and private-network posture meet the configured policy.
-- **Least privilege, environment separation, and secret hygiene** — federated least-privilege runner identity with
+- **Least privilege, environment separation, and secret hygiene**: federated least-privilege runner identity with
   controlled egress, separated nonproduction and production environments with isolated secrets and identity and required
   reviewers, and external-managed secret references only.
-- **Governed triggers, promotion, and deployment targets** — restricted build triggers, protected branches, digest-immutable
+- **Governed triggers, promotion, and deployment targets**: restricted build triggers, protected branches, digest-immutable
   and approval-bound promotion, and digest- and approval-bound deployment targets.
-- **Dual-publish, cutover, and rollback** — a bounded dual-publish window binding the exact source and target registries,
+- **Dual-publish, cutover, and rollback**: a bounded dual-publish window binding the exact source and target registries,
   plus a complete rollback plan with source-registry failback.
-- **Freshness, tamper/replay protection, and explicit source-of-truth ownership** — the source assessment, target evidence,
+- **Freshness, tamper/replay protection, and explicit source-of-truth ownership**: the source assessment, target evidence,
   and attempt lineage are current; provenance discontinuity (a tampered attestation subject) and replayed ordinals, nonces,
   or assessments fail closed; and the source registry remains authoritative until an approved cutover completes.
-- **Fail-closed manual review** — unsupported registry/CI-CD pairings, missing evidence, or any unsatisfied control block
+- **Fail-closed manual review**: unsupported registry/CI-CD pairings, missing evidence, or any unsatisfied control block
   the plan and select `blocked-manual-review`.
 
 ## Strategy and stages

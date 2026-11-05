@@ -245,7 +245,7 @@ failed registration command and failed registration readback. Run these checks w
 `node tests/startup-deployment-integration.mjs` and `node tests/startup-provider-remediation.mjs`.
 These checks prove fail-closed retry behavior in mocks; they do not prove live recovery or authorize a resume.
 
-## Operational acceptance checklist — observations required
+## Operational acceptance checklist, observations required
 
 Keep dated evidence references, responsible reviewer, exact artifact digests, target aliases and pass/fail for each item.
 Do not substitute synthetic checks or planned timestamps for observations:

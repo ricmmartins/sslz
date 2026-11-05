@@ -12,11 +12,11 @@ We welcome contributions from startup CTOs, platform engineers, and anyone who h
 
 ## What We're Looking For
 
-- **Real-world configurations** — Have you deployed a landing zone for your startup? Share what worked and what didn't.
-- **New examples** — Startup archetypes we haven't covered (fintech, healthtech, gaming, e-commerce).
-- **Bug fixes** — Bicep/Terraform that doesn't compile or deploy correctly.
-- **Documentation improvements** — Clearer explanations, better diagrams, updated pricing.
-- **Policy definitions** — Custom Azure Policies that solve real startup problems.
+- **Real-world configurations**: Have you deployed a landing zone for your startup? Share what worked and what didn't.
+- **New examples**: Startup archetypes we haven't covered (fintech, healthtech, gaming, e-commerce).
+- **Bug fixes**: Bicep/Terraform that doesn't compile or deploy correctly.
+- **Documentation improvements**: Clearer explanations, better diagrams, updated pricing.
+- **Policy definitions**: Custom Azure Policies that solve real startup problems.
 
 ## How to Contribute
 

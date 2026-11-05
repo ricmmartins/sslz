@@ -69,7 +69,7 @@ Options ranked by complexity:
 ### Prerequisites
 
 - Azure CLI >= 2.53.0 with Bicep CLI (or Terraform >= 1.5.0)
-- An existing resource group (you must create this — the landing zone does not create application resource groups)
+- An existing resource group (you must create this, the landing zone does not create application resource groups)
 - An SSH public key for AKS node access
 - You may need to request GPU quota for NC-series VMs via the Azure Portal (Quotas page)
 

@@ -18,7 +18,7 @@ Every recommendation here is either free or costs less than a compromised produc
 | CSPM (Free) | Both subs | Free | Secure Score, recommendations, asset inventory. No reason to skip. |
 | Defender for Servers P2 | Prod only | ~$15/server/month | EDR via Defender for Endpoint, vulnerability assessment, JIT VM access, adaptive application controls. |
 | Defender for Containers | If running AKS | ~$7/vCPU/month | Runtime threat detection, image vulnerability scanning, Kubernetes audit log monitoring. |
-| Defender for Databases | Prod only | Varies | SQL/Postgres threat detection — alerts on SQL injection, anomalous access, brute force. |
+| Defender for Databases | Prod only | Varies | SQL/Postgres threat detection, alerts on SQL injection, anomalous access, brute force. |
 | Defender for Key Vault | Both subs | ~$0.02/10k transactions | Alerts on unusual access patterns to secrets. Cheap. Always enabled by default. |
 | Defender for ARM | Both subs | ~$4/sub/month | Detects suspicious control-plane operations (mass deletions, privilege escalation). Always enabled by this landing zone. |
 | Defender for Storage V2 | Explicit opt-in | Paid; review current Azure pricing | Advanced threat protection for storage. Enable only when the workload and cost review justify it. |
@@ -86,7 +86,7 @@ Do this first. It blocks 99.9% of identity attacks.
 Create exactly one break-glass account:
 - **Username:** `breakglass@yourcompany.onmicrosoft.com`
 - **Role:** Global Administrator
-- **MFA:** Hardware security key (YubiKey or similar) — NOT phone-based
+- **MFA:** Hardware security key (YubiKey or similar): NOT phone-based
 - **Password:** 20+ characters, randomly generated
 - **Storage:** Physical safe or a separate, dedicated password manager vault
 - **Testing:** Verify it works quarterly
@@ -176,16 +176,16 @@ Set up these alerts on your Log Analytics workspace:
 
 ### The Essentials
 
-1. **NSGs on every subnet** — Deny all inbound by default, explicitly allow what's needed
-2. **Service-level firewalls** — Azure SQL firewall rules, Storage firewall, etc.
-3. **TLS everywhere** — Enforce HTTPS on all public endpoints (App Service: HTTPS Only = On)
-4. **No public IPs on databases** — Use Private Endpoints or service firewall to restrict access
+1. **NSGs on every subnet**: Deny all inbound by default, explicitly allow what's needed
+2. **Service-level firewalls**: Azure SQL firewall rules, Storage firewall, etc.
+3. **TLS everywhere**: Enforce HTTPS on all public endpoints (App Service: HTTPS Only = On)
+4. **No public IPs on databases**: Use Private Endpoints or service firewall to restrict access
 
 ### What You Can Skip
 
-- **Azure Firewall** — $900+/month. Use NSGs until compliance says otherwise.
-- **DDoS Protection Standard** — $2,944/month. Azure's basic DDoS protection (free) covers L3/L4. Use Front Door WAF for L7 protection.
-- **Azure Bastion** — $138+/month. Use `az ssh` or just-in-time VM access (Defender for Servers P2) instead.
+- **Azure Firewall**: $900+/month. Use NSGs until compliance says otherwise.
+- **DDoS Protection Standard**: $2,944/month. Azure's basic DDoS protection (free) covers L3/L4. Use Front Door WAF for L7 protection.
+- **Azure Bastion**: $138+/month. Use `az ssh` or just-in-time VM access (Defender for Servers P2) instead.
 
 ### Secret Management
 
@@ -213,7 +213,7 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 
 ## See Also
 
-- [Networking Deep Dive](/docs/networking/) — NSG rules, Private Endpoints, VNet design
-- [CI/CD Setup](/docs/ci-cd-setup/) — Workload Identity Federation configuration
-- [Architecture Decisions](/docs/architecture/) — Policy baseline, management groups, identity
-- [Troubleshooting](/docs/troubleshooting/) — Common deployment errors and fixes
+- [Networking Deep Dive](/docs/networking/): NSG rules, Private Endpoints, VNet design
+- [CI/CD Setup](/docs/ci-cd-setup/): Workload Identity Federation configuration
+- [Architecture Decisions](/docs/architecture/): Policy baseline, management groups, identity
+- [Troubleshooting](/docs/troubleshooting/): Common deployment errors and fixes
