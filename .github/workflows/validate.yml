@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - '.github/agents/**'
+      - '.claude/**'
+      - 'scripts/generate-agent-adapters.mjs'
       - 'agent/**'
       - 'docs/**'
       - '_data/**'
@@ -44,6 +46,8 @@ on:
     branches: [main]
     paths:
       - '.github/agents/**'
+      - '.claude/**'
+      - 'scripts/generate-agent-adapters.mjs'
       - 'agent/**'
       - 'docs/**'
       - '_data/**'
@@ -91,6 +95,9 @@ jobs:
 
       - name: Validate schemas, catalog, and examples
         run: node scripts/validate-agent-contracts.mjs
+
+      - name: Check generated Claude Code and Codex adapters
+        run: node scripts/generate-agent-adapters.mjs --check
 
       - name: Validate SSLZ Agent profile and journeys
         run: node tests/sslz-agent.mjs

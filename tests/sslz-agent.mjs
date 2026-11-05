@@ -70,7 +70,7 @@ for (const path of [
 }
 assert(!agent.body.includes("not discoverable in the GitHub UI until"), "Do not imply default-branch publication enables the hosted picker.");
 assert(normalizedProfile.includes("GitHub.com custom-agent picker is not a supported launch path"));
-assert(normalizedLauncher.includes("Claude Code and Codex do not have a maintained native adapter"));
+assert(normalizedLauncher.includes("Claude Code and Codex use generated adapters"));
 assert(normalizedProfile.includes("report readback as blocked"), "File-generation success must not substitute for permitted readback.");
 assert.equal(agent.name, "SSLZ Agent");
 assert.match(profile, /^  product: SSLZ Agent$/m);
