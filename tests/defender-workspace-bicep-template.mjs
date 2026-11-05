@@ -57,6 +57,48 @@ try {
   }
 
   const graph = resources(template);
+  const pricingPlans = graph.filter(
+    (resource) => resource.type === "Microsoft.Security/pricings",
+  );
+  const armPlan = pricingPlans.find((resource) => resource.name === "Arm");
+  assert.equal(armPlan?.properties?.subPlan, "PerSubscription");
+  const keyVaultPlans = pricingPlans.filter(
+    (resource) => resource.name === "KeyVaults",
+  );
+  assert(
+    keyVaultPlans.some(
+      (resource) =>
+        resource.properties?.pricingTier === "Standard" &&
+        resource.properties?.subPlan === "PerKeyVault",
+    ),
+  );
+  assert(
+    keyVaultPlans.some(
+      (resource) =>
+        resource.properties?.pricingTier === "Free" &&
+        !("subPlan" in resource.properties),
+    ),
+  );
+
+  const budget = graph.find(
+    (resource) => resource.type === "Microsoft.Consumption/budgets",
+  );
+  assert(budget?.properties?.timePeriod?.endDate);
+  assert.match(JSON.stringify(template), /dateTimeAdd.*P10Y/);
+
+  const policyAssignments = graph.filter(
+    (resource) =>
+      resource.type === "Microsoft.Authorization/policyAssignments",
+  );
+  assert.equal(policyAssignments.length, 8);
+  assert(policyAssignments.every((resource) => resource.properties?.definitionVersion));
+  assert.match(JSON.stringify(template), /57\.\*\.\*/);
+  assert.match(JSON.stringify(template), /1\.\*\.\*/);
+  assert.match(
+    JSON.stringify(template),
+    /subscriptionResourceId\('Microsoft\.Authorization\/roleDefinitions'/,
+  );
+
   const workspaceSettings = graph.filter(
     (resource) => resource.type === "Microsoft.Security/workspaceSettings",
   );

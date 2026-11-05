@@ -249,7 +249,8 @@ const EXPECTED_BICEP_RESOURCE_COUNTS = new Map([
   ["Microsoft.OperationalInsights/workspaces", 1],
   ["Microsoft.Resources/deployments", 5],
   ["Microsoft.Resources/resourceGroups", 2],
-  ["Microsoft.Security/pricings", 9],
+  // Servers and Key Vault each compile to separate Standard/Free branches.
+  ["Microsoft.Security/pricings", 10],
   ["Microsoft.Security/securityContacts", 1],
   ["Microsoft.Security/workspaceSettings", 1],
 ]);
@@ -1816,17 +1817,17 @@ function summarizeBicepTemplate(document, subscriptionId) {
       if (type === "Microsoft.Authorization/roleAssignments") {
         const match = String(
           resource.properties?.roleDefinitionId ?? "",
-        ).match(/^\[variables\('roleDefinitions'\)\.([A-Za-z]+)\]$/);
+        ).match(/^\[variables\('scopedRoleDefinitions'\)\.([A-Za-z]+)\]$/);
         const alias = match?.[1];
         const expectedRoleId = EXPECTED_BICEP_ROLE_DEFINITIONS.get(alias);
-        const compiledRoleId = template?.variables?.roleDefinitions?.[alias];
+        const compiledRoleId = template?.variables?.scopedRoleDefinitions?.[alias];
         const principalId = resource.properties?.principalId;
         const binding = `${alias}|${principalId}`;
         if (
           !expectedRoleId ||
           typeof compiledRoleId !== "string" ||
-          compiledRoleId.toLowerCase() !==
-            `/providers/microsoft.authorization/roledefinitions/${expectedRoleId}` ||
+          compiledRoleId !==
+            `[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '${expectedRoleId}')]` ||
           resource.properties?.principalType !== "ServicePrincipal" ||
           !EXPECTED_BICEP_ROLE_BINDINGS.has(binding) ||
           roleBindings.has(binding)

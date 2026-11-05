@@ -27,7 +27,7 @@ Usage: $0 --tool <terraform|bicep> --env <prod|nonprod> [--company <name>] [--ye
 Options:
   --tool             Deployment tool used (terraform or bicep)
   --env              Environment to tear down (prod or nonprod)
-  --company          Company name used in resource naming (narrows RG matching for Bicep teardown)
+  --company          Company name used in resource naming (required for Bicep teardown)
   --yes              Skip confirmation prompt
   --remove-backend   Also remove Terraform state backend (storage account + lock)
   --help             Show this help
@@ -63,6 +63,11 @@ fi
 
 if [[ "$ENV" != "prod" && "$ENV" != "nonprod" ]]; then
   echo "Error: --env must be 'prod' or 'nonprod'."
+  exit 1
+fi
+
+if [[ "$TOOL" == "bicep" ]] && ! [[ "${COMPANY:-}" =~ ^[a-z][a-z0-9-]*$ ]]; then
+  echo "Error: Bicep teardown requires --company with a lowercase company identifier."
   exit 1
 fi
 
@@ -151,16 +156,12 @@ elif [[ "$TOOL" == "bicep" ]]; then
   echo "Removing resource groups created by the landing zone..."
   echo ""
 
-  # List resource groups matching the landing zone naming convention (rg-<company>-<env>-*)
-  if [[ -n "${COMPANY:-}" ]]; then
-    RGS=$(az group list --query "[?starts_with(name, 'rg-${COMPANY}-${ENV}')].name" -o tsv)
-  else
-    RGS=$(az group list --query "[?starts_with(name, 'rg-') && contains(name, '-${ENV}')].name" -o tsv)
-  fi
+  # Match only the two groups defined by the baseline, not neighboring environments or workloads.
+  RGS=$(az group list --query "[?name=='rg-${COMPANY}-${ENV}-monitoring' || name=='rg-${COMPANY}-${ENV}-networking'].name" -o tsv)
 
   if [[ -z "$RGS" ]]; then
     echo "No matching resource groups found for environment: $ENV"
-    echo "Expected pattern: rg-*-${ENV}[-*]"
+    echo "Expected groups: rg-${COMPANY}-${ENV}-monitoring and rg-${COMPANY}-${ENV}-networking"
   else
     echo "Resource groups to delete:"
     echo "$RGS" | while read -r rg; do echo "  - $rg"; done
@@ -186,39 +187,30 @@ elif [[ "$TOOL" == "bicep" ]]; then
 
   echo ""
   echo "NOTE: Subscription-level resources (policies, Defender plans, diagnostic settings,"
-  echo "budgets, role assignments) are not removed by deleting resource groups. To remove them:"
+  echo "budgets, role assignments) are not removed by deleting resource groups."
+  echo "Use your pre-deployment inventory to restore shared settings and remove only owned IDs."
   echo ""
-  echo "  # Policy assignments"
-  echo "  az policy assignment delete --name mcsb-audit"
-  echo "  az policy assignment delete --name allowed-locations"
-  echo "  az policy assignment delete --name allowed-locations-rg"
-  echo "  az policy assignment delete --name require-env-tag-rg"
-  echo "  az policy assignment delete --name require-team-tag-rg"
-  echo "  az policy assignment delete --name inherit-env-tag"
-  echo "  az policy assignment delete --name inherit-team-tag"
-  echo "  az policy assignment delete --name activity-log-diag"
+  echo "  # Policy assignments: inventory each exact ID and managed-identity principalId first."
+  echo "  # Delete only assignments newly created by this deployment; restore any modified assignments."
   echo ""
   echo "  # Orphaned role assignments from DINE/Modify policy managed identities"
   echo "  # These are NOT automatically deleted when policies are removed."
   echo "  # Failing to remove them causes RoleAssignmentUpdateNotPermitted on redeploy."
-  echo "  SUB_ID=\$(az account show --query id -o tsv)"
-  echo "  az role assignment list --all --query \"[?(roleDefinitionName=='Tag Contributor' || roleDefinitionName=='Log Analytics Contributor' || roleDefinitionName=='Monitoring Contributor')].name\" -o tsv | while read name; do"
-  echo "    az rest --method DELETE -u \"https://management.azure.com/subscriptions/\${SUB_ID}/providers/Microsoft.Authorization/roleAssignments/\${name}?api-version=2022-04-01\""
-  echo "  done"
+  echo "  # Capture each deployed policy's principalId BEFORE deleting that policy."
+  echo "  # Remove only exact role-assignment IDs whose principalId and scope match that inventory."
+  echo "  # Never delete subscription role assignments by role name alone."
   echo ""
   echo "  # Diagnostic setting"
-  echo "  az rest --method DELETE -u \"https://management.azure.com/subscriptions/\${SUB_ID}/providers/microsoft.insights/diagnosticSettings/diag-activity-log-to-law?api-version=2021-05-01-preview\""
+  echo "  # Delete only the exact diagnostic-setting ID captured in the deployment inventory."
   echo ""
   echo "  # Security contact"
-  echo "  az rest --method DELETE -u \"https://management.azure.com/subscriptions/\${SUB_ID}/providers/Microsoft.Security/securityContacts/default?api-version=2020-01-01-preview\""
+  echo "  # Restore the prior security contact from your pre-deployment inventory."
   echo ""
   echo "  # Budget"
   echo "  az consumption budget delete --budget-name budget-\${COMPANY:-<company>}-${ENV}-monthly"
   echo ""
-  echo "  # Reset Defender plans to Free"
-  echo "  for plan in VirtualMachines Containers SqlServers OpenSourceRelationalDatabases KeyVaults Arm CloudPosture; do"
-  echo "    az security pricing create --name \$plan --tier Free"
-  echo "  done"
+  echo "  # Restore prior Defender plan settings from your pre-deployment inventory."
+  echo "  # Do not reset shared subscription plans to Free without checking their prior state."
 fi
 
 echo ""
