@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Use SSLZ Agent"
-description: "Launch SSLZ Agent from the main branch with GitHub Copilot CLI."
+description: "Launch SSLZ Agent locally with GitHub Copilot CLI, Claude Code or Codex."
 permalink: /use-sslz-agent/
 ---
 
@@ -11,11 +11,11 @@ run the agent or connect to Azure, and it does not receive access to your Azure 
 or secrets.
 You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
 
-The tested launch path is GitHub Copilot CLI. Claude Code and Codex use generated adapters of the same profile (see [Use Claude Code or Codex](#use-claude-code-or-codex)). They have no client-specific acceptance tests, so equivalent agent behavior is not established.
+Copilot CLI is the primary launch path. Claude Code and Codex use generated adapters of the same profile (see [Use Claude Code or Codex](#use-claude-code-or-codex)).
 
 ## In short
 
-SSLZ Agent is an assistant that runs on your computer, inside GitHub Copilot CLI. You describe what you are building,
+SSLZ Agent is an assistant that runs on your computer, inside GitHub Copilot CLI or, with generated copies, Claude Code or Codex. You describe what you are building,
 and it explains your options for a starting foundation on Azure aligned with SSLZ, then helps you plan it. It only
 talks and plans: it does not connect to Azure or change anything unless you approve a specific step.
 
@@ -117,6 +117,27 @@ command and review its output when you need a planner result. GitHub also docume
 `--agent sslz-agent --prompt "..."` for programmatic invocation. This walkthrough uses an interactive session so you can
 answer questions and review tool requests; do not add blanket permissions to make an unattended prompt run.
 
+## Use Claude Code or Codex
+
+If you use Claude Code or Codex instead, install it from its own documentation, clone
+the repository as above, and start it in the cloned folder. Both use generated copies of the same instructions. They
+are not yet validated in those clients, so check each permission prompt, keep approvals on, and never use a
+bypass mode such as `--dangerously-skip-permissions` or `--dangerously-bypass-approvals-and-sandbox`.
+
+For Claude Code:
+
+```text
+claude --agent sslz-agent
+```
+
+For Codex:
+
+```text
+codex "Read agent/adapters/codex-sslz-agent.md and follow it as SSLZ Agent for this session."
+```
+
+The copies live in `.claude/agents/sslz-agent.md` and `agent/adapters/codex-sslz-agent.md`. Do not edit them by hand:
+they are generated from `.github/agents/sslz-agent.agent.md` and CI fails if they drift.
 ## Check local planning without Azure
 
 These optional checks read tracked files and sanitized fixtures. Run them yourself, or approve these exact commands when
@@ -185,26 +206,6 @@ remain guarded by their operation-specific contracts; provider apply is disabled
 dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
 not establish application health.
 
-## Use Claude Code or Codex
-
-If you do not use Copilot, generated adapters of the same instructions are included. They are not tested in those
-clients: check each permission prompt, keep approvals on, and never use a bypass mode such as
-`--dangerously-skip-permissions` or `--dangerously-bypass-approvals-and-sandbox`.
-
-For Claude Code, run this in the cloned folder:
-
-```text
-claude --agent sslz-agent
-```
-
-For Codex, run this in the cloned folder:
-
-```text
-codex "Read agent/adapters/codex-sslz-agent.md and follow it as SSLZ Agent for this session."
-```
-
-The adapters live in `.claude/agents/sslz-agent.md` and `agent/adapters/codex-sslz-agent.md`. They are generated from
-`.github/agents/sslz-agent.agent.md` with `node scripts/generate-agent-adapters.mjs`, and CI fails if they drift.
 ## Limits
 
 This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository,
