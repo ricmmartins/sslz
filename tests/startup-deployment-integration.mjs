@@ -894,9 +894,15 @@ function bicepCompiledTemplate() {
     monitoringContributor:
       "/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
   };
+  const scopedRoleDefinitions = Object.fromEntries(
+    Object.entries(roleDefinitions).map(([alias, id]) => [
+      alias,
+      `[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '${id.split("/").at(-1)}')]`,
+    ]),
+  );
   const role = (alias, principal) =>
     resource("Microsoft.Authorization/roleAssignments", {
-      roleDefinitionId: `[variables('roleDefinitions').${alias}]`,
+      roleDefinitionId: `[variables('scopedRoleDefinitions').${alias}]`,
       principalId: `[reference('${principal}', '2024-04-01', 'full').identity.principalId]`,
       principalType: "ServicePrincipal",
     });
@@ -930,7 +936,7 @@ function bicepCompiledTemplate() {
       ], "[variables('rgNetworking')]"),
       defender: nested(
         [
-          ...Array.from({ length: 9 }, () =>
+          ...Array.from({ length: 10 }, () =>
             resource("Microsoft.Security/pricings"),
           ),
           resource("Microsoft.Security/securityContacts", {
@@ -963,7 +969,7 @@ function bicepCompiledTemplate() {
           contactEmails: { value: "[parameters('budgetAlertEmails')]" },
         },
       ),
-      policies: nested(policyResources, { roleDefinitions }),
+      policies: nested(policyResources, { roleDefinitions, scopedRoleDefinitions }),
     },
     outputs: Object.fromEntries(
       [
@@ -2036,8 +2042,8 @@ try {
     return runtime;
   };
   const ownerRoleBuild = bicepBuildMutation((document) => {
-    document.resources.policies.properties.template.variables.roleDefinitions.tagContributor =
-      "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635";
+    document.resources.policies.properties.template.variables.scopedRoleDefinitions.tagContributor =
+      "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]";
   });
   assert.throws(
     () =>
@@ -2050,8 +2056,49 @@ try {
       }),
     /unexpected role or principal/,
   );
+  for (const mutate of [
+    (template) => {
+      template.variables.scopedRoleDefinitions.tagContributor =
+        template.variables.roleDefinitions.tagContributor;
+    },
+    (template) => {
+      template.variables.scopedRoleDefinitions.tagContributor =
+        "[subscriptionResourceId('11111111-1111-1111-1111-111111111111', 'Microsoft.Authorization/roleDefinitions', '4a9ae827-6dc8-4573-8ac7-8239d42aa03f')]";
+    },
+    (template) => {
+      template.variables.scopedRoleDefinitions.tagContributor =
+        "[resourceId('Microsoft.Authorization/roleDefinitions', '4a9ae827-6dc8-4573-8ac7-8239d42aa03f')]";
+    },
+    (template) => {
+      template.resources.resource8.properties.roleDefinitionId =
+        "[variables('roleDefinitions').tagContributor]";
+    },
+    (template) => {
+      template.resources.resource8.properties.principalId =
+        "[reference('activityLogDiagAssignment', '2024-04-01', 'full').identity.principalId]";
+    },
+    (template) => {
+      template.resources.resource9.properties.principalId =
+        template.resources.resource8.properties.principalId;
+    },
+  ]) {
+    const runtime = bicepBuildMutation((document) =>
+      mutate(document.resources.policies.properties.template),
+    );
+    assert.throws(
+      () =>
+        buildDeploymentManifest(plan, {
+          provider: "bicep",
+          environment: "prod",
+          planPath,
+          evaluatedAt,
+          runner: runtime.runner,
+        }),
+      /unexpected role or principal/,
+    );
+  }
   const hardcodedBicepContact = bicepBuildMutation((document) => {
-    document.resources.defender.properties.template.resources.resource9.properties.emails =
+    document.resources.defender.properties.template.resources.resource10.properties.emails =
       "attacker@example.com";
   });
   assert.throws(
@@ -2065,6 +2112,29 @@ try {
       }),
     /do not consume the approved notification-contact parameters/,
   );
+  for (const mutate of [
+    (template) => {
+      delete template.resources.resource0;
+    },
+    (template) => {
+      template.resources.extraPricing = structuredClone(template.resources.resource0);
+    },
+  ]) {
+    const runtime = bicepBuildMutation((document) =>
+      mutate(document.resources.defender.properties.template),
+    );
+    assert.throws(
+      () =>
+        buildDeploymentManifest(plan, {
+          provider: "bicep",
+          environment: "prod",
+          planPath,
+          evaluatedAt,
+          runner: runtime.runner,
+        }),
+      /resource graph does not exactly match/,
+    );
+  }
   const scriptBuild = bicepBuildMutation((document) => {
     document.resources.logAnalytics.properties.template.resources.resource0.type =
       "Microsoft.Resources/deploymentScripts";
