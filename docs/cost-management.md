@@ -9,7 +9,7 @@ description: "Budgets, reservations, and common cost mistakes"
 
 ## Budget Alerts
 
-Set these on both subscriptions immediately. Budget alerts are free and take 5 minutes to configure.
+Set these on both subscriptions immediately. Budget alerts are free and take 5 minutes to set up.
 
 ### Thresholds
 
@@ -22,7 +22,7 @@ Set these on both subscriptions immediately. Budget alerts are free and take 5 m
 
 ### Setting Your Initial Budget
 
-If you don't know your expected spend, set the budget at **2x your current monthly burn**. You'll get a 50% alert when you hit your actual expected spend, which is a good sanity check. Adjust after 2-3 months of data.
+If you don't know your expected spend, set the budget at **2x your current monthly burn**. You'll get a 50% alert when you reach your actual expected spend, which is a useful sanity check. Adjust after 2-3 months of data.
 
 ## Tagging Strategy
 
@@ -99,7 +99,7 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
 **The fix:**
 - After a workload runs for 3+ months and isn't going away, buy a **1-year reservation**
 - Typical savings: 30-40% on compute (VMs, AKS nodes, App Service plans)
-- Start with 1-year commitments only — don't lock into 3 years at your stage
+- Start with 1-year commitments only. Don't lock into 3 years at your stage.
 - Azure Advisor shows RI recommendations based on your actual usage
 
 | Resource | On-Demand (est.) | 1-Year RI (est.) | Savings |
@@ -116,7 +116,7 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
 - Non-prod: Standard SSD (E-series disks). 1/3 the cost of Premium.
 - Prod with low IOPS: Standard SSD is often sufficient.
 - Prod with high IOPS: Premium SSD or Ultra Disk.
-- Managed disks are billed whether the VM is running or not — right-size them.
+- Managed disks are billed whether the VM is running or not, so right-size them.
 
 ### 5. Ignoring Spot VMs
 
@@ -127,7 +127,7 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
 - Batch processing: Spot VMs or Spot node pools in AKS.
 - Dev/test environments: Spot VMs with `Deallocate` eviction policy.
 
-Setting `maxPrice: -1` (or `spot_max_price = -1` in Terraform) means "pay up to the current on-demand price." Azure will **only** evict the VM when it needs the capacity back for on-demand customers — never because of price fluctuations. This is the recommended default for most Spot workloads because it maximizes uptime while still getting the Spot discount (typically 60-90% off).
+Setting `maxPrice: -1` (or `spot_max_price = -1` in Terraform) means "pay up to the current on-demand price." Azure will **only** evict the VM when it needs the capacity back for on-demand customers, never because of price fluctuations. This is the recommended default for most Spot workloads because it maximizes uptime while keeping the Spot discount (typically 60-90% off).
 
 ```bicep
 resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
@@ -151,12 +151,12 @@ If you want to cap the price (e.g., only run when the Spot price is below $0.05/
 
 **The fix:**
 - Create your non-prod subscription as a Dev/Test subscription (or convert it)
-- Benefits: No Windows OS license charges on VMs, discounted rates on several services
+- Benefits: no Windows OS license charges on VMs, discounted rates on several services
 - Requires Visual Studio subscribers (most startups with MSDN/MPN have these)
 
 ## Automated Cost Reporting
 
-Budget alerts catch spikes, but you also need regular visibility into where money goes. Azure Cost Management provides built-in scheduled exports — no extra tooling required.
+Budget alerts catch spikes, but you also need regular visibility into where money goes. Azure Cost Management provides built-in scheduled exports, so no extra tooling is required.
 
 ### Set Up Cost Exports
 
@@ -195,7 +195,7 @@ az costmanagement export create \
 
 ### Cost Anomaly Alerts
 
-Azure Cost Management also supports **anomaly detection** (preview). Enable it to get automatic alerts when daily spend deviates significantly from the baseline — catches issues that fixed-threshold budget alerts miss.
+Azure Cost Management also supports **anomaly detection** (preview). Enable it to get automatic alerts when daily spend deviates significantly from the baseline. It catches issues that fixed-threshold budget alerts miss.
 
 **Cost Management** → **Cost alerts** → **Anomaly alerts** → Enable for each subscription.
 

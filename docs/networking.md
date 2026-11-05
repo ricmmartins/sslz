@@ -11,7 +11,7 @@ description: "VNet design, NSGs, and when you actually need a hub"
 
 ## Do You Even Need a VNet?
 
-Seriously. If your entire stack is:
+Maybe not. If your entire stack is:
 - Azure Container Apps or App Service (with built-in auth)
 - Azure SQL or Cosmos DB (with service-level firewall)
 - Azure Storage (with service-level firewall)
@@ -34,7 +34,7 @@ Then you can run production without a VNet. Use service-level firewalls to restr
 | `vnet-<co>-prod` | `10.0.0.0/16` | 65,536 |
 | `vnet-<co>-nonprod` | `10.1.0.0/16` | 65,536 |
 
-Use `10.x.0.0/16` ranges. They're private (RFC 1918), don't conflict with most corporate networks, and give you room to grow. **Do not use `172.16.0.0/12` or `192.168.0.0/16`** — they're more likely to conflict if you ever need VPN to an office network.
+Use `10.x.0.0/16` ranges. They're private (RFC 1918), rarely conflict with corporate networks, and leave room to grow. **Do not use `172.16.0.0/12` or `192.168.0.0/16`** — they're more likely to conflict if you ever need VPN to an office network.
 
 ### Subnet Layout
 
@@ -54,9 +54,9 @@ vnet-<co>-prod 10.0.0.0/16
     └── CI/CD agents, jump boxes, Bastion subnet
 ```
 
-**Why `/20` for AKS?** With Azure CNI, pods consume IPs from the subnet. A modest cluster with 10 nodes and 30 pods each is ~300 pod IPs. Add headroom for upgrades (surge nodes), system components, and future node pools. A /20 gives you ~4k usable IPs (Azure reserves 5 per subnet), which is a solid default for most startup-scale clusters. If you expect a much larger cluster (high node count, multiple pools, high max-pods), bump AKS to `/19` or `/18`.
+**Why `/20` for AKS?** With Azure CNI, pods consume IPs from the subnet. A modest cluster with 10 nodes and 30 pods each is ~300 pod IPs. Add headroom for upgrades (surge nodes), system components, and future node pools. A /20 gives ~4k usable IPs (Azure reserves 5 per subnet), a reasonable default for most startup-scale clusters. If you expect a much larger cluster (high node count, multiple pools, high max-pods), bump AKS to `/19` or `/18`.
 
-**Why `/22` for data?** Each Private Endpoint uses one IP. You'll have 5-20 Private Endpoints in a typical startup. `/22` gives you 1,019 usable IPs — way more than you need, but subnets are free and re-sizing them later is painful.
+**Why `/22` for data?** Each Private Endpoint uses one IP. You'll have 5-20 Private Endpoints in a typical startup. `/22` gives you 1,019 usable IPs, far more than you need, but subnets are free and resizing them later is painful.
 
 ### Subnet Delegation
 
@@ -82,7 +82,7 @@ Priority  Direction  Action  Source              Destination        Port
 4096      Inbound    Deny    *                   *                  *
 ```
 
-Yes, deny everything inbound by default. Then add explicit allow rules for what you need.
+Inbound is denied by default. Add explicit allow rules for what you need.
 
 ### Common Allow Rules
 
@@ -110,7 +110,7 @@ No inbound rules needed — VNet integration is outbound only.
 
 ### VNet Flow Logs
 
-Enable [VNet Flow Logs](https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview) on your virtual networks and send them to your Log Analytics workspace. VNet flow logs replace the deprecated NSG flow logs, providing broader visibility across the entire VNet rather than per-NSG. This gives you:
+Enable [VNet Flow Logs](https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview) on your virtual networks and send them to your Log Analytics workspace. VNet flow logs replace the deprecated NSG flow logs, covering the whole VNet instead of one NSG. They provide:
 - Network traffic visibility across the entire virtual network
 - Connection troubleshooting
 - Traffic analytics (optional, costs extra)
@@ -157,7 +157,7 @@ By default, Azure VNets use Azure-provided DNS (`168.63.129.16`). This resolves:
 - Public DNS names normally
 - Azure Private DNS Zones linked to the VNet
 
-This is fine for most startups. Don't set up custom DNS unless you need it.
+That is enough for most startups. Don't set up custom DNS unless you need it.
 
 ### Private DNS Zones
 
@@ -178,7 +178,7 @@ Link each zone to both VNets (prod and nonprod) if resources in both need to res
 
 ### When to Centralize DNS
 
-When you have 5+ Private DNS Zones and 3+ VNets, managing zone links becomes tedious. That's when you create a hub VNet with a DNS forwarder (or use Azure DNS Private Resolver) and point all VNets to it.
+When you have 5+ Private DNS Zones and 3+ VNets, managing zone links gets tedious. At that point, create a hub VNet with a DNS forwarder (or use Azure DNS Private Resolver) and point all VNets to it.
 
 ## When to Add a Hub
 
@@ -220,7 +220,7 @@ After (when you graduate):
 | Threat intelligence | No | Yes |
 | Good for startups? | **Yes** | **Not until compliance or hybrid demands it** |
 
-Start with NSGs. They're free, they cover 95% of use cases, and they're per-subnet so failures are isolated. Add Azure Firewall when you have a specific compliance or operational requirement.
+Start with NSGs. They're free, they cover most use cases, and they're per-subnet, so failures stay isolated. Add Azure Firewall when you have a specific compliance or operational requirement.
 
 ## Outbound Internet Access
 
@@ -230,7 +230,7 @@ Azure [retired default outbound internet access](https://learn.microsoft.com/azu
 
 ### How This Affects the Landing Zone
 
-For most SSLZ workload patterns, this is **not a breaking issue** — here's why:
+For most SSLZ workload patterns, this is **not a breaking issue**:
 
 | Subnet | Typical Workload | Outbound Strategy | Impact |
 |---|---|---|---|
@@ -239,7 +239,7 @@ For most SSLZ workload patterns, this is **not a breaking issue** — here's why
 | `snet-data` | Private Endpoints | No outbound internet needed | ✅ Not affected |
 | `snet-shared` | Jump boxes, CI/CD agents (VMs) | ⚠️ Needs explicit outbound if deploying VMs | ⚠️ Needs attention |
 
-**Bottom line:** If your stack is PaaS-first (Container Apps, App Service, AKS with Load Balancer), outbound connectivity is handled by the platform and you don't need to take additional action. The only subnet where this matters is `snet-shared` — and only if you deploy VMs or VMSS into it.
+**Bottom line:** If your stack is PaaS-first (Container Apps, App Service, AKS with Load Balancer), the platform handles outbound connectivity and you don't need to act. Only `snet-shared` is affected, and only if you deploy VMs or VMSS into it.
 
 ### If You Need Outbound for VMs
 
@@ -251,11 +251,11 @@ If you deploy VMs into `snet-shared` (jump boxes, self-hosted CI/CD agents, etc.
 | **Standard Load Balancer** outbound rules | Included with LB | When you already have a Load Balancer |
 | **Azure Firewall** (hub) | ~$900+/month | When you need L7 inspection and centralized egress (graduation path) |
 
-**NAT Gateway** is the recommended option for startups. It's simple, cost-effective, and provides a predictable static outbound IP — useful for allowlisting with third-party APIs.
+**NAT Gateway** is the recommended option for startups. It's simple, inexpensive, and gives a static outbound IP, which is useful for allowlisting with third-party APIs.
 
 ### Private Subnets (Optional Hardening)
 
-You can explicitly set `defaultOutboundAccess: false` on subnets to make them "private" — blocking all outbound internet access unless a NAT Gateway or other explicit path is configured. This is a security best practice but only needed if you're deploying VMs and want to ensure no accidental outbound access.
+You can explicitly set `defaultOutboundAccess: false` on subnets to make them "private" — blocking all outbound internet access unless a NAT Gateway or other explicit path is configured. This is good security practice, but only needed if you're deploying VMs and want to ensure no accidental outbound access.
 
 For PaaS-only subnets (`snet-app`, `snet-data`), this setting has no practical effect since the platform services manage their own connectivity.
 
@@ -272,4 +272,4 @@ For PaaS-only subnets (`snet-app`, `snet-data`), this setting has no practical e
 | Best for | Global apps, multi-region, CDN | Single-region apps, internal LBs |
 | Starting cost | ~$35/month (Standard) | ~$175/month (v2) |
 
-**Recommendation:** If your app is internet-facing and you want WAF, start with Front Door Standard. It's cheaper, global, and includes CDN. Use Application Gateway only if you need it inside a VNet for internal routing.
+**Recommendation:** If your app is internet-facing and you want WAF, start with Front Door Standard. It's cheaper, global, and includes a CDN. Use Application Gateway only if you need it inside a VNet for internal routing.

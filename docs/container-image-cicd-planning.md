@@ -13,8 +13,8 @@ synthetic fixtures and hosted CI; the repository has no current-main live regist
 or rollback evidence. See the [implementation and evidence matrix](/agent/docs/implementation-status/).
 
 This increment assesses supplied container image, registry, and CI/CD metadata and generates a deterministic plan for
-moving from AWS ECR, GCP Artifact Registry/GCR, or a generic OCI registry — paired with GitHub Actions, AWS CodeBuild,
-GCP Cloud Build, GitLab CI, Jenkins, or Azure DevOps — to Azure Container Registry with a GitHub Actions or Azure DevOps
+moving from AWS ECR, GCP Artifact Registry/GCR, or a generic OCI registry (paired with GitHub Actions, AWS CodeBuild,
+GCP Cloud Build, GitLab CI, Jenkins, or Azure DevOps) to Azure Container Registry with a GitHub Actions or Azure DevOps
 delivery pipeline. It has no source or target registry connection, image push or pull, pipeline write, cloud operation,
 IaC action, DNS change, credential action, or any other write path. It never stores credentials, tokens, secret-bearing
 URLs, customer identifiers, or repository contents.
@@ -88,7 +88,7 @@ integration digests (workload profile, regional plan, IaC plan, readiness eviden
 approval, and PostgreSQL migration identity). The result emits the same binding for readiness, IaC, manifest, and approval
 identities with `executionEligible: false`. Any assessment mutation, stale or replayed evidence, changed target, or
 decision change produces a different plan and identity or a blocking check. A later execution increment must copy and
-verify these bindings; this increment deliberately provides no executor or approval transition.
+verify these bindings; this increment provides no executor or approval transition.
 
 This additive planning contract does not affect Bicep or Terraform parameters, resources, previews, or apply surfaces, so
 no IaC parity change is required.

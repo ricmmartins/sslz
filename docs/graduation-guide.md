@@ -16,7 +16,7 @@ You don't need all of these. If 2-3 apply simultaneously, start planning.
 | **Second independent workload** | Each workload should live in its own subscription. If you're deploying a second product, service, or team's workload, create a new subscription — don't colocate in the same one. Resource groups are not isolation boundaries. |
 | **Engineering team > 50 people** | Different teams need different permissions, policies, and cost boundaries. A flat structure can't support this. |
 | **Regulatory compliance** (SOC2 Type II, HIPAA, PCI-DSS, FedRAMP) | Compliance frameworks require specific controls: network segmentation, centralized logging, access reviews, change management. The starter landing zone doesn't cover these. |
-| **Multi-region deployment** | Cross-region networking, global DNS, traffic routing — you need centralized network management. |
+| **Multi-region deployment** | Cross-region networking, global DNS, and traffic routing need centralized network management. |
 | **Hybrid connectivity** (on-prem, VPN, ExpressRoute) | Requires a Connectivity subscription with gateways and centralized DNS. |
 | **5+ subscriptions** | Policy and RBAC management at scale needs a management group hierarchy. |
 | **Dedicated platform/infrastructure team** | You have people whose job is the platform. Give them proper tools and separation. |
@@ -24,7 +24,7 @@ You don't need all of these. If 2-3 apply simultaneously, start planning.
 
 ## Migration Path
 
-The good news: if you followed this guide, migration is incremental. You're adding layers, not rebuilding.
+If you followed this guide, migration is incremental: you add layers instead of rebuilding.
 
 ### Phase 0: Lightweight Management Group Split (Optional)
 
@@ -176,7 +176,7 @@ Tenant Root Group
 
 ## Cost of Full ALZ
 
-Be aware of the additional monthly costs:
+Full ALZ adds these monthly costs:
 
 | Component | Estimated Monthly Cost |
 |---|---|
@@ -189,7 +189,7 @@ Be aware of the additional monthly costs:
 | Entra ID P2 | $9/user/month |
 | **Total platform overhead** | **$1,500-3,000/month** |
 
-This is why we don't start with full ALZ. At $1,500-3,000/month just for platform overhead, it needs to be justified by team size, compliance requirements, or operational needs.
+That is why we don't start with full ALZ. At $1,500-3,000/month for platform overhead alone, it needs to be justified by team size, compliance requirements, or operational needs.
 
 ## See Also
 

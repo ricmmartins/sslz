@@ -8,7 +8,7 @@ permalink: /contributing
 
 # Contributing
 
-We welcome contributions from startup CTOs, platform engineers, and anyone who's deployed Azure infrastructure at scale and learned from it.
+We welcome contributions from startup CTOs, platform engineers, and anyone who has deployed Azure infrastructure at scale.
 
 ## What We're Looking For
 

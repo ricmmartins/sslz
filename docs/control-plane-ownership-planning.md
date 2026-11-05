@@ -74,7 +74,7 @@ manifest, and deployment approval. It also binds the exact environment and targe
 
 The program-lineage builder first reproduces its five-stage predecessor envelope. It passes those exact identities to
 the ownership planner and appends the canonical ownership plan digest as a sixth stage. This avoids a circular digest
-while preserving the predecessor envelope as the immutable handoff boundary. Legacy five-stage envelopes remain
+and keeps the predecessor envelope as the immutable handoff boundary. Legacy five-stage envelopes remain
 validatable; new canonical journeys emit the six-stage chain.
 
 The canonical report references both the final envelope and the separate ownership plan by exact digest. Any upstream

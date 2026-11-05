@@ -8,7 +8,7 @@ description: "Phased, backward-compatible delivery plan for agent-assisted SSLZ"
 
 ## Current status
 
-This document preserves the phased design and review gates, but it is no longer a literal PR-number roadmap. Phases 0-6
+This document preserves the phased design and review gates, but it is no longer a PR-number roadmap. Phases 0-6
 have delivered contract, planning, or approval-gated implementations. Phase 7 has delivered execution-disabled planning
 artifacts only. The PostgreSQL migration, image/CI, dual-cloud, and program-lineage work delivered after the original plan
 is also execution-disabled. See the [authoritative status matrix and actual PR history](/agent/docs/implementation-status/).
@@ -62,8 +62,7 @@ Use Bash for the first CLI implementation because the repository already uses Ba
 decision data in JSON so another language or agent extension can consume it later.
 
 Do not introduce Bats or another test dependency unless the repository adopts it explicitly. The initial test script
-can use Bash assertions and fixture commands. The structure above shows the intended boundary, not a dependency
-decision.
+can use Bash assertions and fixture commands. The structure above shows the intended layout and does not decide on a dependency.
 
 ## Phase 0: Contract assets
 
@@ -354,11 +353,11 @@ evidence are proven.
 7. add global ingress only when end-to-end health checks and data behavior support it.
 
 Foundry, PostgreSQL, Container Apps, and AKS each require separate recovery acceptance tests. A successful second SSLZ
-deployment does not mark the workload as recovery ready.
+deployment does not mean the workload is recovery ready.
 
 ## Pull request sequence
 
-The following was the original conceptual sequence, not GitHub PR numbering:
+The original conceptual sequence, which does not match GitHub PR numbering:
 
 | Conceptual increment | Delivered in | Azure writes |
 |---|---|---:|

@@ -11,9 +11,9 @@ This page describes the implementation and execution boundaries of the integrate
 documentation together at [`8ceaa7f`](https://github.com/ricmmartins/sslz/commit/8ceaa7ff382e772cb6d3d8f8aeef7a8474f5d42a).
 Installation uses `main`; no separate planning branch or pinned checkout is required.
 
-The capability matrix distinguishes implemented code from execution authority and test evidence. A contract or planner
+The capability matrix separates implemented code, execution authority, and test evidence. A contract or planner
 can be implemented without being allowed to execute the operation it describes. Evidence links below identify the
-revision actually tested; they do not certify later revisions or current tenant readiness.
+revision that was tested; they do not certify later revisions or current tenant readiness.
 
 ## Evidence terms
 
@@ -64,7 +64,7 @@ migration or dual-cloud execution authority.
 
 The shipped profile is for GitHub Copilot CLI. Claude Code and Codex do not have a maintained native adapter or
 client-specific acceptance suite in this repository. Reusing the documentation or scripts in another client does not
-establish equivalent discovery, tool permissions, or approval behavior.
+give you the same discovery, tool permissions, or approval behavior.
 
 The synthetic journey command writes and recreates `.sslz/generated/greenfield-journey`. It also creates and removes
 the process-specific replay store `.sslz/remediation-state/greenfield-${process.pid}`. Approve both local targets and
@@ -79,7 +79,7 @@ retrieval also remains unverified if the runtime cannot expose the final respons
 
 The Quick Start and example `az deployment ... create` and `terraform apply` commands are direct operator IaC paths.
 They do not invoke the startup-agent Phase 4 plan, Phase 5 remediation approval, or Phase 6 signed deployment approval.
-That is an intentional compatibility path, not an approval bypass inside the agent workflows. Operators using it own plan
+This is an intentional compatibility path and does not bypass approvals inside the agent workflows. Operators using it own plan
 review, credentials, permissions, state protection, change approval, validation, and rollback.
 
 The repository must not contain tenant credentials, signing keys, approval identities, connection strings, billing

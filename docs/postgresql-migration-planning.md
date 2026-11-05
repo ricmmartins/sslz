@@ -19,6 +19,7 @@ The first migration increment assesses supplied PostgreSQL metadata and generate
 AWS RDS, Google Cloud SQL, or self-managed PostgreSQL to Azure Database for PostgreSQL Flexible Server. It has no source
 database connection, Azure operation, migration-tool action, dump/restore action, CDC change, DNS change, or write path.
 
+
 ## Validate and plan
 
 ```bash
@@ -46,7 +47,7 @@ its selected region, exact engine version, required extensions, selected evidenc
 The migration evaluator then checks extension versions and features, encoding/collation, storage/IOPS/connection
 headroom, HA/zones/RTO/RPO, private connectivity and DNS, identity mapping, logical replication prerequisites, migration
 tool availability, large objects, generated columns, roles/ownership/RLS, source-of-truth rules, validation, and rollback.
-Unsupported extensions or features remain explicit blockers; the planner never drops or substitutes them.
+Unsupported extensions or features stay blockers; the planner never drops or substitutes them.
 
 ## Strategies and stages
 
@@ -116,10 +117,10 @@ PR #22 output from being relaxed. The planner is intentionally stateless and nev
 advance the protected lineage after acceptance. Replaying an evidence set already present in that authoritative lineage,
 or replaying an older lineage whose digest no longer matches the protected current digest, blocks.
 
-Offline dump/restore remains the default represented strategy. Logical-replication catch-up is accepted only when the
-bound migration plan selected `online-logical-replication` and the evidence explicitly records permission, a lag bound,
-and final lag within that bound. An offline plan must mark catch-up as not applicable. This is representation of supplied
-evidence only; neither path can execute from this repository surface.
+Offline dump/restore remains the default strategy. Logical-replication catch-up is accepted only when the
+bound migration plan selected `online-logical-replication` and the evidence records permission, a lag bound,
+and final lag within that bound. An offline plan must mark catch-up as not applicable. This only represents supplied
+evidence; neither path can execute from this repository.
 
 Validation requires schema compatibility, an exact expected catalog object count, one unique exact-parity row-count result
 for every assessed table whose source count also matches the bound assessment (evidence-defined tolerances are rejected),
@@ -136,7 +137,7 @@ no IaC parity change is required.
 ## Approval-bound, execution-disabled contract
 
 [PR #24](https://github.com/ricmmartins/sslz/pull/24) implemented the contract evaluator for a possible future
-write-capable migration path, not the writer itself. It consumes the exact source assessment, migration input and plan,
+write-capable migration path. It does not implement the writer. It consumes the exact source assessment, migration input and plan,
 rehearsal evidence and report, a current execution lineage, independently signed live-condition attestations, eight
 separately signed stage approvals, and a protected trust manifest:
 
@@ -176,7 +177,7 @@ current-lineage snapshot, and must remain current at that trusted evaluation tim
 | `postgresql-execution-trust.schema.json` | Independently protected artifact, attestation, and approval digests plus stage- or evidence-restricted Ed25519 public keys; the complete manifest is pinned by a separately supplied protected digest |
 | `postgresql-execution-plan.schema.json` | Deterministic checks, eligibility, sanitized planned actions, explicit rollback boundaries, unapplied lineage transition, and no-operation safety boundary |
 
-Offline dump/restore is the first-class path. Its CDC authority must still issue a separate signed `not-applicable`
+Offline dump/restore is the primary path. Its CDC authority must still issue a separate signed `not-applicable`
 decision with no granted CDC capability; omission or reuse cannot be substituted by another approval. Online logical
 replication is accepted only when the bound migration and rehearsal plans both selected it and a separate restricted
 signer attests current CDC permission, logical-replication readiness, and replica-identity review.
@@ -189,8 +190,8 @@ trusting an algorithm label. It rejects stale artifact reuse, mismatched environ
 out-of-order stages, replayed nonces, non-monotonic lineage, approval substitution, capability widening, strategy downgrade,
 invalid signatures, modified signed claims, and omitted evidence.
 
-The files under `agent/examples/postgresql-execution-*.json` are sanitized schema specimens whose zero digests and placeholder
-signatures are deliberately non-operational. The test suite generates ephemeral Ed25519 identities in memory and covers
+The files under `agent/examples/postgresql-execution-*.json` are sanitized schema specimens. Their zero digests and placeholder
+signatures are non-operational. The test suite generates ephemeral Ed25519 identities in memory and covers
 positive offline and online planning plus stale, partial, tampered, replayed, duplicated, omitted, widened, downgraded, and
 out-of-order cases without persisting private signing material.
 
@@ -199,7 +200,7 @@ attempt's protected lineage outcome has returned to `rehearsal-reviewed`; ordina
 nonces must still advance without gaps or reuse.
 
 This contract adds no Bicep or Terraform parameter, resource, preview, apply, or state surface. Provider/IaC readiness is
-an opaque signed evidence binding only, so existing Bicep and Terraform remain intentionally unchanged.
+an opaque signed evidence binding only, so existing Bicep and Terraform stay unchanged.
 
 ## Identity and invalidation
 
@@ -211,7 +212,7 @@ with `migrationExecutionEligible: false`.
 Any source assessment mutation, stale/future/expired evidence, omitted object or database, replayed target evidence,
 source/target mismatch, changed target region/version, strategy/scope/owner change, or validation/rollback change produces
 a different plan and migration identity or a blocking check. A later execution PR must copy and verify these bindings in
-actual execution artifacts; this increment deliberately provides no migration executor or approval transition.
+actual execution artifacts; this increment provides no migration executor or approval transition.
 
 ## Human and live confirmation
 

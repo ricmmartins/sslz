@@ -31,8 +31,8 @@ baseline approval digests. It then chains the real planner outputs in this fixed
 5. dual-cloud connectivity, DNS, identity, and egress plan;
 6. dual-cloud control-plane ownership and RACI plan.
 
-The sixth stage consumes the exact digest of the reproduced five-stage predecessor envelope, avoiding a circular
-envelope digest while making the ownership handoff boundary explicit. Object keys are canonicalized recursively and
+The sixth stage consumes the exact digest of the reproduced five-stage predecessor envelope. This avoids a circular
+envelope digest and makes the ownership handoff boundary explicit. Object keys are canonicalized recursively and
 arrays retain their order. Each stage digest includes its predecessor,
 artifact identity, execution-disabled flags, evidence mode, status, and future authority. The program identity binds the
 baseline, lineage nonce and ordinal, and complete stage chain. The envelope digest binds the complete sanitized output.
@@ -47,7 +47,7 @@ Program generation reevaluates every supplied `observedAt`/`expiresAt` and `issu
 execution trust arguments are supplied outside the artifact bundle through `--trusted-planner-digests`; the builder does
 not derive them from the documents they authenticate. For attempt 2 and later, callers must supply the full protected
 previous envelope through `--trusted-previous-envelope`. The new accepted history must exactly append that envelope's
-program, lineage, prior history, ordinal, nonce, and digest. The builder deliberately writes no replay state, so a
+program, lineage, prior history, ordinal, nonce, and digest. The builder writes no replay state, so a
 protected external executor or approval service must retain and supply the trusted inputs.
 
 ## Authority and evidence

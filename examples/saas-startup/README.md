@@ -22,7 +22,7 @@ Azure Container Apps Environment (public mode or VNet-injected private-data mode
 
 | Choice | Rationale |
 |---|---|
-| Container Apps over AKS | No cluster management. Scale to zero. Pay per use. Good enough until you need custom Kubernetes operators. |
+| Container Apps over AKS | No cluster management, scale to zero, pay per use. Enough until you need custom Kubernetes operators. |
 | Azure SQL Elastic Pool | Multi-tenant database with shared resources. DTU pooling saves 50-70% vs individual databases. |
 | Redis | Session cache, rate limiting, pub/sub for real-time features. |
 
@@ -74,12 +74,12 @@ terraform apply
 
 ### Multi-Tenancy
 
-This example uses **shared database, shared schema** with a `tenant_id` column. This is the simplest model and works until:
+This example uses **shared database, shared schema** with a `tenant_id` column. It is the simplest model and works until:
 - A single tenant needs dedicated resources (noisy neighbor)
 - Compliance requires data isolation (HIPAA, per-customer encryption keys)
 - You exceed ~1000 tenants per database
 
-When you hit these limits, move to **database-per-tenant** using Elastic Pool (each tenant gets a database in the pool, sharing DTUs).
+When you hit these limits, move to **database-per-tenant** using Elastic Pool (each tenant gets a database in the pool and shares DTUs).
 
 ### Scaling
 
@@ -130,7 +130,7 @@ container_apps_infrastructure_subnet_id = "/subscriptions/<SUB_ID>/resourceGroup
 private_endpoint_subnet_id              = "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.Network/virtualNetworks/<VNET>/subnets/snet-private-endpoints"
 ```
 
-The outputs include the Container Apps environment ID, both subnet IDs in private mode, and the two Private DNS zone IDs. These make the runtime path explicit for post-deployment checks without exposing credentials.
+The outputs include the Container Apps environment ID, both subnet IDs in private mode, and the two Private DNS zone IDs. They make the runtime path explicit for post-deployment checks without exposing credentials.
 
 ## Teardown
 

@@ -224,7 +224,7 @@ timestamps, and result codes.
 
 ## Post-deployment gate
 
-A successful deployment command is not success. Phase 6 checks the expected resource groups, Log Analytics retention
+A successful deployment command does not count as success on its own. Phase 6 checks the expected resource groups, Log Analytics retention
 and quota, Activity Log destination and categories, exact policy assignments and regional parameters, selected Defender
 tiers, monthly budget and notification thresholds, the approved live budget and Defender recipient commitment, and the
 expected VNet. Reads are retried for bounded Azure propagation.

@@ -46,7 +46,7 @@ scope for this increment and are not asserted, translated, or validated.
 
 ## Enforcement
 
-The evaluator checks, and blocks on failure of, every one of these controls:
+The evaluator checks each of these controls and blocks if any fails:
 
 - **Supported architecture and current, complete evidence** — the source provider and connectivity type pair to a
   supported Azure gateway kind (AWS Direct Connect/Site-to-Site VPN, GCP Cloud Interconnect/Cloud VPN, or generic/on-prem
@@ -100,7 +100,7 @@ plan, IaC plan, readiness evidence, deployment manifest, deployment approval, Po
 container image/CI migration identity). The result emits the same binding for readiness, IaC, manifest, and approval
 identities with `executionEligible: false`. Any assessment mutation, stale or replayed evidence, changed target, or
 decision change produces a different plan and identity or a blocking check. A later execution increment must copy and
-verify these bindings; this increment deliberately provides no executor or approval transition.
+verify these bindings; this increment provides no executor or approval transition.
 
 This additive planning contract does not affect Bicep or Terraform parameters, resources, previews, or apply surfaces, so
 no IaC parity change is required.

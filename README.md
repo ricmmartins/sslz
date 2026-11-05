@@ -25,7 +25,7 @@ tests, and Azure tooling is needed only for later operations that explicitly req
 
 ## Background
 
-For a comprehensive walkthrough of the full Azure Landing Zone journey — from identity and RBAC to Platform and Application Landing Zones — see [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195). This project takes that foundation and distills it into a deployable starting point for startups.
+For a full walkthrough of the Azure Landing Zone journey, from identity and RBAC to Platform and Application Landing Zones, see [From Zero to Hero with Azure Landing Zones](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/from-zero-to-hero-with-azure-landing-zones/4229195). This project distills that foundation into a deployable starting point for startups.
 
 ## Why This Exists
 
@@ -34,9 +34,9 @@ For a comprehensive walkthrough of the full Azure Landing Zone journey — from 
 | [ALZ (Enterprise Scale)](https://aka.ms/alz) | 100+ modules, months to understand, built for 10k-seat enterprises |
 | [ALZ-Bicep](https://github.com/Azure/ALZ-Bicep) | Still enterprise-scoped, overwhelming for a 10-person startup |
 | [CAF Terraform Module](https://github.com/Azure/terraform-azurerm-caf-enterprise-scale) | Enterprise-scoped, in extended support (archived Aug 2026). Microsoft recommends migrating to [Azure Verified Modules](https://aka.ms/avm). |
-| **This project** | **Deploys in 1 hour. Grows with you. Written for engineers, not consultants.** |
+| **This project** | **Deploys in 1 hour, grows with you, and is written for engineers.** |
 
-> **⚠️ Important:** This project is **not** a replacement or competitor to [Azure Landing Zones (ALZ)](https://aka.ms/alz) or the [Trey Research](https://github.com/Azure/Enterprise-Scale/tree/main/docs/reference/treyresearch) small-enterprise reference. It targets a different profile entirely: very early-stage startups (pre-seed to Series A), 5–15 engineers, no dedicated platform team, typically a single workload in a single region, and no hybrid connectivity requirements. For those teams, the alternative isn't ALZ — it's usually a single subscription with zero governance. This project provides a minimal but secure baseline to start with, and an explicit [graduation guide](docs/graduation-guide.md) for when they're ready to evolve into the full ALZ architecture.
+> **⚠️ Important:** This project is **not** a replacement or competitor to [Azure Landing Zones (ALZ)](https://aka.ms/alz) or the [Trey Research](https://github.com/Azure/Enterprise-Scale/tree/main/docs/reference/treyresearch) small-enterprise reference. It targets a different profile: very early-stage startups (pre-seed to Series A), 5–15 engineers, no dedicated platform team, typically a single workload in a single region, and no hybrid connectivity requirements. For those teams, the usual alternative is a single subscription with zero governance. This project provides a minimal but secure baseline to start with, and an explicit [graduation guide](docs/graduation-guide.md) for when they're ready to evolve into the full ALZ architecture.
 
 ## Architecture
 
@@ -58,7 +58,7 @@ vnet-<co>-nonprod (10.1.0.0/16)
 └── (same layout)
 ```
 
-No hub. No Azure Firewall. No VNet peering. Each subscription is self-contained. [Read more →](docs/architecture.md)
+There is no hub, Azure Firewall, or VNet peering. Each subscription is self-contained. [Read more →](docs/architecture.md)
 
 ## Plan with SSLZ Agent
 
@@ -410,7 +410,7 @@ Pre-built configurations for common startup archetypes:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). We welcome PRs — especially real-world configurations from startup CTOs and platform engineers who've battle-tested this.
+See [CONTRIBUTING.md](CONTRIBUTING.md). We welcome PRs, especially real-world configurations from startup CTOs and platform engineers who have used this.
 
 ## License
 
