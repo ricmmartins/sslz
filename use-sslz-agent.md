@@ -186,9 +186,8 @@ infrastructure you provision once, outside this repository:
 - GitHub OIDC federation to Azure with least-privilege RBAC, never Owner;
 - a durable, backed-up replay store.
 
-The
-[production executor runbook](https://github.com/ricmmartins/sslz/blob/main/docs/production-executor.md#prerequisites-before-agentic-execution)
-lists each prerequisite with example commands and a read-only readiness check.
+The production executor runbook in the repository, `docs/production-executor.md`, lists each prerequisite with
+example commands and a read-only readiness check.
 
 ## Hosted UI and release limits
 
