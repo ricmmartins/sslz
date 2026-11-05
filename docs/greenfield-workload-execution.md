@@ -37,7 +37,7 @@ Both group names must be absent before preview and again before deployment.
 The subscription deployment name `sslz-<runName>` must also be unused; an existing
 deployment record is never overwritten by this path.
 The environment's managed load balancer/public IPs, replica, private endpoint,
-DNS, storage versions and data transfer can incur costs. The app deliberately
+DNS, storage versions and data transfer can incur costs. The app
 has public HTTPS health ingress; its Blob data path must be private. Application
 logs are not sent to a paid workspace by this acceptance template. Alert delivery
 and a production monitoring configuration are separate acceptance requirements.
@@ -181,7 +181,7 @@ executor host; passing filesystem tests or creating a store marker is insufficie
 
 ## Recovery and cleanup limitations
 
-This initial executor intentionally implements no update, automatic resume,
+This initial executor implements no update, automatic resume,
 restore, rollback, alert-delivery test or deletion command. Blob versioning is
 configured but backup/restore has not thereby been demonstrated. Live evidence
 for those operations and accountable incident ownership remains required.

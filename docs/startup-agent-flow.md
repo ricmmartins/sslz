@@ -29,8 +29,7 @@ It runs the integrated synthetic founder journey through repository contracts wi
 fail-closed negative journeys, a separately signed synthetic observed AKS acceptance, and an execution-disabled
 cross-program lineage envelope. It performs no Azure writes or live-tenant reads. It requires Node.js and the local
 Bicep CLI installed by `az bicep install`, but no npm install or project dependency restore. Tagged releases expose only
-the capabilities documented in their tag; direct Bicep/Terraform usage remains the baseline deployment workflow rather
-than an implicit agent run.
+the capabilities documented in their tag; direct Bicep/Terraform usage remains the baseline deployment workflow and is never an implicit agent run.
 
 Run this check in an isolated checkout if an earlier report must be preserved. It deletes and recreates
 `.sslz/generated/greenfield-journey`, and creates and removes the process-specific replay store
@@ -41,15 +40,15 @@ The fixture's fixed clock and synthetic approvals do not establish current tenan
 
 The one-subscription and billing-benefit scenario was observed while the existing SSLZ baseline was exercised through a
 generic agent interaction. That interaction did not intentionally invoke the startup preflight, workload, regional,
-readiness, IaC, or signed-approval commands. It is therefore an acceptance-gap hardening input for the agent-aware flow,
-not evidence that those commands regressed.
+readiness, IaC, or signed-approval commands. It is therefore an acceptance-gap hardening input for the agent-aware flow
+and no evidence that those commands regressed.
 
-Before this hardening, the agent-aware flow already provided deterministic checks, catalog-driven blockers, current
+Before this hardening, the agent-aware flow already had deterministic checks, catalog-driven blockers, current
 readiness evidence, canonical plan digests, immutable deployment manifests, signed single-use approvals, replay
-resistance, and live tenant/subscription validation. The genuine gaps were narrower: Phase 1 required a separate
+resistance, and live tenant/subscription validation. Only a few gaps remained: Phase 1 required a separate
 prod/nonprod pair, did not publish a versioned subscription/billing topology decision, and could not bind an external
-benefit-association confirmation to that exact decision. The topology contract and bindings below close only those gaps;
-they do not replace or duplicate the existing workload, regional, IaC, or deployment controls.
+benefit-association confirmation to that exact decision. The topology contract and bindings below close only those gaps
+and do not replace or duplicate the existing workload, regional, IaC, or deployment controls.
 
 ## Goal
 
@@ -70,7 +69,7 @@ Account discovery
 ```
 
 SSLZ remains the declarative deployment engine. The agent collects context, runs checks, explains blockers, and
-selects an appropriate SSLZ configuration. It must not hide or replace Bicep and Terraform plans.
+selects an SSLZ configuration. It must not hide or replace Bicep and Terraform plans.
 
 ## Design principles
 
@@ -202,8 +201,8 @@ For each candidate region, check:
 
 ### Hot/Cool startup topology
 
-The Hot/Cool option is an opt-in conceptual target, not the default for every startup. The table describes intended
-topology, not current deployment evidence or execution support.
+The Hot/Cool option is an opt-in conceptual target and not the default for every startup. The table describes intended
+topology and does not show deployment evidence or execution support.
 
 | Layer | Primary region (Hot) | Secondary region (Cool) |
 |---|---|---|
@@ -304,8 +303,8 @@ See [Approved Deployment Integration](/agent/docs/approved-deployment-integratio
 
 ## Cross-program planning lineage
 
-The canonical journey references a separate v1 program-lineage envelope rather than copying migration identities into
-the signed Phase 5/6 deployment approval. This keeps the existing approval scope unchanged while binding one exact
+The canonical journey references a separate v1 program-lineage envelope instead of copying migration identities into
+the signed Phase 5/6 deployment approval. The existing approval scope stays unchanged, and the envelope binds one exact
 sequence of real planner outputs:
 
 1. PostgreSQL migration assessment and planning;
@@ -326,7 +325,7 @@ DNS, identity, egress, cutover, rollback, or failback. Its report separately ide
 readiness and non-executable migration/dual-cloud planning readiness, including whether evidence is synthetic or live.
 
 The canonical greenfield journey report is v2 and requires this envelope identity and readiness separation. A v1 report
-is intentionally rejected rather than accepted with incomplete lineage. See
+is intentionally rejected because its lineage is incomplete. See
 [Program Lineage Envelope](/agent/docs/program-lineage-envelope/).
 
 ## Agent result contracts

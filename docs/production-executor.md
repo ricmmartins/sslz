@@ -212,8 +212,7 @@ node tests/production-executor-readiness.mjs
 ```
 
 Tests create explicitly synthetic fixtures in an isolated ignored checkout beneath `.sslz/generated`, remove them on
-completion, and never provision the actual executor store. They deliberately test binary metadata resolution without
-claiming a real Terraform runtime or deployment. CI runs this suite in `validate.yml`, not the website workflow.
+completion, and never provision the actual executor store. They test binary metadata resolution only and make no claim about a real Terraform runtime or deployment. CI runs this suite in `validate.yml`, not the website workflow.
 
 ## Rotation, interrupted execution and recovery
 
@@ -273,8 +272,7 @@ Do not substitute synthetic checks or planned timestamps for observations:
 No live execution is authorized by this runbook. For a separately authorized new-resource experiment, record the
 approved spending ceiling, maximum active-resource duration, and preservation boundary outside tracked files.
 Pre-estimate all selected paid tiers and bootstrap/test costs, establish an owner and stop/cleanup deadline,
-and stop if the approved limits cannot be met. Azure
-budgets/alerts are not hard spending caps and billing telemetry may lag. Do not start a subscription-wide baseline that
+and stop if the approved limits cannot be met. Azure budgets/alerts are not hard spending caps and billing telemetry may lag. Do not start a subscription-wide baseline that
 would change existing resources under a new-test-resources-only authorization. Never destroy whole subscriptions or
 resource groups as a cleanup shortcut. Missing external services or safe isolation are blockers, not permission to fake
 readiness or broaden the experiment.

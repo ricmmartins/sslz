@@ -1,7 +1,7 @@
 # Bounded greenfield acceptance workload
 
 This example contains a real health/readiness service, unlike the infrastructure-only
-SaaS/API/AI examples. It is an initial nonproduction acceptance path, not a complete
+SaaS/API/AI examples. It is an initial nonproduction acceptance path. It is not a complete
 customer application or a production-certified deployment.
 
 `main.bicep` creates a dedicated new resource group. `workload.bicep` creates

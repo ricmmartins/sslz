@@ -81,7 +81,7 @@ region must exactly match the attempt target. The production planner compares th
 computed plan digest with each predecessor binding and rejects reuse before writing retry artifacts.
 
 Every later attempt receives deterministic, collision-safe Bicep nested deployment names, resource and policy-assignment
-suffixes, Terraform workspace identities, raw saved-plan paths, and generated artifact paths. Terraform deliberately
+suffixes, Terraform workspace identities, raw saved-plan paths, and generated artifact paths. Terraform
 retains the chain's reviewed backend key so subscription-level singleton ownership is not lost; predecessor validation,
 successful cleanup evidence, chain concurrency, fresh provenance, and the new approval prevent stale or parallel state
 use. The attempt identity is provider-equivalent, but each provider gets its own artifact directory. Region changes
@@ -109,7 +109,7 @@ new readiness subject.
 
 This local command validates the selected secondary region, evidence freshness, owner role/reference, measured and
 target RTO/RPO, cost ceiling and provenance, external reviews, recovery exercise, billing/support confirmation, and
-exact artifact/source digests. Missing human or billing evidence always blocks; it is never inferred. The output binds
+exact artifact/source digests. Missing human or billing evidence always blocks and is never inferred. The output binds
 provider-equivalent decisions to two execution-disabled manifests with ordered step states, deterministic idempotency
 keys, retry/resume rules, read-only postchecks, teardown intent, and fail-closed cleanup handling.
 
@@ -135,7 +135,7 @@ incomplete probes, external ingress, and production/global/data failover setting
 The minimum footprint is one internal Container Apps environment on a dedicated nondelegated `/23` subnet and one
 single-revision app pinned to an image digest. It may scale to zero or retain one idle replica; that assumption must match
 the reviewed cost evidence. Startup, readiness, and liveness probes, workspace diagnostics, configuration parity, scoped
-identity access, rollback, cleanup, and recovery measurements are blocking. The checked-in example intentionally retains
+identity access, rollback, cleanup, and recovery measurements are blocking. The checked-in example retains
 `not-measured`, null RTO, and null RPO placeholders, which cannot auto-pass.
 
 Generated files use nonpersonal `example.invalid` contact placeholders unless a protected contacts file is supplied.

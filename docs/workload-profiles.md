@@ -25,8 +25,8 @@ the profile version, selection rationale, assumptions, required checks, unresolv
 The command makes no Azure calls, writes no files, and always reports `iacGenerated: false`.
 
 A ready workload profile can be passed with timestamped evidence to the
-[regional and capacity planner](/agent/docs/preflight-result-contract/). That planner consumes the versioned profile selection;
-it does not change the selected compute profile or extensions.
+[regional and capacity planner](/agent/docs/preflight-result-contract/). That planner consumes the versioned profile selection
+and does not change the selected compute profile or extensions.
 
 ## Profile selection rules
 
@@ -74,7 +74,7 @@ Docker packaging is input context only. It is never an AKS selection reason.
 **Default for:** HTTP APIs, web applications, background workers, scheduled jobs, and event-driven services.
 
 **Why it is the default:** Container Apps provides managed ingress, autoscaling, health monitoring, revisions, and
-scale to zero without requiring the startup to operate Kubernetes.
+scale to zero, and the startup does not have to operate Kubernetes.
 
 **Baseline decisions:**
 
@@ -186,7 +186,7 @@ planning.
 - tested backup restore procedure.
 
 Cross-region recovery requires an explicit data plan. A secondary application environment without replicated or
-restorable data is not a recovery solution.
+restorable data does not provide recovery.
 
 When the requested region is ineligible, the planner ranks only exact eligible alternatives. It never lowers the engine
 version, changes tier or SKU, drops an extension or feature, weakens zone/RTO/RPO requirements, exceeds the cost ceiling,
@@ -238,8 +238,7 @@ The agent stops for architecture review when any of these apply:
 - a dedicated platform team requesting enterprise-wide shared services;
 - the architecture requires services that no current profile covers.
 
-These are signals to use the [Graduation Guide](/docs/graduation-guide/), not reasons to keep expanding the startup
-profiles.
+When one applies, use the [Graduation Guide](/docs/graduation-guide/) instead of expanding the startup profiles.
 
 ## Official guidance
 

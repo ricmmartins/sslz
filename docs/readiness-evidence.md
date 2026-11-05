@@ -19,7 +19,7 @@ must accompany an IaC v3 plan. It does not collect evidence, call Azure, confirm
 deploy anything. It records only supplied status, opaque references, timestamps, bounded measurements, and SHA-256
 digests needed to decide whether a reviewed plan is eligible for approval.
 
-The contract deliberately separates:
+The contract separates:
 
 - `codeEvidence`: authoritative preflight, primary/secondary regional observations, selected Foundry
   model-version/deployment/quota observations, and the selected PostgreSQL regional decision/evidence binding;

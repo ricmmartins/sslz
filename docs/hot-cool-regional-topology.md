@@ -16,9 +16,9 @@ current-main live recovery evidence exists. See the
 ## Purpose
 
 Hot/Cool prepares a startup to redeploy or activate a workload in another region when the primary region cannot
-supply capacity or experiences an outage. It keeps the secondary footprint smaller than the primary footprint.
+supply capacity or has an outage. The secondary footprint stays smaller than the primary.
 
-It is not automatically:
+It does not automatically provide:
 
 - active/passive disaster recovery;
 - zero-data-loss failover;
@@ -55,7 +55,7 @@ The agent must not invent recovery targets.
 
 ## Region selection
 
-Choose the primary region for workload fit, not proximity alone. Rank candidate regions using:
+Choose the primary region for workload fit as well as proximity. Rank candidate regions using:
 
 1. data-residency compliance;
 2. required services and features;
@@ -231,8 +231,8 @@ review the deployment boundary; until that happens, Phase 6 continues to reject 
 The first Container Apps profile increment binds immutable image digests, single-revision configuration, versioned Key
 Vault references, managed identity and exact RBAC scope, a dedicated nondelegated `/23` subnet, scale-to-zero or one-idle
 cost assumptions, all three health probe types, configuration parity, workspace diagnostics, rollback, and cleanup.
-Its checked-in measured-recovery result is intentionally `not-measured`; it cannot become review-ready from targets or
-attestations alone and never constitutes evidence of end-to-end recovery.
+Its checked-in measured-recovery result is `not-measured`. It cannot become review-ready from targets or
+attestations alone and is never evidence of end-to-end recovery.
 
 ## Official guidance
 

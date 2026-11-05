@@ -9,7 +9,7 @@ description: "Why this layout, what we skipped, and when to revisit"
 
 ## Why This Layout
 
-This landing zone makes deliberate trade-offs: simplicity over completeness, speed over perfection. Every decision below is reversible. None of them will paint you into a corner.
+This landing zone trades completeness for simplicity and perfection for speed. Every decision below is reversible.
 
 ## Management Groups
 
@@ -169,7 +169,7 @@ We assign a minimal set of policies at the subscription level:
 | Inherit tag: `team` from resource group | Modify | Auto-propagate team tag to child resources |
 | Allowed locations | Deny | Prevent accidental resource deployments to wrong regions |
 | Allowed locations for resource groups | Deny | Prevent resource group creation in wrong regions |
-| Deploy diagnostic settings for Activity Log | DeployIfNotExists | Ensure all control plane actions are logged |
+| Deploy diagnostic settings for Activity Log | DeployIfNotExists | Log all control plane actions |
 
 ### Why Audit Mode for Security Benchmark?
 
@@ -231,7 +231,7 @@ If a Deny policy is blocking a critical deployment:
 
 ## Multi-Region and Disaster Recovery
 
-This landing zone deploys to a single region. That's intentional — multi-region adds significant complexity that most startups don't need on day one.
+This landing zone deploys to a single region. That's intentional: multi-region adds significant complexity that most startups don't need on day one.
 
 ### When to Go Multi-Region
 
@@ -242,7 +242,7 @@ This landing zone deploys to a single region. That's intentional — multi-regio
 
 ### How to Prepare Without Over-Engineering
 
-Even in a single region, you can prepare for a future multi-region expansion:
+A single-region deployment can still prepare for multi-region later:
 
 1. **Use paired regions:** Deploy to a region with a good pair (e.g., East US 2 + Central US). Azure prioritizes recovery for paired regions.
 2. **Avoid region-locked resources:** Don't hardcode region names. This landing zone uses a `location` parameter for a reason.

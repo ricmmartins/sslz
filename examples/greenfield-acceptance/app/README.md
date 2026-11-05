@@ -2,7 +2,7 @@
 
 This is a deliberately small Azure Container Apps acceptance service for the
 user-assigned managed identity → private Blob Storage path. It is not a SaaS/API
-product and contains no AI support functionality.
+product and has no AI functionality.
 
 Configure `AZURE_CLIENT_ID` (the user-assigned identity's client ID),
 `BLOB_ACCOUNT_URL` (an `https://<account>.blob.core.windows.net` URL), and

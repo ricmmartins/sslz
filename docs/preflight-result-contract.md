@@ -38,7 +38,7 @@ node tests/startup-provider-remediation.mjs
 node tests/startup-deployment-integration.mjs
 ```
 
-The workload profile plan is intentionally separate from `deployment-plan.schema.json`: Phase 2 selects and explains
+The workload profile plan is separate from `deployment-plan.schema.json`: Phase 2 selects and explains
 a profile but does not generate IaC, preview artifacts, deployment services, or approval digests.
 
 The regional capacity plan is also separate from `deployment-plan.schema.json`. It ranks evidence-backed candidates,

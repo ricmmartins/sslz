@@ -7,7 +7,7 @@ description: "Complete list of Azure resources created by the landing zone"
 
 # Resource Inventory
 
-This is the complete inventory of every Azure resource created by the Startup Landing Zone deployment. Both the Bicep and Terraform implementations produce identical resources. Use this page as the single source of truth for what the landing zone deploys.
+This page lists every Azure resource the Startup Landing Zone deployment creates. The Bicep and Terraform implementations produce the same resources. Use it as the reference for what the landing zone deploys.
 
 **Naming convention prefix:** `{companyName}-{environment}` (e.g., `contoso-prod`)
 

@@ -27,7 +27,7 @@ Azure App Service (Linux, P1v3)
 | App Service over Container Apps | Simpler ops for a pure API workload. Deployment slots for zero-downtime deploys. Built-in autoscale. |
 | API Management (Consumption) | Pay-per-call. Built-in rate limiting, API key management, and developer portal. No idle cost. |
 | Cosmos DB over SQL | Schema flexibility for an evolving API. Global distribution when you expand. Serverless tier for dev. |
-| Application Insights | Deep APM for API latency tracking. Distributed tracing. Dependency mapping. Smart detection for anomalies. |
+| Application Insights | APM for API latency tracking, distributed tracing, dependency mapping and smart anomaly detection. |
 
 ## Estimated Monthly Cost
 
@@ -45,7 +45,7 @@ Azure App Service (Linux, P1v3)
 
 ### API Versioning
 
-Use URL path versioning (`/v1/`, `/v2/`). It's the most visible and debuggable pattern. API Management handles routing different versions to different backends.
+Use URL path versioning (`/v1/`, `/v2/`). It is the most visible and easiest to debug. API Management routes each version to its own backend.
 
 ### Rate Limiting
 
@@ -63,7 +63,7 @@ Tier your API plans:
 ### Database Strategy
 
 - **Dev/Staging:** Cosmos DB Serverless (pay per request, $0 when idle)
-- **Prod:** Cosmos DB Autoscale (400-4000 RU/s) — scales with traffic, caps cost
+- **Prod:** Cosmos DB Autoscale (400-4000 RU/s), which scales with traffic and caps cost
 - **Partition key:** Choose based on your most common query pattern (usually `tenantId` or `userId`)
 
 ### Zero-Downtime Deployments
@@ -76,7 +76,7 @@ Use App Service deployment slots:
 
 ### Monitoring
 
-Application Insights gives you:
+Application Insights provides:
 - **Live Metrics:** Real-time request rate, failures, response time
 - **Application Map:** Visual dependency graph (API → DB → Cache)
 - **Failures:** Automatic exception grouping and impact analysis

@@ -23,8 +23,8 @@ AKS Cluster
 
 | Choice | Rationale |
 |---|---|
-| AKS over Azure ML | Full control over inference serving (vLLM, TGI, Triton). Azure ML is great for experimentation but adds abstraction you may not want in production inference. |
-| GPU Spot nodes | 60-90% savings on GPU compute. Inference can handle evictions with graceful drain + multiple replicas. |
+| AKS over Azure ML | Full control over inference serving (vLLM, TGI, Triton). Azure ML suits experimentation but adds abstraction that production inference may not need. |
+| GPU Spot nodes | 60-90% savings on GPU compute. Inference can handle evictions with graceful drain and multiple replicas. |
 | Azure OpenAI | Managed GPT-4/GPT-4o for RAG, summarization, embeddings. No GPU needed for these workloads. |
 | Blob Storage | Cheapest storage for large model weights and datasets. Use lifecycle policies to tier old data to Cool/Archive. |
 
@@ -54,15 +54,15 @@ AKS Cluster
 ### Model Serving
 
 Options ranked by complexity:
-1. **vLLM** — Best for LLM inference. Supports continuous batching, PagedAttention. Easiest to run on AKS.
-2. **Triton Inference Server** — Best for multi-model serving (CV, NLP, tabular). More complex but very flexible.
-3. **TGI (Text Generation Inference)** — HuggingFace's solution. Good middle ground.
+1. **vLLM**: best for LLM inference. Supports continuous batching and PagedAttention. Easiest to run on AKS.
+2. **Triton Inference Server**: best for multi-model serving (CV, NLP, tabular). More complex but flexible.
+3. **TGI (Text Generation Inference)**: HuggingFace's solution. A middle ground.
 
 ### Cost Optimization
 
-- **Inference caching with Redis:** Cache frequent prompts/responses. 30-50% cost reduction on LLM calls.
-- **Azure OpenAI PTU:** If your Azure OpenAI spend exceeds $5k/month, investigate Provisioned Throughput Units for predictable pricing.
-- **Blob lifecycle policies:** Automatically move training data older than 30 days to Cool tier (50% cheaper).
+- **Inference caching with Redis:** Cache frequent prompts and responses. This cuts LLM call cost by 30-50%.
+- **Azure OpenAI PTU:** If your Azure OpenAI spend exceeds $5k/month, look at Provisioned Throughput Units for predictable pricing.
+- **Blob lifecycle policies:** Move training data older than 30 days to the Cool tier automatically (50% cheaper).
 
 ## Deploy
 

@@ -109,8 +109,7 @@ Start with repository reads and planning only. Do not log in to Azure, inspect a
 write files, or run a preview. Ask before any command or external request.
 ```
 
-Describe your own workload using sanitized facts. For an open-ended request, the agent summarizes what is known,
-unknown, and the next safe decision, then asks about facts you have not already provided:
+Describe your own workload using sanitized facts. For an open-ended request, the agent summarizes what is known and unknown and names the next safe decision, then asks about facts you have not already provided:
 
 > What are you building, where does it run today, and what do you want Azure to do first?
 

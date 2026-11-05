@@ -7,7 +7,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 <section class="hero">
   <a href="{{ site.github_repo }}" class="hero-badge" target="_blank" rel="noopener">Open Source on GitHub</a>
   <h1>Startup-Scale Landing Zone</h1>
-  <p class="tagline">A stripped-down, opinionated, production-ready Azure Landing Zone designed for startups and digital-native teams. Built for companies with 5–50 engineers that need to get Azure right from day one without enterprise complexity.</p>
+  <p class="tagline">A stripped-down, opinionated, production-ready Azure Landing Zone for startups and digital-native teams. Built for companies with 5–50 engineers that need to get Azure right from day one without enterprise complexity.</p>
   <div class="hero-ctas">
     <a href="#quick-start" class="btn btn-primary">Quick Start</a>
     <a href="{{ site.github_repo }}" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
@@ -48,7 +48,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
 
 <section class="key-points landing-section">
   <h2>Why This Landing Zone</h2>
-  <p class="section-subtitle">Enterprise-grade foundations without enterprise complexity.</p>
+  <p class="section-subtitle">Enterprise foundations without the enterprise complexity.</p>
   <div class="cards-grid">
     <div class="card">
       <div class="card-icon">&#9889;</div>
@@ -58,7 +58,7 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
     <div class="card">
       <div class="card-icon">&#9878;</div>
       <h3>2 Subscriptions</h3>
-      <p>One management group, prod + non-prod. Simple hierarchy that grows with you.</p>
+      <p>One management group, prod + non-prod. A simple hierarchy you can grow later.</p>
     </div>
     <div class="card">
       <div class="card-icon">&#128737;</div>
@@ -90,17 +90,17 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
     </div>
     <div class="compare-card accent">
       <h3>This Project</h3>
-      <p>Deploys in 1 hour. Grows with you. Written for engineers, not consultants.</p>
+      <p>Deploys in 1 hour, grows with you, and is written for engineers.</p>
     </div>
   </div>
   <div class="callout-warning">
-    <strong>⚠️ Important:</strong> This project is <strong>not</strong> a replacement or competitor to <a href="https://aka.ms/alz">Azure Landing Zones (ALZ)</a> or the <a href="https://github.com/Azure/Enterprise-Scale/tree/main/docs/reference/treyresearch">Trey Research</a> small-enterprise reference. It targets a different profile entirely: very early-stage startups (pre-seed to Series A), 5–15 engineers, no dedicated platform team, typically a single workload in a single region, and no hybrid connectivity requirements. For those teams, the alternative isn't ALZ — it's usually a single subscription with zero governance. This project provides a minimal but secure baseline to start with, and an explicit <a href="/docs/graduation-guide">graduation guide</a> for when they're ready to evolve into the full ALZ architecture.
+    <strong>⚠️ Important:</strong> This project is <strong>not</strong> a replacement or competitor to <a href="https://aka.ms/alz">Azure Landing Zones (ALZ)</a> or the <a href="https://github.com/Azure/Enterprise-Scale/tree/main/docs/reference/treyresearch">Trey Research</a> small-enterprise reference. It targets a different profile: very early-stage startups (pre-seed to Series A), 5–15 engineers, no dedicated platform team, typically a single workload in a single region, and no hybrid connectivity requirements. For those teams, the usual alternative is a single subscription with zero governance. This project provides a minimal but secure baseline to start with, and an explicit <a href="/docs/graduation-guide">graduation guide</a> for when they're ready to evolve into the full ALZ architecture.
   </div>
 </section>
 
 <section class="architecture-preview landing-section">
   <h2>Architecture Overview</h2>
-  <p class="section-subtitle">Simple, self-contained subscriptions. No hub network, no Azure Firewall — until you need them.</p>
+  <p class="section-subtitle">Self-contained subscriptions, with no hub network or Azure Firewall until you need them.</p>
   <div class="arch-visual">
     <div class="arch-panel">
       <h3>Management Hierarchy</h3>
@@ -313,7 +313,7 @@ az network nsg list --query "[].name" -o tsv</code></pre>
 
 <section class="landing-section" id="day-1-checklist">
   <h2>Day-1 Checklist</h2>
-  <p class="section-subtitle">90 minutes from zero to production-ready. Three phases, one afternoon.</p>
+  <p class="section-subtitle">90 minutes from zero to production-ready, in three phases.</p>
   <div class="timeline">
     <div class="timeline-phase">
       <div class="timeline-marker">
@@ -483,7 +483,7 @@ az network nsg list --query "[].name" -o tsv</code></pre>
 
 <section class="landing-section alt-bg">
   <h2>Documentation</h2>
-  <p class="section-subtitle">Practical guides written for engineers, not consultants.</p>
+  <p class="section-subtitle">Practical guides written for engineers.</p>
   <div class="docs-grid">
     <a href="{{ '/docs/architecture' | relative_url }}" class="doc-card">
       <h3>Architecture Decisions</h3>

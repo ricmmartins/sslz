@@ -32,7 +32,7 @@ APP_NAME="github-actions-landing-zone"
 az ad app create --display-name "$APP_NAME" --query appId -o tsv
 ```
 
-Save the output — this is your **Application (client) ID**. You'll need it later.
+Save the output. This is your **Application (client) ID**, which you'll need later.
 
 ```bash
 # Store it in a variable for the next steps
@@ -48,7 +48,7 @@ The service principal is the Azure-side identity linked to your app registration
 az ad sp create --id "$APP_ID" --query id -o tsv
 ```
 
-Save the output — this is the **Object ID** of the service principal.
+Save the output. This is the **Object ID** of the service principal.
 
 ## Step 3: Add Federated Credentials for GitHub Actions (5 min)
 
@@ -156,7 +156,7 @@ az role assignment create \
 
 ## Step 5: Set Up Terraform Remote Backend (5 min)
 
-The Terraform deploy workflow requires a remote backend to persist state between runs. Without it, each run starts from scratch and fails on existing resources.
+The Terraform deploy workflow requires a remote backend to persist state between runs. Without one, each run starts from scratch and fails on existing resources.
 
 ```bash
 # Create the storage account for Terraform state
@@ -183,7 +183,7 @@ az role assignment create \
 
 ## Step 6: Configure GitHub Repository Secrets (5 min)
 
-In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these as **repository-level** secrets (not environment secrets — the validate/plan jobs don't reference a GitHub environment):
+In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these as **repository-level** secrets (not environment secrets, because the validate/plan jobs don't reference a GitHub environment):
 
 | Secret Name | Value | Where to Find It |
 |---|---|---|

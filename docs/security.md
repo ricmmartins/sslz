@@ -7,7 +7,7 @@ description: "Defender, RBAC, logging, and network security"
 
 # Security Baseline
 
-Security that protects you without slowing you down. Every recommendation here is either free or costs less than a compromised production database.
+Every recommendation here is either free or costs less than a compromised production database.
 
 ## Defender for Cloud
 
@@ -19,7 +19,7 @@ Security that protects you without slowing you down. Every recommendation here i
 | Defender for Servers P2 | Prod only | ~$15/server/month | EDR via Defender for Endpoint, vulnerability assessment, JIT VM access, adaptive application controls. |
 | Defender for Containers | If running AKS | ~$7/vCPU/month | Runtime threat detection, image vulnerability scanning, Kubernetes audit log monitoring. |
 | Defender for Databases | Prod only | Varies | SQL/Postgres threat detection — alerts on SQL injection, anomalous access, brute force. |
-| Defender for Key Vault | Both subs | ~$0.02/10k transactions | Alerts on unusual access patterns to secrets. Cheap insurance. Always enabled by default. |
+| Defender for Key Vault | Both subs | ~$0.02/10k transactions | Alerts on unusual access patterns to secrets. Cheap. Always enabled by default. |
 | Defender for ARM | Both subs | ~$4/sub/month | Detects suspicious control-plane operations (mass deletions, privilege escalation). Always enabled by this landing zone. |
 | Defender for Storage V2 | Explicit opt-in | Paid; review current Azure pricing | Advanced threat protection for storage. Enable only when the workload and cost review justify it. |
 | Defender for App Service | No | ~$15/month per instance | Limited value compared to other plans. Revisit later. |
@@ -66,7 +66,7 @@ For live incidents where developers need to modify prod:
 2. The developer fixes the issue
 3. The admin revokes access immediately after
 
-This is manual. That's fine. If you're doing this more than once a month, either your CI/CD is broken or your monitoring is insufficient.
+This is manual, which is fine. If you're doing this more than once a month, either your CI/CD is broken or your monitoring is insufficient.
 
 When this becomes frequent enough to be painful, implement Privileged Identity Management (PIM) for just-in-time access with time-bound approvals.
 
@@ -79,7 +79,7 @@ When this becomes frequent enough to be painful, implement Privileged Identity M
 - Legacy authentication protocols blocked
 - Admin activities require MFA
 
-Do this before anything else. It blocks 99.9% of identity attacks.
+Do this first. It blocks 99.9% of identity attacks.
 
 ### Break-Glass Account
 
