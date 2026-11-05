@@ -5,7 +5,7 @@ description: "Launch SSLZ Agent locally with GitHub Copilot CLI, Claude Code or 
 permalink: /use-sslz-agent/
 ---
 
-Run **SSLZ Agent** locally in GitHub Copilot CLI. The profile, planners, contracts, and documentation are all included
+Run **SSLZ Agent** locally in GitHub Copilot CLI. The agent instructions, planning scripts, safety tests, and documentation are all included
 in the repository's `main` branch, which is the default branch. This page provides setup instructions only. It does not
 run the agent or connect to Azure, and it does not receive access to your Azure tenant, subscriptions, billing account,
 or secrets.
@@ -170,23 +170,15 @@ existing reports, and approve both local write targets before running that comma
 Generated `.bicepparam` and `.tfvars` files can require separate read-only confirmations. If a confirmation is
 unavailable, the agent must report that readback as blocked; generation alone does not verify the file contents.
 
-## Current documentation and MCP availability
+## Current documentation (optional)
 
-The preferred source for current Azure documentation is the public
-[Microsoft Learn MCP server](https://learn.microsoft.com/en-us/training/support/mcp), using HTTP transport at
-`https://learn.microsoft.com/api/mcp`. It requires no Azure login or API key. In Copilot CLI, `/mcp` shows availability;
-`/mcp add` opens the setup form. Choose a unique server name, HTTP, that URL, and only the documentation tools you need,
-then save with Ctrl+S. Preserve existing server settings; do not replace your MCP configuration file. See GitHub's
-[MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers).
+For up-to-date Azure documentation, you can add the public
+[Microsoft Learn MCP server](https://learn.microsoft.com/en-us/training/support/mcp) (HTTP,
+`https://learn.microsoft.com/api/mcp`). It requires no Azure login or API key. In Copilot CLI, run `/mcp add` and follow
+the [MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers).
 
-Configuring a server does not guarantee that its tools are exposed in the selected agent's runtime. The `WebFetch`
-profile capability does not itself grant Microsoft Learn MCP access. Prefer Learn MCP when available. If it is
-unavailable, use only an exposed, approved HTTPS fetch tool for relevant public `learn.microsoft.com` or
-`docs.microsoft.com` pages, checking the final URL after redirects. Cite what was actually retrieved. If neither route
-works, disclose the gap and continue with local facts only. Do not add tools, use shell HTTP commands, or enable blanket
-permissions to bypass a restriction. An unavailable tool can reflect the profile, runtime, configuration, or policy;
-it does not by itself mean that your company's administrator must change anything.
-
+A configured server does not guarantee that its tools are exposed to the selected agent. If Learn MCP is unavailable, the
+agent falls back to approved fetches of `learn.microsoft.com` pages, or to local facts only, and says so.
 ## Approve live access separately
 
 Only when you choose a specific live read should the agent explain the exact read-only repository command, target,
@@ -208,8 +200,8 @@ not establish application health.
 
 ## Limits
 
-This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository,
-and a hosted agent has no automatic access to your Azure tenant. See GitHub's
+This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository, and
+a hosted agent has no automatic access to your Azure tenant. See GitHub's
 [invocation reference](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents)
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
@@ -217,5 +209,5 @@ The `main` branch includes adoption conversation guidance, documentation groundi
 local contract checks, and fixture-based planning. Fixture replay checks are not evidence that the agent ran the planner, and an external planner invocation and a CLI
 response do not prove that the agent ran the planner itself. This guide does not establish an autonomous
 conversation-to-deployment flow or real tenant readiness. Record a remotely available revision when you need repeatable
-evidence. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for links to the
-SSLZ files that implement or plan each capability.
+evidence. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for links to
+the SSLZ files that implement or plan each capability.
