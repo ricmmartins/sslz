@@ -14,6 +14,18 @@ You can discuss your workload and run local JSON planners without Azure CLI, an 
 The shipped profile supports GitHub Copilot CLI. Claude Code and Codex do not have a maintained native adapter or
 client-specific acceptance tests in this repository; reusing the scripts does not establish equivalent agent behavior.
 
+## In short
+
+SSLZ Agent is an assistant that runs on your computer, inside GitHub Copilot CLI. You describe what you are building,
+and it explains your options for a starting foundation on Azure aligned with SSLZ, then helps you plan it. It only
+talks and plans: it does not connect to Azure or change anything unless you approve a specific step.
+
+1. Install Git, Node.js and GitHub Copilot CLI.
+2. Clone the SSLZ repository.
+3. Start the agent and tell it about your project.
+
+The sections below give the exact commands. Everything after "Check local planning without Azure" is optional reading.
+
 ## Install the local prerequisites
 
 You need Git and [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
@@ -174,20 +186,6 @@ Local artifact generation and live preview need separate review and approval. Pr
 remain guarded by their operation-specific contracts; provider apply is disabled in this profile. Migration and
 dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
 not establish application health.
-
-## Before agentic workload execution
-
-Signed workload execution is pre-production. A rehearsal with throwaway keys deployed and removed a small
-`greenfield-acceptance` workload in a test subscription, which does not prove independent trust. Production use needs
-infrastructure you provision once, outside this repository:
-
-- signing keys held in a service independent of the runner, with only public keys on the runner;
-- a protected self-hosted runner with required reviewers, limited to `main`;
-- GitHub OIDC federation to Azure with least-privilege RBAC, never Owner;
-- a durable, backed-up replay store.
-
-The production executor runbook in the repository, `docs/production-executor.md`, lists each prerequisite with
-example commands and a read-only readiness check.
 
 ## Hosted UI and release limits
 
