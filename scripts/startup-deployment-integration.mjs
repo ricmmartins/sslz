@@ -5630,6 +5630,7 @@ export {
   expectedTerraformResourceGraph,
   runDeploymentIntegration,
   readTrustedPublicKey,
+  requireDurableStateStore,
   sanitizedTerraformEnvironment,
   validateApprovedAksIngressPostcheck,
 };

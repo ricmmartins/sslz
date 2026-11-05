@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/sslz/schemas/greenfield-workload-request.schema.json",
+  "title": "SSLZ bounded nonproduction acceptance workload request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "tenantId", "subscriptionId", "runName", "location", "image",
+    "attemptId", "requirementsDigest", "planDigest", "expiresAt", "maximumCostUsd", "maximumActiveHours"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "tenantId": { "$ref": "#/$defs/uuid" },
+    "subscriptionId": { "$ref": "#/$defs/uuid" },
+    "attemptId": { "$ref": "#/$defs/uuid" },
+    "runName": { "type": "string", "pattern": "^[a-z][a-z0-9]{5,15}$" },
+    "location": { "type": "string", "pattern": "^[a-z][a-z0-9]{2,30}$" },
+    "image": { "type": "string", "pattern": "^ghcr\\.io/ricmmartins/sslz-acceptance@sha256:[0-9a-f]{64}$" },
+    "requirementsDigest": { "$ref": "#/$defs/digest" },
+    "planDigest": { "$ref": "#/$defs/digest" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "maximumCostUsd": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+    "maximumActiveHours": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}
