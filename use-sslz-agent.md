@@ -11,8 +11,7 @@ run the agent or connect to Azure, and it does not receive access to your Azure 
 or secrets.
 You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
 
-The shipped profile supports GitHub Copilot CLI. Claude Code and Codex do not have a maintained native adapter or
-client-specific acceptance tests in this repository; reusing the scripts does not establish equivalent agent behavior.
+The tested launch path is GitHub Copilot CLI. Claude Code and Codex use generated adapters of the same profile (see [Use Claude Code or Codex](#use-claude-code-or-codex)). They have no client-specific acceptance tests, so equivalent agent behavior is not established.
 
 ## In short
 
@@ -186,6 +185,26 @@ remain guarded by their operation-specific contracts; provider apply is disabled
 dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
 not establish application health.
 
+## Use Claude Code or Codex
+
+If you do not use Copilot, generated adapters of the same instructions are included. They are not tested in those
+clients: check each permission prompt, keep approvals on, and never use a bypass mode such as
+`--dangerously-skip-permissions` or `--dangerously-bypass-approvals-and-sandbox`.
+
+For Claude Code, run this in the cloned folder:
+
+```text
+claude --agent sslz-agent
+```
+
+For Codex, run this in the cloned folder:
+
+```text
+codex "Read agent/adapters/codex-sslz-agent.md and follow it as SSLZ Agent for this session."
+```
+
+The adapters live in `.claude/agents/sslz-agent.md` and `agent/adapters/codex-sslz-agent.md`. They are generated from
+`.github/agents/sslz-agent.agent.md` with `node scripts/generate-agent-adapters.mjs`, and CI fails if they drift.
 ## Limits
 
 This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository,
