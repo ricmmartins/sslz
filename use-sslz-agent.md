@@ -5,7 +5,7 @@ description: "Launch SSLZ Agent locally with GitHub Copilot CLI, Claude Code or 
 permalink: /use-sslz-agent/
 ---
 
-Run **SSLZ Agent** locally in GitHub Copilot CLI. The profile, planners, contracts, and documentation are all included
+Run **SSLZ Agent** locally in GitHub Copilot CLI. The agent instructions, planning scripts, safety tests, and documentation are all included
 in the repository's `main` branch, which is the default branch. This page provides setup instructions only. It does not
 run the agent or connect to Azure, and it does not receive access to your Azure tenant, subscriptions, billing account,
 or secrets.
