@@ -5,26 +5,21 @@ description: "Launch SSLZ Agent locally with GitHub Copilot CLI, Claude Code or 
 permalink: /use-sslz-agent/
 ---
 
-Run **SSLZ Agent** locally in GitHub Copilot CLI. The agent instructions, planning scripts, safety tests, and documentation are all included
-in the repository's `main` branch, which is the default branch. This page provides setup instructions only. It does not
-run the agent or connect to Azure, and it does not receive access to your Azure tenant, subscriptions, billing account,
-or secrets.
-You can discuss your workload and run local JSON planners without Azure CLI, an Azure subscription, or Azure login.
+Run **SSLZ Agent** on your computer to plan an Azure starting foundation aligned with SSLZ. Use GitHub Copilot CLI (the
+primary path), Claude Code, or Codex. You describe what you are building, and it explains your options and helps you plan
+them. It only talks and plans: it does not connect to Azure or change anything unless you approve a specific step.
 
-Copilot CLI is the primary launch path. Claude Code and Codex use generated adapters of the same profile (see [Use Claude Code or Codex](#use-claude-code-or-codex)).
+This page provides setup instructions only. It does not receive access to your Azure tenant, subscriptions, billing
+account, or secrets. You can start without Azure CLI, an Azure subscription, or Azure login. The agent, its planning
+scripts, safety tests, and documentation are all in the repository's `main` branch, which is the default branch.
 
 ## In short
 
-SSLZ Agent is an assistant that runs on your computer, inside GitHub Copilot CLI or, with generated copies, Claude Code or Codex. You describe what you are building,
-and it explains your options for a starting foundation on Azure aligned with SSLZ, then helps you plan it. It only
-talks and plans: it does not connect to Azure or change anything unless you approve a specific step.
-
-1. Install Git, Node.js and GitHub Copilot CLI.
+1. Install Git, Node.js and GitHub Copilot CLI (or use [Claude Code or Codex](#use-claude-code-or-codex)).
 2. Clone the SSLZ repository.
 3. Start the agent and tell it about your project.
 
-The sections below give the exact commands. Everything after "Check local planning without Azure" is optional reading.
-
+The sections below give the exact commands. Everything under "Reference (optional)" is optional reading.
 ## Install the local prerequisites
 
 You need Git and [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
@@ -52,7 +47,7 @@ different prerequisites and approval responsibilities.
 
 ## Clone the repository
 
-The agent profile and its implementation live together on `main`. Clone the repository into a parent directory where
+The agent profile and its implementation live together on `main`. The profile is the agent's instruction file. Clone the repository into a parent directory where
 `sslz-agent` does not already exist, using `sslz-agent` as the clone folder. Git will refuse to clone over a nonempty
 directory; do not delete or overwrite an existing checkout to follow this guide.
 
@@ -94,12 +89,6 @@ launcher; if the host cannot request an approval, the agent must report that act
 specific tool, command, local path, or official documentation URL needed for the next step. Keep the profile
 interactive and never launch this profile with `--allow-all`.
 
-A personal profile with the same ID in `~/.copilot/agents/` overrides the repository profile. On Windows, that folder is
-`$HOME\.copilot\agents`. Check for both `sslz-agent.agent.md` and `sslz-agent.md`, and any conflicting display name.
-Resolve a conflict yourself before continuing; these instructions do not rename, remove, or overwrite your profiles.
-If the agent is missing, confirm the repository root, `main` branch, profile file, folder trust, and CLI version, then
-restart the CLI. See GitHub's [custom-agent guidance](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli).
-
 Try an interactive request such as:
 
 ```text
@@ -120,7 +109,7 @@ answer questions and review tool requests; do not add blanket permissions to mak
 ## Use Claude Code or Codex
 
 If you use Claude Code or Codex instead, install it from its own documentation, clone
-the repository as above, and start it in the cloned folder. Both use generated copies of the same instructions. They
+the repository as above, and start it in the cloned folder. Claude Code and Codex use generated adapters of the same instructions. They
 are not yet validated in those clients, so check each permission prompt, keep approvals on, and never use a
 bypass mode such as `--dangerously-skip-permissions` or `--dangerously-bypass-approvals-and-sandbox`.
 
@@ -138,7 +127,37 @@ codex "Read agent/adapters/codex-sslz-agent.md and follow it as SSLZ Agent for t
 
 The copies live in `.claude/agents/sslz-agent.md` and `agent/adapters/codex-sslz-agent.md`. Do not edit them by hand:
 they are generated from `.github/agents/sslz-agent.agent.md` and CI fails if they drift.
-## Check local planning without Azure
+
+## Approve live access separately
+
+Only when you choose a specific live read should the agent explain the exact read-only repository command, target,
+required permissions, and information it will read. Then install
+[Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) if needed and authenticate locally for that
+approved scope. Review the active account and subscription before allowing the inspection. Azure authentication is not
+consent to subsequent reads or writes.
+
+Keep Copilot CLI's normal permission prompts enabled. The custom-agent `execute` capability is broad; the profile does
+not create an operating-system shell allowlist. Reject commands outside the documented repository entry points. Never
+use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`, or `--yolo` with this walkthrough. Do
+not paste credentials, tokens, billing records, signing keys, customer data, tenant IDs, or subscription IDs into chat
+or tracked files.
+
+Local artifact generation and live preview need separate review and approval. Provider registration and deployment
+remain guarded by their operation-specific contracts; provider apply is disabled in this profile. Migration and
+dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
+not establish application health.
+
+## Reference (optional)
+
+### If the agent does not appear
+
+A personal profile with the same ID in `~/.copilot/agents/` overrides the repository profile. On Windows, that folder is
+`$HOME\.copilot\agents`. Check for both `sslz-agent.agent.md` and `sslz-agent.md`, and any conflicting display name.
+Resolve a conflict yourself before continuing; these instructions do not rename, remove, or overwrite your profiles.
+If the agent is missing, confirm the repository root, `main` branch, profile file, folder trust, and CLI version, then
+restart the CLI. See GitHub's [custom-agent guidance](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli).
+
+### Check local planning without Azure
 
 These optional checks read tracked files and sanitized fixtures. Run them yourself, or approve these exact commands when
 the agent proposes them:
@@ -170,7 +189,7 @@ existing reports, and approve both local write targets before running that comma
 Generated `.bicepparam` and `.tfvars` files can require separate read-only confirmations. If a confirmation is
 unavailable, the agent must report that readback as blocked; generation alone does not verify the file contents.
 
-## Current documentation (optional)
+### Current documentation (optional)
 
 For up-to-date Azure documentation, you can add the public
 [Microsoft Learn MCP server](https://learn.microsoft.com/en-us/training/support/mcp) (HTTP,
@@ -179,26 +198,8 @@ the [MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/cus
 
 A configured server does not guarantee that its tools are exposed to the selected agent. If Learn MCP is unavailable, the
 agent falls back to approved fetches of `learn.microsoft.com` pages, or to local facts only, and says so.
-## Approve live access separately
 
-Only when you choose a specific live read should the agent explain the exact read-only repository command, target,
-required permissions, and information it will read. Then install
-[Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) if needed and authenticate locally for that
-approved scope. Review the active account and subscription before allowing the inspection. Azure authentication is not
-consent to subsequent reads or writes.
-
-Keep Copilot CLI's normal permission prompts enabled. The custom-agent `execute` capability is broad; the profile does
-not create an operating-system shell allowlist. Reject commands outside the documented repository entry points. Never
-use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`, or `--yolo` with this walkthrough. Do
-not paste credentials, tokens, billing records, signing keys, customer data, tenant IDs, or subscription IDs into chat
-or tracked files.
-
-Local artifact generation and live preview need separate review and approval. Provider registration and deployment
-remain guarded by their operation-specific contracts; provider apply is disabled in this profile. Migration and
-dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
-not establish application health.
-
-## Limits
+### Limits
 
 This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository, and
 a hosted agent has no automatic access to your Azure tenant. See GitHub's
@@ -206,7 +207,7 @@ a hosted agent has no automatic access to your Azure tenant. See GitHub's
 and [custom-agent configuration reference](https://docs.github.com/en/copilot/reference/custom-agents-configuration).
 
 The `main` branch includes adoption conversation guidance, documentation grounding when the required tools are exposed,
-local contract checks, and fixture-based planning. Fixture replay checks are not evidence that the agent ran the planner, and an external planner invocation and a CLI
+local contract checks, and fixture-based planning. Checks on sample data are not evidence that the agent ran the planner, and an external planner invocation and a CLI
 response do not prove that the agent ran the planner itself. This guide does not establish an autonomous
 conversation-to-deployment flow or real tenant readiness. Record a remotely available revision when you need repeatable
 evidence. See the [SSLZ Agent capability and evidence guide]({{ '/agent/' | relative_url }}) for links to
