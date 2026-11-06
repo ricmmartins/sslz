@@ -176,7 +176,8 @@ description: "A stripped-down, opinionated, deployable Azure Landing Zone for st
       <div class="step-number">1</div>
       <h3>Prerequisites</h3>
       <span class="step-time">5 min</span>
-      <p>Clone the repo, log in to Azure, and validate your environment. You'll need Azure CLI, two subscriptions (prod + nonprod), and Owner permissions.</p>
+      <p>Clone the repo, log in to Azure, and validate your environment. You'll need <a href="https://learn.microsoft.com/cli/azure/install-azure-cli">Azure CLI</a>, <a href="https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription">two subscriptions</a> (prod + nonprod), and <a href="https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal">Owner permission</a> on both. If you create the subscriptions yourself, you are Owner by default.</p>
+      <p><strong>On Windows, install <a href="https://git-scm.com/download/win">Git for Windows</a> and run every command in Git Bash.</strong> The <code>.sh</code> scripts do not run in PowerShell or Command Prompt. Azure Cloud Shell and WSL also work.</p>
       <details>
         <summary>Show commands</summary>
 <pre><code>git clone https://github.com/ricmmartins/sslz.git
@@ -221,7 +222,10 @@ cd ../../../..</code></pre>
       <div class="step-number">3</div>
       <h3>Deploy</h3>
       <span class="step-time">20 min</span>
-      <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values (set <code>budgetStartDate</code> to the first day of the current month, or the deployment fails), preview with what-if/plan, then deploy.</p>
+      <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values, preview with what-if/plan, then deploy.</p>
+      <div class="callout-warning">
+        <p><strong>Before you deploy, change <code>budgetStartDate</code>.</strong> The example file ships with an old date (<code>2026-03-01T00:00:00Z</code>). Set it to the first day of the current month, for example <code>2026-11-01T00:00:00Z</code>. A past or mid-month date makes the budget deployment fail. In Terraform the variable is <code>budget_start_date</code>.</p>
+      </div>
       <details>
         <summary>Bicep commands</summary>
 <pre><code>cd infra/bicep
