@@ -81,7 +81,8 @@ You need:
 - **Azure CLI** — [Install guide](https://learn.microsoft.com/cli/azure/install-azure-cli)
 - **Terraform** >= 1.5.0 — [Install guide](https://developer.hashicorp.com/terraform/install) (only for Terraform option)
 - **Two Azure subscriptions** — One for prod, one for non-prod. [Create a subscription](https://learn.microsoft.com/azure/cost-management-billing/manage/create-subscription)
-- **Permissions** — Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups)
+- **Permissions** — Owner on both subscriptions (or Owner on the Tenant Root Group if deploying management groups). If you created the subscriptions yourself you are Owner by default; otherwise see [how to assign roles](https://learn.microsoft.com/azure/role-based-access-control/role-assignments-portal).
+- **Windows users** — Install [Git for Windows](https://git-scm.com/download/win) and run every command in **Git Bash**. The `.sh` scripts do not run in PowerShell or Command Prompt.
 
 Run the pre-flight check to verify everything:
 
@@ -166,7 +167,7 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 - `securityContactEmail` — Email for Defender for Cloud alerts.
 - `budgetAlertEmails` — List of emails for budget notifications.
 - `monthlyBudgetAmount` — Your monthly budget in USD.
-- `budgetStartDate` — First day of the deployment month at `00:00:00Z`; replace the example date.
+- `budgetStartDate` — **Required change.** The example date is old. Set it to the first day of the current month (for example `'2026-11-01T00:00:00Z'`) or the budget deployment fails.
 - `location`, `allowedLocations`, `logAnalyticsWorkspaceLocation` — Review the deployment and workspace regions together; changing the CLI deployment location alone does not move resources.
 - `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
 
