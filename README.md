@@ -337,9 +337,10 @@ remove the `prevent_destroy` lifecycle guard to bypass this review.
 # Bicep (deletes only the two resource groups)
 ./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany
 
-# Bicep, also removing the baseline's subscription-level policy assignments,
-# diagnostic setting, budget and security contact. Use only on a subscription
-# that is not shared with other workloads. Defender plans are left unchanged.
+# Either tool, plus leftovers from the other tool or outside Terraform state:
+# baseline resource groups, policy assignments, diagnostic setting, budget and
+# security contact. Use only on a subscription that is not shared with other
+# workloads. Defender plans are left unchanged.
 ./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings
 ```
 
