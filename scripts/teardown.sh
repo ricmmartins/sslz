@@ -20,6 +20,7 @@ ENV=""
 AUTO_APPROVE=false
 REMOVE_BACKEND=false
 INCLUDE_SUBSCRIPTION_SETTINGS=false
+INCLUDE_MANAGEMENT_GROUP=false
 
 usage() {
   cat <<EOF
@@ -36,6 +37,10 @@ Options:
                      policy assignments (and their role assignments), diagnostic setting, budget and
                      security contact. Requires --company. Do not use on a subscription shared with
                      other workloads. Defender plans stay.
+  --include-management-group
+                     Also move the subscriptions in mg-<company> back to the Tenant Root Group and
+                     delete the group. Requires --company. Run it only after tearing down both
+                     prod and nonprod, because the group is shared.
   --help             Show this help
 
 Examples:
@@ -52,6 +57,7 @@ while [[ $# -gt 0 ]]; do
     --yes) AUTO_APPROVE=true; shift ;;
     --remove-backend) REMOVE_BACKEND=true; shift ;;
     --include-subscription-settings) INCLUDE_SUBSCRIPTION_SETTINGS=true; shift ;;
+    --include-management-group) INCLUDE_MANAGEMENT_GROUP=true; shift ;;
     --company) COMPANY="$2"; shift 2 ;;
     --help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
@@ -78,10 +84,40 @@ if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]] && ! [[ "${COMPANY:-}" =~ ^[
   exit 1
 fi
 
+if [[ "$INCLUDE_MANAGEMENT_GROUP" == "true" ]] && ! [[ "${COMPANY:-}" =~ ^[A-Za-z][A-Za-z0-9-]*$ ]]; then
+  echo "Error: --include-management-group requires --company with the same company identifier used at deploy time."
+  exit 1
+fi
+
 if [[ "$TOOL" == "bicep" ]] && ! [[ "${COMPANY:-}" =~ ^[A-Za-z][A-Za-z0-9-]*$ ]]; then
   echo "Error: Bicep teardown requires --company with the same company identifier used at deploy time (letters, digits, hyphens)."
   exit 1
 fi
+
+cleanup_management_group() {
+  local mg="mg-${COMPANY}"
+  if ! az account management-group show --name "$mg" &>/dev/null; then
+    echo "Management group $mg not found. Nothing to delete."
+    return
+  fi
+  echo "Removing management group $mg..."
+  local children subs sub
+  children=$(az account management-group show --name "$mg" --expand --query "children[?type=='Microsoft.Management/managementGroups'].name" -o tsv | tr -d '\r')
+  if [[ -n "$children" ]]; then
+    echo "$mg has child management groups ($children). Delete them first. Skipping."
+    return
+  fi
+  subs=$(az account management-group show --name "$mg" --expand --query "children[].name" -o tsv | tr -d '\r')
+  for sub in $subs; do
+    echo "Moving subscription $sub to the Tenant Root Group..."
+    az account management-group subscription remove --name "$mg" --subscription "$sub" || true
+  done
+  if az account management-group delete --name "$mg"; then
+    echo "Deleted $mg."
+  else
+    echo "Could not delete $mg. Check that it is empty and that you have access at the root scope."
+  fi
+}
 
 echo "=== Landing Zone Teardown ==="
 echo "  Tool:        $TOOL"
@@ -282,6 +318,10 @@ elif [[ "$TOOL" == "bicep" ]]; then
   echo ""
   echo "  # Restore prior Defender plan settings from your pre-deployment inventory."
   echo "  # Do not reset shared subscription plans to Free without checking their prior state."
+fi
+
+if [[ "$INCLUDE_MANAGEMENT_GROUP" == "true" ]]; then
+  cleanup_management_group
 fi
 
 echo ""

@@ -324,8 +324,9 @@ az network nsg list --query "[].name" -o tsv</code></pre>
 # leftovers (policy assignments and their role assignments, the activity-log
 # diagnostic setting, budget, security contact), add the flag below to either
 # tool. Use it only on a subscription with no other workloads. Defender plans stay.
-# Teardown does not remove the management group (mg-&lt;company&gt;) or your subscriptions.
-./scripts/teardown.sh --tool terraform --env prod --company yourcompany --include-subscription-settings</code></pre>
+# The management group (mg-&lt;company&gt;) stays by default. After tearing down both prod and nonprod,
+# add --include-management-group to delete it. Subscriptions are never deleted.
+./scripts/teardown.sh --tool terraform --env prod --company yourcompany --include-subscription-settings [--include-management-group]</code></pre>
       </details>
     </div>
   </div>

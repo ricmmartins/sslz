@@ -395,9 +395,12 @@ remove the `prevent_destroy` lifecycle guard to bypass this review.
 # contact. Use only on a subscription that is not shared with other workloads.
 # Defender plans are left unchanged.
 ./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings
+
+# After both environments are gone, also delete mg-<company>:
+./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings --include-management-group
 ```
 
-Teardown does not remove the management group (`mg-<company>`) or your subscriptions. Move the subscriptions back to the Tenant Root Group, then delete the group in the portal or with `az account management-group delete --name mg-<company>`. Switching between Bicep and Terraform on the same subscription without running teardown first causes `already exists` and `RoleAssignmentUpdateNotPermitted` errors.
+By default, teardown does not remove the management group (`mg-<company>`) or your subscriptions. After you tear down both prod and nonprod, add `--include-management-group` to move the subscriptions back to the Tenant Root Group and delete the group. The subscriptions themselves are never deleted. Switching between Bicep and Terraform on the same subscription without running teardown first causes `already exists` and `RoleAssignmentUpdateNotPermitted` errors.
 
 ## Day-1 Checklist
 
