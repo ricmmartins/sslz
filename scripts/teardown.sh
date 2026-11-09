@@ -19,6 +19,7 @@ TOOL=""
 ENV=""
 AUTO_APPROVE=false
 REMOVE_BACKEND=false
+INCLUDE_SUBSCRIPTION_SETTINGS=false
 
 usage() {
   cat <<EOF
@@ -30,6 +31,11 @@ Options:
   --company          Company name used in resource naming (required for Bicep teardown)
   --yes              Skip confirmation prompt
   --remove-backend   Also remove Terraform state backend (storage account + lock)
+  --include-subscription-settings
+                     Also delete leftovers from either tool: baseline resource groups, exact-named
+                     policy assignments (and their role assignments), diagnostic setting, budget and
+                     security contact. Requires --company. Do not use on a subscription shared with
+                     other workloads. Defender plans stay.
   --help             Show this help
 
 Examples:
@@ -45,6 +51,7 @@ while [[ $# -gt 0 ]]; do
     --env) ENV="$2"; shift 2 ;;
     --yes) AUTO_APPROVE=true; shift ;;
     --remove-backend) REMOVE_BACKEND=true; shift ;;
+    --include-subscription-settings) INCLUDE_SUBSCRIPTION_SETTINGS=true; shift ;;
     --company) COMPANY="$2"; shift 2 ;;
     --help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
@@ -63,6 +70,11 @@ fi
 
 if [[ "$ENV" != "prod" && "$ENV" != "nonprod" ]]; then
   echo "Error: --env must be 'prod' or 'nonprod'."
+  exit 1
+fi
+
+if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]] && ! [[ "${COMPANY:-}" =~ ^[a-z][a-z0-9-]*$ ]]; then
+  echo "Error: --include-subscription-settings requires --company with a lowercase company identifier."
   exit 1
 fi
 
@@ -96,6 +108,38 @@ if [[ "$AUTO_APPROVE" != "true" ]]; then
   fi
 fi
 
+cleanup_subscription_settings() {
+  local SUB_ID SCOPE NAME PRINCIPAL RA RGS_LEFT
+  SUB_ID=$(az account show --query id -o tsv)
+  SCOPE="/subscriptions/${SUB_ID}"
+  echo ""
+  echo "=== Removing leftover baseline settings (${SCOPE}) ==="
+  # Catches items created by the other tool or left outside Terraform state.
+  RGS_LEFT=$(az group list --query "[?name=='rg-${COMPANY}-${ENV}-monitoring' || name=='rg-${COMPANY}-${ENV}-networking'].name" -o tsv)
+  for NAME in $RGS_LEFT; do
+    echo "Deleting leftover resource group $NAME"
+    az group delete --name "$NAME" --yes --no-wait
+  done
+  for NAME in mcsb-audit allowed-locations allowed-locations-rg require-env-tag-rg require-team-tag-rg inherit-env-tag inherit-team-tag activity-log-diag; do
+    if az policy assignment show --name "$NAME" --scope "$SCOPE" &>/dev/null; then
+      PRINCIPAL=$(az policy assignment show --name "$NAME" --scope "$SCOPE" --query identity.principalId -o tsv 2>/dev/null || true)
+      # Remove the managed identity's role assignments before the policy; they are not deleted with it.
+      if [[ -n "$PRINCIPAL" && "$PRINCIPAL" != "None" ]]; then
+        for RA in $(az role assignment list --assignee "$PRINCIPAL" --scope "$SCOPE" --query "[].id" -o tsv 2>/dev/null || true); do
+          echo "Deleting role assignment $RA"
+          az role assignment delete --ids "$RA" || true
+        done
+      fi
+      echo "Deleting policy assignment $NAME"
+      az policy assignment delete --name "$NAME" --scope "$SCOPE" || true
+    fi
+  done
+  az monitor diagnostic-settings subscription delete --name diag-activity-log-to-law --subscription "$SUB_ID" --yes 2>/dev/null || true
+  az consumption budget delete --budget-name "budget-${COMPANY}-${ENV}-monthly" --subscription "$SUB_ID" 2>/dev/null || true
+  az security contact delete --name default 2>/dev/null || true
+  echo "Left in place: Defender for Cloud plans. Restore them from your pre-deployment inventory."
+}
+
 if [[ "$TOOL" == "terraform" ]]; then
   echo ""
   echo "=== Running Terraform Destroy ==="
@@ -128,6 +172,10 @@ if [[ "$TOOL" == "terraform" ]]; then
 
   echo ""
   echo "Terraform destroy complete."
+
+  if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]]; then
+    cleanup_subscription_settings
+  fi
 
   if [[ "$REMOVE_BACKEND" == "true" ]]; then
     echo ""
@@ -183,6 +231,10 @@ elif [[ "$TOOL" == "bicep" ]]; then
     echo ""
     echo "Resource group deletions initiated (running in background)."
     echo "Monitor progress: az group list --query \"[?starts_with(name, 'rg-') && contains(name, '-${ENV}')].{name:name, state:properties.provisioningState}\" -o table"
+  fi
+
+  if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]]; then
+    cleanup_subscription_settings
   fi
 
   echo ""
