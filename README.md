@@ -138,14 +138,15 @@ az deployment tenant create \
 
 > **If you get `AuthorizationFailed` on `Microsoft.Resources/deployments/validate/action`:** Bicep runs this as a *tenant-scope deployment*, which needs deployment permission at the tenant root (`/`). Owner on your subscriptions is not enough, and neither is Global Administrator by default. A Global Administrator can grant it ([Microsoft docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access)):
 >
-> 1. Turn on **Access management for Azure resources** in the Azure portal under Microsoft Entra ID > Properties ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
+> Do **both** steps 1 and 2, in order. They do different things: step 1 lets a Global Administrator manage Azure roles at the root (it adds User Access Administrator at `/`), and step 2 uses that to give yourself the role that actually allows the deployment. Skip both if you already have Contributor or Owner at `/`.
+>
+> 1. Turn on **Access management for Azure resources** in the Azure portal under Microsoft Entra ID > Properties ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)). The portal is not mandatory: you can run `az rest --method post --url "/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01"` instead ([REST option](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
 > 2. Give yourself a role at the root scope. Contributor is enough to create management groups:
 >
 >    ```bash
 >    az role assignment create --assignee "<your-user@domain>" --scope "/" --role "Contributor"
 >    ```
->
-> 3. Run `az logout`, then `az login`, and repeat the deployment command. The new role can take several minutes to propagate; if you now get `AuthorizationFailed` on `Microsoft.Resources/deployments/write`, wait and retry (the Azure CLI may print a Python traceback that hides this message). If it still fails after about 15 minutes, assign `Owner` instead of `Contributor` at `/`, run `az logout` and `az login`, and retry.
+>> 3. Run `az logout`, then `az login`, and repeat the deployment command. The new role can take several minutes to propagate; if you now get `AuthorizationFailed` on `Microsoft.Resources/deployments/write`, wait and retry (the Azure CLI may print a Python traceback that hides this message). If it still fails after about 15 minutes, assign `Owner` instead of `Contributor` at `/`, run `az logout` and `az login`, and retry.
 > 4. When you are done, remove the role assignment (`az role assignment delete` with the same arguments) and turn the elevation toggle off.
 >
 > Option B (Terraform) calls the Management Groups API directly and usually does not need this elevation.
