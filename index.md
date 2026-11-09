@@ -224,7 +224,7 @@ cd ../../../..</code></pre>
       <span class="step-time">20 min</span>
       <p>Deploy the landing zone — policies, networking, monitoring, Defender for Cloud, and budgets. Copy the parameter file, edit with your values, preview with what-if/plan, then deploy.</p>
       <div class="callout-warning">
-        <p><strong>Before you deploy, change <code>budgetStartDate</code>.</strong> The example file ships with an old date (<code>2026-03-01T00:00:00Z</code>). Set it to the first day of the current month, for example <code>2026-11-01T00:00:00Z</code>. A past or mid-month date makes the budget deployment fail. In Terraform the variable is <code>budget_start_date</code>.</p>
+        <p><strong>Bicep: before you deploy, change <code>budgetStartDate</code>.</strong> The example file ships with an old date (<code>2026-03-01T00:00:00Z</code>). Set it to the first day of the current month, for example <code>2026-11-01T00:00:00Z</code>. A past or mid-month date makes the budget deployment fail. Terraform: leave <code>budget_start_date</code> out and it uses the first day of the current month automatically.</p>
       </div>
       <details>
         <summary>Bicep commands</summary>

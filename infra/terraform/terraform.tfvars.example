@@ -1,33 +1,42 @@
 # ==============================================================================
-# Copy this file to terraform.tfvars and fill in your values
+# Copy this file to terraform.tfvars, then edit ONLY the six values in
+# section 1. Everything in section 2 is optional: the defaults are fine.
 # ==============================================================================
 
-# REQUIRED — Your Azure subscription ID (UUID format)
+# ------------------------------------------------------------------------------
+# SECTION 1: CHANGE THESE (required)
+# ------------------------------------------------------------------------------
+
+# Your Azure subscription ID (UUID). Find it with: az account show --query id -o tsv
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
-# REQUIRED — Your company name (used in resource naming, e.g., rg-mycompany-prod-monitoring)
+# Your company name, lowercase letters and digits (used in resource names)
 company_name = "mycompany"
 
-# REQUIRED — Environment: "prod" or "nonprod"
+# "prod" or "nonprod". Use the one that matches the subscription above.
 environment = "prod"
 
-# Azure region to deploy into (default: eastus2)
-location = "eastus2"
-
-# REQUIRED — Email addresses that receive budget alerts
+# Email addresses that receive budget alerts
 budget_alert_emails = [
   "platform-team@mycompany.com",
   "cto@mycompany.com"
 ]
 
-# REQUIRED — Email for Defender for Cloud security alerts
+# Email for Defender for Cloud security alerts
 security_contact_email = "security@mycompany.com"
 
-# Monthly budget in USD (default: 5000)
+# Monthly budget in USD. Alerts only; this is not a spending cap.
 monthly_budget_amount = 5000
 
-# Budget start date — leave empty to auto-set to the 1st of the current month.
-# If you set this manually, it must be the first of a month (e.g., "2026-03-01T00:00:00Z").
+# ------------------------------------------------------------------------------
+# SECTION 2: OPTIONAL (leave as is unless you know you need to change it)
+# ------------------------------------------------------------------------------
+
+# Azure region to deploy into (default: eastus2)
+location = "eastus2"
+
+# Budget start date. Leave this commented out: it is set automatically to the
+# 1st of the current month. If you set it, it must be the 1st of a month.
 # budget_start_date = "2026-03-01T00:00:00Z"
 
 # Deploy VNet and networking resources (default: true)
