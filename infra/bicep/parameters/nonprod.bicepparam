@@ -1,23 +1,39 @@
 // ⚠️  EXAMPLE VALUES — copy to nonprod.local.bicepparam and customize before deploying.
 using '../main.bicep'
 
-param location = 'eastus2'
+// ============================================================================
+// SECTION 1: REQUIRED. Review and change every value in this section.
+// ============================================================================
 param companyName = 'mycompany'
 param environment = 'nonprod'
+param location = 'eastus2'
+param securityContactEmail = 'security@mycompany.com'
 param monthlyBudgetAmount = 2000
 param budgetAlertEmails = [
   'platform-team@mycompany.com'
 ]
-param deployNetworking = true
-param budgetStartDate = '2026-03-01T00:00:00Z' // set to 1st of your deployment month
+param budgetStartDate = '2026-03-01T00:00:00Z' // must be the 1st of your deployment month
+
+// ============================================================================
+// SECTION 2: OPTIONAL. Defaults are defined in main.bicep (see @description).
+// ============================================================================
+param deployNetworking = true // false skips the VNet and networking resources
 param enableDefenderForServers = false
 param enableDefenderForContainers = false
 param enableDefenderForDatabases = false
 param enableDefenderForStorage = false
-param securityContactEmail = 'security@mycompany.com'
 param allowedLocations = [
   'eastus2'
   'centralus'
 ]
 param logAnalyticsWorkspaceLocation = 'eastus2'
 param defenderWorkspaceSharedSubscription = false
+
+// Other optional parameters (uncomment to override the default):
+// param vnetAddressPrefix = '10.1.0.0/16'                       // must be a /16
+// param appSubnetDelegation = 'Microsoft.Web/serverFarms'       // or 'Microsoft.App/environments'
+// param logRetentionInDays = 90                                 // 30-730
+// param logDailyQuotaGb = 5                                     // -1 = unlimited
+// param existingLogAnalyticsWorkspaceId = ''                    // reuse a central workspace
+// param enableDefenderForKeyVault = true
+// param tags = { owner: 'platform-team' }
