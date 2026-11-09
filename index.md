@@ -309,9 +309,11 @@ az network nsg list --query "[].name" -o tsv</code></pre>
 ./scripts/teardown.sh --tool terraform --env prod --company yourcompany
 ./scripts/teardown.sh --tool bicep --env prod --company yourcompany
 
-# Bicep teardown deletes only the resource groups. Subscription-level
-# policy assignments, role assignments, the activity-log diagnostic setting,
-# budget, security contact and Defender plans stay; remove them yourself.</code></pre>
+# By default, Bicep teardown deletes only the resource groups. To also remove
+# leftovers (policy assignments and their role assignments, the activity-log
+# diagnostic setting, budget, security contact), add the flag below to either
+# tool. Use it only on a subscription with no other workloads. Defender plans stay.
+./scripts/teardown.sh --tool terraform --env prod --company yourcompany --include-subscription-settings</code></pre>
       </details>
     </div>
   </div>
