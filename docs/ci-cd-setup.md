@@ -183,7 +183,7 @@ az role assignment create \
 
 ## Step 6: Configure GitHub Repository Secrets (5 min)
 
-In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these as **repository-level** secrets (not environment secrets, because the validate/plan jobs don't reference a GitHub environment):
+In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add these as **repository-level** secrets (the Azure login step reads them as secrets.*):
 
 | Secret Name | Value | Where to Find It |
 |---|---|---|
@@ -194,28 +194,24 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 
 > **Single subscription?** If you only have one subscription, set both `AZURE_SUBSCRIPTION_ID_PROD` and `AZURE_SUBSCRIPTION_ID_NONPROD` to the same value.
 
-Also add these **repository-level variables** (Settings > Secrets and variables > Actions > Variables tab):
+The bundled deploy workflows (`deploy-bicep.yml` and `deploy-terraform.yml`) read only these four secrets plus the
+optional repository variables `SSLZ_DEPLOYMENT_APPROVAL_PUBLIC_KEY_FILE`, `SSLZ_TERRAFORM_PROVENANCE_PUBLIC_KEY_FILE`
+and `SSLZ_TERRAFORM_EXECUTABLE`. They do not read company name, budget, region or backend values. Those come from the
+approved plan (agent path) or from your own parameter files and workflow (classic path).
 
-| Variable Name | Value | Used By | Purpose |
-|---|---|---|---|
-| `AZURE_LOCATION` | Azure region (e.g., `eastus2`) | Bicep + Terraform | Deployment location |
-| `COMPANY_NAME` | Your company name (e.g., `acme`) | Terraform only | Used in resource naming |
-| `BUDGET_ALERT_EMAILS` | `team@acme.com,cto@acme.com` | Terraform only | Budget alert recipients (comma-separated) |
-| `SECURITY_CONTACT_EMAIL` | `security@acme.com` | Terraform only | Defender alert recipient |
-| `TF_BACKEND_STORAGE_ACCOUNT` | Storage account name from Step 5 | Terraform only | Remote state backend |
-| `TF_BACKEND_RESOURCE_GROUP` | `rg-terraform-state` | Terraform only | Resource group for state (default: `rg-terraform-state`) |
-
-> **Bicep users:** The Terraform-only variables above have sensible defaults in the workflow, but Bicep gets its values from parameter files instead. See Step 5b below.
+If you write your own Terraform workflow, pass the values from Step 5 (backend storage account and resource group) and
+your `terraform.tfvars` settings to it yourself.
 
 ### Step 6b: Customize Bicep Parameter Files (Bicep only)
 
-If deploying with the Bicep workflow, update the parameter files with your actual values **before** triggering a deploy:
+If you automate Bicep yourself, update the parameter files with your actual values **before** triggering a deploy:
 
 - `infra/bicep/parameters/prod.bicepparam` — production settings
 - `infra/bicep/parameters/nonprod.bicepparam` — non-production settings
 
-At minimum, update `companyName`, `budgetAlertEmails`, `securityContactEmail`, and `allowedLocations`. Commit and push the changes.
-
+Change every value in SECTION 1 (`companyName`, `location`, `securityContactEmail`, `monthlyBudgetAmount`,
+`budgetAlertEmails`, `budgetStartDate`) and review `allowedLocations`. `budgetStartDate` must be the first day of the
+month of your deployment. Commit and push the changes.
 ## Step 7: Create GitHub Environments (Optional, Recommended)
 
 GitHub Environments add an approval gate before production deployments.
@@ -242,13 +238,13 @@ Terraform, and runs repository contract tests without deploying Azure resources.
 
 ### Automate the classic direct-operator path
 
-Use the same commands from the [Quick Start]({{ '/' | relative_url }}#quick-start) in a workflow you own: run
+Use the same commands from the [Quick Start](https://startupscalelanding.zone/#quick-start) in a workflow you own: run
 `az deployment sub what-if` or `terraform plan`, retain the review output, require a protected environment for writes,
 and invoke `az deployment sub create` or `terraform apply` only after human approval. The operator remains responsible
 for identity, state, review, validation, and rollback.
 
 The repository's bundled approval-bound deployment workflows belong to the
-[optional agent-aware experience]({{ '/agent/docs/approved-deployment-integration/' | relative_url }}); they are not
+[optional agent-aware experience](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/); they are not
 required by the classic Quick Start.
 
 ## Troubleshooting
