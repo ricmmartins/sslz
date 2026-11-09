@@ -138,14 +138,19 @@ az deployment tenant create \
 
 > **If you get `AuthorizationFailed` on `Microsoft.Resources/deployments/validate/action`:** Bicep runs this as a *tenant-scope deployment*, which needs deployment permission at the tenant root (`/`). Owner on your subscriptions is not enough, and neither is Global Administrator by default. A Global Administrator can grant it ([Microsoft docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access)):
 >
-> 1. Turn on **Access management for Azure resources** in the Azure portal under Microsoft Entra ID > Properties ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
+> Do **both** steps 1 and 2, in order. They do different things: step 1 lets a Global Administrator manage Azure roles at the root (it adds User Access Administrator at `/`), and step 2 uses that to give yourself the role that actually allows the deployment. Skip both if you already have Contributor or Owner at `/`.
+>
+> 1. Elevate your access. Choose one option:
+>    - **Portal:** turn on **Access management for Azure resources** under Microsoft Entra ID > Properties.
+>    - **Command:** `az rest --method post --url "/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01"`. It prints nothing when it works.
+>
+>    Both do the same thing ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
 > 2. Give yourself a role at the root scope. Contributor is enough to create management groups:
 >
 >    ```bash
 >    az role assignment create --assignee "<your-user@domain>" --scope "/" --role "Contributor"
 >    ```
->
-> 3. Run `az logout`, then `az login`, and repeat the deployment command. The new role can take several minutes to propagate; if you now get `AuthorizationFailed` on `Microsoft.Resources/deployments/write`, wait and retry (the Azure CLI may print a Python traceback that hides this message). If it still fails after about 15 minutes, assign `Owner` instead of `Contributor` at `/`, run `az logout` and `az login`, and retry.
+>> 3. Run `az logout`, then `az login`, and repeat the deployment command. The new role can take several minutes to propagate; if you now get `AuthorizationFailed` on `Microsoft.Resources/deployments/write`, wait and retry (the Azure CLI may print a Python traceback that hides this message). If it still fails after about 15 minutes, assign `Owner` instead of `Contributor` at `/`, run `az logout` and `az login`, and retry.
 > 4. When you are done, remove the role assignment (`az role assignment delete` with the same arguments) and turn the elevation toggle off.
 >
 > Option B (Terraform) calls the Management Groups API directly and usually does not need this elevation.
@@ -190,7 +195,7 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 Everything else has a default in `main.bicep`, so you can leave it out. To override a default, add a line `param <name> = <value>` to your `.local.bicepparam` file. The full list, with descriptions and allowed values, is in the `@description` comments in [`infra/bicep/main.bicep`](infra/bicep/main.bicep). The ones you are most likely to change:
 - `deployNetworking` — `true` by default. Set `false` to skip the VNet and networking resources.
 - `vnetAddressPrefix` — Must be a `/16`. Defaults to `10.0.0.0/16` for prod and `10.1.0.0/16` for nonprod.
-- `appSubnetDelegation` — `Microsoft.Web/serverFarms` (App Service, default) or `Microsoft.App/environments` (Container Apps).
+- `appSubnetDelegation` — Which Azure service is allowed to use the app subnet (`snet-app`). Keep the default `Microsoft.Web/serverFarms` for App Service or Functions. Use `Microsoft.App/environments` for Azure Container Apps. A subnet can be delegated to only one of them, so pick the one you will run.
 - `logRetentionInDays` (30-730, default 90) and `logDailyQuotaGb` (default 5, `-1` for unlimited).
 - `enableDefenderForServers`, `enableDefenderForContainers`, `enableDefenderForDatabases`, `enableDefenderForKeyVault` — Defender plans. Defaults depend on the environment.
 - `existingLogAnalyticsWorkspaceId` — Reuse an approved central workspace instead of creating one.
