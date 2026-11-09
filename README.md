@@ -136,17 +136,17 @@ az deployment tenant create \
 
 > Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step, and use lowercase letters and digits (starting with a letter). Terraform enforces this. Bicep accepts other characters, but the name ends up in every resource group and resource name (`rg-<company>-prod-...`), and many Azure names must be lowercase.
 >
-> The management group is the one place where a friendly name makes sense. Its ID is always `mg-<company>`, and its portal name defaults to `<company> Landing Zone`. To show `Martins Landing Zone` instead, add `displayName='Martins Landing Zone'` to the Bicep command, or `-var='display_name=Martins Landing Zone'` to the Terraform command.
+> The management group is the one place where a friendly name makes sense. Its ID is always `mg-<company>`, and its portal name defaults to `<company> Landing Zone`. To show `Contoso Landing Zone` instead, add `displayName='Contoso Landing Zone'` to the Bicep command, or `-var='display_name=Contoso Landing Zone'` to the Terraform command.
 >
-> Where the company name shows up (example: `martins`, prod):
+> Where the company name shows up (example: `contoso`, prod):
 >
 > | Resource | Name |
 > |---|---|
-> | Management group (Step 2) | `mg-martins` |
-> | Resource groups | `rg-martins-prod-monitoring`, `rg-martins-prod-networking` |
-> | Log Analytics workspace | `law-martins-prod` |
-> | Virtual network | `vnet-martins-prod` |
-> | Budget | `budget-martins-prod-monthly` |
+> | Management group (Step 2) | `mg-contoso` |
+> | Resource groups | `rg-contoso-prod-monitoring`, `rg-contoso-prod-networking` |
+> | Log Analytics workspace | `law-contoso-prod` |
+> | Virtual network | `vnet-contoso-prod` |
+> | Budget | `budget-contoso-prod-monthly` |
 >
 > The name is also used by `teardown.sh --company`, so the value must match what you deployed with.
 
