@@ -73,13 +73,13 @@ if [[ "$ENV" != "prod" && "$ENV" != "nonprod" ]]; then
   exit 1
 fi
 
-if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]] && ! [[ "${COMPANY:-}" =~ ^[a-z][a-z0-9-]*$ ]]; then
-  echo "Error: --include-subscription-settings requires --company with a lowercase company identifier."
+if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]] && ! [[ "${COMPANY:-}" =~ ^[A-Za-z][A-Za-z0-9-]*$ ]]; then
+  echo "Error: --include-subscription-settings requires --company with the same company identifier used at deploy time (letters, digits, hyphens)."
   exit 1
 fi
 
-if [[ "$TOOL" == "bicep" ]] && ! [[ "${COMPANY:-}" =~ ^[a-z][a-z0-9-]*$ ]]; then
-  echo "Error: Bicep teardown requires --company with a lowercase company identifier."
+if [[ "$TOOL" == "bicep" ]] && ! [[ "${COMPANY:-}" =~ ^[A-Za-z][A-Za-z0-9-]*$ ]]; then
+  echo "Error: Bicep teardown requires --company with the same company identifier used at deploy time (letters, digits, hyphens)."
   exit 1
 fi
 
