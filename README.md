@@ -134,7 +134,7 @@ az deployment tenant create \
     nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
 ```
 
-> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step; the Terraform deployment in Step 3 only accepts lowercase letters and digits (2-20 characters, starting with a letter).
+> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step, and use lowercase letters and digits (starting with a letter). Terraform enforces this. Bicep accepts other characters, but the name ends up in every resource group and resource name (g-<company>-prod-...), and many Azure names must be lowercase.
 
 > **If you get `AuthorizationFailed` on `Microsoft.Resources/deployments/validate/action`:** Bicep runs this as a *tenant-scope deployment*, which needs deployment permission at the tenant root (`/`). Owner on your subscriptions is not enough, and neither is Global Administrator by default. A Global Administrator can grant it ([Microsoft docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access)):
 >
