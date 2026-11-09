@@ -143,7 +143,7 @@ az deployment tenant create \
 >    az role assignment create --assignee "<your-user@domain>" --scope "/" --role "Contributor"
 >    ```
 >
-> 3. Run `az logout`, then `az login`, and repeat the deployment command.
+> 3. Run `az logout`, then `az login`, and repeat the deployment command. The new role can take several minutes to propagate; if you now get `AuthorizationFailed` on `Microsoft.Resources/deployments/write`, wait and retry (the Azure CLI may print a Python traceback that hides this message).
 > 4. When you are done, remove the role assignment (`az role assignment delete` with the same arguments) and turn the elevation toggle off.
 >
 > Option B (Terraform) calls the Management Groups API directly and usually does not need this elevation.
