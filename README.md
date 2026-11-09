@@ -336,10 +336,9 @@ See the [Day-1 Checklist](#day-1-checklist) below, and [CI/CD Setup](docs/ci-cd-
 
 ### Teardown
 
-To destroy all landing zone resources:
-
-Return to the repository root first and select the subscription used for that
-deployment. Run only the command for your provider and actual environment.
+To destroy all landing zone resources, return to the repository root first and select the subscription used for that
+deployment. Run only the command for your provider and actual environment, and use the same lowercase
+`--company` and `--env` values as the deploy.
 Preserve the Terraform backend configuration and original state; do not use
 another environment's state or assume `--env` selects a different state file.
 Review all listed changes, including subscription-level settings, before confirming.
@@ -351,7 +350,8 @@ plans, security contacts, diagnostics or budgets. Verify deletion completion and
 restore shared settings from that inventory; do not delete role assignments by
 role name or reset paid security plans blindly.
 
-Terraform has an additional guard: the Defender workspace association uses
+Terraform has an additional guard. With `--include-subscription-settings` the script handles it for you.
+Without that flag, the Defender workspace association uses
 `prevent_destroy`, and the generic teardown command does not restore shared
 subscription settings. If this deployment created that association or changed
 Defender pricing, first restore those settings to the pre-deployment inventory.
@@ -385,15 +385,19 @@ remove the `prevent_destroy` lifecycle guard to bypass this review.
 # Terraform
 ./scripts/teardown.sh --tool terraform --env nonprod --company yourcompany
 
-# Bicep (deletes only the two resource groups)
+# Bicep (deletes only the two resource groups; policies, budget and diagnostics stay,
+# so add the flag below if you plan to deploy again on this subscription)
 ./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany
 
 # Either tool, plus leftovers from the other tool or outside Terraform state:
-# baseline resource groups, policy assignments, diagnostic setting, budget and
-# security contact. Use only on a subscription that is not shared with other
-# workloads. Defender plans are left unchanged.
+# baseline resource groups, policy assignments and their role assignments,
+# orphaned baseline role assignments, diagnostic setting, budget and security
+# contact. Use only on a subscription that is not shared with other workloads.
+# Defender plans are left unchanged.
 ./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings
 ```
+
+Teardown does not remove the management group (`mg-<company>`) or your subscriptions. Move the subscriptions back to the Tenant Root Group, then delete the group in the portal or with `az account management-group delete --name mg-<company>`. Switching between Bicep and Terraform on the same subscription without running teardown first causes `already exists` and `RoleAssignmentUpdateNotPermitted` errors.
 
 ## Day-1 Checklist
 
