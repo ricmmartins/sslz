@@ -212,7 +212,7 @@ cd infra/terraform
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Open `terraform.tfvars` and fill in the **REQUIRED** values (marked in the file):
+Open `terraform.tfvars` and edit the six values in **section 1** of the file. Section 2 is optional; the defaults are fine. `budget_start_date` is set automatically, so leave it commented out.
 - `subscription_id` — Your Azure subscription UUID
 - `company_name` — Your company name (e.g., `"acme"`)
 - `environment` — `"prod"` or `"nonprod"`
