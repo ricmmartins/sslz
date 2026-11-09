@@ -134,7 +134,21 @@ az deployment tenant create \
     nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
 ```
 
-> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step; the Terraform deployment in Step 3 only accepts lowercase letters and digits (2-20 characters, starting with a letter).
+> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step, and use lowercase letters and digits (starting with a letter). Terraform enforces this. Bicep accepts other characters, but the name ends up in every resource group and resource name (`rg-<company>-prod-...`), and many Azure names must be lowercase.
+>
+> The management group is the one place where a friendly name makes sense. Its ID is always `mg-<company>`, and its portal name defaults to `<company> Landing Zone`. To show `Martins Landing Zone` instead, add `displayName='Martins Landing Zone'` to the Bicep command, or `-var='display_name=Martins Landing Zone'` to the Terraform command.
+>
+> Where the company name shows up (example: `martins`, prod):
+>
+> | Resource | Name |
+> |---|---|
+> | Management group (Step 2) | `mg-martins` |
+> | Resource groups | `rg-martins-prod-monitoring`, `rg-martins-prod-networking` |
+> | Log Analytics workspace | `law-martins-prod` |
+> | Virtual network | `vnet-martins-prod` |
+> | Budget | `budget-martins-prod-monthly` |
+>
+> The name is also used by `teardown.sh --company`, so the value must match what you deployed with.
 
 > **If you get `AuthorizationFailed` on `Microsoft.Resources/deployments/validate/action`:** Bicep runs this as a *tenant-scope deployment*, which needs deployment permission at the tenant root (`/`). Owner on your subscriptions is not enough, and neither is Global Administrator by default. A Global Administrator can grant it ([Microsoft docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access)):
 >
