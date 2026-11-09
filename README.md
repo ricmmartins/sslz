@@ -112,7 +112,7 @@ permissions and the preview for each selected subscription before deploying.
 
 ### Step 2: Deploy Management Groups (Optional, 5 min)
 
-This step creates the management group hierarchy shown in the [Architecture](#architecture) diagram. It requires **tenant-level permissions** (Owner or Management Group Contributor on the Tenant Root Group). Skip this if you don't have tenant-level access — the landing zone works without it.
+This step creates the management group hierarchy shown in the [Architecture](#architecture) diagram. It requires **tenant-level permissions**: Owner or Management Group Contributor on the Tenant Root Group for Terraform, and deployment permission at the tenant root (`/`) for Bicep (see the note under Option A). Skip this if you don't have tenant-level access — the landing zone works without it.
 
 The templates also associate the supplied existing prod/non-prod subscriptions
 with the new management groups. This changes their parent hierarchy and can
@@ -134,6 +134,8 @@ az deployment tenant create \
     nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
 ```
 
+> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step; the Terraform deployment in Step 3 only accepts lowercase letters and digits (2-20 characters, starting with a letter).
+
 > **If you get `AuthorizationFailed` on `Microsoft.Resources/deployments/validate/action`:** Bicep runs this as a *tenant-scope deployment*, which needs deployment permission at the tenant root (`/`). Owner on your subscriptions is not enough, and neither is Global Administrator by default. A Global Administrator can grant it ([Microsoft docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access)):
 >
 > 1. Turn on **Access management for Azure resources** in the Azure portal under Microsoft Entra ID > Properties ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
@@ -143,7 +145,7 @@ az deployment tenant create \
 >    az role assignment create --assignee "<your-user@domain>" --scope "/" --role "Contributor"
 >    ```
 >
-> 3. Run `az logout`, then `az login`, and repeat the deployment command.
+> 3. Run `az logout`, then `az login`, and repeat the deployment command. The new role can take several minutes to propagate; if you now get `AuthorizationFailed` on `Microsoft.Resources/deployments/write`, wait and retry (the Azure CLI may print a Python traceback that hides this message). If it still fails after about 15 minutes, assign `Owner` instead of `Contributor` at `/`, run `az logout` and `az login`, and retry.
 > 4. When you are done, remove the role assignment (`az role assignment delete` with the same arguments) and turn the elevation toggle off.
 >
 > Option B (Terraform) calls the Management Groups API directly and usually does not need this elevation.
@@ -184,6 +186,14 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 - `budgetStartDate` — **Required change.** The example date is old. Set it to the first day of the current month (for example `'2026-11-01T00:00:00Z'`) or the budget deployment fails.
 - `location`, `allowedLocations`, `logAnalyticsWorkspaceLocation` — Review the deployment and workspace regions together; changing the CLI deployment location alone does not move resources.
 - `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
+
+Everything else has a default in `main.bicep`, so you can leave it out. To override a default, add a line `param <name> = <value>` to your `.local.bicepparam` file. The full list, with descriptions and allowed values, is in the `@description` comments in [`infra/bicep/main.bicep`](infra/bicep/main.bicep). The ones you are most likely to change:
+- `deployNetworking` — `true` by default. Set `false` to skip the VNet and networking resources.
+- `vnetAddressPrefix` — Must be a `/16`. Defaults to `10.0.0.0/16` for prod and `10.1.0.0/16` for nonprod.
+- `appSubnetDelegation` — `Microsoft.Web/serverFarms` (App Service, default) or `Microsoft.App/environments` (Container Apps).
+- `logRetentionInDays` (30-730, default 90) and `logDailyQuotaGb` (default 5, `-1` for unlimited).
+- `enableDefenderForServers`, `enableDefenderForContainers`, `enableDefenderForDatabases`, `enableDefenderForKeyVault` — Defender plans. Defaults depend on the environment.
+- `existingLogAnalyticsWorkspaceId` — Reuse an approved central workspace instead of creating one.
 
 ```bash
 # Preview what will be created (no changes made)
