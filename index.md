@@ -195,7 +195,7 @@ az account show --query "{name:name, tenant:tenantId}"   # confirm this is the r
       <div class="step-number">2</div>
       <h3>Management Groups (Optional)</h3>
       <span class="step-time">5 min</span>
-      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access — the landing zone works without it. If the Bicep command fails with <code>AuthorizationFailed</code>, it needs <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access">tenant-scope deployment permission</a> (<a href="https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin">elevated access</a>); the Terraform command usually does not need it. Steps are in the <a href="https://github.com/ricmmartins/sslz#step-2-deploy-management-groups-optional-5-min">README</a>.</p>
+      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access — the landing zone works without it. If the Bicep command fails with <code>AuthorizationFailed</code>, it needs <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access">tenant-scope deployment permission</a> (<a href="https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin">elevated access</a>); the Terraform command usually does not need it. After you give yourself the role (Contributor at <code>/</code> is enough), run <code>az logout</code> and <code>az login</code>. It can take several minutes to propagate, and the Azure CLI may print a Python traceback that hides the real error. Replace every <code>&lt;...&gt;</code> placeholder including the angle brackets, and use the same company name in every step. Steps are in the <a href="https://github.com/ricmmartins/sslz#step-2-deploy-management-groups-optional-5-min">README</a>.</p>
       <details>
         <summary>Bicep command</summary>
 <pre><code>az deployment tenant create \
@@ -230,7 +230,9 @@ cd ../../../..</code></pre>
         <summary>Bicep commands</summary>
 <pre><code>cd infra/bicep
 
-# Copy and edit parameters (companyName, emails, budget, etc.)
+# Copy and edit parameters. Change every value in SECTION 1 (companyName, location,
+# securityContactEmail, monthlyBudgetAmount, budgetAlertEmails, budgetStartDate).
+# SECTION 2 is optional; defaults live in main.bicep.
 cp parameters/prod.bicepparam parameters/prod.local.bicepparam
 
 # Preview changes (no resources created)
