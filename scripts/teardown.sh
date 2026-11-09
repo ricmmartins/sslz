@@ -166,6 +166,14 @@ if [[ "$TOOL" == "terraform" ]]; then
   fi
 
   terraform init
+
+  # The Defender workspace association has prevent_destroy and would block the destroy.
+  # Forget it in state only (no Azure change); the full cleanup is opt-in.
+  if [[ "$INCLUDE_SUBSCRIPTION_SETTINGS" == "true" ]] && terraform state list 2>/dev/null | grep -qF 'azurerm_security_center_workspace.defender'; then
+    echo "Removing the prevent_destroy Defender workspace association from Terraform state (Azure unchanged)."
+    terraform state rm 'azurerm_security_center_workspace.defender[0]'
+  fi
+
   terraform destroy \
     -var="environment=$ENV" \
     $( [[ "$AUTO_APPROVE" == "true" ]] && echo "-auto-approve" )
