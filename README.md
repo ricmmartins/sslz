@@ -185,6 +185,14 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 - `location`, `allowedLocations`, `logAnalyticsWorkspaceLocation` — Review the deployment and workspace regions together; changing the CLI deployment location alone does not move resources.
 - `enableDefenderForStorage` — Keep `false` for the startup baseline; set `true` only after reviewing the paid Defender for Storage V2 plan and current pricing.
 
+Everything else has a default in `main.bicep`, so you can leave it out. To override a default, add a line `param <name> = <value>` to your `.local.bicepparam` file. The full list, with descriptions and allowed values, is in the `@description` comments in [`infra/bicep/main.bicep`](infra/bicep/main.bicep). The ones you are most likely to change:
+- `deployNetworking` — `true` by default. Set `false` to skip the VNet and networking resources.
+- `vnetAddressPrefix` — Must be a `/16`. Defaults to `10.0.0.0/16` for prod and `10.1.0.0/16` for nonprod.
+- `appSubnetDelegation` — `Microsoft.Web/serverFarms` (App Service, default) or `Microsoft.App/environments` (Container Apps).
+- `logRetentionInDays` (30-730, default 90) and `logDailyQuotaGb` (default 5, `-1` for unlimited).
+- `enableDefenderForServers`, `enableDefenderForContainers`, `enableDefenderForDatabases`, `enableDefenderForKeyVault` — Defender plans. Defaults depend on the environment.
+- `existingLogAnalyticsWorkspaceId` — Reuse an approved central workspace instead of creating one.
+
 ```bash
 # Preview what will be created (no changes made)
 az deployment sub what-if \
