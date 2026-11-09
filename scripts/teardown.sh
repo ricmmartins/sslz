@@ -134,6 +134,17 @@ cleanup_subscription_settings() {
       az policy assignment delete --name "$NAME" --scope "$SCOPE" || true
     fi
   done
+  # Orphans from earlier runs (policy identities that were deleted) make the next Bicep deploy fail
+  # with RoleAssignmentUpdateNotPermitted. Only subscription-scope assignments of the baseline roles
+  # whose principal no longer exists are removed.
+  for RA in $(az role assignment list --scope "$SCOPE" --query "[?scope=='${SCOPE}' && principalType=='ServicePrincipal' && (roleDefinitionName=='Tag Contributor' || roleDefinitionName=='Monitoring Contributor' || roleDefinitionName=='Log Analytics Contributor')].id" -o tsv 2>/dev/null || true); do
+    PRINCIPAL=$(az role assignment show --ids "$RA" --query principalId -o tsv 2>/dev/null || true)
+    SP_TYPE=$(az ad sp show --id "$PRINCIPAL" --query servicePrincipalType -o tsv 2>&1 || true)
+    if [[ "$SP_TYPE" == *"does not exist"* || "$SP_TYPE" == *ResourceNotFound* ]]; then
+      echo "Deleting orphaned role assignment $RA"
+      az role assignment delete --ids "$RA" || true
+    fi
+  done
   az monitor diagnostic-settings subscription delete --name diag-activity-log-to-law --subscription "$SUB_ID" --yes 2>/dev/null || true
   az consumption budget delete --budget-name "budget-${COMPANY}-${ENV}-monthly" --subscription "$SUB_ID" 2>/dev/null || true
   az security contact delete --name default 2>/dev/null || true
