@@ -211,7 +211,9 @@ If you automate Bicep yourself, update the parameter files with your actual valu
 
 Change every value in SECTION 1 (`companyName`, `location`, `securityContactEmail`, `monthlyBudgetAmount`,
 `budgetAlertEmails`, `budgetStartDate`) and review `allowedLocations`. `budgetStartDate` must be the first day of the
-month of your deployment. Commit and push the changes.
+month of your deployment. Use a lowercase companyName (letters and digits), because it ends up in every resource name.
+Commit and push the changes.
+
 ## Step 7: Create GitHub Environments (Optional, Recommended)
 
 GitHub Environments add an approval gate before production deployments.

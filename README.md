@@ -206,7 +206,7 @@ cp parameters/prod.bicepparam parameters/prod.local.bicepparam
 ```
 
 Open `parameters/prod.local.bicepparam` and change these values (the `.local.` copy keeps your settings out of version control):
-- `companyName` — Your company name (e.g., `'acme'`). Used in all resource names.
+- `companyName` — Your company name in lowercase letters and digits (e.g., `'acme'`). Used in all resource names.
 - `securityContactEmail` — Email for Defender for Cloud alerts.
 - `budgetAlertEmails` — List of emails for budget notifications.
 - `monthlyBudgetAmount` — Your monthly budget in USD.
