@@ -140,7 +140,11 @@ az deployment tenant create \
 >
 > Do **both** steps 1 and 2, in order. They do different things: step 1 lets a Global Administrator manage Azure roles at the root (it adds User Access Administrator at `/`), and step 2 uses that to give yourself the role that actually allows the deployment. Skip both if you already have Contributor or Owner at `/`.
 >
-> 1. Turn on **Access management for Azure resources** in the Azure portal under Microsoft Entra ID > Properties ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)). The portal is not mandatory: you can run `az rest --method post --url "/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01"` instead ([REST option](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
+> 1. Elevate your access. Choose one option:
+>    - **Portal:** turn on **Access management for Azure resources** under Microsoft Entra ID > Properties.
+>    - **Command:** `az rest --method post --url "/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01"`. It prints nothing when it works.
+>
+>    Both do the same thing ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
 > 2. Give yourself a role at the root scope. Contributor is enough to create management groups:
 >
 >    ```bash
@@ -191,7 +195,7 @@ Open `parameters/prod.local.bicepparam` and change these values (the `.local.` c
 Everything else has a default in `main.bicep`, so you can leave it out. To override a default, add a line `param <name> = <value>` to your `.local.bicepparam` file. The full list, with descriptions and allowed values, is in the `@description` comments in [`infra/bicep/main.bicep`](infra/bicep/main.bicep). The ones you are most likely to change:
 - `deployNetworking` — `true` by default. Set `false` to skip the VNet and networking resources.
 - `vnetAddressPrefix` — Must be a `/16`. Defaults to `10.0.0.0/16` for prod and `10.1.0.0/16` for nonprod.
-- `appSubnetDelegation` — `Microsoft.Web/serverFarms` (App Service, default) or `Microsoft.App/environments` (Container Apps).
+- `appSubnetDelegation` — Which Azure service is allowed to use the app subnet (`snet-app`). Keep the default `Microsoft.Web/serverFarms` for App Service or Functions. Use `Microsoft.App/environments` for Azure Container Apps. A subnet can be delegated to only one of them, so pick the one you will run.
 - `logRetentionInDays` (30-730, default 90) and `logDailyQuotaGb` (default 5, `-1` for unlimited).
 - `enableDefenderForServers`, `enableDefenderForContainers`, `enableDefenderForDatabases`, `enableDefenderForKeyVault` — Defender plans. Defaults depend on the environment.
 - `existingLogAnalyticsWorkspaceId` — Reuse an approved central workspace instead of creating one.

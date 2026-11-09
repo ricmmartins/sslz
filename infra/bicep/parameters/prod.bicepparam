@@ -32,7 +32,7 @@ param defenderWorkspaceSharedSubscription = false
 
 // Other optional parameters (uncomment to override the default):
 // param vnetAddressPrefix = '10.0.0.0/16'                       // must be a /16
-// param appSubnetDelegation = 'Microsoft.Web/serverFarms'       // or 'Microsoft.App/environments'
+// param appSubnetDelegation = 'Microsoft.Web/serverFarms'       // service that hosts apps in snet-app: 'Microsoft.Web/serverFarms' (App Service) or 'Microsoft.App/environments' (Container Apps)
 // param logRetentionInDays = 90                                 // 30-730
 // param logDailyQuotaGb = 5                                     // -1 = unlimited
 // param existingLogAnalyticsWorkspaceId = ''                    // reuse a central workspace
