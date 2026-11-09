@@ -491,9 +491,10 @@ img {
 /* --- Quick Start compact --- */
 .quick-start-steps {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1.25rem;
-  margin-top: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 900px;
+  margin: 1.5rem auto 0;
 }
 
 .step-card {
@@ -503,9 +504,19 @@ img {
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
   position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: 1.25rem;
+  align-items: start;
+}
+
+.step-card > * {
+  grid-column: 2;
 }
 
 .step-card .step-number {
+  grid-column: 1;
+  grid-row: 1 / span 20;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -537,10 +548,28 @@ img {
   margin: 0;
 }
 
+.step-card ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.step-card li + li {
+  margin-top: 0.3rem;
+}
+
+.step-card p + p,
+.step-card p + .callout-warning {
+  margin-top: 0.6rem;
+}
+
 .step-card .step-time {
+  display: block;
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 0.5rem;
+  margin: 0 0 0.5rem;
 }
 
 /* --- Back to top --- */
@@ -2129,10 +2158,6 @@ img {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .quick-start-steps {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .viz-net-nsg-row {
     grid-template-columns: 1fr 1fr;
   }
@@ -2204,8 +2229,10 @@ img {
     grid-template-columns: 1fr;
   }
 
-  .quick-start-steps {
-    grid-template-columns: 1fr;
+  .step-card {
+    grid-template-columns: 32px minmax(0, 1fr);
+    column-gap: 0.9rem;
+    padding: 1.1rem;
   }
 
   .arch-visual {
