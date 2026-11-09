@@ -130,13 +130,14 @@ az deployment tenant create \
   --template-file infra/bicep/modules/management-groups.bicep \
   --parameters \
     companyName='<yourcompany>' \
+    displayName='<YourCompany> Landing Zone' \
     prodSubscriptionId='<PROD_SUBSCRIPTION_ID>' \
     nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
 ```
 
 > Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step, and use lowercase letters and digits (starting with a letter). Terraform enforces this. Bicep accepts other characters, but the name ends up in every resource group and resource name (`rg-<company>-prod-...`), and many Azure names must be lowercase.
 >
-> The management group is the one place where a friendly name makes sense. Its ID is always `mg-<company>`, and its portal name defaults to `<company> Landing Zone`. To show `Contoso Landing Zone` instead, add `displayName='Contoso Landing Zone'` to the Bicep command, or `-var='display_name=Contoso Landing Zone'` to the Terraform command.
+> The management group is the one place where a friendly name makes sense. Its ID is always `mg-<company>`, and its portal name defaults to `<company> Landing Zone`. The `displayName` line (Bicep) and `display_name` line (Terraform) in the commands above set it, for example `Contoso Landing Zone`. They are optional: delete the line to keep the default.
 >
 > Where the company name shows up (example: `contoso`, prod):
 >
@@ -177,6 +178,7 @@ terraform init
 terraform apply \
   -var='subscription_id=<ANY_SUBSCRIPTION_ID>' \
   -var='company_name=<yourcompany>' \
+  -var='display_name=<YourCompany> Landing Zone' \
   -var='prod_subscription_id=<PROD_SUBSCRIPTION_ID>' \
   -var='nonprod_subscription_id=<NONPROD_SUBSCRIPTION_ID>'
 cd ../../../..
