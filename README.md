@@ -134,6 +134,20 @@ az deployment tenant create \
     nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
 ```
 
+> **If you get `AuthorizationFailed` on `Microsoft.Resources/deployments/validate/action`:** Bicep runs this as a *tenant-scope deployment*, which needs deployment permission at the tenant root (`/`). Owner on your subscriptions is not enough, and neither is Global Administrator by default. A Global Administrator can grant it ([Microsoft docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access)):
+>
+> 1. Turn on **Access management for Azure resources** in the Azure portal under Microsoft Entra ID > Properties ([how to elevate access](https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin)).
+> 2. Give yourself a role at the root scope. Contributor is enough to create management groups:
+>
+>    ```bash
+>    az role assignment create --assignee "<your-user@domain>" --scope "/" --role "Contributor"
+>    ```
+>
+> 3. Run `az logout`, then `az login`, and repeat the deployment command.
+> 4. When you are done, remove the role assignment (`az role assignment delete` with the same arguments) and turn the elevation toggle off.
+>
+> Option B (Terraform) calls the Management Groups API directly and usually does not need this elevation.
+
 #### Option B: Terraform
 
 ```bash

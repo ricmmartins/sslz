@@ -195,7 +195,7 @@ az account show --query "{name:name, tenant:tenantId}"   # confirm this is the r
       <div class="step-number">2</div>
       <h3>Management Groups (Optional)</h3>
       <span class="step-time">5 min</span>
-      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access — the landing zone works without it.</p>
+      <p>Create the management group hierarchy. Requires tenant-level permissions (Owner on Tenant Root Group). Skip if you don't have access — the landing zone works without it. If the Bicep command fails with <code>AuthorizationFailed</code>, it needs <a href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-to-tenant#required-access">tenant-scope deployment permission</a> (<a href="https://learn.microsoft.com/azure/role-based-access-control/elevate-access-global-admin">elevated access</a>); the Terraform command usually does not need it. Steps are in the <a href="https://github.com/ricmmartins/sslz#step-2-deploy-management-groups-optional-5-min">README</a>.</p>
       <details>
         <summary>Bicep command</summary>
 <pre><code>az deployment tenant create \
