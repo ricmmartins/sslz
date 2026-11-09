@@ -393,11 +393,13 @@ remove the `prevent_destroy` lifecycle guard to bypass this review.
 # baseline resource groups, policy assignments and their role assignments,
 # orphaned baseline role assignments, diagnostic setting, budget and security
 # contact. Use only on a subscription that is not shared with other workloads.
-# Defender plans are left unchanged.
+# Defender plans are left unchanged unless you add --reset-defender-plans.
 ./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings
 
-# After both environments are gone, also delete mg-<company>:
-./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings --include-management-group
+# Optional: set the Defender plans back to Free (removes protection and its billing,
+# even for plans that were on before the deploy), then delete mg-<company> once
+# both environments are gone:
+./scripts/teardown.sh --tool bicep --env nonprod --company yourcompany --include-subscription-settings --reset-defender-plans --include-management-group
 ```
 
 By default, teardown does not remove the management group (`mg-<company>`) or your subscriptions. After you tear down both prod and nonprod, add `--include-management-group` to move the subscriptions back to the Tenant Root Group and delete the group. The subscriptions themselves are never deleted. Switching between Bicep and Terraform on the same subscription without running teardown first causes `already exists` and `RoleAssignmentUpdateNotPermitted` errors.
