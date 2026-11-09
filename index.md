@@ -203,6 +203,7 @@ az account show --query "{name:name, tenant:tenantId}"   # confirm this is the r
   --template-file infra/bicep/modules/management-groups.bicep \
   --parameters \
     companyName='&lt;yourcompany&gt;' \
+    displayName='&lt;YourCompany&gt; Landing Zone' \
     prodSubscriptionId='&lt;PROD_SUB_ID&gt;' \
     nonprodSubscriptionId='&lt;NONPROD_SUB_ID&gt;'</code></pre>
       </details>
@@ -213,6 +214,7 @@ terraform init
 terraform apply \
   -var='subscription_id=&lt;ANY_SUB_ID&gt;' \
   -var='company_name=&lt;yourcompany&gt;' \
+  -var='display_name=&lt;YourCompany&gt; Landing Zone' \
   -var='prod_subscription_id=&lt;PROD_SUB_ID&gt;' \
   -var='nonprod_subscription_id=&lt;NONPROD_SUB_ID&gt;'
 cd ../../../..</code></pre>
