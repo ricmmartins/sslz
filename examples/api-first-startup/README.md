@@ -91,6 +91,11 @@ Application Insights provides:
 - An existing resource group (you must create this — the landing zone does not create application resource groups)
 - APIM publisher email and name for API Management configuration
 
+Create the resource group first, in the subscription where the workload will run (`az account show` prints the active one; switch with `az account set --subscription <ID>`). Bicep deploys to the active subscription. Terraform uses the `subscription_id` you set in `terraform.tfvars`, so keep the two the same:
+
+```bash
+az group create --name rg-mycompany-prod-app --location eastus2
+```
 ### Bicep
 
 ```bash

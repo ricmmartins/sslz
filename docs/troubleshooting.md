@@ -23,7 +23,8 @@ description: "Common deployment errors and fixes"
      --role "Management Group Contributor" \
      --scope "/"
    ```
-2. Or deploy management groups separately with a privileged identity:
+2. If you are the tenant admin and no role is assigned yet, first turn on **Access management for Azure resources** (Microsoft Entra ID > Properties) or run `az rest --method post --url "/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01"`, grant yourself Contributor or Owner at `/`, then `az logout` and `az login`. See Step 2 of the README.
+3. Or deploy management groups separately with a privileged identity:
    ```bash
    cd infra/terraform/modules/management-groups
    terraform init && terraform apply
@@ -36,9 +37,9 @@ description: "Common deployment errors and fixes"
 **Cause:** The budget start date must be exactly `YYYY-MM-01T00:00:00Z`. Additionally, Azure rejects changes to `startDate` on existing budgets — so this value must remain constant across redeployments.
 
 **Fix:**
-- **Bicep:** Set `budgetStartDate` in your `.bicepparam` file to a fixed date (e.g., `'2026-01-01T00:00:00Z'`). This is a required parameter.
-- **Terraform:** The workflow auto-sets `TF_VAR_budget_start_date` and the budget resource uses `ignore_changes = [time_period]` to prevent drift.
-- For manual CLI deployments: `budget_start_date = "2026-01-01T00:00:00Z"`
+- **Bicep:** Set `budgetStartDate` in your `.bicepparam` file to the first day of the current month (for example `'2026-11-01T00:00:00Z'` in November 2026). It is a required parameter, and Azure rejects a start date in a past month on a new budget.
+- **Terraform:** The deploy sets `TF_VAR_budget_start_date` and the budget resource uses `ignore_changes = [time_period]` to prevent drift.
+- For Terraform CLI runs you can override it with `budget_start_date = "2026-11-01T00:00:00Z"`
 
 ### Backend Not Configured
 
@@ -55,9 +56,10 @@ description: "Common deployment errors and fixes"
 
 **Error:** `PolicyAssignmentAlreadyExists` or `PolicyDefinitionNotFound`
 
-**Cause:** Policy assignments are subscription-scoped singletons. Re-deploying to the same subscription with different names causes conflicts.
+**Cause:** Policy assignments are subscription-scoped singletons. Re-deploying to the same subscription with different names, or switching between Bicep and Terraform without a teardown, causes conflicts.
 
 **Fix:**
+- Clean the subscription first: `./scripts/teardown.sh --tool <bicep|terraform> --env <env> --company <company> --include-subscription-settings` (same `--company` as the deploy)
 - Ensure only one deployment targets each subscription at a time
 - If you renamed a policy assignment, delete the old one first:
   ```bash
@@ -78,7 +80,7 @@ description: "Common deployment errors and fixes"
 **Fix:**
 - Review which plans are enabled: check `enable_defender_for_*` variables
 - For cost-sensitive environments, only enable Key Vault (low cost) and ARM (always on)
-- Disable unused plans: set the corresponding variable to `false`
+- Disable unused plans: set the corresponding variable to `false`, or turn existing ones off with `./scripts/teardown.sh ... --reset-defender-plans` (sets the plans this project manages back to Free)
 
 ### Provider Registration
 
@@ -165,15 +167,17 @@ terraform plan -out=tfplan && terraform apply tfplan
 
 **Cause:** When DINE/Modify policy assignments are deleted and recreated, they get new managed identity principal IDs. But the old role assignments (with deterministic GUIDs) still exist with the old principal IDs. Azure does not allow updating the `principalId` on an existing role assignment.
 
-**Fix:** Delete the orphaned role assignments before redeploying:
+**Fix:** Run the teardown with the same company name you deployed with. It removes the policy assignments, their role assignments and the orphaned ones (only Tag Contributor, Monitoring Contributor and Log Analytics Contributor whose principal no longer exists in Entra ID), then redeploy:
 ```bash
-SUB_ID=$(az account show --query id -o tsv)
-az role assignment list --all \
-  --query "[?(roleDefinitionName=='Tag Contributor' || roleDefinitionName=='Log Analytics Contributor' || roleDefinitionName=='Monitoring Contributor')].name" \
-  -o tsv | while read name; do
-    az rest --method DELETE \
-      -u "https://management.azure.com/subscriptions/${SUB_ID}/providers/Microsoft.Authorization/roleAssignments/${name}?api-version=2022-04-01"
-done
+./scripts/teardown.sh --tool bicep --env prod --company <company> --include-subscription-settings
 ```
 
-> **Note:** The standard `az role assignment delete` command cannot remove these because the managed identity principals no longer exist in Entra ID. The REST API bypass is required.
+> **Note:** Do not delete these role assignments by role name alone. That also removes assignments that belong to live identities.
+
+### Management Group Not Found or Left Behind
+
+**Symptom:** Teardown prints `Management group mg-<company> not found`, or an old `mg-*` group stays in the portal.
+
+**Cause:** The ID is `mg-<company>`. A different spelling at deploy time (a typo, or `Martins` versus `martins` on an older version) created a different group. Newer versions lowercase the name.
+
+**Fix:** Run `az account management-group list --query "[].name" -o tsv`, then use the exact `--company` that matches the group, together with `--include-management-group`. Run it only after tearing down both prod and nonprod.

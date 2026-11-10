@@ -238,7 +238,7 @@ The agent stops for architecture review when any of these apply:
 - a dedicated platform team requesting enterprise-wide shared services;
 - the architecture requires services that no current profile covers.
 
-When one applies, use the [Graduation Guide](/docs/graduation-guide/) instead of expanding the startup profiles.
+When one applies, use the [Graduation Guide](graduation-guide.md) instead of expanding the startup profiles.
 
 ## Official guidance
 
