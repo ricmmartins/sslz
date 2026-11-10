@@ -105,6 +105,11 @@ cleanup_management_group() {
   local mg="mg-${COMPANY}"
   if ! az account management-group show --name "$mg" &>/dev/null; then
     echo "Management group $mg not found. Nothing to delete."
+    local others
+    others=$(az account management-group list --query "[?starts_with(name, 'mg-')].name" -o tsv 2>/dev/null | tr -d '\r')
+    if [[ -n "$others" ]]; then
+      echo "Other mg-* groups in this tenant (check the --company spelling): $(echo $others)"
+    fi
     return
   fi
   echo "Removing management group $mg..."
