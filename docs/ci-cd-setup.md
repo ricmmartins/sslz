@@ -12,6 +12,16 @@ Bicep or Terraform automation using Workload Identity Federation (WIF). WIF elim
 short-lived tokens through OIDC. The classic SSLZ path remains operator-owned: review `what-if` or `terraform plan`
 output, control the deployment identity and state, and run the provider command yourself.
 
+## What you get at the end
+
+| Piece | When it runs | What it needs |
+|---|---|---|
+| **Validate IaC** (bundled) | Automatically on every pull request | Nothing from Azure. It builds, lints and validates the code only. |
+| **Deploy workflows** (`deploy-bicep.yml`, `deploy-terraform.yml`) | Only when you start them in **Actions > Run workflow** | The four secrets from Step 6 and an approved plan from the [agent path](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/). Without that plan they refuse to run. |
+| **Your own deploy workflow** (classic path) | You decide: for example plan on pull request, apply after approval on `main` | The identity, state and secrets from Steps 1-7. The repository does not ship this workflow. |
+
+Steps 1-7 prepare the identity, the Terraform state and the secrets. Step 8 proves the automatic validation works. It does not sign in to Azure, so the first real test of the Azure login happens in a deploy run.
+
 ## Prerequisites
 
 - Azure CLI installed and authenticated (`az login`)
