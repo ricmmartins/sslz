@@ -1,0 +1,102 @@
+name: Terraform Classic (plan and apply)
+
+# Classic operator-owned path: plan on pull requests, apply on main after a
+# human approves the protected "prod" environment. It does not use the agent
+# approval flow. Setup: docs/ci-cd-setup.md
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/terraform-classic.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/terraform-classic.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: terraform-classic-prod
+  cancel-in-progress: false
+
+env:
+  ARM_USE_OIDC: "true"
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+  TF_VAR_environment: prod
+  TF_VAR_company_name: ${{ vars.SSLZ_COMPANY_NAME }}
+  TF_VAR_security_contact_email: ${{ vars.SSLZ_SECURITY_CONTACT_EMAIL }}
+  TF_VAR_monthly_budget_amount: ${{ vars.SSLZ_MONTHLY_BUDGET_AMOUNT }}
+  TF_VAR_budget_alert_emails: ${{ vars.SSLZ_BUDGET_ALERT_EMAILS }}
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  plan:
+    name: Terraform plan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Terraform init
+        run: |
+          terraform init -input=false \
+            -backend-config="storage_account_name=${{ vars.SSLZ_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="use_azuread_auth=true"
+
+      - name: Terraform plan
+        run: terraform plan -input=false -lock-timeout=5m -out=tfplan
+
+      - name: Show plan
+        run: terraform show -no-color tfplan >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: tfplan
+          path: infra/terraform/tfplan
+          retention-days: 1
+
+  apply:
+    name: Terraform apply (needs approval)
+    needs: plan
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: Terraform init
+        run: |
+          terraform init -input=false \
+            -backend-config="storage_account_name=${{ vars.SSLZ_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="use_azuread_auth=true"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: infra/terraform
+
+      - name: Terraform apply the reviewed plan
+        run: terraform apply -input=false -lock-timeout=5m tfplan

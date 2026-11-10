@@ -18,7 +18,7 @@ output, control the deployment identity and state, and run the provider command 
 |---|---|---|
 | **Validate IaC** (bundled) | Automatically on every pull request | Nothing from Azure. It builds, lints and validates the code only. |
 | **Deploy workflows** (`deploy-bicep.yml`, `deploy-terraform.yml`) | Only when you start them in **Actions > Run workflow** | The four secrets from Step 6 and an approved plan from the [agent path](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/). Without that plan they refuse to run. |
-| **Your own deploy workflow** (classic path) | You decide: for example plan on pull request, apply after approval on `main` | The identity, state and secrets from Steps 1-7. The repository does not ship this workflow. |
+| **Terraform Classic** (`terraform-classic.yml`) | Plan on pull requests, apply on `main` after you approve the `prod` environment | The identity, state and secrets from Steps 1-7, plus the repository variables listed in Step 8. Bicep has no equivalent workflow. |
 
 Steps 1-7 prepare the identity, the Terraform state and the secrets. Step 8 proves the automatic validation works. It does not sign in to Azure, so the first real test of the Azure login happens in a deploy run.
 
@@ -275,10 +275,25 @@ Terraform, and runs repository contract tests without deploying Azure resources.
 
 ### Automate the classic direct-operator path
 
-Use the same commands from the [Quick Start](https://startupscalelanding.zone/#quick-start) in a workflow you own: run
-`az deployment sub what-if` or `terraform plan`, retain the review output, require a protected environment for writes,
-and invoke `az deployment sub create` or `terraform apply` only after human approval. The operator remains responsible
-for identity, state, review, validation, and rollback.
+The repository ships a ready Terraform workflow for this path: `.github/workflows/terraform-classic.yml`. It runs
+`terraform plan` on pull requests that touch `infra/terraform/`, and on `main` it applies the saved plan only after you
+approve the **prod** environment (Step 7). It signs in with the OIDC identity from Steps 1-6 and keeps state in the
+storage account from Step 5. It does not use the agent approval flow.
+
+Add these **repository variables** (**Settings > Secrets and variables > Actions > Variables**; they are not secret):
+
+| Variable | Example |
+|---|---|
+| `SSLZ_STATE_STORAGE_ACCOUNT` | The `$STATE_SA` name from Step 5 |
+| `SSLZ_COMPANY_NAME` | `contoso` (lowercase letters and digits) |
+| `SSLZ_SECURITY_CONTACT_EMAIL` | `security@contoso.com` |
+| `SSLZ_MONTHLY_BUDGET_AMOUNT` | `500` |
+| `SSLZ_BUDGET_ALERT_EMAILS` | `["finance@contoso.com"]` (a JSON list) |
+
+The workflow deploys the **prod** environment to `AZURE_SUBSCRIPTION_ID_PROD`. To try it, open **Actions > Terraform
+Classic > Run workflow**, check the plan in the run summary, then approve the **prod** environment on the `apply` job. The
+`apply` job runs only on `main`. For Bicep, build a similar workflow around `az deployment sub what-if` and
+`az deployment sub create`. The operator remains responsible for identity, state, review, validation, and rollback.
 
 The repository's bundled approval-bound deployment workflows belong to the
 [optional agent-aware experience](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/); they are not
