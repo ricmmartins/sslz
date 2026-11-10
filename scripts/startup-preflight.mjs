@@ -165,6 +165,7 @@ function azJson(args) {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
+    maxBuffer: 256 * 1024 * 1024,
   });
   return output.trim() ? JSON.parse(output) : null;
 }
