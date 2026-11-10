@@ -158,18 +158,32 @@ az role assignment create \
 
 ## Step 5: Set Up Terraform Remote Backend (5 min)
 
-The Terraform deploy workflow requires a remote backend to persist state between runs. Without one, each run starts from scratch and fails on existing resources.
+Terraform keeps a state file that records what it created. In CI each run starts on a fresh machine, so the state must live in Azure Storage. That storage account has to exist **before** the first `terraform init`. You create it once, with the script below. It is not part of the landing zone itself.
+
+The script creates the resource group `rg-terraform-state`, a storage account (locked, with blob versioning) and a `tfstate` container.
 
 ```bash
 # Create the storage account for Terraform state
 # Run this from the repo root, targeting the prod subscription
-az account set --subscription <YOUR_PROD_SUBSCRIPTION_ID>
-./scripts/bootstrap-backend.sh -s <storage-account-name>
+# Reuses PROD_SUB_ID from Step 4 (set it again if you opened a new terminal)
+az account set --subscription "$PROD_SUB_ID"
+
+# Pick a globally unique name: 3-24 lowercase letters and digits
+STATE_SA="stsslz$RANDOM$RANDOM"
+echo "State storage account: $STATE_SA"   # save this name for main.tf
+./scripts/bootstrap-backend.sh -s "$STATE_SA"
 ```
 
-The storage account name must be globally unique, 3-24 lowercase alphanumeric characters (e.g., `stterraformsslz`).
+Prefer to create it by hand? This is what the script does:
 
-`infra/terraform/main.tf` ships with the placeholder `storage_account_name = "yourStorageAccount"`. Replace it with your storage account name (and `resource_group_name` if you passed `-g`), then commit the change. Without this, `terraform init` in CI fails to find the backend.
+```bash
+az group create --name rg-terraform-state --location eastus2
+az storage account create --name "$STATE_SA" --resource-group rg-terraform-state \
+  --location eastus2 --sku Standard_LRS --min-tls-version TLS1_2 --allow-blob-public-access false
+az storage container create --name tfstate --account-name "$STATE_SA" --auth-mode login
+```
+
+`infra/terraform/main.tf` ships with the placeholder `storage_account_name = "yourStorageAccount"`. Replace it with `$STATE_SA` (and `resource_group_name` if you passed `-g`), then commit the change. Without this, `terraform init` in CI fails to find the backend.
 
 Next, grant the CI/CD service principal access to the state storage:
 
