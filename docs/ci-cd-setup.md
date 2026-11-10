@@ -319,7 +319,7 @@ For Bicep use `.github/workflows/bicep-classic.yml`. It signs in with `azure/log
 runs `az deployment sub what-if` on pull requests that touch `infra/bicep/`, and on `main` runs `az deployment sub create`
 after you approve the **prod** environment. It deploys `infra/bicep/parameters/prod.bicepparam` as committed in Step 6b and
 needs no repository variables. Bicep has no saved plan, so the deploy re-evaluates the template when you approve it.
-Use one tool per subscription: do not run both workflows against the same one. Both start on every push to `main`, so disable the one you are not testing (**Actions > the workflow > ... > Disable workflow**). The operator remains responsible for identity, state, review, validation, and rollback.
+Use one tool per subscription: do not run both workflows against the same one. Both start on every push to `main`, so disable the one you are not testing (**Actions > the workflow > ... > Disable workflow**). Runs of the same workflow queue behind each other (one deployment at a time), so an old run still waiting for approval blocks every newer run. Approve or cancel the old one first (**Actions > the run > Cancel workflow**). The operator remains responsible for identity, state, review, validation, and rollback.
 
 To clean up after a CI deploy, run `scripts/teardown.sh --tool bicep --env prod --company <name> --include-subscription-settings --yes` from a machine signed in to the subscription. Do not pass `--remove-backend`, because the pipeline keeps its Terraform state there. A deploy that stops with `already exists` usually means leftovers from an earlier run or from the other tool.
 

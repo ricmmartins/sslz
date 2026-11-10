@@ -4,15 +4,16 @@ using '../main.bicep'
 // ============================================================================
 // SECTION 1: REQUIRED. Review and change every value in this section.
 // ============================================================================
-param companyName = 'martins'
+param companyName = 'mycompany'
 param environment = 'prod'
 param location = 'eastus2'
-param securityContactEmail = 'ricardo@martins.id'
+param securityContactEmail = 'security@mycompany.com'
 param monthlyBudgetAmount = 5000
 param budgetAlertEmails = [
-  'ricardo@martins.id'
+  'platform-team@mycompany.com'
+  'cto@mycompany.com'
 ]
-param budgetStartDate = '2026-11-01T00:00:00Z' // must be the 1st of your deployment month
+param budgetStartDate = '2026-03-01T00:00:00Z' // must be the 1st of your deployment month
 
 // ============================================================================
 // SECTION 2: OPTIONAL. Defaults are defined in main.bicep (see @description).
