@@ -260,8 +260,8 @@ Tag governance is enforced via policy:
 | Workflow File | Name | Trigger | Purpose |
 |---|---|---|---|
 | `validate.yml` | Validate IaC | PR and push to `main` on `infra/**` or `examples/**` | Builds and lints all Bicep files; runs `terraform fmt`, TFLint, and `terraform validate` |
-| `deploy-bicep.yml` | Deploy Landing Zone (Bicep) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Bicep commands |
-| `deploy-terraform.yml` | Deploy Landing Zone (Terraform) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Terraform commands |
+| `deploy-bicep.yml` | Agent Deploy (Bicep, self-hosted, signed approval) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Bicep commands |
+| `deploy-terraform.yml` | Agent Deploy (Terraform, self-hosted, signed approval) | Manual dispatch from `main` | Optional agent-aware approval wrapper; the classic path uses direct operator Terraform commands |
 | `integration-test.yml` | Integration Test | Manual dispatch or weekly schedule (Monday 06:00 UTC) | Runs Bicep What-If and Terraform Plan against a dedicated integration subscription; optional writes require manual `main` dispatch plus `integration-nonprod`, and teardown is attempted after every started apply |
 | `github-pages.yml` | Deploy to GitHub Pages | Push to `main` or manual dispatch | Builds Jekyll site and deploys to GitHub Pages |
 

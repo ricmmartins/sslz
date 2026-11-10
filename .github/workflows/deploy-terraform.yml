@@ -1,4 +1,4 @@
-name: Deploy Landing Zone (Terraform)
+name: Agent Deploy (Terraform, self-hosted, signed approval)
 
 on:
   workflow_dispatch:

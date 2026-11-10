@@ -1,4 +1,4 @@
-name: Deploy Landing Zone (Bicep)
+name: Agent Deploy (Bicep, self-hosted, signed approval)
 
 on:
   workflow_dispatch:
