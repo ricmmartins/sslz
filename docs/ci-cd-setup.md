@@ -12,16 +12,33 @@ Bicep or Terraform automation using Workload Identity Federation (WIF). WIF elim
 short-lived tokens through OIDC. The classic SSLZ path remains operator-owned: review `what-if` or `terraform plan`
 output, control the deployment identity and state, and run the provider command yourself.
 
+## Which workflow does what
+
+The **Actions** tab lists nine workflows. Only two of them deploy infrastructure in the classic path. Use this table to pick.
+
+| Name in Actions | File | What it does | When it runs | Do you need it? |
+|---|---|---|---|---|
+| **Terraform Classic** | `terraform-classic.yml` | `terraform plan` on pull requests, `terraform apply` on `main` after approval | PRs touching `infra/terraform/**`, push to `main`, manual | **Yes, if you use Terraform.** |
+| **Bicep Classic** | `bicep-classic.yml` | `what-if` on pull requests, deploy on `main` after approval | PRs touching `infra/bicep/**`, push to `main`, manual | **Yes, if you use Bicep.** |
+| **Agent Deploy (Terraform)** | `deploy-terraform.yml` | Applies a plan that the SSLZ Agent approved and signed | Manual only | No. Agent path only. It needs a self-hosted runner labeled `sslz-deployment` and a signed approval. |
+| **Agent Deploy (Bicep)** | `deploy-bicep.yml` | Same as above, for Bicep | Manual only | No. Agent path only. |
+| **Validate IaC** | `validate.yml` | Builds, lints and runs contract tests. No Azure login. | Every pull request | Runs by itself. |
+| **Validate Commit Attribution** | `validate-commit-attribution.yml` | Rejects commit messages with AI co-author trailers | Every pull request | Runs by itself. |
+| **Validate website launcher** | `validate-website.yml` | Checks the site launcher and the agent page | Pull requests and push to `main` | Runs by itself. |
+| **Deploy to GitHub Pages** and **pages-build-deployment** | `github-pages.yml` | Publish the documentation site | Push to `main` | Only if you publish the site from your fork. |
+| **Integration Test** | `integration-test.yml` | Project maintainers' end-to-end test of the nonprod stack | Weekly, and manual | No. It needs the `AZURE_SUBSCRIPTION_ID_INTEGRATION` secret. Disable it in your fork. |
+
+Pick **one** of Terraform Classic or Bicep Classic per subscription. Both fire on every push to `main`, so disable the one you do not use (Actions > the workflow > "..." > Disable workflow).
+
 ## What you get at the end
 
-| Piece | When it runs | What it needs |
-|---|---|---|
-| **Validate IaC** (bundled) | Automatically on every pull request | Nothing from Azure. It builds, lints and validates the code only. |
-| **Deploy workflows** (`deploy-bicep.yml`, `deploy-terraform.yml`) | Only when you start them in **Actions > Run workflow** | The four secrets from Step 6 and an approved plan from the [agent path](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/). Without that plan they refuse to run. |
-| **Terraform Classic** (`terraform-classic.yml`) | Plan on pull requests, apply on `main` after you approve the `prod` environment | The identity, state and secrets from Steps 1-7, plus the repository variables listed in Step 8. |
-| **Bicep Classic** (`bicep-classic.yml`) | What-if on pull requests, deploy on `main` after you approve the `prod` environment | The identity and secrets from Steps 1-4, 6, 6b and 7. No Terraform state needed. |
-
 Steps 1-7 prepare the identity, the Terraform state and the secrets. Step 8 proves the automatic validation works. It does not sign in to Azure, so the first real test of the Azure login happens in a deploy run.
+
+| Piece | What it needs |
+|---|---|
+| **Terraform Classic** | The identity, state and secrets from Steps 1-7, plus the repository variables listed in Step 8. |
+| **Bicep Classic** | The identity and secrets from Steps 1-4, 6, 6b and 7. No Terraform state needed. |
+| **Agent Deploy (Terraform/Bicep)** | The four secrets from Step 6 and an approved plan from the [agent path](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/). Without that plan they refuse to run. |
 
 ## Prerequisites
 
