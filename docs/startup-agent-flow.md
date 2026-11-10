@@ -85,7 +85,7 @@ selects an SSLZ configuration. It must not hide or replace Bicep and Terraform p
    service errors. Provide the official guidance or support route for each blocker.
 6. **Keep existing SSLZ behavior stable.** Agent support must be additive and backward compatible.
 7. **Know when to graduate.** Recommend full Azure Landing Zones when the workload exceeds the boundaries in the
-   [Graduation Guide](/docs/graduation-guide/).
+   [Graduation Guide](graduation-guide.md).
 
 ## Official sources
 

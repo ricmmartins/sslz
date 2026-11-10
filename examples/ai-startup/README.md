@@ -73,6 +73,11 @@ Options ranked by complexity:
 - An SSH public key for AKS node access
 - You may need to request GPU quota for NC-series VMs via the Azure Portal (Quotas page)
 
+Create the resource group first, in the subscription where the workload will run (`az account show` prints the active one; switch with `az account set --subscription <ID>`). Bicep deploys to the active subscription. Terraform uses the `subscription_id` you set in `terraform.tfvars`, so keep the two the same:
+
+```bash
+az group create --name rg-mycompany-prod-app --location eastus2
+```
 ### Bicep
 
 ```bash

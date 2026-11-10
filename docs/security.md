@@ -57,7 +57,7 @@ Don't chase a perfect score. A score of 60-70% with the high-severity items reso
 1. **Never assign roles to individual users.** Always use groups. When someone leaves, you remove them from the group, not from 15 role assignments.
 2. **Developers don't get Contributor on prod.** Deployments go through CI/CD. Debug with Reader + Log Analytics + Application Insights.
 3. **No Owner at subscription level for non-admins.** Owner can modify RBAC, which means one compromised account can grant itself anything.
-4. **Service Principals need elevated roles for policy enforcement.** CI/CD needs User Access Administrator because DINE/Modify policies create managed identities with role assignments. See the [CI/CD Setup guide](/docs/ci-cd-setup/#step-4-assign-azure-roles-5-min) for details.
+4. **Service Principals need elevated roles for policy enforcement.** CI/CD needs User Access Administrator because DINE/Modify policies create managed identities with role assignments. See the [CI/CD Setup guide](ci-cd-setup.md#step-4-assign-azure-roles-5-min) for details.
 
 ### Emergency Access
 
@@ -213,7 +213,7 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 
 ## See Also
 
-- [Networking Deep Dive](/docs/networking/) — NSG rules, Private Endpoints, VNet design
-- [CI/CD Setup](/docs/ci-cd-setup/) — Workload Identity Federation configuration
-- [Architecture Decisions](/docs/architecture/) — Policy baseline, management groups, identity
-- [Troubleshooting](/docs/troubleshooting/) — Common deployment errors and fixes
+- [Networking Deep Dive](networking.md) — NSG rules, Private Endpoints, VNet design
+- [CI/CD Setup](ci-cd-setup.md) — Workload Identity Federation configuration
+- [Architecture Decisions](architecture.md) — Policy baseline, management groups, identity
+- [Troubleshooting](troubleshooting.md) — Common deployment errors and fixes
