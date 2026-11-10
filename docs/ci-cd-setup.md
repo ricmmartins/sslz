@@ -63,7 +63,7 @@ Save the output. This is the **Object ID** of the service principal.
 
 ## Step 3: Add Federated Credentials for GitHub Actions (5 min)
 
-This tells Entra ID to trust tokens from your specific GitHub repository. You need one credential for the `main` branch
+This tells Entra ID to trust tokens from your specific GitHub repository. Check that `GITHUB_ORG` and `GITHUB_REPO` are your own owner and repository name: a wrong owner gives `AADSTS700213` on the first login. List the result with `az ad app federated-credential list --id "$APP_ID" --query "[].subject" -o tsv`. You need one credential for the `main` branch
 and one for pull requests.
 
 ```bash
@@ -258,6 +258,8 @@ the Terraform Classic and Bicep Classic deploy jobs start right after the plan, 
 1. Go to **Settings > Environments**
 2. Create a **nonprod** environment.
 3. Create a **prod** environment. Turn on **Required reviewers**, add yourself, and save. Restrict deployment branches to `main`.
+4. Turn off **Allow administrators to bypass configured protection rules**. If you own the repository, leaving it on skips the approval.
+5. Leave **Prevent self-review** off when you are the only reviewer, or you cannot approve your own runs.
 
 ## Step 8: Test the Setup
 
@@ -300,7 +302,9 @@ For Bicep use `.github/workflows/bicep-classic.yml`. It signs in with `azure/log
 runs `az deployment sub what-if` on pull requests that touch `infra/bicep/`, and on `main` runs `az deployment sub create`
 after you approve the **prod** environment. It deploys `infra/bicep/parameters/prod.bicepparam` as committed in Step 6b and
 needs no repository variables. Bicep has no saved plan, so the deploy re-evaluates the template when you approve it.
-Use one tool per subscription: do not run both workflows against the same one. The operator remains responsible for identity, state, review, validation, and rollback.
+Use one tool per subscription: do not run both workflows against the same one. Both start on every push to `main`, so disable the one you are not testing (**Actions > the workflow > ... > Disable workflow**). The operator remains responsible for identity, state, review, validation, and rollback.
+
+To clean up after a CI deploy, run `scripts/teardown.sh --tool bicep --env prod --company <name> --include-subscription-settings --yes` from a machine signed in to the subscription. Do not pass `--remove-backend`, because the pipeline keeps its Terraform state there. A deploy that stops with `already exists` usually means leftovers from an earlier run or from the other tool.
 
 The repository's bundled approval-bound deployment workflows belong to the
 [optional agent-aware experience](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/); they are not
