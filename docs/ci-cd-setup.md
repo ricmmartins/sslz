@@ -227,9 +227,16 @@ If you automate Bicep yourself, update the parameter files with your actual valu
 - `infra/bicep/parameters/prod.bicepparam` — production settings
 - `infra/bicep/parameters/nonprod.bicepparam` — non-production settings
 
-Change every value in SECTION 1 (`companyName`, `location`, `securityContactEmail`, `monthlyBudgetAmount`,
-`budgetAlertEmails`, `budgetStartDate`) and review `allowedLocations`. `budgetStartDate` must be the first day of the
-month of your deployment. Use a lowercase companyName (letters and digits), because it ends up in every resource name.
+Edit the two files in place. Do not copy them to `*.local.bicepparam` for CI: those files are git-ignored, so they never
+reach the runner. (The "copy to `.local`" comment at the top of each file is for local deploys from your machine.)
+
+Change every value in SECTION 1 except `environment`, which must stay `prod` and `nonprod` (`companyName`, `location`,
+`securityContactEmail`, `monthlyBudgetAmount`, `budgetAlertEmails`, `budgetStartDate`), and review `allowedLocations`.
+
+- Use the same `companyName` in both files: lowercase letters and digits, 2-10 characters. It ends up in every resource name.
+- `budgetStartDate` must be the first day of the month of your deployment, for example `2026-11-01T00:00:00Z`.
+- `budgetAlertEmails` and `securityContactEmail` must be real addresses you read.
+
 Commit and push the changes.
 
 ## Step 7: Create GitHub Environments (Optional, Recommended)
