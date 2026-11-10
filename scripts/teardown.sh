@@ -205,9 +205,9 @@ cleanup_subscription_settings() {
       az role assignment delete --ids "$RA" || true
     fi
   done
-  az monitor diagnostic-settings subscription delete --name diag-activity-log-to-law --subscription "$SUB_ID" --yes 2>/dev/null || true
+  az monitor diagnostic-settings subscription delete --name diag-activity-log-to-law --subscription "$SUB_ID" --yes 2>/dev/null </dev/null || true
   az consumption budget delete --budget-name "budget-${COMPANY}-${ENV}-monthly" --subscription "$SUB_ID" 2>/dev/null || true
-  az security contact delete --name default 2>/dev/null || true
+  az security contact delete --name default --yes 2>/dev/null </dev/null || true
   echo "Left in place: Defender for Cloud plans. Restore them from your pre-deployment inventory."
 }
 
