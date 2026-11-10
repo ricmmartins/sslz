@@ -250,13 +250,14 @@ Change every value in SECTION 1 except `environment`, which must stay `prod` and
 
 Commit and push the changes.
 
-## Step 7: Create GitHub Environments (Optional, Recommended)
+## Step 7: Create GitHub Environments (Required for the classic workflows)
 
-GitHub Environments add an approval gate before production deployments.
+GitHub Environments add the approval gate before production deployments. Without **Required reviewers** on `prod`,
+the Terraform Classic and Bicep Classic deploy jobs start right after the plan, with no approval, and both run at once.
 
 1. Go to **Settings > Environments**
 2. Create a **nonprod** environment.
-3. Create a **prod** environment with required reviewers and deployment branches restricted to `main`.
+3. Create a **prod** environment. Turn on **Required reviewers**, add yourself, and save. Restrict deployment branches to `main`.
 
 ## Step 8: Test the Setup
 

@@ -71,6 +71,13 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
 
+      - name: Check company name
+        run: |
+          if grep -Eq "^param companyName = 'mycompany'" parameters/prod.bicepparam; then
+            echo "::error::parameters/prod.bicepparam still has the sample companyName 'mycompany'. Edit it first (Step 6b)."
+            exit 1
+          fi
+
       - name: Deploy
         run: |
           location=$(sed -n "s/^param location = '\([^']*\)'.*/\1/p" parameters/prod.bicepparam)
