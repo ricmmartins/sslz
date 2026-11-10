@@ -75,7 +75,7 @@ az ad app federated-credential create --id "$APP_ID" --parameters '{
 }'
 ```
 
-If you use GitHub Environments, add credentials for each environment:
+A job that sets `environment:` sends the `environment:<name>` subject instead of the branch or pull request subject. The bundled deploy workflows set it, so add these credentials if you use them or Step 7 environments:
 
 ```bash
 # Credential for nonprod environment
@@ -152,6 +152,8 @@ az role assignment create \
   --scope "/subscriptions/$NONPROD_SUB_ID"
 ```
 
+> **Deploying management groups?** The roles above are subscription-scoped. Creating the management group hierarchy also needs tenant-level access for the service principal (for example Management Group Contributor on the Tenant Root Group, and deployment permission at / for Bicep; see Step 2 of the README). Skip this if you only deploy to the subscriptions.
+
 > **Why User Access Administrator?** The landing zone includes DINE (Deploy If Not Exists) and Modify policies. When Azure enforces these policies, it creates system-assigned managed identities and grants them role assignments. The service principal deploying these policies needs `Microsoft.Authorization/roleAssignments/write` permission, which Contributor alone does not provide.
 
 ## Step 5: Set Up Terraform Remote Backend (5 min)
@@ -166,6 +168,8 @@ az account set --subscription <YOUR_PROD_SUBSCRIPTION_ID>
 ```
 
 The storage account name must be globally unique, 3-24 lowercase alphanumeric characters (e.g., `stterraformsslz`).
+
+`infra/terraform/main.tf` ships with the placeholder `storage_account_name = "yourStorageAccount"`. Replace it with your storage account name (and `resource_group_name` if you passed `-g`), then commit the change. Without this, `terraform init` in CI fails to find the backend.
 
 Next, grant the CI/CD service principal access to the state storage:
 
@@ -289,7 +293,8 @@ Some providers need to be registered before use. Run `./scripts/validate-prerequ
 manually:
 
 ```bash
-az provider register --namespace Microsoft.Insights
-az provider register --namespace Microsoft.Security
-az provider register --namespace Microsoft.PolicyInsights
+for ns in Microsoft.Resources Microsoft.Network Microsoft.OperationalInsights Microsoft.Security \
+  Microsoft.PolicyInsights Microsoft.Consumption Microsoft.Authorization Microsoft.Insights; do
+  az provider register --namespace "$ns"
+done
 ```
