@@ -48,6 +48,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check repository variables
+        run: |
+          missing=0
+          for v in SSLZ_STATE_STORAGE_ACCOUNT SSLZ_COMPANY_NAME SSLZ_SECURITY_CONTACT_EMAIL SSLZ_MONTHLY_BUDGET_AMOUNT SSLZ_BUDGET_ALERT_EMAILS; do
+            if [ -z "${!v}" ]; then echo "::error::Repository variable $v is not set (Settings > Secrets and variables > Actions > Variables)"; missing=1; fi
+          done
+          exit $missing
+        env:
+          SSLZ_STATE_STORAGE_ACCOUNT: ${{ vars.SSLZ_STATE_STORAGE_ACCOUNT }}
+          SSLZ_COMPANY_NAME: ${{ vars.SSLZ_COMPANY_NAME }}
+          SSLZ_SECURITY_CONTACT_EMAIL: ${{ vars.SSLZ_SECURITY_CONTACT_EMAIL }}
+          SSLZ_MONTHLY_BUDGET_AMOUNT: ${{ vars.SSLZ_MONTHLY_BUDGET_AMOUNT }}
+          SSLZ_BUDGET_ALERT_EMAILS: ${{ vars.SSLZ_BUDGET_ALERT_EMAILS }}
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~> 1.9"
