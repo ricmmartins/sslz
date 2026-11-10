@@ -36,7 +36,7 @@ param nonprodSubscriptionId string
 // ============================================================================
 
 resource mg 'Microsoft.Management/managementGroups@2023-04-01' = {
-  name: 'mg-${companyName}'
+  name: 'mg-${toLower(companyName)}'
   properties: {
     displayName: displayName
   }
