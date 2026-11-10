@@ -135,7 +135,7 @@ az deployment tenant create \
     nonprodSubscriptionId='<NONPROD_SUBSCRIPTION_ID>'
 ```
 
-> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step, and use lowercase letters and digits (starting with a letter). Terraform enforces this. Bicep accepts other characters, but the name ends up in every resource group and resource name (`rg-<company>-prod-...`), and many Azure names must be lowercase.
+> Replace every `<...>` placeholder, including the angle brackets. Use the same company name in every step, and use lowercase letters and digits (starting with a letter). Terraform enforces this. Bicep lowercases the name for the management group ID and every resource name, so `Martins` and `martins` give the same `mg-martins`; the portal display name keeps the case you typed.
 >
 > The management group is the one place where a friendly name makes sense. Its ID is always `mg-<company>`, and its portal name defaults to `<company> Landing Zone`. The `displayName` line (Bicep) and `display_name` line (Terraform) in the commands above are optional. Delete them to keep the default. If you keep them, the value is used exactly as written and nothing is appended, so write the full name you want to see in the portal:
 >

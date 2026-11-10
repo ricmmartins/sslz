@@ -144,7 +144,7 @@ param tags object = {
 // Variables
 // ============================================================================
 
-var prefix = '${companyName}-${environment}${regionalAttemptSuffix}'
+var prefix = '${toLower(companyName)}-${environment}${regionalAttemptSuffix}'
 var rgMonitoring = 'rg-${prefix}-monitoring'
 var rgNetworking = 'rg-${prefix}-networking'
 var useExistingLogAnalyticsWorkspace = !empty(existingLogAnalyticsWorkspaceId)

@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do
     --include-subscription-settings) INCLUDE_SUBSCRIPTION_SETTINGS=true; shift ;;
     --include-management-group) INCLUDE_MANAGEMENT_GROUP=true; shift ;;
     --reset-defender-plans) RESET_DEFENDER_PLANS=true; shift ;;
-    --company) COMPANY="$2"; shift 2 ;;
+    --company) COMPANY="${2,,}"; shift 2 ;;
     --help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
   esac

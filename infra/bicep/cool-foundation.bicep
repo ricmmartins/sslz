@@ -39,7 +39,7 @@ param tags object = {
 }
 
 var regionalSuffix = toLower(replace(location, ' ', ''))
-var prefix = '${companyName}-${environment}-cool-${regionalSuffix}'
+var prefix = '${toLower(companyName)}-${environment}-cool-${regionalSuffix}'
 var monitoringResourceGroupName = 'rg-${prefix}-monitoring'
 var networkingResourceGroupName = 'rg-${prefix}-networking'
 var primaryRange = parseCidr(primaryVnetAddressPrefix)
