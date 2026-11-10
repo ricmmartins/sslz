@@ -1,0 +1,81 @@
+name: Bicep Classic (what-if and deploy)
+
+# Classic operator-owned path: what-if on pull requests, deploy on main after a
+# human approves the protected "prod" environment. It does not use the agent
+# approval flow. Setup: docs/ci-cd-setup.md
+# It deploys infra/bicep/parameters/prod.bicepparam, so edit that file first (Step 6b).
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/bicep/**'
+      - '.github/workflows/bicep-classic.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/bicep/**'
+      - '.github/workflows/bicep-classic.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: bicep-classic-prod
+  cancel-in-progress: false
+
+jobs:
+  what-if:
+    name: Bicep what-if
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/bicep
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+
+      - name: What-if
+        run: |
+          location=$(sed -n "s/^param location = '\([^']*\)'.*/\1/p" parameters/prod.bicepparam)
+          if [ -z "$location" ]; then echo "::error::Could not read 'param location' from parameters/prod.bicepparam"; exit 1; fi
+          az deployment sub what-if \
+            --name sslz-prod \
+            --location "$location" \
+            --template-file main.bicep \
+            --parameters parameters/prod.bicepparam | tee whatif.txt
+          { echo '```'; cat whatif.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Bicep deploy (needs approval)
+    needs: what-if
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: infra/bicep
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+
+      - name: Deploy
+        run: |
+          location=$(sed -n "s/^param location = '\([^']*\)'.*/\1/p" parameters/prod.bicepparam)
+          az deployment sub create \
+            --name sslz-prod \
+            --location "$location" \
+            --template-file main.bicep \
+            --parameters parameters/prod.bicepparam

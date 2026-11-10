@@ -18,7 +18,8 @@ output, control the deployment identity and state, and run the provider command 
 |---|---|---|
 | **Validate IaC** (bundled) | Automatically on every pull request | Nothing from Azure. It builds, lints and validates the code only. |
 | **Deploy workflows** (`deploy-bicep.yml`, `deploy-terraform.yml`) | Only when you start them in **Actions > Run workflow** | The four secrets from Step 6 and an approved plan from the [agent path](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/). Without that plan they refuse to run. |
-| **Terraform Classic** (`terraform-classic.yml`) | Plan on pull requests, apply on `main` after you approve the `prod` environment | The identity, state and secrets from Steps 1-7, plus the repository variables listed in Step 8. Bicep has no equivalent workflow. |
+| **Terraform Classic** (`terraform-classic.yml`) | Plan on pull requests, apply on `main` after you approve the `prod` environment | The identity, state and secrets from Steps 1-7, plus the repository variables listed in Step 8. |
+| **Bicep Classic** (`bicep-classic.yml`) | What-if on pull requests, deploy on `main` after you approve the `prod` environment | The identity and secrets from Steps 1-4, 6, 6b and 7. No Terraform state needed. |
 
 Steps 1-7 prepare the identity, the Terraform state and the secrets. Step 8 proves the automatic validation works. It does not sign in to Azure, so the first real test of the Azure login happens in a deploy run.
 
@@ -290,10 +291,15 @@ Add these **repository variables** (**Settings > Secrets and variables > Actions
 | `SSLZ_MONTHLY_BUDGET_AMOUNT` | `500` |
 | `SSLZ_BUDGET_ALERT_EMAILS` | `["finance@contoso.com"]` (a JSON list) |
 
-The workflow deploys the **prod** environment to `AZURE_SUBSCRIPTION_ID_PROD`. To try it, open **Actions > Terraform
+The Terraform workflow deploys the **prod** environment to `AZURE_SUBSCRIPTION_ID_PROD`. To try it, open **Actions > Terraform
 Classic > Run workflow**, check the plan in the run summary, then approve the **prod** environment on the `apply` job. The
-`apply` job runs only on `main`. For Bicep, build a similar workflow around `az deployment sub what-if` and
-`az deployment sub create`. The operator remains responsible for identity, state, review, validation, and rollback.
+`apply` job runs only on `main`.
+
+For Bicep use `.github/workflows/bicep-classic.yml`. It signs in with `azure/login` (same OIDC identity and secrets),
+runs `az deployment sub what-if` on pull requests that touch `infra/bicep/`, and on `main` runs `az deployment sub create`
+after you approve the **prod** environment. It deploys `infra/bicep/parameters/prod.bicepparam` as committed in Step 6b and
+needs no repository variables. Bicep has no saved plan, so the deploy re-evaluates the template when you approve it.
+Use one tool per subscription: do not run both workflows against the same one. The operator remains responsible for identity, state, review, validation, and rollback.
 
 The repository's bundled approval-bound deployment workflows belong to the
 [optional agent-aware experience](https://startupscalelanding.zone/agent/docs/approved-deployment-integration/); they are not
