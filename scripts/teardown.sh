@@ -21,6 +21,7 @@ AUTO_APPROVE=false
 REMOVE_BACKEND=false
 INCLUDE_SUBSCRIPTION_SETTINGS=false
 INCLUDE_MANAGEMENT_GROUP=false
+RESET_DEFENDER_PLANS=false
 
 usage() {
   cat <<EOF
@@ -36,11 +37,16 @@ Options:
                      Also delete leftovers from either tool: baseline resource groups, exact-named
                      policy assignments (and their role assignments), diagnostic setting, budget and
                      security contact. Requires --company. Do not use on a subscription shared with
-                     other workloads. Defender plans stay.
+                     other workloads. Defender plans stay unless you add --reset-defender-plans.
   --include-management-group
                      Also move the subscriptions in mg-<company> back to the Tenant Root Group and
                      delete the group. Requires --company. Run it only after tearing down both
                      prod and nonprod, because the group is shared.
+  --reset-defender-plans
+                     Also set the Defender for Cloud plans this project manages back to Free on the
+                     current subscription (VirtualMachines, Containers, SqlServers,
+                     OpenSourceRelationalDatabases, KeyVaults, Arm, StorageAccounts). This removes
+                     protection and its billing, even if the plan was enabled before the deploy.
   --help             Show this help
 
 Examples:
@@ -58,6 +64,7 @@ while [[ $# -gt 0 ]]; do
     --remove-backend) REMOVE_BACKEND=true; shift ;;
     --include-subscription-settings) INCLUDE_SUBSCRIPTION_SETTINGS=true; shift ;;
     --include-management-group) INCLUDE_MANAGEMENT_GROUP=true; shift ;;
+    --reset-defender-plans) RESET_DEFENDER_PLANS=true; shift ;;
     --company) COMPANY="$2"; shift 2 ;;
     --help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
@@ -117,6 +124,23 @@ cleanup_management_group() {
   else
     echo "Could not delete $mg. Check that it is empty and that you have access at the root scope."
   fi
+}
+
+reset_defender_plans() {
+  local plan tier
+  echo "Setting Defender for Cloud plans back to Free on this subscription..."
+  for plan in VirtualMachines Containers SqlServers OpenSourceRelationalDatabases KeyVaults Arm StorageAccounts; do
+    tier=$(az security pricing show --name "$plan" --query pricingTier -o tsv 2>/dev/null | tr -d '\r')
+    if [[ "$tier" == "Standard" ]]; then
+      if az security pricing create --name "$plan" --tier Free -o none; then
+        echo "  $plan: Free"
+      else
+        echo "  $plan: could not change"
+      fi
+    else
+      echo "  $plan: already ${tier:-Free}"
+    fi
+  done
 }
 
 echo "=== Landing Zone Teardown ==="
@@ -318,6 +342,10 @@ elif [[ "$TOOL" == "bicep" ]]; then
   echo ""
   echo "  # Restore prior Defender plan settings from your pre-deployment inventory."
   echo "  # Do not reset shared subscription plans to Free without checking their prior state."
+fi
+
+if [[ "$RESET_DEFENDER_PLANS" == "true" ]]; then
+  reset_defender_plans
 fi
 
 if [[ "$INCLUDE_MANAGEMENT_GROUP" == "true" ]]; then
