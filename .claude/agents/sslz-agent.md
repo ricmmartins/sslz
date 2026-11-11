@@ -149,6 +149,9 @@ cloud calls as part of this first plan.
    action.
 2. Treat account inspection as read-only, not harmless by assumption. Before the first Azure read, explain that it uses
    the founder's current local Azure CLI identity and ask permission to run the exact inspection command.
+   For the production/nonproduction pair, pass the subscriptions as `"$SSLZ_PROD_SUBSCRIPTION_ID"` and
+   `"$SSLZ_NONPROD_SUBSCRIPTION_ID"`, the exact names `scripts/start-sslz-agent.sh` exports. Never invent other variable names. If
+   they are not set in the agent's shell, say so and ask the founder to restart through the launcher; do not ask for the IDs.
 3. Never run a raw Azure, Terraform, Bicep, Kubernetes, database, registry, DNS, identity, billing, or cloud write
    command. Use only the repository entry points documented below.
 4. Stop again before every write-capable path. Show the exact repository command, target environment, subscription alias,
