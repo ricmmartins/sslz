@@ -44,7 +44,7 @@ copilot --version
 node --version
 ```
 
-The initial conversation does not require Azure CLI, an Azure subscription, or Azure login. Local JSON planning uses
+The initial conversation does not require Azure CLI, an Azure subscription, or Azure login. The read-only preflight and the launcher script do need Azure CLI and `az login` to the tenant that owns your subscriptions. Local JSON planning uses
 synthetic inputs and does not need Azure access.
 The website's [Quick Start]({{ '/' | relative_url }}#quick-start) is a separate, direct operator deployment path with
 different prerequisites and approval responsibilities.
@@ -87,6 +87,8 @@ To start with the guided opening, run:
 ```shell
 copilot --agent sslz-agent --interactive "Start a new founder journey."
 ```
+
+If you plan to run the read-only Azure preflight (Bash, WSL, macOS or Linux), start from `bash scripts/start-sslz-agent.sh` instead. It checks the tools (Node.js, Copilot CLI and Azure CLI), requires `az login`, shows the active tenant, lets you pick the production and non-production subscriptions by number, and then starts the same interactive agent in that shell. It only reads your account list and never changes Azure. Skip it for the initial conversation, which needs no Azure access. On Windows PowerShell, use WSL or set the variables yourself as described under "What to expect on a real run".
 
 Use the interactive form so you can review individual permission requests. Do not use prompt mode as an unattended
 launcher; if the host cannot request an approval, the agent must report that action as blocked. Approve only the
