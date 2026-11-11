@@ -705,13 +705,23 @@ function evaluate(options) {
       `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.Billing/billingProperty/default?api-version=2024-04-01`,
     ]),
   }));
-  const benefits = readEvidence([
-    "rest",
-    "--method",
-    "get",
-    "--url",
-    "https://management.azure.com/providers/Microsoft.BillingBenefits/credits?api-version=2026-06-01",
-  ]);
+  const benefitReads = distinctTargetIds.map((subscriptionId) =>
+    readEvidence([
+      "rest",
+      "--method",
+      "get",
+      "--url",
+      `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.BillingBenefits/credits?api-version=2026-06-01`,
+    ]),
+  );
+  const benefits = {
+    value: {
+      value: benefitReads.flatMap((read) =>
+        Array.isArray(read.value?.value) ? read.value.value : [],
+      ),
+    },
+    error: benefitReads.find((read) => read.error)?.error,
+  };
   const topologyDecision = buildTopologyDecision({
     runId: options.runId,
     generatedAt: options.generatedAt,
