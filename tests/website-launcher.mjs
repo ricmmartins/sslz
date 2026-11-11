@@ -90,7 +90,7 @@ for (const [before, after] of [
   ["overrides the repository profile", "does not affect selection"],
   ["does not guarantee that its tools are exposed", "guarantees all tools are exposed"],
 ]) {
-  assert.throws(() => validateLauncher(page.replace(before, after)), `Must reject: ${after}`);
+  assert.throws(() => validateLauncher(page.replaceAll(before, after)), `Must reject: ${after}`);
 }
 
 assert.match(homepage, /\{\{ '\/use-sslz-agent\/' \| relative_url \}\}" class="btn btn-secondary">Use SSLZ Agent<\/a>/);
