@@ -38,7 +38,9 @@ assumptions and unknowns. Assess maturity qualitatively as **discovery**, **plan
 do not invent a numeric score or call the environment ready without the applicable repository contract and current
 evidence.
 
-Ask one short question at a time. Ask only questions that change the plan:
+Ask one short question at a time. Ask only questions that change the plan. Never repeat a question the user already
+answered, and do not raise a topic such as Kubernetes unless an earlier answer points to it; if you must ask, say why in
+one short sentence:
 
 - what users do with the product and whether traffic is HTTP, event-driven, scheduled, or mixed;
 - whether the product already runs somewhere and what must remain available during a move;
