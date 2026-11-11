@@ -210,13 +210,8 @@ agent falls back to approved fetches of `learn.microsoft.com` pages, or to local
 
 A live test with a new Azure account showed this sequence:
 
-Before you start the agent, set the two subscription IDs in the same terminal that launches `copilot`. In Bash or WSL:
-
-```bash
-export SSLZ_PROD_SUBSCRIPTION_ID="<prod-subscription-id>"
-export SSLZ_NONPROD_SUBSCRIPTION_ID="<nonprod-subscription-id>"
-copilot --agent sslz-agent
-```
+Before you start the agent, set the two subscription IDs in the same terminal that launches `copilot`. In Bash or WSL, run `export SSLZ_PROD_SUBSCRIPTION_ID="<prod-subscription-id>"` and
+`export SSLZ_NONPROD_SUBSCRIPTION_ID="<nonprod-subscription-id>"`, then start the agent from that same terminal.
 
 If the agent is already running, exit it (`/exit` or Ctrl+C twice), export the variables, and start it again. A new
 `copilot` session does not see variables you set in another terminal. To check them without printing the IDs, run
