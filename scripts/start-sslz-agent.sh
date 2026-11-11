@@ -15,11 +15,20 @@ if ! az account show >/dev/null 2>&1; then
   exit 1
 fi
 
+tenant="$(az account show --query tenantId -o tsv)"
+echo "Active Azure tenant: $tenant ($(az account show --query user.name -o tsv))"
+echo "Only subscriptions in this tenant are offered. If it is not the tenant you want, run: az login --tenant <tenant-id>"
+
+for optional in terraform; do
+  command -v "$optional" >/dev/null 2>&1 || echo "Note: $optional is not installed. Planning and the preflight work, but Terraform validation will be unavailable."
+done
+az bicep version >/dev/null 2>&1 || echo "Note: Bicep is not installed (az bicep install). Bicep validation will be unavailable."
+
 pick_subscription() {
   local label="$1" var="$2" choice
-  mapfile -t subs < <(az account list --all --query "[?state=='Enabled'].[name,id]" -o tsv)
+  mapfile -t subs < <(az account list --all --query "[?state=='Enabled' && tenantId=='$tenant'].[name,id]" -o tsv)
   if [ "${#subs[@]}" -eq 0 ]; then
-    echo "No enabled subscriptions found for this Azure login." >&2
+    echo "No enabled subscriptions found in tenant $tenant." >&2
     exit 1
   fi
   echo
