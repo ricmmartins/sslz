@@ -216,13 +216,24 @@ A live test with a new Azure account showed this sequence:
    yourself and save the JSON), so IDs stay out of the chat. A `blocked` status and exit code 1 mean the report found
    gaps, not that the script crashed. Every check is reported as blocking, including `skipped` and `unknown` ones.
 4. **Provider registration.** If providers are missing, register them yourself with `az provider register`. The agent
-   never applies this. Azure may return namespaces in lowercase, such as `microsoft.insights`.
+   never applies this. Azure may return namespaces in lowercase, such as `microsoft.insights`. Registration takes a few
+   minutes: check with `az provider show -n <namespace> --query registrationState -o tsv` and rerun the preflight once
+   it shows `Registered`. Providers stay registered after a teardown, so you do not need to repeat this.
+   Which providers are needed depends on the profiles you chose, for example Container Apps and PostgreSQL.
 5. **Readiness gate.** Terraform generation requires current evidence that goes beyond the preflight: a second
    emergency-capable administrator, security, architecture and Bicep/Terraform parity reviews, billing and benefit
    confirmation, measured recovery tests, and an eligible regional plan. The agent does not accept "I accept the risk"
    as a substitute, and there is no exemption for accounts without Startup credits. If you cannot supply this evidence
    yet, use the agent for planning only and deploy with the
    [CI/CD guide]({{ '/docs/ci-cd-setup' | relative_url }}) or the Quick Start.
+
+**Billing checks may stay `unknown`.** The preflight reads billing properties and Billing Benefits credits for each
+target subscription. A test or pay-as-you-go account, or a missing billing role, can leave these unknown. That is a
+statement about what could be read, not proof that credits are missing. Ask Azure Billing Support to confirm the billing
+account and profile for the exact target subscriptions.
+
+**Run it in Bash, WSL, or Cloud Shell.** The commands in this guide use Bash syntax. On Windows, use WSL, and run
+`az login` inside WSL, because the Windows login is not shared with it.
 
 ### Limits
 
