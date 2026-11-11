@@ -90,6 +90,14 @@ copilot --agent sslz-agent --interactive "Start a new founder journey."
 
 If you plan to run the read-only Azure preflight (Bash, WSL, macOS or Linux), start from `bash scripts/start-sslz-agent.sh` instead. It checks the tools (Node.js, Copilot CLI and Azure CLI), requires `az login`, shows the active tenant, lets you pick the production and non-production subscriptions by number, and then starts the same interactive agent in that shell. It only reads your account list and never changes Azure. Skip it for the initial conversation, which needs no Azure access. On Windows PowerShell, use WSL or set the variables yourself as described under "What to expect on a real run".
 
+Before you run the launcher, prepare these once:
+
+1. Install Azure CLI in the same environment where you run the launcher. In WSL, install it inside WSL, because the Windows installation is not shared.
+2. Sign in to the tenant that owns your subscriptions: `az login --tenant <tenant-id>`. In WSL, run this inside WSL too.
+3. Confirm the account sees both subscriptions: `az account list --all -o table`. You need two separate subscriptions in that tenant, one for production (identity) and one for non-production (connectivity). The account needs at least Reader on both.
+4. Run the launcher. It shows the active tenant first. If the tenant is not the one you want, stop and repeat step 2.
+
+If you skip these steps, the launcher stops with a clear message, or the preflight reports the tenant or access as blocked. Nothing in Azure changes either way.
 Use the interactive form so you can review individual permission requests. Do not use prompt mode as an unattended
 launcher; if the host cannot request an approval, the agent must report that action as blocked. Approve only the
 specific tool, command, local path, or official documentation URL needed for the next step. Keep the profile
