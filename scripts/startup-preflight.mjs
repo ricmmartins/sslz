@@ -541,12 +541,12 @@ function evaluate(options) {
     }
     const states = new Map(
       item.evidence.value.map((provider) => [
-        provider.namespace,
+        String(provider.namespace).toLowerCase(),
         provider.registrationState,
       ]),
     );
     return options.requiredProviders
-      .filter((provider) => states.get(provider) !== "Registered")
+      .filter((provider) => states.get(provider.toLowerCase()) !== "Registered")
       .map((provider) => ({ environment: item.environment, namespace: provider }));
   });
   const remediationProviders = missingProviders.filter((provider, index, items) => {
