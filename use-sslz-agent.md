@@ -224,7 +224,8 @@ You can also run the preflight yourself in another terminal and keep the JSON fi
    You approve twice: the agent's own question, and then the CLI's per-command permission prompt.
 3. **Read-only preflight.** The agent shows `scripts/startup-preflight.mjs inspect` but does not see variables from
    your other terminals. Set the subscription IDs in the same shell that launches `copilot` (or run the command
-   yourself and save the JSON), so IDs stay out of the chat. A `blocked` status and exit code 1 mean the report found
+   yourself and save the JSON), so IDs stay out of the chat. `bash scripts/start-sslz-agent.sh` does this for you: it checks
+   the tools and the Azure login, lets you pick the two subscriptions by number, and starts the agent in that shell. A `blocked` status and exit code 1 mean the report found
    gaps, not that the script crashed. Every check is reported as blocking, including `skipped` and `unknown` ones.
 4. **Provider registration.** If providers are missing, register them yourself with `az provider register`. The agent
    never applies this. Azure may return namespaces in lowercase, such as `microsoft.insights`. Registration takes a few
