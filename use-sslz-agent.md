@@ -9,6 +9,10 @@ Run **SSLZ Agent** on your computer to plan an Azure starting foundation aligned
 primary path), Claude Code, or Codex. You describe what you are building, and it explains your options and helps you plan
 them. It only talks and plans: it does not connect to Azure or change anything unless you approve a specific step.
 
+**SSLZ Agent is optional.** To deploy the landing zone foundation, use the [Quick Start](/) and the Classic
+Terraform or Bicep workflows; that path is the tested default. The agent is a companion for what comes next, such as
+planning a workload or a migration on top of a foundation that already exists, or for different needs.
+
 This page provides setup instructions only. It does not receive access to your Azure tenant, subscriptions, billing
 account, or secrets. You can start without Azure CLI, an Azure subscription, or Azure login. The agent, its planning
 scripts, safety tests, and documentation are all in the repository's `main` branch, which is the default branch.
