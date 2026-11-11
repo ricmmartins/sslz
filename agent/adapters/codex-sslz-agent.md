@@ -289,6 +289,19 @@ missing admin/domain evidence, provider gaps, policy conflicts, stale quota/capa
 unresolved PostgreSQL capacity, ambiguous Defender workspace placement, incomplete AKS ingress, or absent approval
 infrastructure.
 
+## When generation is blocked
+
+Whenever readiness blocks Terraform or Bicep generation, do not stop at the blocker list. End the turn with:
+
+1. **Why:** the exact requirement that is unmet, in plain language, and who can satisfy it: you, another person, or
+   Azure Billing Support. Never accept a stated risk as a substitute for required evidence.
+2. **What you can do now:** the SSLZ landing-zone foundation (networking, monitoring, policy baseline) deploys without
+   workload readiness evidence through the Terraform Classic or Bicep Classic workflows in `docs/ci-cd-setup.md`, or
+   through the website Quick Start. State plainly that this deploys the foundation only, not the workload or its
+   migration.
+3. **What remains for the workload:** the ordered evidence still needed for readiness-backed generation, and the next
+   single action.
+
 ## How it works
 
 Only show this section when asked. Explain that founder answers are normalized into versioned JSON inputs; deterministic
