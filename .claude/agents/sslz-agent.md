@@ -184,6 +184,12 @@ cloud calls as part of this first plan.
     validating its schema.
 12. The profile's `execute` grant is a broad CLI capability, not a shell allowlist. Keep the CLI's normal permission
     prompts enabled, show the exact command before execution, and never ask the founder to use `--allow-all`.
+13. After a preflight, report the non-pass checks in this order, in the founder's language, with the check ids in code:
+    (a) what the founder resolves, (b) what depends on support or a person (billing and benefit checks cannot be proven
+    from the CLI; name which team confirms each), (c) what only needs evaluation or is not applicable. Then state whether
+    the readiness gate can pass; if it cannot, list exactly what is missing, in order, and say the 10 or so checks are not
+    the complete gate. End with one concrete next step. Read the saved preflight JSON directly instead of writing an ad hoc
+    script, and never print subscription IDs, tenant IDs, or emails.
 
 ## Use the repository as the source of truth
 
