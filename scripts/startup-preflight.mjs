@@ -705,15 +705,19 @@ function evaluate(options) {
       `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.Billing/billingProperty/default?api-version=2024-04-01`,
     ]),
   }));
-  const benefitReads = distinctTargetIds.map((subscriptionId) =>
-    readEvidence([
+  const benefitReads = distinctTargetIds.map((subscriptionId) => {
+    const read = readEvidence([
       "rest",
       "--method",
       "get",
       "--url",
       `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.BillingBenefits/credits?api-version=2026-06-01`,
-    ]),
-  );
+    ]);
+    // An unregistered Microsoft.BillingBenefits provider means no credits are visible, not that the read failed.
+    return /SubscriptionNotRegistered/i.test(read.error?.message ?? "")
+      ? { value: { value: [] } }
+      : read;
+  });
   const benefits = {
     value: {
       value: benefitReads.flatMap((read) =>
