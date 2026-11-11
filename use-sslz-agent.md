@@ -170,6 +170,21 @@ The login belongs to the Azure CLI on your machine, and the two variables belong
 Copilot session you opened earlier, or one in another terminal, does not see either one. If you already started the agent
 another way, exit it and run the launcher instead.
 
+## What you get at the end
+
+The agent is a planner, not a deployer. Neither path creates anything in Azure.
+
+| | Path A (no Azure) | Path B (read-only preflight) |
+|---|---|---|
+| Touches your Azure | No | Reads only, with your approval per command |
+| Conversation output | Options, a recommended hypothesis, what is known and unknown, and the next safe step | The same, plus the explanation of each check that did not pass |
+| Local files | Optional `.sslz/generated/.../requirements.json` and a workload plan in JSON, both git-ignored and written only after you approve | The same, plus the preflight report as JSON, for example `.sslz/generated/founder-journey/preflight.json` |
+| Terraform or Bicep | No | Not by default. Review inputs come from `scripts/startup-iac-plan.mjs` and only after the readiness gate passes (see "What to expect on a real run") |
+
+Even when the gate passes, the generated files are local review inputs under `.sslz/generated`. Deploying is a separate,
+approved step, through the [CI/CD guide]({{ '/docs/ci-cd-setup' | relative_url }}) or the Quick Start. If the gate does not pass,
+the output is guidance plus the list of what is missing.
+
 ## What else the agent can do
 
 "Start a new founder journey." is only the guided opening. You can start the agent with your own first message, or
