@@ -40,7 +40,8 @@ az account list --all -o table
 bash scripts/start-sslz-agent.sh
 ```
 
-Using Claude Code or Codex instead? See [Use Claude Code or Codex](#use-claude-code-or-codex). Everything under
+Details: [Path A](#path-a-talk-to-the-agent-no-azure) and [Path B](#path-b-add-the-read-only-azure-preflight-launcher).
+Both start with the shared setup in "Both paths" below. Using Claude Code or Codex instead? See [Use Claude Code or Codex](#use-claude-code-or-codex). Everything under
 "Reference (optional)" is optional reading, including [Safety and approvals](#safety-and-approvals), which applies to both
 paths.
 
@@ -51,7 +52,7 @@ paths.
 - **Preflight:** a read-only check of your Azure setup. It does not deploy anything or register providers.
 - **Readiness gate:** the evidence the Terraform generator requires before it produces files. The agent cannot waive it.
 
-## Install the local prerequisites
+## Both paths: install the local prerequisites
 
 You need Git and [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
 Sign in to Copilot with a GitHub account that has Copilot access. On Windows, use PowerShell 6 or later. Installation
@@ -78,7 +79,7 @@ planning uses synthetic inputs and does not need Azure access.
 The website's [Quick Start]({{ '/' | relative_url }}#quick-start) is a separate, direct operator deployment path with
 different prerequisites and approval responsibilities.
 
-## Clone the repository
+## Both paths: clone the repository
 
 The agent profile and its implementation live together on `main`. The profile is the agent's instruction file. Clone the repository into a parent directory where
 `sslz-agent` does not already exist, using `sslz-agent` as the clone folder. Git will refuse to clone over a nonempty
@@ -98,9 +99,9 @@ and `WebFetch` tools. Its guidance covers founders and technology leaders across
 hosting environments. The startup planner itself accepts teams of 1-50 engineers; larger teams need broader
 architecture review instead of forcing their inputs into that schema.
 
-## Sign in to Copilot and select the agent
+## Path A: talk to the agent (no Azure)
 
-Sign in to GitHub Copilot, independently of Azure:
+This is Path A from the summary above. Sign in to GitHub Copilot, independently of Azure:
 
 ```shell
 copilot login
@@ -135,7 +136,7 @@ Describe your own workload using sanitized facts. For an open-ended request, the
 Answer one question at a time. A conversation does not guarantee that a deterministic planner ran; request its exact
 command and review its output when you need a planner result.
 
-## Path B: run the read-only preflight with the launcher
+## Path B: add the read-only Azure preflight (launcher)
 
 Use this path when you want the agent to check your Azure setup. Use Bash, WSL, macOS or Linux; on Windows PowerShell, see
 [Windows and PowerShell](#windows-and-powershell). Start from `bash scripts/start-sslz-agent.sh` instead of
@@ -330,7 +331,7 @@ A live test with a new Azure account showed this sequence:
    You approve twice: the agent's own question, and then the CLI's per-command permission prompt.
 3. **Read-only preflight.** The agent shows `scripts/startup-preflight.mjs inspect` but does not see variables from
    your other terminals, so IDs stay out of the chat. `bash scripts/start-sslz-agent.sh` sets this up for you (see
-   [Path B](#path-b-run-the-read-only-preflight-with-the-launcher)). A `blocked` status and exit code 1 mean the report
+   [Path B](#path-b-add-the-read-only-azure-preflight-launcher)). A `blocked` status and exit code 1 mean the report
    found gaps, not that the script crashed. Every check is reported as blocking, including `skipped` and `unknown` ones.
 4. **Provider registration.** If providers are missing, register them yourself with `az provider register`. The agent
    never applies this. Azure may return namespaces in lowercase, such as `microsoft.insights`. Registration takes a few
