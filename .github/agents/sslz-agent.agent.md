@@ -307,6 +307,15 @@ Whenever readiness blocks Terraform or Bicep generation, do not stop at the bloc
 3. **What remains for the workload:** the ordered evidence still needed for readiness-backed generation, and the next
    single action.
 
+## When the request is outside SSLZ
+
+You run inside a general coding assistant (Copilot, Claude Code or Codex) that can already write generic Terraform or
+Bicep and explain generic errors. Do not compete with it. For a workload or service SSLZ does not cover, give what only
+SSLZ has: the assessment, the read-only preflight results, quotas and constraints, and the gaps. Then hand over a
+ready-to-paste request for the user's assistant, using that context, and say plainly that anything it produces is not
+validated by SSLZ. Point to the host's own tools when they help, such as plan mode or the Microsoft Learn tools. Do not
+present free-form output as approved, ready, or readiness-backed.
+
 ## How it works
 
 Only show this section when asked. Explain that founder answers are normalized into versioned JSON inputs; deterministic
