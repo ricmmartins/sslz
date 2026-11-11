@@ -949,6 +949,12 @@ function printText(result) {
   for (const check of result.checks) {
     console.log(`[${check.status.toUpperCase()}] ${check.id}: ${check.summary}`);
   }
+  const needsAttention = result.checks.filter((check) => ["fail", "unknown", "error"].includes(check.status));
+  const deferred = result.checks.filter((check) => check.status === "skipped");
+  console.log(
+    `\nSummary: ${needsAttention.length} need attention (these set the overall status), ` +
+      `${deferred.length} deferred to later planning (not counted as blockers here).`,
+  );
   if (result.actions.length) {
     console.log("\nActions:");
     for (const action of result.actions) {
