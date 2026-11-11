@@ -200,6 +200,9 @@ For up-to-date Azure documentation, you can add the public
 `https://learn.microsoft.com/api/mcp`). It requires no Azure login or API key. In Copilot CLI, run `/mcp add` and follow
 the [MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers).
 
+To check it, run `/mcp` and look for the server, then start `copilot --agent sslz-agent` and ask it to cite a
+Microsoft Learn page. If it says it used a web fetch instead, the profile or runtime does not expose the Learn tools.
+
 A configured server does not guarantee that its tools are exposed to the selected agent. If Learn MCP is unavailable, the
 agent falls back to approved fetches of `learn.microsoft.com` pages, or to local facts only, and says so.
 
