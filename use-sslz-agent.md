@@ -19,11 +19,38 @@ scripts, safety tests, and documentation are all in the repository's `main` bran
 
 ## In short
 
-1. Install Git, Node.js and GitHub Copilot CLI (or use [Claude Code or Codex](#use-claude-code-or-codex)).
-2. Clone the SSLZ repository.
-3. Start the agent and tell it about your project.
+Pick one path. Both run from your terminal, and both are explained below.
 
-The sections below give the exact commands. Everything under "Reference (optional)" is optional reading.
+**Path A: just talk to the agent (no Azure needed).** Install Git, Node.js 22 or later and GitHub Copilot CLI, and run
+`copilot login` once. Then:
+
+```text
+git clone --branch main --single-branch https://github.com/ricmmartins/sslz.git sslz-agent
+cd sslz-agent
+copilot --agent sslz-agent
+```
+
+**Path B: also run the read-only Azure preflight (Bash, WSL, macOS or Linux).** Do Path A's installs, plus Azure CLI in
+the same environment and two separate subscriptions in one tenant where your account has at least Reader. From the cloned
+folder:
+
+```text
+az login --tenant <tenant-id>
+az account list --all -o table
+bash scripts/start-sslz-agent.sh
+```
+
+Using Claude Code or Codex instead? See [Use Claude Code or Codex](#use-claude-code-or-codex). Everything under
+"Reference (optional)" is optional reading, including [Safety and approvals](#safety-and-approvals), which applies to both
+paths.
+
+### Words used on this page
+
+- **Profile:** the agent's instruction file in the repository.
+- **Tenant:** the Microsoft Entra directory that owns your Azure subscriptions.
+- **Preflight:** a read-only check of your Azure setup. It does not deploy anything or register providers.
+- **Readiness gate:** the evidence the Terraform generator requires before it produces files. The agent cannot waive it.
+
 ## Install the local prerequisites
 
 You need Git and [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
@@ -44,8 +71,10 @@ copilot --version
 node --version
 ```
 
-The initial conversation does not require Azure CLI, an Azure subscription, or Azure login. The read-only preflight and the launcher script do need Azure CLI and `az login` to the tenant that owns your subscriptions. Local JSON planning uses
-synthetic inputs and does not need Azure access.
+The initial conversation does not require Azure CLI, an Azure subscription, or Azure login. Only the read-only preflight
+and the launcher script (Path B) need Azure CLI and `az login` to the tenant that owns your subscriptions. Local JSON
+planning uses synthetic inputs and does not need Azure access.
+
 The website's [Quick Start]({{ '/' | relative_url }}#quick-start) is a separate, direct operator deployment path with
 different prerequisites and approval responsibilities.
 
@@ -88,20 +117,8 @@ To start with the guided opening, run:
 copilot --agent sslz-agent --interactive "Start a new founder journey."
 ```
 
-If you plan to run the read-only Azure preflight (Bash, WSL, macOS or Linux), start from `bash scripts/start-sslz-agent.sh` instead. It checks the tools (Node.js, Copilot CLI and Azure CLI), requires `az login`, shows the active tenant, lets you pick the production and non-production subscriptions by number, and then starts the same interactive agent in that shell. It only reads your account list and never changes Azure. Skip it for the initial conversation, which needs no Azure access. On Windows PowerShell, use WSL or set the variables yourself as described under "What to expect on a real run".
-
-Before you run the launcher, prepare these once:
-
-1. Install Azure CLI in the same environment where you run the launcher. In WSL, install it inside WSL, because the Windows installation is not shared.
-2. Sign in to the tenant that owns your subscriptions: `az login --tenant <tenant-id>`. In WSL, run this inside WSL too.
-3. Confirm the account sees both subscriptions: `az account list --all -o table`. You need two separate subscriptions in that tenant, one for production (identity) and one for non-production (connectivity). The account needs at least Reader on both.
-4. Run the launcher. It shows the active tenant first. If the tenant is not the one you want, stop and repeat step 2.
-
-If you skip these steps, the launcher stops with a clear message, or the preflight reports the tenant or access as blocked. Nothing in Azure changes either way.
-Use the interactive form so you can review individual permission requests. Do not use prompt mode as an unattended
-launcher; if the host cannot request an approval, the agent must report that action as blocked. Approve only the
-specific tool, command, local path, or official documentation URL needed for the next step. Keep the profile
-interactive and never launch this profile with `--allow-all`.
+Keep the session interactive so you can review each permission request, and never launch this profile with
+`--allow-all`. See [Safety and approvals](#safety-and-approvals).
 
 Try an interactive request such as:
 
@@ -116,9 +133,24 @@ Describe your own workload using sanitized facts. For an open-ended request, the
 > What are you building, where does it run today, and what do you want Azure to do first?
 
 Answer one question at a time. A conversation does not guarantee that a deterministic planner ran; request its exact
-command and review its output when you need a planner result. GitHub also documents
-`--agent sslz-agent --prompt "..."` for programmatic invocation. This walkthrough uses an interactive session so you can
-answer questions and review tool requests; do not add blanket permissions to make an unattended prompt run.
+command and review its output when you need a planner result.
+
+## Path B: run the read-only preflight with the launcher
+
+Use this path when you want the agent to check your Azure setup. Use Bash, WSL, macOS or Linux; on Windows PowerShell, see
+[Windows and PowerShell](#windows-and-powershell). Start from `bash scripts/start-sslz-agent.sh` instead of
+`copilot --agent sslz-agent`. The launcher checks the tools (Node.js, Copilot CLI and Azure CLI), requires `az login`,
+shows the active tenant, lets you pick the production and non-production subscriptions by number, and then starts the
+same interactive agent in that shell. It only reads your account list and never changes Azure.
+
+Before you run the launcher, prepare these once:
+
+1. Install Azure CLI in the same environment where you run the launcher. In WSL, install it inside WSL, because the Windows installation is not shared.
+2. Sign in to the tenant that owns your subscriptions: `az login --tenant <tenant-id>`. In WSL, run this inside WSL too.
+3. Confirm the account sees both subscriptions: `az account list --all -o table`. You need two separate subscriptions in that tenant, one for production (identity) and one for non-production (connectivity). The account needs at least Reader on both.
+4. Run the launcher. It shows the active tenant first. If the tenant is not the one you want, stop and repeat step 2.
+
+If you skip these steps, the launcher stops with a clear message, or the preflight reports the tenant or access as blocked. Nothing in Azure changes either way.
 
 ## What else the agent can do
 
@@ -144,6 +176,7 @@ message in quotes. Without the launcher, run `copilot --agent sslz-agent` for a 
 Anything the agent cannot do inside SSLZ, such as general application code, AWS-side migration steps or a service outside
 the known profiles, it hands back with the facts it gathered and a request you can paste into your own assistant,
 labeled as not validated by SSLZ.
+
 ## Use Claude Code or Codex
 
 If you use Claude Code or Codex instead, install it from its own documentation, clone
@@ -166,13 +199,16 @@ codex "Read agent/adapters/codex-sslz-agent.md and follow it as SSLZ Agent for t
 The copies live in `.claude/agents/sslz-agent.md` and `agent/adapters/codex-sslz-agent.md`. Do not edit them by hand:
 they are generated from `.github/agents/sslz-agent.agent.md` and CI fails if they drift.
 
-## Approve live access separately
+## Reference (optional)
 
-Only when you choose a specific live read should the agent explain the exact read-only repository command, target,
-required permissions, and information it will read. Then install
-[Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) if needed and authenticate locally for that
-approved scope. Review the active account and subscription before allowing the inspection. Azure authentication is not
-consent to subsequent reads or writes.
+### Safety and approvals
+
+Use the interactive form so you can review individual permission requests. Do not use prompt mode as an unattended
+launcher; if the host cannot request an approval, the agent must report that action as blocked. Approve only the
+specific tool, command, local path, or official documentation URL needed for the next step. Keep the profile
+interactive and never launch this profile with `--allow-all`. GitHub also documents
+`--agent sslz-agent --prompt "..."` for programmatic invocation. This walkthrough uses an interactive session so you can
+answer questions and review tool requests; do not add blanket permissions to make an unattended prompt run.
 
 Keep Copilot CLI's normal permission prompts enabled. The custom-agent `execute` capability is broad; the profile does
 not create an operating-system shell allowlist. Reject commands outside the documented repository entry points. Never
@@ -180,12 +216,25 @@ use `--allow-all`, `--allow-all-tools`, `--allow-all-paths`, `--allow-all-urls`,
 not paste credentials, tokens, billing records, signing keys, customer data, tenant IDs, or subscription IDs into chat
 or tracked files.
 
+Only when you choose a specific live read should the agent explain the exact read-only repository command, target,
+required permissions, and information it will read. Then install
+[Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) if needed and authenticate locally for that
+approved scope. Review the active account and subscription before allowing the inspection. Azure authentication is not
+consent to subsequent reads or writes.
+
 Local artifact generation and live preview need separate review and approval. Provider registration and deployment
 remain guarded by their operation-specific contracts; provider apply is disabled in this profile. Migration and
 dual-cloud execution are disabled. The agent does not automatically deploy a workload, and a successful command does
 not establish application health.
 
-## Reference (optional)
+### Troubleshooting
+
+- **The agent does not appear.** See the next section.
+- **The agent does not see the subscription variables.** A new `copilot` session does not inherit variables set in another
+  terminal. Start through the launcher, or see [Windows and PowerShell](#windows-and-powershell).
+- **The preflight says the tenant or access is blocked.** Run `az login --tenant <tenant-id>` in the same environment (in
+  WSL, inside WSL) and check that the account has at least Reader on both subscriptions.
+- **Microsoft Learn MCP is not used.** See "Current documentation" below.
 
 ### If the agent does not appear
 
@@ -240,11 +289,13 @@ Microsoft Learn page. If it says it used a web fetch instead, the profile or run
 A configured server does not guarantee that its tools are exposed to the selected agent. If Learn MCP is unavailable, the
 agent falls back to approved fetches of `learn.microsoft.com` pages, or to local facts only, and says so.
 
-### What to expect on a real run
+### Windows and PowerShell
 
-A live test with a new Azure account showed this sequence:
+The commands in this guide use Bash syntax. On Windows, use WSL for the launcher and the preflight, and run `az login`
+inside WSL, because the Windows login is not shared with it. Cloud Shell also works.
 
-Before you start the agent, set the two subscription IDs in the same terminal that launches `copilot`. In Bash or WSL, run `export SSLZ_PROD_SUBSCRIPTION_ID="<prod-subscription-id>"` and
+To set the subscription IDs yourself instead of using the launcher, set them in the same terminal that launches
+`copilot`. In Bash or WSL, run `export SSLZ_PROD_SUBSCRIPTION_ID="<prod-subscription-id>"` and
 `export SSLZ_NONPROD_SUBSCRIPTION_ID="<nonprod-subscription-id>"`, then start the agent from that same terminal.
 
 If the agent is already running, exit it (`/exit` or Ctrl+C twice), export the variables, and start it again. A new
@@ -252,15 +303,18 @@ If the agent is already running, exit it (`/exit` or Ctrl+C twice), export the v
 `echo ${SSLZ_PROD_SUBSCRIPTION_ID:+ok} ${SSLZ_NONPROD_SUBSCRIPTION_ID:+ok}` in that shell; it should print `ok ok`.
 You can also run the preflight yourself in another terminal and keep the JSON file.
 
+### What to expect on a real run
+
+A live test with a new Azure account showed this sequence:
+
 1. **Discovery.** About a dozen questions, one at a time. The agent keeps your answers separate from facts it has not
    verified. It then proposes a plan and asks which IaC tool you prefer.
 2. **Draft requirements.** It asks before writing `.sslz/generated/.../requirements.json` (a git-ignored local file).
    You approve twice: the agent's own question, and then the CLI's per-command permission prompt.
 3. **Read-only preflight.** The agent shows `scripts/startup-preflight.mjs inspect` but does not see variables from
-   your other terminals. Set the subscription IDs in the same shell that launches `copilot` (or run the command
-   yourself and save the JSON), so IDs stay out of the chat. `bash scripts/start-sslz-agent.sh` does this for you: it checks
-   the tools and the Azure login, lets you pick the two subscriptions by number, and starts the agent in that shell. A `blocked` status and exit code 1 mean the report found
-   gaps, not that the script crashed. Every check is reported as blocking, including `skipped` and `unknown` ones.
+   your other terminals, so IDs stay out of the chat. `bash scripts/start-sslz-agent.sh` sets this up for you (see
+   [Path B](#path-b-run-the-read-only-preflight-with-the-launcher)). A `blocked` status and exit code 1 mean the report
+   found gaps, not that the script crashed. Every check is reported as blocking, including `skipped` and `unknown` ones.
 4. **Provider registration.** If providers are missing, register them yourself with `az provider register`. The agent
    never applies this. Azure may return namespaces in lowercase, such as `microsoft.insights`. Registration takes a few
    minutes: check with `az provider show -n <namespace> --query registrationState -o tsv` and rerun the preflight once
@@ -277,9 +331,6 @@ You can also run the preflight yourself in another terminal and keep the JSON fi
 target subscription. A test or pay-as-you-go account, or a missing billing role, can leave these unknown. That is a
 statement about what could be read, not proof that credits are missing. Ask Azure Billing Support to confirm the billing
 account and profile for the exact target subscriptions.
-
-**Run it in Bash, WSL, or Cloud Shell.** The commands in this guide use Bash syntax. On Windows, use WSL, and run
-`az login` inside WSL, because the Windows login is not shared with it.
 
 ### Limits
 
