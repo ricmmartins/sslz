@@ -152,6 +152,23 @@ Before you run the launcher, prepare these once:
 
 If you skip these steps, the launcher stops with a clear message, or the preflight reports the tenant or access as blocked. Nothing in Azure changes either way.
 
+### What the launcher does for you
+
+You do two things yourself, once: install the tools and run `az login --tenant <tenant-id>`. The launcher then does the
+rest in the same terminal, so you never leave Copilot to set anything up:
+
+1. It reads your current Azure login. It does not sign you in, and it never stores a token or a password.
+2. It shows the tenant and account, and lists only the enabled subscriptions in that tenant.
+3. You type two numbers: first the production subscription, then the non-production one.
+4. It exports them as `SSLZ_PROD_SUBSCRIPTION_ID` and `SSLZ_NONPROD_SUBSCRIPTION_ID` in that shell. The IDs live only in
+   that process and are never written to a file or printed into the chat.
+5. It starts Copilot with the agent from that same shell, so the agent's commands see the Azure login and both variables.
+   The preflight then runs with your approval.
+
+The login belongs to the Azure CLI on your machine, and the two variables belong to the shell that starts Copilot. A
+Copilot session you opened earlier, or one in another terminal, does not see either one. If you already started the agent
+another way, exit it and run the launcher instead.
+
 ## What else the agent can do
 
 "Start a new founder journey." is only the guided opening. You can start the agent with your own first message, or
