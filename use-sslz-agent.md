@@ -112,6 +112,30 @@ command and review its output when you need a planner result. GitHub also docume
 `--agent sslz-agent --prompt "..."` for programmatic invocation. This walkthrough uses an interactive session so you can
 answer questions and review tool requests; do not add blanket permissions to make an unattended prompt run.
 
+## What else the agent can do
+
+"Start a new founder journey." is only the guided opening. You can start the agent with your own first message, or
+with no message at all, and ask for any of the following. The agent works from repository guidance first, says what it
+could not verify, and asks before it runs anything.
+
+| You want to... | Example prompt |
+|---|---|
+| Move from another cloud or on-premises | `We run on AWS ECS Fargate with RDS PostgreSQL. Plan a move to Azure and tell me what is known and unknown.` |
+| Review what you already have in Azure | `We already have a landing zone. Which gaps should we close first for a Container Apps workload?` |
+| Choose services for a workload | `We have a B2B API with PostgreSQL and about 2,000 users. Which Azure services fit, and why not Kubernetes?` |
+| Check readiness, read-only | `Explain what the preflight checks, then, with my approval, run it and explain every check that did not pass.` |
+| Understand a blocked result | `Why is generation blocked, and what exactly must I do to unblock it?` |
+| Plan a PostgreSQL migration | `Plan a 50 GB PostgreSQL migration with zero lost transactions and one hour of downtime. What must we rehearse?` |
+| Stay in two clouds | `Our data stays on AWS and compute moves to Azure. What should Azure control?` |
+| Understand cost and credits | `What do we know and not know about credits, cost and quotas before we deploy?` |
+| Learn how it works | `How it works` (the agent then explains the planners, evidence and approval gates) |
+
+To skip the guided opening with the launcher, use `bash scripts/start-sslz-agent.sh --blank`, or pass your own first
+message in quotes. Without the launcher, run `copilot --agent sslz-agent` for a blank session.
+
+Anything the agent cannot do inside SSLZ, such as general application code, AWS-side migration steps or a service outside
+the known profiles, it hands back with the facts it gathered and a request you can paste into your own assistant,
+labeled as not validated by SSLZ.
 ## Use Claude Code or Codex
 
 If you use Claude Code or Codex instead, install it from its own documentation, clone
