@@ -199,6 +199,27 @@ the [MCP setup guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/cus
 A configured server does not guarantee that its tools are exposed to the selected agent. If Learn MCP is unavailable, the
 agent falls back to approved fetches of `learn.microsoft.com` pages, or to local facts only, and says so.
 
+### What to expect on a real run
+
+A live test with a new Azure account showed this sequence:
+
+1. **Discovery.** About a dozen questions, one at a time. The agent keeps your answers separate from facts it has not
+   verified. It then proposes a plan and asks which IaC tool you prefer.
+2. **Draft requirements.** It asks before writing `.sslz/generated/.../requirements.json` (a git-ignored local file).
+   You approve twice: the agent's own question, and then the CLI's per-command permission prompt.
+3. **Read-only preflight.** The agent shows `scripts/startup-preflight.mjs inspect` but does not see variables from
+   your other terminals. Set the subscription IDs in the same shell that launches `copilot` (or run the command
+   yourself and save the JSON), so IDs stay out of the chat. A `blocked` status and exit code 1 mean the report found
+   gaps, not that the script crashed. Every check is reported as blocking, including `skipped` and `unknown` ones.
+4. **Provider registration.** If providers are missing, register them yourself with `az provider register`. The agent
+   never applies this. Azure may return namespaces in lowercase, such as `microsoft.insights`.
+5. **Readiness gate.** Terraform generation requires current evidence that goes beyond the preflight: a second
+   emergency-capable administrator, security, architecture and Bicep/Terraform parity reviews, billing and benefit
+   confirmation, measured recovery tests, and an eligible regional plan. The agent does not accept "I accept the risk"
+   as a substitute, and there is no exemption for accounts without Startup credits. If you cannot supply this evidence
+   yet, use the agent for planning only and deploy with the
+   [CI/CD guide]({{ '/docs/ci-cd-setup' | relative_url }}) or the Quick Start.
+
 ### Limits
 
 This is a local CLI launcher. The GitHub.com custom-agent picker is not a supported launch path for this repository, and
