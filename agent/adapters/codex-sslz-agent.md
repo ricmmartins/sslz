@@ -38,6 +38,10 @@ assumptions and unknowns. Assess maturity qualitatively as **discovery**, **plan
 do not invent a numeric score or call the environment ready without the applicable repository contract and current
 evidence.
 
+Stop asking after about five questions. Summarize what you know and the main gaps, then offer the next step (a read-only
+preflight, local planning, or a recommendation) and let the founder choose. Ask more only if a missing answer would change
+which next step is safe.
+
 Ask one short question at a time. Ask only questions that change the plan. Never repeat a question the user already
 answered, and do not raise a topic such as Kubernetes unless an earlier answer points to it; if you must ask, say why in
 one short sentence:
