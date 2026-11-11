@@ -210,6 +210,19 @@ agent falls back to approved fetches of `learn.microsoft.com` pages, or to local
 
 A live test with a new Azure account showed this sequence:
 
+Before you start the agent, set the two subscription IDs in the same terminal that launches `copilot`. In Bash or WSL:
+
+```bash
+export SSLZ_PROD_SUBSCRIPTION_ID="<prod-subscription-id>"
+export SSLZ_NONPROD_SUBSCRIPTION_ID="<nonprod-subscription-id>"
+copilot --agent sslz-agent
+```
+
+If the agent is already running, exit it (`/exit` or Ctrl+C twice), export the variables, and start it again. A new
+`copilot` session does not see variables you set in another terminal. To check them without printing the IDs, run
+`echo ${SSLZ_PROD_SUBSCRIPTION_ID:+ok} ${SSLZ_NONPROD_SUBSCRIPTION_ID:+ok}` in that shell; it should print `ok ok`.
+You can also run the preflight yourself in another terminal and keep the JSON file.
+
 1. **Discovery.** About a dozen questions, one at a time. The agent keeps your answers separate from facts it has not
    verified. It then proposes a plan and asks which IaC tool you prefer.
 2. **Draft requirements.** It asks before writing `.sslz/generated/.../requirements.json` (a git-ignored local file).
