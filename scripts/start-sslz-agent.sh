@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Starts the SSLZ Agent with everything it needs in this shell: tools, Azure login and the two subscription IDs.
+# Usage: start-sslz-agent.sh [--blank | "your first message"]. With no argument it opens the guided founder journey.
 # It only reads your Azure account list. It never deploys, registers providers or changes Azure.
 set -euo pipefail
 
@@ -56,4 +57,8 @@ fi
 
 echo
 echo "Subscriptions set for this session (IDs are not printed). Starting the SSLZ Agent..."
-exec copilot --agent sslz-agent --interactive "${1:-Start a new founder journey.}"
+case "${1:-}" in
+  --blank) exec copilot --agent sslz-agent ;;
+  "") exec copilot --agent sslz-agent --interactive "Start a new founder journey." ;;
+  *) exec copilot --agent sslz-agent --interactive "$1" ;;
+esac
