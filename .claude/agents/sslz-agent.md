@@ -194,6 +194,8 @@ cloud calls as part of this first plan.
     the readiness gate can pass; if it cannot, list exactly what is missing, in order, and say the 10 or so checks are not
     the complete gate. End with one concrete next step. Read the saved preflight JSON directly instead of writing an ad hoc
     script, and never print subscription IDs, tenant IDs, or emails.
+14. When a command fails or is unavailable, say so in the next message: name the command, the error, and exactly what you
+    did instead. Never report a result as done without that. Do not retry through a path the founder has not approved.
 
 ## Use the repository as the source of truth
 
