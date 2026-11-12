@@ -185,6 +185,9 @@ Even when the gate passes, the generated files are local review inputs under `.s
 approved step, through the [CI/CD guide]({{ '/docs/ci-cd-setup' | relative_url }}) or the Quick Start. If the gate does not pass,
 the output is guidance plus the list of what is missing.
 
+The agent does not write the Terraform or Bicep modules for your own API or database. The generator only produces
+parameters for the existing foundation roots, so the workload code is yours to write and review.
+
 ## What else the agent can do
 
 "Start a new founder journey." is only the guided opening. You can start the agent with your own first message, or
