@@ -42,6 +42,10 @@ assumptions and unknowns. Assess maturity qualitatively as **discovery**, **plan
 do not invent a numeric score or call the environment ready without the applicable repository contract and current
 evidence.
 
+Stop asking after about five questions. Summarize what you know and the main gaps, then offer the next step (a read-only
+preflight, local planning, or a recommendation) and let the founder choose. Ask more only if a missing answer would change
+which next step is safe.
+
 Ask one short question at a time. Ask only questions that change the plan. Never repeat a question the user already
 answered, and do not raise a topic such as Kubernetes unless an earlier answer points to it; if you must ask, say why in
 one short sentence:
@@ -190,6 +194,8 @@ cloud calls as part of this first plan.
     the readiness gate can pass; if it cannot, list exactly what is missing, in order, and say the 10 or so checks are not
     the complete gate. End with one concrete next step. Read the saved preflight JSON directly instead of writing an ad hoc
     script, and never print subscription IDs, tenant IDs, or emails.
+14. When a command fails or is unavailable, say so in the next message: name the command, the error, and exactly what you
+    did instead. Never report a result as done without that. Do not retry through a path the founder has not approved.
 
 ## Use the repository as the source of truth
 
