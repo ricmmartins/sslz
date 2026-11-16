@@ -140,9 +140,10 @@ command and review its output when you need a planner result.
 
 Use this path when you want the agent to check your Azure setup. Use Bash, WSL, macOS or Linux; on Windows PowerShell, see
 [Windows and PowerShell](#windows-and-powershell). Start from `bash scripts/start-sslz-agent.sh` instead of
-`copilot --agent sslz-agent`. The launcher checks the tools (Node.js, Copilot CLI and Azure CLI), requires `az login`,
-shows the active tenant, lets you pick the production and non-production subscriptions by number, and then starts the
-same interactive agent in that shell. It only reads your account list and never changes Azure.
+`copilot --agent sslz-agent`. The launcher checks the tools (Node.js and Copilot CLI are required), shows the active tenant, lets
+you pick the production and non-production subscriptions by number, and then starts the same interactive agent in that
+shell. It only reads your account list and never changes Azure. If Azure CLI is missing, you are not signed in, or the
+tenant has fewer than two enabled subscriptions, it does not stop: it starts the agent in planning-only mode instead.
 
 Before you run the launcher, prepare these once:
 
@@ -151,14 +152,15 @@ Before you run the launcher, prepare these once:
 3. Confirm the account sees both subscriptions: `az account list --all -o table`. You need two separate subscriptions in that tenant, one for production (identity) and one for non-production (connectivity). The account needs at least Reader on both.
 4. Run the launcher. It shows the active tenant first. If the tenant is not the one you want, stop and repeat step 2.
 
-If you skip these steps, the launcher stops with a clear message, or the preflight reports the tenant or access as blocked. Nothing in Azure changes either way.
+If you skip these steps, the launcher says so, pauses for Enter, and starts the agent in planning-only mode: you can still talk and plan, but no Azure account is read and the preflight is skipped. Nothing in Azure changes either way.
 
 ### What the launcher does for you
 
 You do two things yourself, once: install the tools and run `az login --tenant <tenant-id>`. The launcher then does the
 rest in the same terminal, so you never leave Copilot to set anything up:
 
-1. It reads your current Azure login. It does not sign you in, and it never stores a token or a password.
+1. It reads your current Azure login. It does not sign you in, and it never stores a token or a password. Without a
+   login, it switches to planning-only mode and skips the next steps.
 2. It shows the tenant and account, and lists only the enabled subscriptions in that tenant.
 3. You type two numbers: first the production subscription, then the non-production one.
 4. It exports them as `SSLZ_PROD_SUBSCRIPTION_ID` and `SSLZ_NONPROD_SUBSCRIPTION_ID` in that shell. The IDs live only in
