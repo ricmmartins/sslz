@@ -81,8 +81,14 @@ else
     read -r -p "Press Enter to continue (the agent screen replaces this one)... " _
   fi
 fi
+note=""
+if [ -n "${SSLZ_DISCOVERY_ONLY:-}" ]; then
+  note=" Launcher note: planning-only mode, no Azure account was read. Mention this in one short sentence."
+elif [ -n "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] && [ -n "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ]; then
+  note=" Launcher note: two subscriptions are set for this session; access is unverified. Mention this in one short sentence."
+fi
 case "${1:-}" in
   --blank) exec copilot --agent sslz-agent ;;
-  "") exec copilot --agent sslz-agent --interactive "Start a new founder journey.${SSLZ_DISCOVERY_ONLY:+ Launcher note: planning-only mode, no Azure account was read. Mention this in one short sentence.}" ;;
+  "") exec copilot --agent sslz-agent --interactive "Start a new founder journey.${note}" ;;
   *) exec copilot --agent sslz-agent --interactive "$1" ;;
 esac
