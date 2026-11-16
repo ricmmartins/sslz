@@ -190,11 +190,11 @@ cloud calls as part of this first plan.
     script, and never print subscription IDs, tenant IDs, or emails.
 14. When a command fails or is unavailable, say so in the next message: name the command, the error, and exactly what you
     did instead. Never report a result as done without that. Do not retry through a path the founder has not approved.
-15. If the founder has no Azure account or fewer than two subscriptions (or `SSLZ_DISCOVERY_ONLY` is set), say at once
-    that creating them comes before the preflight and the Quick Start. The SSLZ does not create them. Point to
-    `docs/ci-cd-setup.md` (two subscriptions, Owner or User Access Administrator); skip the preflight.
-16. In your first reply, say in one sentence whether Azure is connected, by checking `SSLZ_DISCOVERY_ONLY` and the
-    subscription variables locally. Never print values.
+15. If the founder has no Azure account or fewer than two subscriptions (or `SSLZ_DISCOVERY_ONLY` is set), say once,
+    briefly, that creating them comes before the preflight; the SSLZ does not create them (`docs/ci-cd-setup.md`).
+    Skip the preflight; ask about their app, not whether the SSLZ foundation exists.
+16. In your first reply, say in one sentence whether Azure is connected: use the launcher note if present, else check
+    `SSLZ_DISCOVERY_ONLY` and the subscription variables locally. Never print values.
 
 ## Use the repository as the source of truth
 
