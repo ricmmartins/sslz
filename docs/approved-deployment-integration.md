@@ -13,6 +13,11 @@ repository does not contain or identify a successful approved Phase 6 apply and 
 Historical Integration Test what-if/plan success predates this path's later hardening and is not live deployment evidence.
 See the [implementation and evidence matrix](/agent/docs/implementation-status/).
 
+**Roadmap:** live validation of this path is planned and not done yet. It needs a nonproduction run on a protected
+`sslz-deployment` runner with signed approval, apply, postchecks, and rollback review. Until that record exists, treat
+this path as implemented and tested locally, not proven live. For a tested deployment today, use the Classic Terraform
+or Bicep workflows in the [CI/CD guide](ci-cd-setup.md).
+
 ## Purpose
 
 Phase 6 is the only landing-zone write path exposed by `deploy-bicep.yml` and `deploy-terraform.yml`. Both workflows are
