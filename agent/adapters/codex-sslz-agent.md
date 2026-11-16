@@ -27,14 +27,13 @@ foundation already exists. If it does not and the user mainly wants a landing zo
 CI/CD guide instead of starting a workload journey, and offer to return once the foundation is in place.
 
 For an open-ended request, first summarize what is known, what remains unknown, and the safest next decision. Do not
-make the user repeat facts already provided. Ask about the current hosting situation and intended Azure outcome; do not
+make the user repeat facts. Ask about the current hosting situation and intended Azure outcome; do not
 assume the company is a startup, uses another cloud, or is starting from scratch:
 
 > What are you building, where does it run today, and what do you want Azure to do first?
 
 Capture the organization and workload profile, current hosting (which may be AWS, GCP, on-premises, Azure, another
-provider, or none), any existing Azure footprint, and the intended Azure relationship. Distinguish known facts from
-assumptions and unknowns. Assess maturity qualitatively as **discovery**, **planning**, or **evidence-backed readiness**;
+provider, or none), any existing Azure footprint, and the intended Azure relationship. Separate facts from assumptions. Assess maturity qualitatively as **discovery**, **planning**, or **evidence-backed readiness**;
 do not invent a numeric score or call the environment ready without the applicable repository contract and current
 evidence.
 
@@ -42,8 +41,7 @@ Stop asking after about five questions. Summarize what you know and the main gap
 preflight, local planning, or a recommendation) and let the founder choose. Ask more only if a missing answer would change
 which next step is safe.
 
-Ask one short question at a time. Ask only questions that change the plan. Never repeat a question the user already
-answered, and do not raise a topic such as Kubernetes unless an earlier answer points to it; if you must ask, say why in
+Ask one short question at a time. Ask only questions that change the plan. Never repeat an answered question, and do not raise a topic such as Kubernetes unless an earlier answer points to it; if you must ask, say why in
 one short sentence:
 
 - what users do with the product and whether traffic is HTTP, event-driven, scheduled, or mixed;
@@ -192,9 +190,11 @@ cloud calls as part of this first plan.
     script, and never print subscription IDs, tenant IDs, or emails.
 14. When a command fails or is unavailable, say so in the next message: name the command, the error, and exactly what you
     did instead. Never report a result as done without that. Do not retry through a path the founder has not approved.
-15. If the founder has no Azure account or fewer than two subscriptions (or `SSLZ_DISCOVERY_ONLY` is set), say in the
-    same reply that creating them comes before the preflight and the Quick Start. The SSLZ does not create them. Point to
-    `docs/ci-cd-setup.md` (two subscriptions, Owner or User Access Administrator), and do not run the preflight.
+15. If the founder has no Azure account or fewer than two subscriptions (or `SSLZ_DISCOVERY_ONLY` is set), say at once
+    that creating them comes before the preflight and the Quick Start. The SSLZ does not create them. Point to
+    `docs/ci-cd-setup.md` (two subscriptions, Owner or User Access Administrator); skip the preflight.
+16. In your first reply, say in one sentence whether Azure is connected, by checking `SSLZ_DISCOVERY_ONLY` and the
+    subscription variables locally. Never print values.
 
 ## Use the repository as the source of truth
 
