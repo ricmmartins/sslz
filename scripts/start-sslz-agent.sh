@@ -77,9 +77,12 @@ if [ -z "${SSLZ_DISCOVERY_ONLY:-}" ]; then
 else
   echo
   echo "Starting the SSLZ Agent in planning-only mode..."
+  if [ -t 0 ]; then
+    read -r -p "Press Enter to continue (the agent screen replaces this one)... " _
+  fi
 fi
 case "${1:-}" in
   --blank) exec copilot --agent sslz-agent ;;
-  "") exec copilot --agent sslz-agent --interactive "Start a new founder journey." ;;
+  "") exec copilot --agent sslz-agent --interactive "Start a new founder journey.${SSLZ_DISCOVERY_ONLY:+ Launcher note: planning-only mode, no Azure account was read. Mention this in one short sentence.}" ;;
   *) exec copilot --agent sslz-agent --interactive "$1" ;;
 esac
