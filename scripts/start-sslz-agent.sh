@@ -47,6 +47,13 @@ pick_subscription() {
   export "$var=${subs[$((choice - 1))]##*$'\t'}"
 }
 
+if [ -z "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || [ -z "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ]; then
+  echo
+  echo "The SSLZ uses two Azure subscriptions: one for production and one for non-production."
+  echo "The subscription names do not matter. Pick any two different ones. If you only have one, create a second first (see docs/ci-cd-setup.md)."
+  echo "Nothing is created or changed by choosing them. Next time, skip these questions with:"
+  echo "  export SSLZ_PROD_SUBSCRIPTION_ID=<id>  SSLZ_NONPROD_SUBSCRIPTION_ID=<id>"
+fi
 [ -n "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "production (identity)" SSLZ_PROD_SUBSCRIPTION_ID
 [ -n "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "non-production (connectivity)" SSLZ_NONPROD_SUBSCRIPTION_ID
 
