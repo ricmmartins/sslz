@@ -50,7 +50,8 @@ pick_subscription() {
 if [ -z "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || [ -z "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ]; then
   echo
   echo "The SSLZ uses two Azure subscriptions: one for production and one for non-production."
-  echo "The subscription names do not matter. Pick any two different ones. If you only have one, create a second first (see docs/ci-cd-setup.md)."
+  echo "Pick two different ones. If you already set up the SSLZ, pick the two you configured for it."
+  echo "If you are only trying the agent, any two work: it only reads them. The launcher needs two different subscriptions (see docs/ci-cd-setup.md if you have just one)."
   echo "Nothing is created or changed by choosing them. Next time, skip these questions with:"
   echo "  export SSLZ_PROD_SUBSCRIPTION_ID=<id>  SSLZ_NONPROD_SUBSCRIPTION_ID=<id>"
 fi
