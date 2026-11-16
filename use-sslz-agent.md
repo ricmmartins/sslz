@@ -218,8 +218,7 @@ labeled as not validated by SSLZ.
 ## Use Claude Code or Codex
 
 If you use Claude Code or Codex instead, install it from its own documentation, clone
-the repository as above, and start it in the cloned folder. Claude Code and Codex use generated adapters of the same instructions. They
-are not yet validated in those clients, so check each permission prompt, keep approvals on, and never use a
+the repository as above, and start it in the cloned folder. Claude Code and Codex use generated adapters of the same instructions. Check each permission prompt, keep approvals on, and never use a
 bypass mode such as `--dangerously-skip-permissions` or `--dangerously-bypass-approvals-and-sandbox`.
 
 For Claude Code:
