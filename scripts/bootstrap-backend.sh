@@ -30,8 +30,10 @@ Example:
   $0 -s stterraformstate
   $0 -l westus2 -g rg-tfstate -s stmycompanytfstate
 EOF
-  exit 1
+  exit "${1:-1}"
 }
+
+[[ "${1:-}" == "--help" ]] && usage 0
 
 while getopts "l:g:s:c:h" opt; do
   case $opt in
@@ -39,7 +41,7 @@ while getopts "l:g:s:c:h" opt; do
     g) RESOURCE_GROUP="$OPTARG" ;;
     s) STORAGE_ACCOUNT="$OPTARG" ;;
     c) CONTAINER_NAME="$OPTARG" ;;
-    h) usage ;;
+    h) usage 0 ;;
     *) usage ;;
   esac
 done
