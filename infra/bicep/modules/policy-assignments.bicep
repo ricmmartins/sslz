@@ -44,6 +44,10 @@ var policyDefinitions = {
 
 resource mcsbAssignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
   name: '${policyAssignmentPrefix}mcsb-audit'
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     displayName: 'Microsoft Cloud Security Benchmark (Audit)'
     description: 'Audit resources against Microsoft Cloud Security Benchmark. Does not block deployments.'
