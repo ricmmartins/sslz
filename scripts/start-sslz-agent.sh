@@ -81,8 +81,8 @@ if [ -z "${SSLZ_DISCOVERY_ONLY:-}" ] && { [ -z "${SSLZ_PROD_SUBSCRIPTION_ID:-}" 
   fi
 fi
 if [ -z "${SSLZ_DISCOVERY_ONLY:-}" ]; then
-  [ -n "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "production (identity)" SSLZ_PROD_SUBSCRIPTION_ID
-  [ -n "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "non-production (connectivity)" SSLZ_NONPROD_SUBSCRIPTION_ID
+  [ -n "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "production" SSLZ_PROD_SUBSCRIPTION_ID
+  [ -n "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "non-production" SSLZ_NONPROD_SUBSCRIPTION_ID
 
   if [ "$SSLZ_PROD_SUBSCRIPTION_ID" = "$SSLZ_NONPROD_SUBSCRIPTION_ID" ]; then
     echo "The production and non-production subscriptions must be different." >&2
