@@ -31,7 +31,12 @@ resource "azurerm_subscription_policy_assignment" "mcsb" {
   description          = "Audit resources against Microsoft Cloud Security Benchmark. Does not block deployments."
   subscription_id      = local.subscription_scope
   policy_definition_id = local.policy_ids.mcsb
+  location             = var.location
   enforce              = true
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 # ==============================================================================
