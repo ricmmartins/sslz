@@ -7,6 +7,19 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 
+case "${1:-}" in
+  "" | --blank) ;;
+  -h | --help)
+    echo 'Usage: start-sslz-agent.sh [--blank | "your first message"]'
+    echo "With no argument it opens the guided founder journey. --blank opens the agent with no first message."
+    exit 0
+    ;;
+  -*)
+    echo "Unknown option: $1. Use --help to see the options." >&2
+    exit 1
+    ;;
+esac
+
 for tool in node copilot; do
   command -v "$tool" >/dev/null 2>&1 || { echo "Missing prerequisite: $tool" >&2; exit 1; }
 done
@@ -40,7 +53,10 @@ pick_subscription() {
     printf '  %d) %s\n' "$i" "${line%%$'\t'*}"
     i=$((i + 1))
   done
-  read -r -p "Number: " choice
+  read -r -p "Number: " choice || {
+    echo "No input received. Set SSLZ_PROD_SUBSCRIPTION_ID and SSLZ_NONPROD_SUBSCRIPTION_ID to skip these questions." >&2
+    exit 1
+  }
   if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt "${#subs[@]}" ]; then
     echo "Invalid choice." >&2
     exit 1
@@ -65,8 +81,8 @@ if [ -z "${SSLZ_DISCOVERY_ONLY:-}" ] && { [ -z "${SSLZ_PROD_SUBSCRIPTION_ID:-}" 
   fi
 fi
 if [ -z "${SSLZ_DISCOVERY_ONLY:-}" ]; then
-  [ -n "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "production (identity)" SSLZ_PROD_SUBSCRIPTION_ID
-  [ -n "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "non-production (connectivity)" SSLZ_NONPROD_SUBSCRIPTION_ID
+  [ -n "${SSLZ_PROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "production" SSLZ_PROD_SUBSCRIPTION_ID
+  [ -n "${SSLZ_NONPROD_SUBSCRIPTION_ID:-}" ] || pick_subscription "non-production" SSLZ_NONPROD_SUBSCRIPTION_ID
 
   if [ "$SSLZ_PROD_SUBSCRIPTION_ID" = "$SSLZ_NONPROD_SUBSCRIPTION_ID" ]; then
     echo "The production and non-production subscriptions must be different." >&2

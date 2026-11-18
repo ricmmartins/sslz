@@ -149,7 +149,7 @@ Before you run the launcher, prepare these once:
 
 1. Install Azure CLI in the same environment where you run the launcher. In WSL, install it inside WSL, because the Windows installation is not shared.
 2. Sign in to the tenant that owns your subscriptions: `az login --tenant <tenant-id>`. In WSL, run this inside WSL too.
-3. Confirm the account sees both subscriptions: `az account list --all -o table`. You need two separate subscriptions in that tenant, one for production (identity) and one for non-production (connectivity). The account needs at least Reader on both.
+3. Confirm the account sees both subscriptions: `az account list --all -o table`. You need two separate subscriptions in that tenant, one for production and one for non-production. The account needs at least Reader on both.
 4. Run the launcher. It shows the active tenant first. If the tenant is not the one you want, stop and repeat step 2.
 
 If you skip these steps, the launcher says so, pauses for Enter, and starts the agent in planning-only mode: you can still talk and plan, but no Azure account is read and the preflight is skipped. Nothing in Azure changes either way.
